@@ -10,11 +10,13 @@ A set of macros that help in the manipulation of strings (such as variable names
 The full list of macros grouped by topic or area of application is shown below:
 
 ## Macros categorized by application
-(An asterisk (*) next to the macro name indicates that help is available for the macro)
-Use %Help(<macro-name>) for a quick help on any of the macros marked with '*'.
+(An asterisk (\*) next to the macro name indicates that help is available for the macro).
+
+Use %Help(<macro-name>) for a quick help on any of the macros marked with '\*'.
+
 Ex: %Help(PlotBinned)
 
-### DATA MANIPULATION
+#### DATA MANIPULATION
 Categorize*          Categorize a set of variables in a given number of groups.
 Center*              Center and optionally standardize a set of variables.
 CheckRepeated        Check the existence of observations with repeated key values in a dataset
@@ -39,7 +41,7 @@ Sort*                User friendly PROC SORT. Several datasets can be sorted sim
 Subset               Subset a dataset with a WHERE condition by by variables.
 Transpose*           Transpose a dataset.
 
-### EXPLORATORY DATA ANALYSIS
+#### EXPLORATORY DATA ANALYSIS
 Boxcox*              Box-Cox transformation (for distribution normalization).
 Cov                  Compute covariance matrix of a set of variables.
 CutMahalanobisChi    Detect multivariate outliers using Mahalanobis distance.
@@ -51,14 +53,14 @@ Mahalanobis          Compute Mahalanobis distance of a set of variables.
 PHTestPlot*          Make plots of survival curves to visually check proportional hazards assumption.
 Qqplot               Make Q-Q plots for a set of variables.
 
-### GENERAL STATISTICS
+#### GENERAL STATISTICS
 FreqMult*            Compute and store the frequencies of a list of variables in an output
                      dataset.
 GetStat              Get the value of ONE specified statistic for a set of variables
                      in a dataset.
 Means*               Execute a user friendly PROC MEANS.
 
-### GRAPHS
+#### GRAPHS
 Colors               Create list of 10 color names to be used for graph symbols and lines.
 DefineSymbols        Define plotting symbols.
 GraphXY              Make a 2D plot of Y vs. X
@@ -88,7 +90,7 @@ TestLogisticFit*     Test the fit of a logistic regression model.
 VariableImpact*      Make plots to evaluate the univariate impact of a set of continuous variable
                      on a binary target.
 
-### OTHER
+#### OTHER
 Compute              Evaluate a given function by forcing the evaluation of its argument.
 EvalExp              Force the evaluation of an expression.
 ExistData            Check if a dataset exists.
@@ -97,7 +99,7 @@ ExistVar             Check if all variables in a given list exist in a dataset.
 Getnobs              Get the nro. of observations and variables in a dataset.
 Help                 Show this help information.
 
-### STRING MANIPULATION
+#### STRING MANIPULATION
 All                  Establish a condition that ALL variables in a list must satisfy.
 Any                  Establish a condition that AT LEAST ONE variable in a list must satisfy.
 CompareLists         Compare two lists of names, and creates 3 datasets containing the list
