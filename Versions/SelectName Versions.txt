@@ -1,0 +1,8 @@
+%SelectName Versions: Descripcion de las diferentes versiones
+-------------------------------------------------------------
+Creado: 16/1/05
+
+
+
+V.1.01: 16/1/05 (DM)
+	- Se agrego' el parametro SEP=. Sin embargo, notar que la busqueda de SEP en la lista de nombres para seleccionar los nombres requeridos por el usuario es CASE SENSITIVE. Esto es asi', porque si se desea conservar el lower case o upper case de los nombres en la lista, la busqueda de SEP debe ser CASE SENSITIVE.

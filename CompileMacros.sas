@@ -1,0 +1,167 @@
+* Code to compile macros into the SASMACR catalog located in C:\SAS\Macros;
+* Created: 25-Sep-2005;
+* Modified: 19-Jun-2012;
+
+
+/*--------------------------------------- Startup settings ----------------------------------*/
+* Location of macros source code;
+%let sourcepath = C:\SAS\Macros\Compile;
+* Location of compiled macros (i.e. where the SASMACR catalog will be stored);
+%let outpath = C:\SAS\Macros;
+/*--------------------------------------- Startup settings ----------------------------------*/
+
+
+*** 1.- Unlock the SASMACR catalog containing the compiled macros (if existing);
+* Unlock the SASMACR catalog that stores the compiled macros in case it exists and is locked;
+* The unlock process is done by setting the SASMSTORE option to point to another library (e.g. SASHELP)
+* AND compiling a dummy macro;
+options mstored sasmstore=sashelp;
+%macro dummy / store;  %mend;
+** It is OK to receive an error message here that states:
+** ERROR: A lock is not available for SASHELP.SASMACR.CATALOG.
+** ERROR: A dummy macro will be compiled;
+
+
+*** 2.- Compile the macros and stored them in the location indicated in &OUTPATH;
+* Assign library that maps the &OUTPATH location used to store the compiled macros;
+libname macros "&outpath";
+* Set the library where the compiled macros should be stored;
+options mstored sasmstore=macros;
+* Define macro variables used in each macro code;
+%let rsubmit = ;
+* Compile macros;
+%include "&sourcepath/All.sas";                                      * 1;
+%include "&sourcepath/Any.sas";                                      * 2;
+%include "&sourcepath/Boxcox.sas";                                   * 3;
+%include "&sourcepath/CallMacro.sas";                                * 4;
+%include "&sourcepath/Categorize.sas";                               * 5;
+%include "&sourcepath/Center.sas";                                   * 6;
+%include "&sourcepath/CheckDiff.sas";                                * 7;
+%include "&sourcepath/CheckInputParameters.sas";                     * 8;
+%include "&sourcepath/CheckRepeated.sas";                            * 9;
+%include "&sourcepath/CheckRequiredParameters.sas";                  * 10;
+%include "&sourcepath/Chisq.sas";                                    * 11;
+%include "&sourcepath/Colors.sas";                                   * 12;
+%include "&sourcepath/CompareLists.sas";                             * 13;
+%include "&sourcepath/Compute.sas";                                  * 14;
+%include "&sourcepath/Cov.sas";                                      * 15;
+%include "&sourcepath/CreateDummyVar.sas";                           * 16;
+%include "&sourcepath/CreateGroupVar.sas";                           * 17;
+%include "&sourcepath/CreateInteractions.sas";                       * 18;
+%include "&sourcepath/CreateLags.sas";                               * 19;
+%include "&sourcepath/CreatePrevPostVar.sas";                        * 20;
+%include "&sourcepath/CreateVarFromList.sas";                        * 21;
+%include "&sourcepath/CreateVarList.sas";                            * 22;
+%include "&sourcepath/CutMahalanobisChi.sas";                        * 23;
+%include "&sourcepath/DefineSymbols.sas";                            * 24;
+%include "&sourcepath/Delet.sas";                                    * 25;
+%include "&sourcepath/DeleteMacroVar.sas";                           * 26;
+%include "&sourcepath/Det.sas";                                      * 27;
+%include "&sourcepath/DetectCollinearities.sas";                     * 28;
+%include "&sourcepath/DetectOutliers.sas";                           * 29;
+%include "&sourcepath/DetectOutliersHadi.sas";                       * 30;
+%include "&sourcepath/DetectOutliersMAD.sas";                        * 31;
+%include "&sourcepath/Dfbetas.sas";                                  * 32;
+%include "&sourcepath/Drop.sas";                                     * 33;
+%include "&sourcepath/EvalExp.sas";                                  * 34;
+%include "&sourcepath/EvaluationChart.sas";                          * 35;
+%include "&sourcepath/Exist.sas";                                    * 36;
+%include "&sourcepath/ExistData.sas";                                * 37;
+%include "&sourcepath/ExistMacroVar.sas";                            * 38;
+%include "&sourcepath/ExistOption.sas";                              * 39;
+%include "&sourcepath/ExistVar.sas";                                 * 40;
+%include "&sourcepath/Export.sas";                                   * 41;
+%include "&sourcepath/FindInList.sas";                               * 42;
+%include "&sourcepath/FindMatch.sas";                                * 43;
+%include "&sourcepath/FittedPlots.sas";                              * 44;
+%include "&sourcepath/FixBreak.sas";                                 * 45;
+%include "&sourcepath/FixNames.sas";                                 * 46;
+%include "&sourcepath/Freq.sas";                                     * 47;
+%include "&sourcepath/FreqMult.sas";                                 * 48;
+%include "&sourcepath/GainsChart.sas";                               * 49;
+%include "&sourcepath/GetDataName.sas";                              * 50;
+%include "&sourcepath/GetDataOptions.sas";                           * 51;
+%include "&sourcepath/GetLibraryName.sas";                           * 52;
+%include "&sourcepath/Getnobs.sas";                                  * 53;
+%include "&sourcepath/GetNroElements.sas";                           * 54;
+%include "&sourcepath/GetRegVarList.sas";                            * 55;
+%include "&sourcepath/GetStat.sas";                                  * 56;
+%include "&sourcepath/GetVarList.sas";                               * 57;
+%include "&sourcepath/GetVarNames.sas";                              * 58;
+%include "&sourcepath/GetVarOrder.sas";                              * 59;
+%include "&sourcepath/GetVarType.sas";                               * 60;
+%include "&sourcepath/GetVarAttrib.sas";                             * 61;
+%include "&sourcepath/Gini.sas";                                     * 62;
+%include "&sourcepath/GraphStrata.sas";                              * 63;
+%include "&sourcepath/GraphXY.sas";                                  * 64;
+%include "&sourcepath/Hadi.sas";                                     * 65;
+%include "&sourcepath/Help.sas";                                     * 66;
+%include "&sourcepath/Import.sas";                                   * 67;
+%include "&sourcepath/InformationValue.sas";                         * 68;
+%include "&sourcepath/InsertInList.sas";                             * 69;
+%include "&sourcepath/IsNumber.sas";                                 * 70;
+%include "&sourcepath/KeepInList.sas";                               * 71;
+%include "&sourcepath/KS.sas";                                       * 72;
+%include "&sourcepath/LiftChart.sas";                                * 73;
+%include "&sourcepath/LogisticRegression.sas";                       * 74;
+%include "&sourcepath/LogReg1.sas";                                  * 75;
+%include "&sourcepath/Mahalanobis.sas";                              * 76;
+%include "&sourcepath/MakeList.sas";                                 * 77;
+%include "&sourcepath/MakeListFromName.sas";                         * 78;
+%include "&sourcepath/MakeListFromVar.sas";                          * 79;
+%include "&sourcepath/MakeVar.sas";                                  * 80;
+%include "&sourcepath/Means.sas";                                    * 81;
+%include "&sourcepath/Merge.sas";                                    * 82;
+%include "&sourcepath/MissingValues.sas";                            * 83;
+%include "&sourcepath/MPlot.sas";                                    * 84;
+%include "&sourcepath/Oversampling.sas";                             * 85;
+%include "&sourcepath/PartialCorrelation.sas";                       * 86;
+%include "&sourcepath/PartialPlots.sas";                             * 87;
+%include "&sourcepath/PiecewiseTransf.sas";                          * 88;
+%include "&sourcepath/PiecewiseTransfCuts.sas";                      * 89;
+%include "&sourcepath/Pretty.sas";                                   * 90;
+%include "&sourcepath/PrintDataDoesNotExist.sas";                    * 91;
+%include "&sourcepath/PrintNameList.sas";                            * 92;
+%include "&sourcepath/PrintRequiredParameterMissing.sas";            * 93;
+%include "&sourcepath/PrintVarDoesNotExist.sas";                     * 94;
+%include "&sourcepath/Puts.sas";                                     * 95;
+%include "&sourcepath/Qqplot.sas";                                   * 96;
+%include "&sourcepath/ReadMacroVar.sas";                             * 97;
+%include "&sourcepath/RemoveFromList.sas";                           * 98;
+%include "&sourcepath/RemovePrefix.sas";                             * 99;
+%include "&sourcepath/RemoveRepeated.sas";                           * 100;
+%include "&sourcepath/RemoveSuffix.sas";                             * 101;
+%include "&sourcepath/RenameVariables.sas";                          * 102;
+%include "&sourcepath/Rep.sas";                                      * 103;
+%include "&sourcepath/ReplaceChar.sas";                              * 104;
+%include "&sourcepath/ReplaceMissing.sas";                           * 105;
+%include "&sourcepath/ResetSASOptions.sas";                          * 106;
+%include "&sourcepath/Rsquare.sas";                                  * 107;
+%include "&sourcepath/SaveMacroVar.sas";                             * 108;
+%include "&sourcepath/SaveResults.sas";                              * 109;
+%include "&sourcepath/Scatter.sas";                                  * 110;
+%include "&sourcepath/ScoreCalibration.sas";                         * 111;
+%include "&sourcepath/SelectName.sas";                               * 112;
+%include "&sourcepath/SelectNames.sas";                              * 113;
+%include "&sourcepath/SelectVar.sas";                                * 114;
+%include "&sourcepath/SetAxis.sas";                                  * 115;
+%include "&sourcepath/SetSASOptions.sas";                            * 116;
+%include "&sourcepath/SetVarOrder.sas";                              * 117;
+%include "&sourcepath/Sort.sas";                                     * 118;
+%include "&sourcepath/Standardize.sas";                              * 119;
+%include "&sourcepath/Subset.sas";                                   * 120;
+%include "&sourcepath/SymmetricAxis.sas";                            * 121;
+%include "&sourcepath/TestLogisticFit.sas";                          * 122;
+%include "&sourcepath/Transpose.sas";                                * 123;
+%include "&sourcepath/VariableImpact.sas";                           * 124;
+%include "&sourcepath/VarOrder.sas";                                 * 125;
+
+
+*** 3.- Unlock the SASMACR catalog just created and re-assign it as READONLY;
+options sasmstore=sashelp;
+%macro dummy / store;  %mend;
+** It is OK to receive an error message here that states:
+** ERROR: A lock is not available for SASHELP.SASMACR.CATALOG.
+** ERROR: A dummy macro will be compiled;
+libname macros "&outpath" access=readonly;
+options mstored sasmstore=macros;

@@ -1,0 +1,38 @@
+%Means Versions: Descripcion de las diferentes versiones
+--------------------------------------------------------
+Creado: 22/1/03
+
+
+
+V.1.06: 22/1/03 (DM)
+	- Se agregaron los parametros stat= y name=, para compatibilizar con que los nombres de los parametros no llevan 's' como en var=. Los parametros stats= y names= se dejaron para que siguieran andando las llamadas anteriores a %Means.
+
+V.1.07: 18/7/03 (DM)
+	- Se agrego' el parametro prefix= para poder crear nombres con prefijos conteniendo los estadisticos calculados.
+
+V.1.08: 14/5/04 (DM)
+	- Se agregaron los parametros: transpose, namevar y log:
+		- Transpose y namevar se usan cuando se desea tener como output dataset una tabla con los resultados como aparece en el output window al ejecutar PROC MEANS. Transpose=1 pide este formato y namevar establece el nombre de la columna con el nombre de las variables a las que se le pidieron los estadisticos.
+		- log se usa como siempre para pedir si se muestran los mensajes en el log o no.
+		
+V.1.09: 21/10/04 (DM)
+	- Se agrego' el parametro format=.
+	- Se agrego' un KEEP de las variables usadas en el analisis (id, by, var y weight) para que el sort dure menos en caso de que las variables de analisis no sean muchas y las variables en el dataset sean muchas.
+		
+V.1.10: 16/8/05 (DM)
+	- Se agrego' el parametro class= que contiene las variables a usar en un CLASS statement. El CLASS statement permite calcular estadisticos por distintos valores de variables categoricas sin necesidad de sortear el dataset.
+
+V.1.11: 24/7/06 (DM)
+	- Se elimino' el parametro WHERE por causar conflicto cuando las variables especificadas en el WHERE no son parte de las variables analizadas listadas en VAR. Toda opcion WHERE tiene que especificarse como opcion del dataset.
+	- Agregue' mas informacion en el log y el help.
+
+V.1.12: 17/08/06 (DM)
+	- Se agrego' el parsing de las variables especificadas en CLASS y ID por medio de %GetVarList para que puedan especificarse cosas como x1-x3, id--name, etc. (Notar que la version 2.00 de %GetVarList parsea todas estas cosas.)
+	Notar que no agregue' el parsing de las variables especificadas en el parametro BY porque como este parametro puede tener un DESCENDING me parece que no tiene sentido parsear ese tipo de strings.
+
+V.1.13: 31/08/06 (DM)
+	- Se modifico' la parte de CheckInputParameters para que solamente se haga si no hay opcion RENAME en los data options, porque si es asi seguramente alguna de las variables pasadas en los parametros siguientes (BY, VAR, etc.) no va a ser encontrada. Y es muy dificil definir cual es el nuevo nombre de las variables.
+
+V.1.14: 2011/11/22 (DM)
+	- Added flag parameter DROPTYPEFREQ so that the user can specify whether they want to drop the _TYPE_ and _FREQ_ variables from the output dataset.
+	By default, the variables are dropped (as was the case until now), so this parameter defaults to 1.

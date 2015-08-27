@@ -1,0 +1,8 @@
+%Cov Versions: Descripcion de las diferentes versiones
+------------------------------------------------------
+Creado: 29/7/04
+
+
+
+V.1.01: 28/7/04 (DM)
+	- Se agrego' la opcion NOMISS para que en el calculo de la covarianza descarte las observaciones que tengan valor missing en al menos una de las variables de analisis.

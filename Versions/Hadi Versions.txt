@@ -1,0 +1,55 @@
+%Hadi Versions: Descripcion de las diferentes versiones
+-------------------------------------------------------
+Creado: 13/1/03
+
+
+
+V.1.01: 13/1/03 (DM)
+	- Cambio del valor de h a utilizar para definir las observaciones "buenas". Fue elegido como: 	
+	h = max( int ((n + p + 1) / 10), 30 ),
+	es decir en lugar de considerar aprox. el 50% de las observaciones como buenas, se considera el 10% de las observaciones como buenas, o 30 observaciones, en caso de que el 10% sea menor que 30, para que las estimaciones de la media y la covarianza usando ese numero de observaciones sea confiable.
+	- Correccion del error que ocurria cuando habia una opcion 'where' en el dataset de analisis, en el data step que elimina las observaciones con missing values tambien con un where statement. El error era que no podia haber dos where statements.
+	Se soluciono' agregando un %if %ExistsOption(&data , where) antes de eliminar los missing values.
+	(Esto fue modificado el 1/8/03, momento en que se opto por ejecutar todas las opciones del input dataset al principio, regardless of cuales opciones fueran.)
+	- Modificacion en la presentacion del porcentaje de outliers detectados (ahora entre parentesis luego del numero total de outliers).
+	
+V.1.02: 15/1/03 (DM)
+	- Re-cambio del valor de h a utilizar para definir las observaciones "buenas". Fue elegido nuevamente como aproximadamente el 50% de las observaciones como estaba en un principio y como hacia Hadi.
+	La razon de esto fue que en los casos con muchas observaciones concentradas en mas o menos la misma zona, el algoritmo detectaba demasiados outliers (que graficamente se veia que no eran tales). Esto ocurrio con el dataset que mando Cristian Paz el 14/1/03, con 200000 observaciones y sucedia incluso cuando se tomaba una muestra aleatoria de 5000 observaciones.
+	Sin embargo, yo creo que no deberia haber ningun problema derivado de la concentracion de puntos porque luego de que se alcanza el valor h y comienza la eliminacion de outliers, el centro y la matriz de covarianza son recalculados a partir del nuevo conjunto de puntos, asi que no veo por que' puntos que estan cerca de la nube tengan que ser detectados como outliers.
+	Asimismo se agrego' un parametro en la llamada a la macro en que uno puede especificar la fraccion que define h. El parametro se llama fractionGood, y su valor default es 0.5.
+	- Se corrigio' el hecho de que no se estaba en realidad calculando la distancia de Mahalanobis, sino el cuadrado de la distancia de Mahalanobis. Esto se corrigio' tomando la raiz cuadrada de cinv para calcular &cv2 y cambiando el IML module Mahalanobis, para que devuelva directamente la raiz cuadrada de la distancia al cuadrado. 
+	- Se agrego' a la salida del log y al dataset de salida (outAll), el valor de corte para decidir si una obs es outlier. La variable se llama 'threshold'.
+	- Seteo del option nonotes dentro de la macro.
+	
+V.1.03: 22/1/03 (DM)
+	- Se agrego' la opcion plot=, que grafica los outliers detectados usando la macro %scatter cuando plot=1.	
+
+V.1.04: 2/6/03 (DM)
+	- Se cambio' la correccion hecha al nivel alpha para tener en cuenta un numero elevado de observaciones. Ahora la correccion es: alpha_new = (1 - (1 - alpha)^1/n).
+	Esta correccion tiene la ventaja de que el valor suministrado de alpha tiene que estar entre 0 y 1, no puede ser superior a 1 como ocurria en la correccion anterior (alpha/n , que es la correccion de Bonferroni).
+	La correccion es valida si los distintos tests (es decir los tests que evaluan si cada observacion es outlier o no) son independientes, lo cual suena razonable si los datos corresponden a una muestra aleatoria.
+	- Se agrego' la opcion adjust=1, que permite pedir no ajustar el alpha por el numero de observaciones (pasando adjust=0)
+	- Se agrego' el plot de las distancias de Mahalanobis usadas para la deteccion de outliers por Hadi vs. numero de observacion.
+	- Se corrigio' el hecho de que si la variable en la que se basa la deteccion de outliers es una sola, se hace el grafico de la variable vs. numero de observacion.
+
+V.1.05: 4/8/03 (DM)
+	- Se agrego' la opcion boxcox=, que puede valer 0 o 1, y de ser igual a 1, pide que las variables de analisis sean previamente transformadas por Box-Cox antes de hacer la deteccion de outliers.
+	- Se agrego' informacion en el log sobre:
+		- las variables utilizadas para la deteccion de outliers.
+		- el numero de observaciones con missing values en alguna de dichas variables.
+		- el numero de observaciones que efectivamente quedan en el analisis, luego de eliminar las observaciones con missing values.
+		- los valores de las BY variables para cada cluster procesado, en caso de que haya by variables.
+		- el numero de observaciones y el numero de outliers detectados en cada cluster, en caso de haber pedido la deteccion de outliers por by variables.
+	- Se elimino el %if %ExistOption(&data , where) del principio. Ahora se ejecutan todas las opciones que vienen en &data, si' o si', independientemente de cuales sean dichas opciones. Esto se hizo porque es muy complicado considerar todas las posibilidades distintas de que' opciones pueden ser pasadas por el usuario, y ademas porque se agrego' informacion del numero de missing values encontrados en el dataset, del numero de observaciones leidas y del numero de observaciones que efectivamente entran en el proceso de deteccion de outliers (es decir, luego de eliminar las observaciones con missing values en alguna de las variables de analisis), y hacer que esta informacion se de' correctamente, sin ejecutar las opciones que vienen en &data, se hacia muy complicado.
+	- Se cambiaron las condiciones de parada del STEP 2 y el STEP 3.
+		- STEP 2: El "do until (r > h)" paso' a "do while (r < h)".
+			Este cambio se debe a contemplar la posibilidad de que r sea >= h, ya antes de ingresar al loop por primera vez, y que ademas h sea comparable al numero de observaciones (n). Si este fuera el caso, la evaluacion de "order[1:r]" daria out of bounds. (Este caso puede ocurrir si se pide hacer Hadi por by variables, y que ocurriera que algunas combinaciones de las by variables tuvieran muy pocas observaciones.)
+		- STEP 3: El "do until (h = n | fin = 1)" paso' a "do while (h < n & fin = 0)".
+			Este cambio se debe a contemplar la posibilidad de que h ya sea >= n al entrar al loop por primera vez, lo cual ocurriria si el numero de observaciones (n) es comparable al numero de variables (p). Esta situacion podria presentarse si se aplica Hadi por by variables, y algunas combinaciones de las by variables tienen muy pocas observaciones.
+		Notar que los cambios descriptos aqui' involucran, para el STEP 2, parar el loop cuando r = h en lugar de cuando r > h como era anteriormente. Es de esperar que esto no cambie sustancialmente los resultados del algoritmo, ya que implica simplemente considerar una observacion mas dentro del conjunto de good observations.
+	- En los datasets de salida (definidos out= y outAll=) se modificaron los nombres de las variables extras generadas cuyo nombre no puede ser elegido por el usuario: se agregaron undescores al principio y al final de cada nombre y se definieron en mayusculas. Estas variables son: _THRESHOLD_, _ALPHA_, _ALPHA_ADJ_.
+	- Cambios en los graficos:
+		- La salida grafica ahora es tambien generada cuando se pasan by variables.
+		- La informacion del threshold en el grafico de las distancias de Mahalanobis por numero de observacion, se paso' al grafico por medio de un annotate dataset.
+		- En caso de que previamente a la deteccion se haya hecho una transformacion de Box-Cox (lo cual ocurre cuando boxcox=1), los scatter plots, de ser generados, son hechos tanto para las variables originales como para las variables transformadas.

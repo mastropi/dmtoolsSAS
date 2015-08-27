@@ -1,0 +1,25 @@
+%PlotBinned Versions: Description of the different versions
+-----------------------------------------------------------
+Created: 15-Aug-2015
+Author: Daniel Mastropietro
+
+
+V.1.00: 2015/08/14 (DM)
+	- Macro created to make plots of a target variable in terms of binned continuous variables and in terms of categorical variables (without binning).
+	The current macro signature is as follows:
+	%PlotBinned(
+		data , 					*** Input dataset.
+		target=, (REQUIRED) 	*** Target variable to plot in the Y axis.
+		var=_NUMERIC_, 		    *** List of input variables to analyze.
+		varclass=, 				*** List of categorical input variables among those listed in VAR.
+		datavartype=,			*** Dataset containing the type or level of the variables listed in VAR.
+		groupsize=,				*** Nro. of cases each group should contain when categorizing continuous variables.
+		groups=20,				*** Nro. of groups to use in the categorization of continuous variables.
+		value=mean,				*** Name of the statistic for both the input and target variable in each bin.
+		bubble=1,				*** Whether to generate a bubble plot instead of a scatter plot.
+		xaxisorig=0,			*** Whether to use the original input variable range on the X axis.
+		yaxisorig=1,			*** Whether to use the original target variable range on the Y axis.
+		odspath=, 				*** Quoted name of the path where all generated files should be saved.
+		odsfile=,				*** Quoted name of the file where the plots are saved.
+		odsfiletype=pdf,		*** Type of the file specified in ODSFILE or output format.
+		log=1);					*** Show messages in log?

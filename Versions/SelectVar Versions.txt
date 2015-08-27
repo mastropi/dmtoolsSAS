@@ -1,0 +1,25 @@
+%SelectVar Versions: Descripcion de las diferentes versiones
+------------------------------------------------------------
+Creado: 13/1/05
+
+
+
+V.1.01: 12/01/05 (DM)
+	- Se renombro' el parametro POSNOT= por NOTPOS= y se agrego' el parametro POSNOT= donde indicar la  posicion en que la keyword pasada en el parametro KEY NO debe estar para que un match sea considerado como tal.
+
+V.1.02: 03/02/05 (DM)
+	- Se agrego' la posibilidad de que los parametros POS=, POSNOT= y NOTPOS= reciban como valor admisible el keyword END, para establecer que la posicion requerida para dichos parametros es el final del nombre de la variable. Por ej. si POS=END, se seleccionan las variables cuyos nombres terminan con el valor pasado en el parametro KEY.
+
+V.1.03: 21/07/05 (DM)
+	- Corregi' el problema de que si POS=END para la keyword buscada, no devuelve el match cuando dicha keyword ocurria antes en el nombre. Esto pasaba por ej. con el nombre B_LIM_CC_SITMAX_HIST_L, que no era considerada un match porque buscaba solamente por la ocurrencia de un _L, y no de todas las ocurrencias, verificando que alguna de ellas se diera al final.
+	Este arreglo implico' modificar radicalmente la macro.
+	- Al hacer estos cambios en %FindMatch, elimine' el procesamiento de la KEY a buscar y desde %SelectVar llamo a %FindMatch para buscar el KEY en cada nombre de la lista de variables del dataset.
+
+V.1.04: 03/08/05 (DM)
+	- El parametro KEY fue convertido en opcional, para que la macro sirva para quedarse con las variables cuyos nombres NO contienen una cierta keyword (para esto basta ejecutar la macro con KEY= vacio y con el parametro NOT= conteniendo el key de exclusion de nombres).
+
+V.1.05: 30/06/06 (DM)
+	- Agregué la posibilidad de que el parametro KEY= pueda tomar los valores _NUMERIC_ y _CHAR_ para devolver las variables numericas o las variables caracter de un dataset.
+
+V.1.06: 2015/08/05 (DM)
+	- Added the keyword _ALL_ as a valid keyword in order to retrieve all variables in the dataset. I did this to complete the list of three valid SAS keywords: _ALL_, _CHAR_, _NUMERIC_, although in order to parse variables we would normally use %GetVarList().

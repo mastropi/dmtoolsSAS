@@ -1,0 +1,9 @@
+%CreateInteractions Versions: Descripcion de las diferentes versiones
+---------------------------------------------------------------------
+Creado: 26/7/05
+
+
+
+V.1.01: 26/7/05 (DM)
+	- Agregue' el parametro SEP= para indicar el separador a usar en la lista con las interacciones creadas que se guarda en la macro variable MACROVAR=.
+	- Comente' la parte donde pregunto si el parametro JOIN= es vacio porque en tal caso el nombre de la variable generada con la interaccion se llama distinto que si JOIN no es vacio, siempre que se cumplan ciertas condiciones sobre los parametros PREFIX, SUFFIX, VAR y WITH. Me parecio que este nombramiento no tiene sentido, porque elimino el nombre de la segunda variable con la que estoy interactuando y no se' bien por que' tome' esa decision. Asi que lo elimine' eso, y el nombre de la variable generada con la interaccion se arma de la misma forma que cuando JOIN no es vacio.

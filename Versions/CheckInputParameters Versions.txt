@@ -1,0 +1,23 @@
+%CheckInputParameters Versions: Descripcion de las diferentes versiones
+-----------------------------------------------------------------------
+Creado: 7/5/04
+
+
+
+V.1.00: 22/9/03 (DM)
+
+V.1.01: 7/5/04 (DM)
+	- In the '%do i = 1 %to &nro_datas' the following %if was added:
+		%if ~&singleData %then
+	and in the %if following, the %quote() was replaced with an %str() and &_data_ was enclosed in double quotes. The reason for these changes are explained in the program, where the changes were made.
+	Essentially the reason is that this solved a problem when a dataset is passed to parameter 'data' with data options.
+
+V.1.02: 14/10/04 (DM)
+	- Se agrego' un semi chequeo de la existencia de variables que se pasan usando hyphen (como en x1-x3). Digo "semi chequeo" porque solamente chequeo si existen la primera y la ultima variables comprendidas por el formato de hyphen, ya que determinar los nombres de las variables del medio seria muy complicado.
+	- Asimismo un %do-%end fue agregado despues del %else que intrudocue la parte en que se verifica la existencia de las variables en el dataset porque para mi estaba faltando.
+
+V.1.03: 23/11/04 (DM)
+	- Se agrego' el parametro CHECK=, en donde se pueden listar los parametros que contienen variables cuya existencia en todos los datasets pasados debe ser checkeada. Esto es util por ejemplo para los parametros tipo BY=, ID=, etc.
+	
+V.2.00: 17/08/06 (DM)
+	- Se hace el parsing de las variables pasadas en VAR= y de las variables especificadas en los parametros listados en CHECK= por medio de la llamada a %GetVarList (la cual desde la version 2.00 hace el parsing de double hyphen strings y de colon expressions).

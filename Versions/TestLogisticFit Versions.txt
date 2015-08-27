@@ -1,0 +1,37 @@
+%TestLogisticFit Versions: Descripcion de las diferentes versiones
+------------------------------------------------------------------
+Creado: 14/7/03
+
+
+
+V.1.01: 12/6/03 (DM)
+	- Created.
+
+V.1.02: 14/7/03 (DM)
+	- Se agregaron barras de error a los graficos de las proporciones observadas y las probabilidades predichas.
+	- Se corrigio un error en el calculo de la proporcion de &event, ya que el %Means que lo calculaba usaba un filtro dado por where=&resp=&event, pero esto eliminaba los valores de la variable regresora categorizada &_var_ para los cuales la variable &resp fuera siempre distinta a &event! 
+	
+V.1.03: 13/8/03 (DM)
+	- Se corrigio el error de que la categorizacion hecha a las variables regresoras listadas en 'var' era hecha sobre todas las observaciones, y no solamente sobre las observaciones que intervinieron en la regresion logistica.
+	- Se agrego' el parametro outCat=, que recibe el nombre de un dataset donde se guardan las variables categorizadas segun el proceso utilizado para hacer el analisis del logistic fit por la macro, mas las variables originalmente presentes en el input dataset 'data'. Los nombres de las variables categorizadas coinciden con los nombres de las variables regresoras listadas en 'var'.
+	- Se corrigio' el problema de que si alguna variable pasada en var= era 'x' o 'y', el annotate dataset usado en el grafico del logit era generado incorrectamente, porque habia confusion entre los 'x' e 'y' del annotate dataset con los 'x' e 'y' del input dataset correspondientes a las variables pasadas en var=. Lo que se hizo fue utilizar temporariamente los nombres _x_ e _y_ al crear el annotate dataset, y luego al final del data step, renombrar _x_ por 'x' y _y_ por 'y' (el rename debe ser hecho porque las variables que indican las coordenadas en un annotate dataset deben ser 'x' e 'y' necesariamente).
+	- Se corrigio', en la generacion del dataset con el que se analiza el ajuste para cada variable regresora (&out_name._&_var_), una parte donde se seteaba a missing &pred._lower y &pred._upper en lugar de setear a missing logit_&pred._lower y logit_&pred._upper.
+
+V.1.04: 30/9/03 (DM)
+	- Se agrego' el parametro 'nameRes=res', donde se puede especificar el nombre de la variable con el residuo estandarizado. Por default es nombre usado es 'res'.
+	- Se agrego' el parametro 'suffixRes=0' que indica si se desea agregar la variable regresora analizada como sufijo al nombre de la variable con el residuo estandarizado (ej: res_regvar1). Por default no se agrega.
+
+V.1.05: 28/10/05 (DM)
+	- Se corrigio' el problema de que cuando una de las variables de analisis coincidia con la variable que contiene la probabilidad predicha (PRED), la macro no calculaba el error estandar de la PRED para cada grupo de la variable de analisis. Esto pasaba cuando se hacia el TestLogisticFit global de un modelo, es decir usando a la probabilidad predicha como variable de analisis.
+	(La solucion fue crear una nueva variable en el dataset de analisis llamada _TLF_pred_)
+
+V.1.06: 17/08/06 (DM)
+	- Se renombro' el parametro NAMERES= por RES= porque es mas facil de recordar y ademas para estar acorde con PRED= (que no es NAMEPRED=). Notar que esta' el parametro SUFFIXRES= pero esta ok.
+	- Se agrego' log=0 al llamar a %DefineSymbols.
+
+V.1.07: 2012/07/13 (DM)
+	- Fixed an error that started occurring with SAS 9.3 where the YMAX graphic option is not defined by default. This value was retrieved and used at the GOPTIONS statement defining the new HSIZE and VSIZE values to use as parameters for the graphical output area when plotting several graphs on the same window (e.g. Q-Q plot and histogram).
+	The YMAX value was replaced with the VSIZE value retrieved at the data step that calls the ginit() function in order to retrieve SAS/GRAPH information with the DSGI system (Data Step Graphics Interface).
+	Note that the same change was done in macro %MPlot where the same data step is called.
+	
+	

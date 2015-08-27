@@ -1,0 +1,36 @@
+%InformationValue Versions: Descripcion de las diferentes versiones
+-------------------------------------------------------------------
+Creado: 12/08/06
+
+
+V.1.01: 12/08/06 (DM)
+	- Se agrego' la posibilidad de que las variables analizadas (pasadas en VAR) sean tanto numericas como caracter.
+	- Se agrego' la posibilidad de que la variable TARGET tome valores distintos al 0 y 1.
+	- Se agrego' una verificacion de si la variable TARGET toma exactamente 2 valores distintos.
+	- Se agrego' un filtro con un WHERE= option al invocar a la macro %FreqMult, para evitar la generacion de registros en el output dataset _iv_FreqMult_ con valores de una variable para los cuales la unica ocurrencia de la variable target es el missing value. Si el WHERE= option no se usara, se podria generar el error "Division by Zero" al calcular las cantidades WOE y IV.
+	- Se agrego' la variable NUSED en el output dataset con el Information Value (&out). Esto fue hecho para identificar variables para los cuales hay muchos valores del WOE (Weight Of Evidence) en missing, lo que indica que dichos valores proveen informacion infinita, ya que para esos valores la TARGET variable solamente toma un valor. (Esto incluso podria usarse antes de ejecutar una regresion logistica para identificar la ocurrencia de QUASI-COMPLETE separation, eliminando las variables que tienen muchos valores con WOE = ., lo cual seguramente produciria un QUASI-COMPLETE separation en una regresion logistica. El challenge aqui' es definir que' significa "muchos valores".)
+
+V.2.00: 17/08/06 (DM)
+	- Se agregaron los parametros GROUPS= y VALUE= para poder agrupar variables NUMERICAS al calcular el Information Value.
+
+V.3.00: 2012/07/31 (DM)
+	- The new parameter SMOOTH= is a FLAG parameter that was added to request the smoothed version calculation of the WOE. Recall that WOE is defined for each category of the analyzed variable and is given by:
+		WOE = log(P(j/1) / P(j/0))
+	Clearly, WOE is missing when either P(j/1) or P(j/0) = 0, which happens when an input category has the same target values for all cases.
+
+	The smoothed version of the WOE avoids such missing values. It is not really useful to have missing values in the WOE as we are losing the information that such categories of the input variable give A LOT OF INFORMATION (actually infinite information since, knowing that the input variable takes that category value tells us right away the value of the target!). By having the WOE for the category equal to missing, this information is not reflected on the Information Value. Using the smoothed WOE allows the transfer of this WOE information to the Information Value.
+
+	This idea came from a suggestion by Bob Lucas on an e-mail sent to the Enteprise Miner group at SAS on 27-Jul-2012.
+	
+	The smoothing factor is computed as 0.5/(total number of obs for the analyzed variable). The value 0.5 comes from the fact that the smoothing factor originally adjusts the number of OCCURRENCES (instead of the probabilities) by 0.5 (used in the literature of empirical logit, see e.g. http://talklab.psy.gla.ac.uk/tvw/elogit-wt.html) and this adjustment implies an adjustment in probability for the corresponding target value of 0.5/(#obs in target value). However, in order to use the same smoothing factor for the numerator and denominator of the WOE, we divide by the TOTAL number of obs (instead of #obs having target=1 and #obs having target=0, respectively).
+
+	The default value of parameter SMOOTH is 1, that is by default a smoothing factor is used in the calculation of WOE in order to avoid missing values.
+
+	Note: a backup copy of previous version 2.00 of %InformationValue was stored as InformationValue-201207Jul31-v200608Aug17-BeforeAddingSmoothWOEOption.sas.
+
+V.3.01: 2015/05/23 (DM)
+	(NOTE: The changes were done on the sasx64 server at Pronto. The macro was updated locally by copying and pasting the code from the server to my computer!)
+	- The display of the mean value --or any other statistic requested by the user-- as the VALUE column (or NUMVALUE column if also character variables are analyzed) in the output IV table was not working and it was fixed. The fix was mainly done by adding a new parameter to the %Categorize macro, VARVALUE=, and passing the input variable names as its value.
+	- Changed the default value for parameter GROUPS= from empty to 10.
+	- Changed the default value for parameter VALUES= from mean to empty, so that by default the integer-valued categories are shown in the output IV table. This is to avoid the confusion that in order to have these categories displayed we would have needed to pass an empty value to VALUES=.
+	- Added a label to the VALUE or NUMVALUE column in the IV output table that reflects the statistic computed on the numeric variables or "dummy category" when just a dummy integer-valued category is used.

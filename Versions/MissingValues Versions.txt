@@ -1,0 +1,18 @@
+%MissingValues Versions: Descripcion de las diferentes versiones
+----------------------------------------------------------------
+Creado: 07/08/06
+
+
+
+V.1.02: 08/08/06 (DM)
+	- Se agregó el parámetro BY, para hacer los cálculos por BY variables.
+	- Se modificó la generación del dataset _MISSING_ en el sentido de que siempre se genera, no importa si se encontraron missing values o no en las variables.
+	Se reemplazaron las líneas
+		do _i_ = 1 to dim(count_num);
+		do _i_ = 1 to dim(count_char);
+	(Notar que count_num y count_char se renombraron a count_miss_num y count_miss_char respectivamente)
+	por:
+		do _i_ = 1 to dim(numvar);
+		do _i_ = 1 to dim(charvar);
+	respectivamente.
+	- Modifiqué el output dataset default a _MV_MISSING_ (donde MV = MissingValues, para referenciar el nombre de la macro que lo generó en el nombre del dataset).

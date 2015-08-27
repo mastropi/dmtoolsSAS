@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Untitled Document</title>
+</head>
+
+<body>
+<p>MACRO %InformationValue</p>
+<ol>
+  <li><a href="#DESCRIPTION">Description</a></li>
+  <li><a href="#USAGE">Usage</a></li>
+  <li><a href="#Notes">Notes</a></li>
+</ol>
+<p>&nbsp;</p>
+<p><br />
+  Version: 1.01<br />
+  Author: Daniel Mastropietro<br />
+  Created: 6-Jul-2005<br />
+  Modified: 12-Aug-2006</p>
+<h3><a name="Description" id="Description">DESCRIPTION</a></h3>
+<p>This macro computes the Information Value (IV) of categorical variables predictors of a 
+target dichotomous variable.
+Assuming that the possible values taken by the target variable are 0 and 1, the formula
+for the IV is the following:</p>
+<p> IV = Sum{j=1 to J} { [P(j/1) - P(j/0)]*ln(P(j/1)/P(j/0) }</p>
+<p>or</p>
+<p> IV = Sum{j=1 to J} { [P(j/0) - P(j/1)]*ln(P(j/0)/P(j/1) }</p>
+<p>depending on which of the values (0 or 1) is taken as the reference value (0 is taken<br />
+  as the reference value in the first case and 1 in the second case).</p>
+<p>- J is the number of different values taken by the categorical predictor variable,<br />
+  - P(j/1) is the probability that the predictor variable take the value j when the<br />
+  target variable takes the value 1, and similarly for P(j/0).</p>
+<p>Note that the IV is ALWAYS non-negative, since a positive/negative difference of P(j/.)<br />
+  implies a positive/negative value of ln(.).</p>
+<h3><a name="Usage" id="Usage"></a>USAGE</h3>
+<p>%InformationValue(</p>
+<blockquote>
+  <table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td width="208" valign="top"><p>data,</p></td>
+      <td width="523" valign="top"><p>/* Input dataset */ </p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>target=,</p></td>
+      <td width="523" valign="top"><p>/* Dichotomous target variable */</p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>var=,</p></td>
+      <td width="523" valign="top"><p>/* Analysis variables (character or numeric) */</p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>event=, </p></td>
+      <td width="523" valign="top"><p>/* Event of interest */</p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>format=, </p></td>
+      <td width="523" valign="top"><p>/* Format to use for each analysis variable */</p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>out=_InformationTable_ </p></td>
+      <td width="523" valign="top"><p>/* Table showing the distribution of the target variable    */</p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>&nbsp;</p></td>
+      <td width="523" valign="top"><p>/* for each value of the analysis variables */</p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>outiv=_InformationValue_, </p></td>
+      <td width="523" valign="top"><p>/* Output dataset containing the Information Value for    each variable */</p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>notes=1, </p></td>
+      <td width="523" valign="top"><p>/* Show SAS notes in the log? */</p></td>
+    </tr>
+    <tr>
+      <td width="208" valign="top"><p>log=1); </p></td>
+      <td width="523" valign="top"><p>/* Show messages in the log? */</p></td>
+    </tr>
+  </table>
+</blockquote>
+<h3><a name="Notes" id="Notes"></a>NOTES</h3>
+  1.- The WOE (Weight of Evidence) is computed using the value specified in parameter EVENT as the<br />
+  event of interest. If no value is specified or the value does not correspond to any possible<br />
+  target value, the default is use: the largest target value (the concept of largest is extended<br />
+  to character target variables based on the alphabetical order).<br />
+  For ex., if the possible target values are 0 and 1 and the EVENT parameter is empty, then the WOE<br />
+  is computed as log(P(j/1)/P(j/0)). Otherwise, if EVENT=0, the WOE is computed as log(P(j/0)/P(j/1)).</h3>
+<p>REQUIRED PARAMETERS:<br />
+  - data:			Input dataset. Data options can be specified as in a data= SAS option.</p>
+<p>- target:		Dichotomous target variable. It can be either character or numeric.</p>
+<p>OPTIONAL PARAMETERS:<br />
+  - var:			Blank-separated list of variables to analyze.<br />
+  The variables can be either character or numeric, or both.<br />
+  default: all variables in the dataset except for the target variable</p>
+<p>- event:		The event of interest.<br />
+  If the target variable is character then:<br />
+  - Its value must be enclosed in quotation marks.<br />
+  - The specification of the event is case sensitive and it must respect<br />
+  the case of the values taken by the target variable.<br />
+  If the value specified does not correspond to any value taken by the target<br />
+  variable, the default is used.<br />
+  default: the largest target value</p>
+<p>- format:		Format to use for each analysis variable listed in VAR. This statement can be<br />
+  used to define groups.<br />
+  The way to specify this parameter is as in a SAS format statement.</p>
+<p>- out:			Output dataset containing the distribution of the target variable for each value<br />
+  of the variables listed in VAR.<br />
+  Data options can be specified as in a data= SAS option.<br />
+  The dataset has the following columns:<br />
+  - var: 			Variable name.<br />
+  - numvalue(*):	Value taken by the numeric variables.<br />
+  - charvalue(*):	Value taken by the character variables.<br />
+  - n: 			Number of observations in the dataset with non missing values of the<br />
+  analysis variable and the target variable.<br />
+  - nNonEvent: 	Number of Non-Events.<br />
+  - pcntNonEvent:	Percent of Non-Events.<br />
+  - nEvent: 		Number of Events.<br />
+  - pcntEvent: 	Percent of Events.<br />
+  - WOE: 			Weight Of Evidence of the corresponding value of the analysis variable.<br />
+  - IV:			Information Value of the analysis variable.<br />
+  (*) If all the analysis variables are character or all the analysis variables are<br />
+  numeric, there is only one column containing the values taken by the variables whose <br />
+  name is VALUE. In this case, the columns NUMVALUE and CHARVALUE are not present in <br />
+  the output dataset.<br />
+  default: _InformationTable_</p>
+<p>- outiv:		Output datase containing the Information Value of each variable listed in VAR.<br />
+  Data options can be specified as in a data= SAS option.<br />
+  The dataset has the following columns:<br />
+  - var: 		Variable name.<br />
+  - n: 		Number of observations in the dataset with non missing values of the<br />
+  analysis variable and the target variable.<br />
+  - nvalues: 	Number of distinct values taken by the variable.<br />
+  - nused:	Number of distinct values of the variable that were used in the <br />
+  computation of the Information Value. This is the same as the number<br />
+  of variable values for which the WOE is missing, which corresponds<br />
+  to values for which the information provided is infinite.<br />
+  - IV:		Information Value of the analysis variable.<br />
+  default: _InformationValue_</p>
+<p>- notes:		Indicates whether to show SAS notes in the log.<br />
+  The notes are shown only for the PROC MEANS step.<br />
+  Possible values: 0 =&gt; No, 1 =&gt; Yes.<br />
+  default: 0</p>
+<p>- log:			Show messages in the log?<br />
+  Possible values: 0 =&gt; No, 1 =&gt; Yes<br />
+  default: 1</p>
+<p>OTHER MACROS AND MODULES USED IN THIS MACRO:<br />
+  - %Callmacro<br />
+  - %ExistVar<br />
+  - %FreqMult<br />
+  - %Getnobs<br />
+  - %GetVarList<br />
+  - %Means<br />
+  - %RemoveFromList<br />
+  - %ResetSASOptions<br />
+  - %SetSASOptions</p>
+<p>APPLICATIONS:<br />
+  1.- Have a measure of the information provided by character and numeric variables in the exploratory<br />
+  phase of building a model to predict a dichotomous target variable. This measure does not require that<br />
+  the relationship between the variable and the target variable be linear, as is required by other measures<br />
+  such as the KS or Gini.<br />
+  However, the following two notes should be taken into account when computing the Information Value:<br />
+  - Continuous variables should be analyzed in categories (using the FORMAT= parameter for example).<br />
+  - The Information Value computation does not take into account the size of each categorical value.<br />
+  This means that if a category is too small with respect to the number of observations in the dataset<br />
+  and provides a lot of information about the target variable, this may not be reflected in the<br />
+  Information Value.<br />
+  However, at the same time, since the category is too small, it may not be good to have a large<br />
+  Information Value for the variable, since that category may not occur so often in the data being<br />
+  modelled.</p>
+<p>2.- This macro could help in identifying variables whose inclusion in a logistic regression may produce<br />
+  quasi-complete separation, which means that the variable is almost a perfect separator of the target<br />
+  variable.<br />
+  Such variables could be identified by looking at the number of distinct values of the analysis variable<br />
+  that are used in the computation of the Information Value (stored in column NUSED of the OUTIV= dataset).<br />
+  If this value is too small with respect to the number of distinct values taken by the analysis variable<br />
+  (stored in column NVALUES of the OUTIV= dataset), it means that for many variable values the target value<br />
+  is only one (as opposed to 2), giving a missing value of the WOE, which means that the information provided<br />
+  by that value is infinite.<br />
+  */<br />
+</p>
+<p>&nbsp; </p>
+</body>
+</html>

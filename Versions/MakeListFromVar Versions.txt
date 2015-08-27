@@ -1,0 +1,14 @@
+%MakeListFromVar Versions: Description of the different versions
+----------------------------------------------------------------
+Created: 06-Jun-2012
+
+
+V.1.02: 2012/06/06 (DM)
+	- Removed the use of the COMPBL function when generating the list containing the values read from the dataset because this may alter the original values stored in the dataset, for instance when values are character and have multiple inner spaces.
+	- Removed the space left between the values in the list and the separator (i.e. the original concatenation statement was '%quote(&list &sep %sysfunc(&fun(&dsid, &varnum)))', where we see a blank space left before and after &sep. This doesn't allow to have no space separating the values!
+	- Added parameter STRIP (0/1 flag) which enables the option of using the STRIP function to remove leading and trailing blanks from the values read from the dataset. This is particularly useful when the variable from where the values are read is a character variable and contains values with different character lengths. 
+
+V.1.03: 2012/09/24 (DM)
+	- RE-ESTABLISHED the use of the COMPBL function that was removed on 2012/06/06 (above) because its absence caused problems when the list of names is very long (~ more than 20 or 30 names!). In fact, for some unknown and very strange behaviour, the name values tend to be preceded by very strange characters (always, i.e. regardless of whether the COMPBL function is used or not, such as for example: A_CUSTOMER V_FIELD_SURFACE).
+	This of course will remove multiple blank spaces in a particular value read from the dataset variable, but I don't know how else to solve the problem (it seems the above described strange behaviour is a BUG). Therefore, if the variable value is "This is    a test" it will be stored as "This is a test".
+

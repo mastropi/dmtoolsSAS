@@ -1,0 +1,10 @@
+%GetVarType Versions: Description of the different versions
+-----------------------------------------------------------
+Created: 07-Jun-2012
+
+
+V.1.02: 2012/06/07 (DM)
+	- Redirected call to new macro %GetVarAttrib which reads ANY attribute from a variable in a dataset using any SAS file I/O function (e.g. vartype, varnum, varlen, etc.)
+
+V.1.03: 2015/05/24 (DM)
+	- Defined macro variable VARTYPE as LOCAL macro variable! This bug was dangerous because for example it made the macro %FreqMult stop working correctly when computing frequencies for both character and numeric variables! (since %FreqMult also defined a macro variable called VARTYPE.

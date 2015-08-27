@@ -1,0 +1,11 @@
+%RemoveSuffix Versions: Descripcion de las diferentes versiones
+---------------------------------------------------------------
+Creado: 18/08/06
+
+
+
+V.1.01: 18/08/06 (DM)
+	- Se corrigio' un error que se generaba cuando el sufijo a eliminar es en realidad TODO el nombre en donde se buscaba ese sufijo. Por ej. al buscar el sufijo AA en el nombre AA. Cuando esto pasaba, la variable &pos valia 1 al terminar el DO UNTIL loop y entonces la aplicacion del la funcion %substr con el tercer parametro igual a &pos-1 daba error, porque este tercer parametro valia 0 lo cual no es valido para %substr.
+	- Se agrego' el parametro LIST= para que uno pueda decir que el parametro NAME que esta' pasando contiene una frase y no una lista de nombres. Esto es simplemente a fines de como se muestra el resultado de la macro al eliminar los sufijos pedidos.
+	- Se agregaron funciones %QUOTE para encerrar macro variables que pudieran contener comas en su valor.
+	- Comente' la parte en que elimino espacios en blanco innecesarios en la lista generada (no me parecio' mas que esto fuera apropiado considerando que la lista pasad podria ser una frase y no necesariamente una lista).

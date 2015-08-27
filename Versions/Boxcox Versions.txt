@@ -1,0 +1,51 @@
+%Boxcox Versions: Descripcion de las diferentes versiones
+---------------------------------------------------------
+Creado: 13/1/03
+
+
+
+V.1.01: 10/1/03 (DM)
+	- Cambios de forma en cuanto al intervalo de confianza presentado cuando se va fuera del search space de lambda.
+	
+V.1.02: 13/1/03 (DM)
+	- Calculo de la log-likelihood como corresponde, es decir agregando las constantes que faltaban, y que no intervienen en el calculo del maximo de la log-likelihood: -0.5*n*log(2*pi) - 0.5*n.
+	- Correccion del error que ocurria cuando habia una opcion 'where' en el dataset de analisis que concernia una variable no listada en la opcion 'var'.
+	Se soluciono' agregando un %if %ExistsOption(&data , where) antes de entrar al IML, para que ejecute el 'where' antes de hacer el use &data_name(&data_options keep=&var);
+	- Correccion del error que cuando el intervalo de confianza para lambda incluia el 1, no era verdad que la variable no fuera transformada sino que era transformada con un valor de lambda incorrecto. Se soluciono' agregando el statement Xt[,j] = X[,j] dentro del if en el que entra cuando el intervalo de confianza incluye el 1.
+
+V.1.03: 15/1/03 (DM)
+	- Correccion del problema de que el orden en que la macro analizaba la transformacion de cada variable no era el mismo que el orden en que son listadas en la opcion var=. Se soluciono' el problema agregando un 'format &var' statement al 'setear' el input dataset en un dataset local.
+	Al hacer esto, tambien se elimino' el %if %ExistsOption para el 'where', 'keep' y 'drop', porque en cualquier caso es necesario setear el input dataset para reordenar las variables.
+	- Seteo del option nonotes dentro de la macro.
+	
+V.1.04: 3/2/03 (DM)
+	- Se agregaron lineas de referencia en el log-likelihood plot para lambda = 0 y lambda = 1. (simplemente se agrego la opcion 'href=0 1' en el plot statement).
+	- Se cambio el qqplot por un probplot, al que ademas se agrego una grilla (simplemente se cambio el statement qqplot por probplot y se agrego la opcion 'grid' en el probplot).
+
+V.1.05: 7/5/03 (DM)
+	- Se volvio a cambiar el probplot por un qqplot, con la idea de incorporar bandas de confianza para las estimaciones de los cuantiles. Para ello en lugar de utilizar PROC UNIVARIATE, se llama a la macro %qqplot, que es una macro desarrollada en la Univ. de York, cuyo codigo original se encuentra en y:\SAS\Macros\external\York\nqplot_york.sas.
+
+V.1.06: 18/6/03 (DM)
+	- Se cambio el orden en que se hacen los graficos de log-likelihood y los q-q plot. Ahora se hacen los graficos por variable. Es decir para cada variable se hace el grafico de la log-likelihood, el q-q plot de la variable original y el q-q plot de la variable transformada.
+	- En el grafico de la log-likelihood se muestra el valor optimo de lambda (lambda_real), el intervalo de confianza para lambda y el valor maximo de la log-likelihood encontrado.
+	- Se agrego al dataset de salida outlambda la siguiente informacion:
+		- matchingValue:	el valor x0 del matching point, es decir el punto que la transformacion deja invariante.
+		- shift:			corrimiento efectuado a la variable original, previo a aplicar la transformacion.
+		- loglik:			valor maximo de la log-likelihood correspondiente al lambda_real (no al lambda_opt).
+		- matchingPoint:	forma de calcular el matching point (mean, median, etc.).
+
+V.1.07: 29/7/03 (DM)
+	- Se agregaron las opciones loglik=, qqplot= y histogram=. Esto permite seleccionar que graficos se desean ver cuando se pasa la opcion plot=1. Por default se generan el grafico de la log-likelihood y los Q-Q plots para cada variable, antes y despues de la transformacion.
+	- La creacion del output dataset se paso al final del codigo. Esto corrige el problema de que no podian verse los graficos para las variables originales y las transformadas en caso de que su nombre fuera el mismo y que ademas el output dataset fuera el mismo que el input dataset (caso raro, pero posible).
+	- Se agrego' la condicion de que si el nombre del output dataset coincide con el nombre del input dataset, se crea un dataset temporario (_Boxcox_out_) para almacenar los datos de salida, y luego, al final, se crea el output dataset. Esto corrige el problema de que si el output dataset coincide con el input dataset, las otras variables del input dataset que no estaban en la lista de variables a ser transformadas no eran conservadas en el output dataset.
+	Notar que para crear el output dataset al final al agregar todas las variables que estan en el input dataset, fue necesario crear una nueva macro variable, llamada &out_param, que contiene el valor original del parametro out= pasado por el usuario.
+
+V.1.08: 31/12/03 (DM)
+	- Se agrego' la opcion macrovar= para pasar el nombre de la macro variable global donde se guarda la lista de variables transformadas.
+	- Se agrego' la opcion exclude=, donde se puede listar un conjunto de valores a excluir del calculo del lambda de la transformacion Box-Cox para cada variable. Su utilidad es mas que nada para excluir los ceros que pueden tener las variables en ocasiones en gran numero. La presencia o no de estos ceros puede afectar considerablemente el valor del lambda y los valores de la variable transformada obtenida, a tal punto de que tener la impresion de que la variable transformada tiene una distribucion mas alejada de la distribucion normal que la variable original.
+
+V.1.09: 11/2/04 (DM)
+	- Se corrigio' el error de que la variable _boxcox_obs_ quedaba en el dataset de salida especificado en el parametro outLambda. Para esto, se reemplazo' la linea:
+		var = namesX`;
+	por:
+		var = namesX[loc(namesX^='_boxcox_obs_')]`;

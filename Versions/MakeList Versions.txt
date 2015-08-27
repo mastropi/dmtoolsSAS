@@ -1,0 +1,21 @@
+%MakeList Versions: Descripcion de las diferentes versiones
+-----------------------------------------------------------
+Creado: 26/5/03
+
+
+
+V.1.15: 26/5/03 (DM)
+	- Elimine' el segundo parametro (_list_) e hice que la macro devolviera la lista generada en una macro variable de manera de poder asignar ese valor a una macro variable con un %let.
+	La manera de resolverlo fue eliminando la llamada a %GetNroElements y reproduciendo lo que hace esa macro en la macro %MakeList mismo.
+
+V.1.16: 16/9/03 (DM)
+	- Agregue' un espacio en blanco entre el separador y los nombres de la lista generada. La razon es que todas las otras macros que manejan listas (como %RemoveFromList o %RemoveRepeated) piden que cuando la lista pasada tiene un separador que no es el espacio en blanco, dicho separador deje un espacio con los nombres. Si no, no funcionan correctamente (lo cual en principio no se puede corregir, porque la limitacion viene de la forma en que funcionan las funciones del SAS que buscan caracteres en strings como %index o indexw, etc., donde no se les puede especificar que busquen palabras separadas por otro caracter que no sea el espacio en blanco).
+
+V.1.17: 5/1/04 (DM)
+	- Se agrego' el parametro log= que, si vale 1, muestra la lista generada en el log. Por default log=0 (para no tener que cambiar todas las llamadas a la macro desde otras macros. En rigor, seria conveniente que por default fuera log=1, porque eso seria pensar en el usuario, pero tal vez el cambio lo haga mas adelante.)
+
+V.1.18: 29/9/04 (DM)
+	- Modifique' la expresion usada para generar la lista de la siguiente manera: agregue' una macro variable local &_var_ a la cual le asigno el nombre de la i-esima variable de la lista &&var&i, y luego uso el valor de &_var_ para actualizar la lista &list.
+	El fin de hacer esto fue que la macro resolviera el valor de macro variables cuando prefix=& (ampersand). Con la version original, solamente lo hacia para la primer variable de la lista.
+	Para ver el cambio realizado (incluso para comparar la nueva version con la vieja version), ver en el programa el comentario %*1 2004/09/29).
+	- Modifique' el uso de un espacio adicional en el separador cuando nospace=0, de la siguiente manera: ahora, solamente se agrega un espacio al separador si el separador pasado en sep= no es un espacio. Esto es para evitar que haya 3 espacios entre los elementos de la lista cuando sep=%quote( ).

@@ -1,0 +1,47 @@
+%GetVarList Versions: Descripcion de las diferentes versiones
+-------------------------------------------------------------
+Creado: 12/01/05
+
+
+
+V.1.01: 12/01/05 (DM)
+	- Se cambio' radicalmente la estructura de la macro. Basicamente lo que se hizo fue modificarla de manera que la macro devuelva la lista de variables presentes en el dataset, en lugar de generar una macro variable (cuyo nombre es pasado en el parametro macrovar) con dicha lista. Esto facilita el uso de la macro ya que se pueden usar statements de la forma:
+	%let varlist = %GetVarList(&data, var=&list);
+	Notar que la lista de variables pasadas en VAR= puede tener cualquiera de las keywords reservadas (_ALL_, _NUMERIC_ y _CHAR_) y lista de variables escritas usando hyphen (como en x1-x3).
+	**********************************************************************************************
+	Sin embargo, TIENE LA DESVENTAJA de que cualquier opcion pasada en &data ES IGNORADA por la macro, lo cual puede REMOTAMENTE generar problemas si alguna de estas opciones es un KEEP o DROP que es incompatible con la lista de variables pasadas. Por ejemplo, habria problemas si al llamar a la macro %Means (por decir algo) la invocacion fuera:
+	%Means(test(keep=x1-x3), var=x1-x5);
+	pues la lista de variables a analizar no esta' incluida en la lista de variables conservadas en TEST en la opcion KEEP presente en el parametro DATA de %Means.
+	Alguna de las macros que llaman a %GetVarList fueron adaptadas de manera de evitar este problema, pero otras no. La manera de evitar el problema es primero ejecutando las opciones presentes en &data leyendo el dataset a un dataset local, y luego llamando a %GetVarList con este dataset local como primer parametro.
+	Notar que este mismo problema pasa con %CheckInputParameters, cuando se verifica la existencia de las variables en el input dataset. Pero esto no tiene solucion si uno quiere que estas macros (%CheckInputParameters y %GetVarList) devuelvan una macro variable como salida.
+
+	A la fecha, las macros que no presentan problemas con este asunto de %GetVarList son:
+	- %CreatePrevPostVar
+	- %CutMahalanobisChi
+	- %DetectCollinearities
+	- %FreqMult
+	- %Hadi
+	- %Means
+	- %PartialPlots
+	- %Qqplot
+	- %Transpose
+	
+	A la fecha, las macros que SI pueden presentar problemas con este asunto de %GetVarList son:
+	- %Categorize
+	- %Center
+	- %GetStat
+	- %Mahalanobis
+	- %MissingValues
+	- %PiecewiseTransf
+	- %Scatter
+	- %TestLogisticFit
+	
+	NOTAR TAMBIEN que hay veces en que la lista de variables debe parsearse con %GetVarList ANTES de generar el dataset temporario de analisis (con lo cual el posible problema mencionado arriba no se evita) para evitar un error en caso de que la lista de variables a analizar quede definida por el keyword _NUMERIC_ en la macro en cuestion. Esto pasa por ej. en la macro %Categorize, donde se explica la razon de seguir este procedimiento.
+	Notar que esta cuestion (que pasa en la macro %Categorize) en general pasa solamente cuando la macro que llama a %GetVarList genera 2 datasets: uno con las variables de analisis y otro con todas las demas variables, que luego deben ser mergeados al final de la macro para generar el output dataset final. (Este proceso no es muy comun en las macros con lo cual tampoco deberia ser muy comun la necesidad de hacer el parsing de la lista de variables antes de la generacion del dataset temporario de analisis.)
+	**********************************************************************************************
+
+V.1.02: 03/03/05 (DM)
+	- Agregue' al principio un %IF para ver si la lista de variables tiene alguna de las keywords reservadas: _ALL_, _NUMERIC_, _CHAR_ o hyphen. Si no las tiene, no proceso la lista de variables porque si la lista es muy larga, el proceso tarda mucho.
+
+V.2.00: 17/08/05 (DM)
+	- Agregue' un parsing de double hyphen strings (como id--name) y del colon expressions (como id:).

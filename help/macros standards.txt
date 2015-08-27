@@ -1,0 +1,164 @@
+Standards para la escritura de las macros producidas por el Laboratorio de Modelos
+----------------------------------------------------------------------------------
+Creado: 17/12/02
+Modificado: 18/11/04
+
+
+- NOMBRE DE LAS MACROS Y PARAMETROS RECIBIDOS (aplicable a las macros estadisticas y en lo posible a todas las macros):
+	- Nombres de macros empiezan en mayuscula.
+	- Nombres de las macros y parametros en ingles.
+	- Hay un solo parametro obligatorio que es el dataset a usar y que va primero y se llama 'data'.
+	- Los demas son opcionales y llevan un valor default como por ejemplo var=_NUMERIC_.
+	- Nombres de los parametros a utilizar:
+		- data:		Para el input dataset.
+		- var:		Para las variables de analisis.
+		- by:		By variables
+		- out:		Para el output dataset.
+		- plot:		Indica si se desea ver los graficos generados (por lo general, default es 0).
+		- output:	Indica si se desea ver salidas generadas en el output (por lo general, default es 0).
+		- log:		Indica si se desea var mensajes en el log (por lo general, default es 1).
+		(en general la idea es respetar los nombres de los statements que usa SAS y seguir el orden indicado aqui.)
+	- No usar plurales en los nombres de los parametros (ej. usar var=, stat=, name=, en lugar de vars=, stats=, names=), aun cuando esos parametros puedan recibir una lista de nombres.
+	- Si los nombres de los parametros son intuitivos (ej. var=, stat=, etc.), explicitar su nombre, AUN CUANDO SEAN OBLIGATORIOS. Si son obligatorios, al principio de la macro debe verificarse que hayan sido pasados. De lo contrario, no seguir con la ejecucion de la macro. (Para este chequeo estan las macros %CheckRequiredParameters y %PrintRequiredParameterMissing para chequear y mostrar el mensaje de error en caso de que los parametros pasados no sean correctos (al 19/9/03). Poner atencion en que los valores de los distintos parametros conviene que este separados por comas (,) al llamar a %CheckRequiredParameters, y SIN ESPACIOS ENTRE ELLOS, para evitar eventuales problemas (ej. '&data,&var,&stat', en lugar de '&data , &var , &stat').)
+	- Al principio de la macro, verificar que los parametros pasados sean correctos. Es decir chequear si existen los datasets pasados, si se pasaron todos los parametros requeridos y si las variables pasadas existen en el dataset (siempre que esto sea un requisito).
+	Para este chequeo esta la macro %CheckInputParameters, que a su vez usa las macros %ExistData, %ExistVar, %PrintDataDoesNotExist, %PrintVarDoesNotExist y %PrintRequiredParameterMissing. La macro muestra mensajes de error en caso de que los parametros (al 23/9/03).
+	Ademas, si algo falla, mostrar como es la llamada a la macro (esto es para que el usuario no tenga que abrir el archivo con el codigo de la macro para saber como se la llama).
+	La forma estandar de hacerlo seria asi:
+	%if ~%CheckInputParameters(data=&data , var=&var , macro=<MACRO-NAME>) %then %do;
+		%put <MACRO-NAME>: The macro call is as follows:;
+		%put %nrstr(%<macro-name>%();				* Notar el uso de %NRSTR y del porcentaje antes de '(';
+		<copiar el USAGE del help, con un parametro en cada linea y agregando %put al principio y ';' al final de cada linea>
+	%end;
+	%else %do;
+		<codigo de la macro>
+	%end;
+
+- COMO ESTRUCTURAR LA AYUDA DE USO DE LA MACRO
+  	- Seguir el siguiente orden (aunque no todos los puntos deben estar si no hay nada para decir):
+		- Nombre de la macro
+		- Description:
+		- Usage:
+		- Required parameters:
+		- Optional parameters:
+		- Returned values:
+		- Notes:
+		- Other macros and modules used in this macro:
+		- See also:
+		- Examples:
+		- Applications: (ejemplos donde la macro puede ser util)
+		- References:
+
+	- Dejar una linea de espacio entre las descripciones de los distintos parametros, entre las distintas notas y entre los distintos ejemplos.
+		
+	- En el usage, si la macro es muy usada por usuarios ajenos al laboratorio, listar cada parametro en una linea distinta, y poner a su derecha una descripcion de una sola linea del significado del parametro.
+	
+  	- En "other macros and modules used in this macro" listar primero las macros y luego los modulos, en orden alfabetico.
+  	
+  	- FORMA DE INVOCAR LA MACRO: En lo posible definir dentro de cada macro, otra macro que muestre en el log la manera de invocarla. La idea es que esta macro se ejecute en alguno de los siguientes casos:
+  		- cuando el usuario llama a la macro %Help con el nombre de la macro cuya ayuda desea conocer. (Para que esto funcione debe agregarse en la macro el parametro help=, que cuando vale 1 indica que la macro fue invocada por %Help con el fin de mostrar la forma de invocarla. Ver macro %Boxcox como ejemplo. Nota: no incluir el parametro help= en la ayuda de la macro que aparece al principio, porque es un parametro de uso interno.)
+  		- cuando el usuario no pasa la cantidad de parametros requeridos por la macro.
+  	Usar para la macro de ayuda el nombre %ShowMacroCall. En general consiste de una serie de %put's que muestran en el log los parametros recibidos por la macro y una breve descripcion de los mismos (que puede ser la misma que aparece al principo del programa SAS).
+  	Por favor, seguir las siguientes convenciones para mostrar como llamar a la macro:
+  	- Indicar cada parametro en una linea distinta.
+  	- Empezar por los parametros obligatorios.
+  	- Indicar los parametros obligatorios con la keyword '(REQUIRED)' a continuacion del nombre del parametro.
+  	- Separar los parametros con comas (de manera de indicar la forma en que la macro debe ser invocada).
+	- Incluir la descripcion de cada parametro a continuacion del nombre del parametro luego de '***'. En lo posible, cada descripcion no deberia superar la longitud de una linea. En caso contrario, omitir el '***' al comienzo de las lineas siguientes, justamente para indicar que la linea es continuacion de la anterior.
+	- Para facilitar la lectura, alinear todas las descripciones bajo la misma columna. Para ello, seguir los siguientes pasos:
+		- Usar %quote para indicar el numero de espacios a dejar entre el nombre del parametro y el comienzo de la descripcion.
+		- Usar ESPACIOS para alinear las descripciones bajo la misma columna y NO tabs! (porque estos no son siempre reconocidos por SAS)
+		- En lo posible comenzar las lineas de descripcion en la columna 41 (considerando que hay UN TAB para cada linea definida dentro de esta macro), con la idea de homogeneizar la estructura de la ayuda entre las distintas macros.
+	A modo de ejemplo ver la macro %Boxcox.
+  	
+- MACRO VARIABLES
+	- Todas las macro variables usadas deben ser definidas localmente, salvo que sea una variable que tenga que ser devuelta al mundo exterior, en cuyo caso no sera definida ni como local ni como global. Esto permite que el scope de dicha variable sea el de la macro que llamo' a la macro que la devuelve. Sin embargo, esto tiene el inconveniente de que dicha variable debe ser declarada (con un %let <var-name>=;) antes de llamar a la macro que la devuelve.
+
+	- Si una macro devuelve una macro variable como salida al mundo exterior, todas las macro variables locales de la macro deben tener nombres con underscores, porque de lo contrario, si el usuario usa como nombre de la variable a devolver el mismo nombre que el de una macro variable definida localmente en la macro, el usuario no recibira' nada como salida, porque la macro va a modificar la variable local en lugar de la variable externa. (Como ej. ver la macro %Det).
+	Esto incluye tambien utilizar underscores para los parametros obligatorios (ya que su nombre no interesa al invocar la macro). No se hace con los parametros opcionales, porque eso cambiaria en forma no intuitiva los nombres de los parametros que tiene que usar el usuario.
+	NOTA IMPORTANTE: Una macro no puede devolver una macro variable al mundo exterior por el metodo de nombrar la macro variable en la ultima linea de la macro, si la macro llama a procedimientos o data steps de SAS. La forma de tratar este caso es la siguiente:
+		- crear un parametro opcional, donde el usuario pueda pasar el nombre de la macro variable donde quiere recibir los valores devueltos por la macro.
+		- Declarar el nombre de la macro variable pasado por el usuario en dicho parametro como macro variable global (esto es para que el usuario no tenga que definir la macro variable con un %let <macro-name> =; antes de incovar a la macro, lo cual es un poco engorroso).
+		- Definir todas las macro variables locales de la macro con un underscore al principio y al final del nombre, asi como los parametros obligatorios recibidos por la macro. Esto es para minimizar el riesgo de que el usuario pase como nombre de la macro variable uno que esta definido como local en la macro o uno de los parametros obligatorios, lo cual ciertamente crearia problemas de ejecucion. Los parametros opcionales deben nombrarse en la forma normal, porque de lo contrario el usuario deberia recordar nombres con underscores, y no es deseable. 
+
+	- Listar las macro variables definidas localmente por categoria (en base a para que' se usan) y por orden alfabetico dentro de cada categoria.
+	
+	- Para los nombres compuestos de macro variables usar la primera letra en minuscula y las primeras letras de las sucesivas palabras que conforman el nombre en mayusculas.
+	
+	- Muchas veces es conveniente crear una nueva macro variable local cuyo valor es parecido a alguno de los parametros recibidos por la macro, porque es deseable conservar el valor pasado por el usuario al invocar la macro. Ejemplos de este caso son los parametros OUT=, ID= en la macro %Mahalanobis, que puede usarse como ejemplo de ilustracion.
+
+- SOBRE LOS MODULOS IML
+	- Si una macro llama a un modulo IML compilado en la biblioteca de modulos (actualmente en y:\sas\iml), al principio de la macro (y dentro de la macro) debe definirse la siguiente macro variable:
+	%let _IMLLabModelos_ = sasuser.IMLLabModelos;
+	que da la ubicacion de los modulos IML utilizados (donde los nombres corresponden a: libref.catref).
+	Hay que acordarse de cambiar esta variable si se cambia la ubicacion de la biblioteca de modulos IML. 
+	Notar que la definicion de esta macro ocurre dentro de cada macro y no afuera, por el tema de que el archivo con una autocall macro tiene que empezar directamente con el nombre de la macro y no con otra cosa. De hecho, al definir la macro variable afuera me ha dado error en algunas ocasiones, como si no encontrara la macro variable.
+
+- DATASETS TEMPORARIOS
+	- Los nombres de datasets temporarios deben ir entre underscores y deben ser de la forma _<macro-name>_<dataset-name>_.
+	- Al leer el input dataset into un dataset temporario, usar un KEEP para conservar solamente las variables que se usan en el analisis realizado por la macro. Esto acelera mucho el proceso de lectura y posterior procesamiento del dataset (por ej. en un SORT).
+	
+- VARIABLES TEMPORARIAS
+	- Nombrar a las variables que deben ser creadas en los datasets en forma temporaria segun la misma regla que se usa para nombrar datasets temporarios, es decir: _<macro-name>_<var-name>_. Esto es para evitar superposicion entre variables temporarias de distintas macros. (Al no haber seguido esta regla me paso que cuando %Hadi llamaba a %Boxcox, la variable _obs_ desaparecia del dataset, y no tenia que desaparecer!)
+	
+- DATASETS DE SALIDA
+	- Permitir que uno pueda especificar data options. Con lo cual al generar esos datasets hay que tener cuidado de que el uso de la macro variable con el nombre sea en un lugar que acepte data options. De lo contrario, hay que usar solamente el nombre del dataset. (Usar %scan para obtener el nombre.)
+	- Toda nueva variable creada en un dataset de salida cuyo nombre no puede ser elegido por el usuario debe ser nombrada usando underscores al principio y al final del nombre. Ademas, para seguir con el estandar de SAS, usar los nombres en mayusculas.
+	Los underscores es para minimzar la posibilidad de que las nuevas variables sobreescriban variables ya existentes en el dataset.
+
+- MENSAJES EN EL LOG
+	- Los mensajes en el log generados por la macro, van antecedidos por el nombre de la macro en mayusculas y dos puntos. Algunos mensajes pueden a su vez ser antecedidos por los nombres 'ERROR -' 'WARNING -' O 'NOTE -', luego del nombre de la macro que genera el mensaje.
+
+	- Dejar un espacio (linea libre) antes del mensaje 'Macro Starts' y uno despues del mensaje 'Macro Ends' para visualizar mejor cuando empieza y termina una macro.
+	En general dejar una linea libre antes de un conjunto de mensajes, pero NO despues.
+	
+	- Si los procedimientos o etapas seguidas por una macro no son de interes para el usuario, usar 'options nonotes' al principio de la macro y reestablecer el seteo original de dicha opcion al finalizar la macro. El valor original de la opcion se puede leer con la funcion 'getoption'.
+	Tambien leer el nombre del ultimo dataset usado antes de empezar la macro y resetear el valor al salir de la macro. Este valor esta' contenido en la system macro variable &syslast.
+	
+	- Si log=1, luego de la verificacion de los input parameters (hecha en general con %CheckInputParameters), listar los parametros pasados por la llamada a la macro para que el usuario sepa a que' llamada corresponden los resultados obtenidos por la macro. Ademas sirve para que el usuario conozca que' otros parametros puede recibir la macro ademas de los pasados por el.
+	Mostrar el nombre del parametro en minuscula, seguido de un " = " y luego el valor del parametro.
+	Alinear los signos '=' para que pueda verse con claridad los distintos valores de los parametros.
+	Para alinear los signos '=', usar la funcion %quote.
+	Ej:
+	%put BOXCOX: Input parameters:;
+	%put BOXCOX: - Input dataset = %quote(&data);
+	%put BOXCOX: - var = %quote(          &var);
+	%put BOXCOX: - out = %quote(          &out);
+	Dejar una linea libre despues del ultimo %put (por seguridad, para que los mensajes que siguen no esten pegados a esta lista).
+	Usar la macro %BOXCOX como modelo.
+	
+	- Si un dataset es generado por la macro, avisar que es creado en el momento de su generacion. Ademas listar nuevas variables creadas por la macro. Si las nuevas variables son agregadas al input dataset, tambien avisar.
+	Mostrar el nombre de las variables en mayusculas, seguidos de una breve descripcion luego de un ":". Lo de que los nombres de las variables esten en mayusculas es para que se pueda ver facilmente donde termina el nombre de la variable y donde comienza su descripcion.
+	Usar la macro %DFBETAS como modelo.
+		
+	- Solamente generar los mensajes si el parametro log = 1. Por default el parametro log= es igual a 1, ya que los mensajes en el log en general no molestan y pueden ser informativos para el usuario.
+
+- MISCELLANEA
+	- Usar siempre %quote al evaluar el valor de un input parameter, porque puede tener una expresion mas que un simple valor. Por ejemplo, podria ser una lista de nombres separadas por espacios, o una lista separadas por comas, etc. Notar que aun en el caso en que la lista este' separada por espacios, una comparacion del tipo '%if &param ~= %then' daria error, ya que no habria comparaciones para todos los elementos de la lista.  Usar %quote en los %if y %str en las asignaciones a macro variables (en los %let).
+	Ej: %if %quote(&param) = ...
+	%let var = %str( string complicado );
+
+	- Dentro de lo posible, permitir que los out= parameters permitan poner opciones tipo keep= o where=, etc.
+
+	- Hay macros que generan macro variables globales para devolver al mundo exterior (por ej. %GetStat a traves del parametro name= o macrovar=, y %SymmetricAxis a traves del parametro axis=). Cuando es el caso de invocar una de estas macros desde otra macro, usar como nombre de las macro variables a declararse como globales nombres con underscores, para minimizar el riesgo de sobreescribir una macro global anteriormente definida por el usuario.
+	Al final de la macro, la macro global creada por una de esas macros, debe ser eliminada con %symdel.
+	NOTA IMPORTANTE: Luego del %symdel usar QUIT; para reducir las posibilidades de que SAS genere problemas con el %symdel, ya que su uso no es del todo confiable (ya tuve errores al usar %symdel, del tipo que luego de invocar una macro que llamaba a %symdel, algunas lineas del codigo que seguia a la invocacion de la macro DESAPARECIA!!! (del SAS support no me supieron contestar nada))
+	NOTA: A veces conviene definir la macro variable global generada por la macro invocada explicitamente como global ANTES de invocar a la macro. Esto es para que si en la macro invocada hay un problema con los datos (por ejemplo todos missing values) que hacen que la macro variable global no sea generada, se produciria un error en la macro que invoco a la otra y eso seria malo.
+	
+	- En los programas que definen las macros, en la medida de lo posible, no sobrepasar de la columna 96 para que al imprimir, las lineas no salgan cortadas.
+
+- ANNOTATE DATASETS
+	- En los annotate datasets (usados para agregar otros elementos en graficos de alta resolucion, como labels, barras de error, etc.) que se construyen a partir de otro dataset que contiene los datos que se grafican (es decir el annotate dataset se crea a partir de un SET del dataset con los datos a graficar), conviene definir las variables 'x' e 'y' (que establecen las coordenadas donde ubicar los elementos mencionados) con underscores (e.g. _x_, _y_) para minimizar las posibilidades de superposicion de dichos nombres ('x', 'y') con variables con el mismo nombre ya existentes en el input dataset con los datos graficados. O sea, si en el dataset con los datos ya existen las variables 'x' e 'y', al crear un annotate dataset con las variables 'x' e 'y' a partir de ese input dataset, seguramente habra problemas, ya que los 'x' e 'y' del input dataset no tienen por que corresponder a las coordenadas 'x' e 'y' del grafico (ya me paso por ejemplo que la variable 'y' del input dataset era la variable que iba en el eje de las x, y el annotate dataset creado sin usar los undescores resultaba incorrecto).
+	Por otro lado, como las coordenadas donde ubicar los elementos en un annotate dataset deben tener el nombre 'x' e 'y' respectivamente para el eje horizontal y para el eje vertical, al final del data step que crea el annotate dataset, deben renombrarse las variables _x_ e _y_ por 'x' e 'y', respectivamente. Ver la siguiente nota con respecto a evitar errores en este RENAME.
+	****************************************************************************************************************
+	IMPORTANTE: Para que el rename de las variables no arroje error de ejecucion en caso de que la variable 'x' o 'y' ya existan en el dataset con los datos, existen dos alternativas:
+	1.- Usar un KEEP= option con el annotate dataset, manteniendo las variables _x_ _y_ (pero indicandolas como 'x' e 'y' ya que ya han sido renombradas), y forzar, usando un FORMAT statement, el orden de las variables para que las variables _x_ e _y_ aparezcan ANTES que las eventuales variables 'x' e 'y' del input dataset. De lo contrario, si por ejemplo la variable x aparece antes que _x_ y se intenta renombrar _x_ por x con un RENAME, este no ocurre porque SAS da el warning de que la variable 'x' ya existe (incluso estando presente la opcion KEEP=)
+	2.- Usar un KEEP statement indicando solamente las variables del annotate dataset, justo antes del RENAME donde se renombra _x_ por 'x' y _y_ por 'y' en los data options del annotate dataset.
+	****************************************************************************************************************	
+	Asimismo, no hace falta en principio usar los underscores para las demas variables con nombres preestablecidos en el annotate dataset (como text, function, xsys, etc.) por dos razones:
+	1.- es raro que el input dataset con los datos tenga variables con esos nombres y, mas importante,
+	2.- porque esas variables suelen recibir valores indicados en forma explicita, no a traves del valor de otras variables como ocurre con las variables 'x' e 'y'.
+	
+	- Para minimizar la posibilidad de problemas, conviene mantener en el annotate dataset solamente las variables necesarias para el annotate dataset.
+
+	(Para mas informacion sobre el tema, ver el help del ANNOTATE FACILITY en el SAS On-line manual.
+	Para un ejemplo, ver los annoate dataset creados en la macro %TestLogisticFit.)

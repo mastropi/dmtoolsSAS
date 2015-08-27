@@ -1,0 +1,14 @@
+%GraphXY Versions: Descripcion de las diferentes versiones
+----------------------------------------------------------
+Creado: 24/2/03
+
+
+
+V.1.01: 24/2/03 (DM)
+	- Se agrego' el parametro options=, para poder pasar opciones validas en el plot statement.
+
+V.1.02: 25/2/03 (DM)
+	- Si ya existe un titulo de nivel 1 (title1) distinto al default ("The SAS System") y el parametro title= esta vacio, NO se modifica el titulo por el default title.
+
+V.1.02: 5/8/03 (DM)	(SI, la version es 1.02, ya que para el usuario no cambio casi nada)
+	- Se agrego' al final el reseteo de las goptions que son cambiadas en la macro a sus valores que tenian antes del llamado a la macro.

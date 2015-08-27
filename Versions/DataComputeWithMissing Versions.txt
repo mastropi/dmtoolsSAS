@@ -1,0 +1,19 @@
+%DataComputeWithMissing Versions: Description of the different versions
+-----------------------------------------------------------------------
+Created: 12-Aug-2015
+
+
+V.1.00: 2015/08/12 (DM)
+	- Created the macro which generates DATA STEP statements that performs a calculation on a variable that may generate missing values on the output variable. Typically the formula that generates missing values is a ratio between two variables where the denominator can be 0.
+	However, the formula can be anything and the generated statements take care of special cases when the output variable may actually be set to a value that is not missing (e.g. when the numerator is 0 and the denominator is 0, set the ratio as 0, NOT missing).
+	The current macro signature is as follows:
+	%DataComputeWithMissing(
+		varout,						*** Variable to create as the result of FORMULA.
+		var,						*** Variable that does not generate missing values in VAROUT.
+		varmiss,					*** Variable that may generate missing vaues in VAROUT.
+		valueout=0,					*** Value to assign to VAROUT when VAR takes the value VALUEOK.
+		valueok=0,					*** Value taken by VAR that can avoids a missing value in VAROUT.
+		valuemiss=0,				*** Value taken by VARMISS that generates missing values in VAROUT.
+		formula=&var / &varmiss,	*** Formula to use to compute VAROUT.
+		macrovar=_nmiss_ _nmissok_,	*** Name of the macro variables to store the count of missing and missing OK.
+		end=lastobs);				*** Variable created in the data step that signals the last observation.

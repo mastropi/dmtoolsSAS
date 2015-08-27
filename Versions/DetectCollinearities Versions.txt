@@ -1,0 +1,15 @@
+%DetectCollinearities Versions: Descripcion de las diferentes versiones
+---------------------------------------------------------------------
+Creado: 23/07/06
+
+
+
+V.1.02: 23/07/06 (DM)
+	- Agregue' el parametro WEIGHT= para indicar una variable que sea usada como weight en la regresion.
+
+V.1.03: 31/08/06 (DM)
+	- Corregi' error en el uso de la macro variable WEIGHT, porque estaba usando siempre la variable WGHT y no el nombre pasado en el parametro WEIGHT=.
+
+V.1.04: 2015/08/10 (DM)
+	- Added new parameter OUTVIF= in order to create an output dataset with the history of the VIFs at each iteration.
+	- Added call to new macro %AddLabels to add a column with the labels of the variables (if any) to all the output datasets.

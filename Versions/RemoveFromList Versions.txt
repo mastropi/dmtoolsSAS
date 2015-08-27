@@ -1,0 +1,22 @@
+%RemoveFromList Versions: Descripcion de las diferentes versiones
+-----------------------------------------------------------------
+Creado: 16/9/03
+
+
+
+V.1.02: 12/9/03 (DM)
+	- Corregi' el problema de que en una lista donde el separador no es el espacio en blanco y se eliminaba el ultimo elemento de la lista, quedaba el separador al final. (Ej. si de la lista 'A or B or C' se pedia eliminar C, la macro devolvia 'A or B or', en lugar de 'A or B'.)
+	- Corregi errores en el uso de %substr que surgian en ciertos casos particulares (daba que el segundo argumento de %substr era invalido o estaba out of range).
+	
+V.1.03: 16/9/03 (DM)
+	- Agregue' un WARNING en el log, indicando si una variable listada entre las que se pide remover no se encuentra en la lista.
+	- Modifique' la macro a ser de CASE SENSITIVE a NO case sensitive. Por ejemplo, ahora '%RemoveFromList(A or B or C , b , sep=or)' devuelve 'A or C'.
+
+V.1.04: 16/9/03 (DM)
+	- Agregue' la opcion allOccurrences=1, que indica si se desea que se eliminen todas las ocurrencias de los elementos con pedido de remocion, o solo la primera ocurrencia. El default es eliminar todas las ocurrencias.
+	- Hice que antes de devolver la lista sin los nombres ya removidos, elimino cualquier eventual separador que haya al principio de la lista. Ya estaba hecho esto para un separador que estuviera al final, ahora lo agregue' para un separador al comienzo. Notar que si hay varios separados juntos al comienzo o al final, se elimina uno solo.
+	- Elimine' el %if al comienzo de la macro que se fijaba si el separador pasado estaba realmente en la lista. La razon de esto es que muchas veces la lista puede tener un solo elemento y uno justo quiere eliminar ese elemento, para lo cual cualquier elemento es valido. (Esto sobre todo puede pasar en otras macros como %RemoveRepeated, en la que hay un loop y al final del loop queda un solo elemento en la lista, que debe ser eliminado. Esta' claro que si se agrega ese %if la macro %RemoveRepeated deja de funcionar cuando el separador es distinto de un espacio en blanco.)
+
+V.1.05: 16/1/05 (DM)
+	- Corregi' el comportamiento de la macro cuando el parametro SEP= no es un espacio en blanco, en el siguiente sentido: anteriormente, cuando SEP= era distinto a un espacio en blanco, ciertas ocurrencias de alguno de los nombres pasados en el parametro NAMES eran eliminadas incorrectamente de la lista (por ej. la ocurrencia de BB en la lista separada por comas: AA , BB CC , DD; claramente BB no esta' en la lista, sino que esta' 'BB CC'). Para corregir este problema, cambie' radicalmente la forma de efectuar la eliminacion de los nombres de la lista, ya que elimine' el uso de la funcion INDEXW --que era la responsable del error, pues INDEXW no admite otro separador que no sea el espacio en blanco para identificar una palabra completa y por eso en la lista del ejemplo anterior consideraba a BB como un nombre presente en la lista separada por comas, si bien dicho nombre no estaba presente en la lista. En lugar de la funcion INDEXW, ahora uso la funcion %SCAN --que si' acepta separadores que no sean el espacio en blanco-- para ir recorriendo todos los nombres presentes en la lista de la cual los nombres son eliminados.
+	- Al tiempo que corregi' el error recien indicado, el uso de la funcion %SCAN en remplazo de INDEXW para buscar los nombres, hizo que el requerimiento de que hubiera un espacio entre el separador y los nombres en la lista de entrada ya no es necesario. De esta manera, la siguiente llamada ya funciona: %RemoveFromList(%quote(xx,yy,zz,ww), %quote(yy,ww), sep=%quote(,)); (antes era necesario dejar un espacio entre la coma y los nombres presentes en la lista de entrada)

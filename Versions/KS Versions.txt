@@ -1,0 +1,19 @@
+%KS Versions: Descripcion de las diferentes versiones
+-----------------------------------------------------
+Creado: 16/2/05
+
+
+V.1.01: 16/2/05 (DM)
+	- Se corrigieron los siguientes errores:
+		- problemas en el funcionamiento de la macro cuando se pasan BY variables. Funcionaba mal tanto el calculo del KS como la generacion de los graficos. Corregir los graficos fue bastante complicado por el tema del annotate dataset y el titulo de a que' valores de las variables corresponde cada grafico.
+		- error en la forma de calcular el KS, a saber: el KS lo calculo cuando genero los datasets _KS_ks_ y _KS_rank_ks_, en los que armo una variable DIFF que mide la diferencia entre las CDFs correspondientes a cada valor de la variable TARGET. Hasta este momento yo estaba actualizando DIFF solamente cuando entraba una observacion del segundo dataset (donde "segundo dataset" es el dataset con la CDF correspondiente al nivel mas alto de la variable TARGET). Esta condicion la controlaba con un IF IN2 (que ahora esta' comentado). Deduje que esto esta mal, porque el DIFF tiene que medir la diferencia entre las dos CDF y esta diferencia puede cambiar ya sea cuando la CDF del segundo dataset cambia como cuando la CDF del primer dataset cambia (donde "primer dataset" es el dataset con la CDF correspondiente al nivel mas bajo de la variable TARGET).
+		La correctitud de este procedimiento la verifique' con el calculo del RANK KS por medio del PROC NPAR1WAY de SAS aplicado al RANK de la variable SCORE, que me dio igual que el RANK KS calculado por mi macro.
+		Notar que luego de la correccion, los valores de KS y de RANK KS son los mismos (al menos hasta ahora, a partir de los casos que tuve entre manos), y lo que cambia es el ranking en que ocurre dicho KS (es decir hay diferencias entre el (descending) rank de SCORE y el rank del "(Descending) Rank de Score" donde ocurre el KS).
+
+V.1.02: 6/5/05 (DM)
+	- Modifique' la macro para que pueda calcular el KS de cualquier variable, no necesariamente de una variable que toma valores positivos. Este requerimiento estaba antes porque para calcular la CDF de la variable analizada usaba PROC LIFETEST. Ahora lo que hago es usar PROC RANK, que me da tambien la CDF (es directamente la variable RANK). Notar que igual sigo usando PROC LIFETEST para las variables con valores positivos porque este procedimiento me da las bandas de confianza para la CDF.
+	Por ahora la forma de decirle a la macro que use PROC LIFETEST o PROC RANK es por medio del parametro BANDS, que si vale 1 uso PROC LIFETEST y si vale 0 uso PROC RANK.
+	- Corregi' el calculo de las macro variables MIN y MAX cuando MIN=MIN y MAX=MAX (estos ultimos son los parametros de la macro).
+	
+V.1.03: 23/8/05 (DM)
+	- Corregi' el error de que el KS estaba mal calculado cuando la variable analizada es discreta (como el score generado por un arbol de decision). El problema era generado porque la macro no contemplaba la posibilidad de que las dos CDFs (de los Good y de los Bad) saltaran en el mismo punto. 

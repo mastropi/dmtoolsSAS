@@ -1,0 +1,24 @@
+%VariableImpact Versions: Descripcion de las diferentes versiones
+-----------------------------------------------------------------
+Creado: 22/10/04
+
+
+
+V.1.01: 22/10/04 (DM)
+	- Agregue' las opciones BARS=1 y BARWIDTH=1, con el fin de graficar las barras de min y max para cada categoria de la variable independiente analizada, y las barras de error de la estimacion de la probabilidad y el logit de la variable target analizada, para cada categoria de la variable independiente analizada.
+
+V.1.02: 4/1/05 (DM)
+	- Agregue' los parametros OUT= y PLOT=1. Con OUT= se pide generar un output dataset con la informacion necesaria para generar los graficos de impacto en el futuro. Junto con el output dataset se genera un annotate dataset con la informacion necesaria para anotar los graficos y una macro variable global VI_GPLOT con los PROC GPLOT statements necesarios para generar los graficos en el futuro, por el usuario.
+	Con PLOT= se indica si se desea ver o no los graficos generados por la macro.
+
+V.1.03: 17/08/06 (DM)
+	- Agregue' el parse a las variables VAR= usando %GetVarList (version 2.00).
+	- Agregue' un footnote2 al hacer el grafico con barras indicando el significado de las barras verticales (solo estaba la descripcion de las barras horizontales).
+	- Agregue' log=0 al llamar a %DefineSymbols.
+
+V.1.04: 2015/05/23 (DM)
+	- Corrected the plot generated when parameter VALUE= is not empty. In such case, the statistic specified as argument should be used as input variable values and this was not the case. The fix involved: (i) replacing 'VALUE=&value' with 'VALUE=' in the calls to %Categorize (since the statistic represented by VALUE= is computed below by the %Means macro), (ii) adding an %IF %THEN %DO %ELSE %DO in the call to %Means in order to keep the variable containing the information we want to use for the plots, (iii) replacing '&value' with 'value' in the _means_ and _anno_ dataset created after the call to %Means.
+	- Removed formats and labels from input variables should they exist. Formats should be removed because the analyzed input variables may not have all the same formats and this may result in e.g. the elimination of decimal values when some variables are real but the first analyzed variable is integer.
+	Labels should be removed because if input variables have labels they are carried over to the statistics computed on them (such as mean, min, max) and they will show up in the corresponding column names of the output dataset and this does not make sense.
+	Note that format and label of the target variable is not a problem because the target variable is the same for all analyzed variables! (therefore the column in the output dataset containing information about the target variable can have the format and label of the target variable)
+	- Added a label on the VALUE column of the output dataset to inform whether it contains just an integer category ("category") or the statistic used as representation of the category specified in the VALUE= parameter of the macro call.

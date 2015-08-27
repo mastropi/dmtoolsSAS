@@ -1,0 +1,13 @@
+%FindMatch Versions: Descripcion de las diferentes versiones
+------------------------------------------------------------
+Creado: 29/7/05
+
+
+
+V.1.01: 29/7/05 (DM)
+	- Hice los cambios conducentes a la version 1.03 de %SelectVar, que corrige el problema de buscar por una keyword al final del nombre, aun cuando dicha keyword aparece en el medio del nombre.
+	- Ahora la macro concentra el proceso de busqueda de la keyword, por lo que la macro %SelecVar llama a esta para buscar la keyword en un nombre.
+
+V.1.02: 3/8/05 (DM)
+	- Se corrigio' el problema de que no funcionaba bien el parametro notPos cuando notPos=END (el problema era que el calculo de la variable auxiliar _notPos_ usaba el length de KEY en lugar de usar el length de NOT.
+	- El parametro KEY fue convertido en opcional, para que la macro sirva para quedarse con los nombres que NO contienen una cierta keyword (para esto basta ejecutar la macro con KEY= vacio y con el parametro NOT= conteniendo el key de exclusion de nombres).

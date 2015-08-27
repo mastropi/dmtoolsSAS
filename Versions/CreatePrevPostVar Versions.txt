@@ -1,0 +1,11 @@
+%CreatePrevPostVar Versions: Descripcion de las diferentes versiones
+--------------------------------------------------------------------
+Creado: 19/8/04
+
+
+
+V.1.01: 19/8/04 (DM)
+	- Se agregaron los parametros condition=, match= y comparison=, que permiten crear los valores de una variable anterior y posterior a bloques que cumplan con ciertas condiciones. Por ej. los valores anterior y posterior a bloques en que la variable es missing.
+	Ademas, ahora es posible especificar tanto el parametro condition= como match=, cosa que antes era uno u otro. Por ej. ahora puede pasarse: condition=group~=3, match=. (missing).
+	- Se agrego' el parametro which=, que permite establecer que' valores se desea calcular para cada variable, si el previo, el posterior o ambos. Por default es ambos.
+	- Se modifico' la forma de calcular los valores previos y posteriores, de manera que primero calcula los valores posteriores para TODAS las variables listadas en var= y luego calcula sus valores previos. Esto reduce mucho el tiempo de procesamiento cuando hay varias variables a procesar, ya que en la version anterior, los valores previo y posterior eran calculados para CADA variable, lo cual implicaba que el dataset era leido todo por cada variable y ademas era ordenado dos veces en forma ascendente y descendente.

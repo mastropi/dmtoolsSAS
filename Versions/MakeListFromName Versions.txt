@@ -1,0 +1,25 @@
+%MakeListFromName Versions: Descripcion de las diferentes versiones
+-------------------------------------------------------------------
+Creado: 13/2/03
+
+
+
+V.1.01: 13/2/03 (DM)
+	- Se agrego' el parametro start=, que permite elegir el numero de comienzo de la lista (default = 1).
+
+V.1.02: 27/2/03 (DM)
+	- Se agrego' el parametro step=, que permite elegir el step a usar en los numeros que indexan los elementos de la lista (default = 1).
+
+V 1.03: 5/1/04 (DM)
+	- Se agrego' el parametro log= que, si vale 1, muestra la lista generada en el log. Por default log=0 (para no tener que cambiar todas las llamadas a la macro desde otras macros. En rigor, seria conveniente que por default fuera log=1, porque eso seria pensar en el usuario, pero tal vez el cambio lo haga mas adelante.)
+
+V 1.04: 10/2/04 (DM)
+	- Se agrego' el parametro stop= que indica el indice hasta donde se desea llegar en la lista. El parametro length sigue siendo 'obligatorio' en el sentido de que cuando se pasa no es necesario pasarlo en la forma length=. Esto para no tener que cambiar las llamadas a la macro ya existentes en distintos programas.
+	En caso de que se pasen ambos parametros (length y stop), se da preferencia a length y si no se pasa ninguno de los dos parametros, se muestra un mensaje de error.
+
+V 1.05: 8/6/05 (DM)
+	- Se modifico' radicalmente el uso de los parametros START=, STEP=, STOP= y LENGTH= para tener mas flexibilidad en la combinacion de parametros que se pasan. Ahora deben pasarse si o si 2 de los parametros STEP, STOP y LENGTH. El valor default de START es 1. La macro chequea si hay valores para alguna de las siguientes combinaciones de parametros:
+	START, STEP, LENGTH
+	START, STOP, LENGTH
+	START, STEP, STOP
+

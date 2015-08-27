@@ -1,0 +1,1558 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns:st1="urn:schemas-microsoft-com:office:smarttags"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="help1_files/filelist.xml">
+<title>/* MACRO %TestLogisticFit</title>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="country-region"/>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="City"/>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="State"/>
+<o:SmartTagType namespaceuri="urn:schemas-microsoft-com:office:smarttags"
+ name="place"/>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>Daniel Mastropietro</o:Author>
+  <o:LastAuthor>Daniel Mastropietro</o:LastAuthor>
+  <o:Revision>1</o:Revision>
+  <o:TotalTime>0</o:TotalTime>
+  <o:Created>2006-08-13T07:04:00Z</o:Created>
+  <o:LastSaved>2006-08-13T07:04:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>2051</o:Words>
+  <o:Characters>11695</o:Characters>
+  <o:Company>SAS Institute</o:Company>
+  <o:Lines>97</o:Lines>
+  <o:Paragraphs>27</o:Paragraphs>
+  <o:CharactersWithSpaces>13719</o:CharactersWithSpaces>
+  <o:Version>11.8028</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:PunctuationKerning/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:DontGrowAutofit/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]--><!--[if !mso]><object
+ classid="clsid:38481807-CA0E-42D2-BF39-B33AF135CC4D" id=ieooui></object>
+<style>
+st1\:*{behavior:url(#ieooui) }
+</style>
+<![endif]-->
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h1
+	{mso-style-next:Normal;
+	margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	mso-pagination:widow-orphan;
+	page-break-after:avoid;
+	mso-outline-level:1;
+	font-size:16.0pt;
+	font-family:Arial;
+	mso-font-kerning:16.0pt;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+</head>
+
+<body lang=EN-US style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>/*
+MACRO %TestLogisticFit<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>Version:
+1.06<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>Author:
+Daniel Mastropietro<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>Created:
+28-May-03<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>Modified:
+28-Oct-05<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<h1><span style='background:white'>DESCRIPTION:<o:p></o:p></span></h1>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>Analiza
+el ajuste de <span class=GramE>un</span> modelo de regresión logística a partir
+de gráficos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>que</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> involucran las probabilidades
+predichas por el modelo y un conjunto de<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>variables</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> regresoras analizadas.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>En
+lo que sigue se indica con logit a la función:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:3'>                  </span><span class=GramE>logit(</span>p)
+= log(p/(1-p)),<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>donde</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> log es el logaritmo natural.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>Los
+gráficos que la macro efectúa son:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>1.-</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> Logit de las probabilidades vs.
+distintos valores de una dada variable<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>regresora</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> categorizada. En <span
+class=GramE>este</span> gráfico se incluyen:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+Logit de la probabilidad predicha por el modelo para cada grupo de la<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>variable</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> regresora
+categorizada. Se calcula <st1:City w:st="on"><span class=GramE>como</span></st1:City>
+el logit <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+promedio<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>de</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> las probabilidades predichas
+dentro de cada grupo.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+Logit de la probabilidad observada para cada grupo de la variable<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>regresora</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> categorizada. Se
+calcula <st1:City w:st="on"><st1:place w:st="on"><span class=GramE>como</span></st1:place></st1:City>
+el logit de la proporción de<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>observaciones</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'>, dentro de cada grupo,
+en que la variable respuesta es igual<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>al</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> evento cuya probabilidad es
+modelada por la regresión.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>Además,
+puede pedirse que se muestren barras de error entorno de estas dos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>cantidades</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'>, con la idea de
+estudiar más en detalle la variabilidad de las<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>probabilidades</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> predichas dentro de
+cada grupo de la variable regresora,<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>y</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> de ver gráficamente el error
+asociado a la probabilidad observada.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>El
+ancho de las barras mide la magnitud de:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>el</span> desvío estándar de las probabilidades predichas
+para las distintas<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>observaciones</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> dentro de cada grupo.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>el</span> error estándar de la probabilidad observada.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>2.-</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> Un gráfico de residuos
+estandarizados vs. cada variable regresora<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>categorizada</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'>. Los residuos
+estandarizados se calculan <st1:City w:st="on"><st1:place w:st="on"><span
+  class=GramE>como</span></st1:place></st1:City> la diferencia entre<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>la</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> probabilidad observada y la
+probabilidad predicha para cada grupo de<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>la</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> variable regresora categorizada y
+se estandariza por su desvío estándar.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>3.-</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> Un Normal Q-Q plot de los residuos
+estandarizados, donde su distribución<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>se</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> compara con la normal estándar.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>4.-</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> Si es solicitado, un histograma
+con la distribución de los residuos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>estandarizados</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'>.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<h1><span style='background:white'>USAGE:<o:p></o:p></span></h1>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>%<span
+class=GramE>TestLogisticFit(</span><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>data ,</span><span
+style='mso-tab-count:3'>                  </span>*** Input dataset<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>target</span>= ,<span
+style='mso-tab-count:2'>         </span>*** Variable respuesta<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>var</span>= , <span
+style='mso-tab-count:3'>                 </span>*** Lista con las variables
+regresoras (puede incluir la variable respuesta)<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>out</span>= ,<span
+style='mso-tab-count:3'>                  </span>*** Raiz del nombre de los
+output datasets conteniendo lo que se grafica<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>outCat</span>=<span
+style='mso-tab-count:1'>     </span>,<span style='mso-tab-count:2'>           </span>***
+Output dataset con las variables regresoras categorizadas<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>pred=</span>p ,<span
+style='mso-tab-count:2'>          </span>*** Variable que contiene las
+probabilidades predichas<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>event=</span>1 ,<span
+style='mso-tab-count:2'>         </span>*** Evento modelado por la regresion
+logistica<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>groups=</span>10 ,<span
+style='mso-tab-count:2'>       </span>*** Número de grupos en los que efectuar
+la categorización<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>percentiles</span>= , <span
+style='mso-tab-count:1'>   </span>*** Percentiles para la categorizacion<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>nameRes=</span>res ,<span
+style='mso-tab-count:1'>     </span>*** Nombre a usar para la variable con el
+residuo estandarizado<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>suffixRes=</span>0 ,<span
+style='mso-tab-count:1'>     </span>*** Agregar la variable regresora <st1:City
+w:st="on"><st1:place w:st="on">como</st1:place></st1:City> sufijo para la
+variable 'nameRes'?<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>plot=</span>0,<span
+style='mso-tab-count:3'>                 </span>*** Mostrar gráficos?<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>histogram=</span>0 ,<span
+style='mso-tab-count:1'>     </span>*** Hacer el histograma de los residuos?<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>qqplot=</span>1 ,<span
+style='mso-tab-count:2'>        </span>*** Hacer el normal Q-Q plot de los
+residuos?<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>refline=</span>3.3,<span
+style='mso-tab-count:1'>      </span>*** Valor de <st1:City w:st="on"><st1:place
+ w:st="on">la línea</st1:place></st1:City> de referencia en el gráfico de los
+residuos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>pointlabels=</span>0,<span
+style='mso-tab-count:1'>    </span>*** Mostrar point labels?<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>bars=</span>0 ,<span
+style='mso-tab-count:2'>          </span>*** Mostrar barras de error en los
+gráficos de probabilidades?<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>barwidth=</span>1,<span
+style='mso-tab-count:2'>       </span>*** Multiplicador para las barras de
+error<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>plotWhat=</span>logit,<span
+style='mso-tab-count:1'>   </span>*** Graficar el logit(p) ó p en los gráficos <st1:State
+w:st="on"><st1:place w:st="on">del</st1:place></st1:State> ajuste?<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>axisX</span>= ,<span
+style='mso-tab-count:2'>          </span>*** Axis statement a usar en el eje de
+las X en los gráficos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>axisLogit</span>= ,<span
+style='mso-tab-count:1'>      </span>*** Axis statement a usar en el eje <st1:State
+w:st="on"><st1:place w:st="on">del</st1:place></st1:State> logit en los
+gráficos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>axisPred</span>= ,<span
+style='mso-tab-count:2'>       </span>*** Axis statement a usar en el eje de
+las probabilidades en los gráficos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>axisRes</span>= ,<span
+style='mso-tab-count:2'>        </span>*** Axis statement a usar en el eje de
+los residuos en los gráficos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>log=</span>1);<span
+style='mso-tab-count:3'>                 </span>*** Mostrar mensajes en el log?<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>REQUIRED
+PARAMETERS:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>data</span>:<span style='mso-tab-count:3'>                 </span>Input
+dataset. Se supone que es <span class=GramE>un</span> dataset generado por el
+output<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>statement</span>
+<st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State> PROC
+LOGISTIC.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Puede recibir cualquier
+opción adicional <st1:City w:st="on"><st1:place w:st="on"><span class=GramE>como</span></st1:place></st1:City>
+en cualquier opción<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>data</span>=
+de SAS.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>var</span>:<span style='mso-tab-count:3'>                  </span>Lista
+de variables, donde la primera es la variable respuesta <st1:State w:st="on"><st1:place
+ w:st="on">del</st1:place></st1:State><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>modelo</span>
+de regresion a analizar y las demas son las variables regresoras<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>respecto</span>
+a las cuales se desea analizar el ajuste. Notar que no pueden<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>incluirse</span>
+interacciones entre variables.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Las variables no tienen
+por qué <span class=GramE>haber</span> sido incluidas en la regresión,<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>por</span>
+lo que esta macro puede usarse para analizar si es necesario incluir<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>nuevas</span>
+variables en la regresión.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Ej: y x1 x2.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>OPTIONAL
+PARAMETERS:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>target</span>:<span style='mso-tab-count:2'>         </span>Variable
+respuesta dicotómica.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Si el parámetro es
+vacío, la variable respuesta es tomada <st1:State w:st="on"><st1:place w:st="on"><span
+  class=GramE>del</span></st1:place></st1:State> primer elemento<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>de</span>
+la lista especificada en VAR.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>out</span>:<span style='mso-tab-count:3'>                  </span>Raiz
+a usar para los output datasets que contienen lo que se grafica.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Se genera <span
+class=GramE>un</span> output dataset por cada variable regresora que aparece en<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>la</span>
+lista de 'var'.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Los nombres de las
+columnas de cada uno de estos datasets son:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- &lt;variable regresora
+considerada&gt;: sus valores estan categorizados.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- &lt;variable
+respuesta&gt;_Mean: promedio de la variable respuesta en cada<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>grupo</span>
+de la variable regresora.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>-
+&lt;variable respuesta&gt;_Std: Error estándar de &lt;variable
+respuesta&gt;_Mean.</span><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- &lt;variable
+respuesta&gt;_Lower: valor inferior <st1:State w:st="on"><st1:place w:st="on"><span
+  class=GramE>del</span></st1:place></st1:State> intervalo de ancho<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>'<span class=GramE>barwidth</span>'*&lt;variable
+respuesta&gt;_Std.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- &lt;variable
+respuesta&gt;_Upper: valor superior <st1:State w:st="on"><st1:place w:st="on"><span
+  class=GramE>del</span></st1:place></st1:State> intervalo de ancho<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>'<span class=GramE>barwidth</span>'*&lt;variable
+respuesta&gt;_Std.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span style='mso-tab-count:3'>                  </span>-
+&lt;variable con probabilidad predicha&gt;_Mean: promedio de las<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>probabilidades</span>
+predichas dentro de cada grupo de la variable regresora.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- &lt;variable con
+probabilidad predicha&gt;_Std: Desvío estándar de<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>&lt;<span class=GramE>variable</span>
+respuesta&gt;_Mean.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- &lt;variable con
+probabilidad predicha&gt;_Lower: valor inferior <st1:State w:st="on"><st1:place
+ w:st="on"><span class=GramE>del</span></st1:place></st1:State><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>intervalo</span>
+de ancho 'barwidth'*&lt;variable con probabilidad predicha&gt;_Std.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- &lt;variable con
+probabilidad predicha&gt;_Upper: valor superior <st1:State w:st="on"><st1:place
+ w:st="on"><span class=GramE>del</span></st1:place></st1:State><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>intervalo</span>
+de ancho 'barwidth'*&lt;variable con probabilidad predicha&gt;_Std.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- logit_&lt;variable
+respuesta&gt;: <span class=GramE>logit(</span>segunda columna).<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- logit_&lt;variable con
+probabilidad predicha&gt;: <span class=GramE>logit(</span>tercera columna).<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>- _N_:
+numero de observaciones en cada grupo de la variable regresora.</span><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- &lt;variable con
+residuo estandarizado&gt; (default=res): residuo estandarizado,<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>donde</span>
+el residuo es la diferencia entre la segunda y la tercera columna.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+outCat:<span style='mso-tab-count:2'>         </span>Output dataset con las
+variables regresoras listadas en 'var' categorizadas<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>según</span>
+el proceso requerido para hacer el análisis <st1:State w:st="on"><st1:place
+ w:st="on">del</st1:place></st1:State> logistic fit.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Todas las variables
+presentes en el input dataset 'dat' también están<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>presentes</span>
+en este dataset de salida.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Los nombres de las
+variables categorizadas coinciden con los nombres<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>de</span>
+las variables regresoras listadas en 'var'.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Puede pasarse cualquier
+opción adicional <st1:City w:st="on"><st1:place w:st="on"><span class=GramE>como</span></st1:place></st1:City>
+en cualquier opción<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>data</span>=
+de SAS.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>pred</span>:<span style='mso-tab-count:3'>                 </span>Nombre
+de la variable en el input dataset que tiene las probabilidades<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>predichas</span>
+por el modelo.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+p<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>event</span>:<span style='mso-tab-count:2'>          </span>Evento
+de interés. Es el valor de la variable respuesta<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>cuya</span>
+probabilidad fue modelada por la regresion logistica.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>Puede
+ser cualquier valor numérico o alfanumérico.</span><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+1<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>groups</span>:<span style='mso-tab-count:2'>         </span>Número
+de grupos en los que se efectúa la categorización de las variables<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>regresoras</span>
+para hacer los gráficos de ajuste.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Cada grupo se define a
+partir de percentiles equidistantes, tantos <st1:City w:st="on"><st1:place
+ w:st="on"><span class=GramE>como</span></st1:place></st1:City><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>grupos</span>
+haya. Por <span class=GramE>ej.,</span> si groups=5 los percentiles usados para
+categorizar<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>las</span>
+variables son 20 40 60 80 100.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+10, es decir se utilizan los percentiles 10 20 ... 100<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>percentiles</span>:<span style='mso-tab-count:1'>    </span>Valores
+de los percentiles utilizados para categorizar las variables<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>regresoras</span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Tiene preferencia sobre
+el parámetro groups, en el sentido de que si<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>los</span>
+dos son pasados, se toma el valor de 'percentiles' y no de 'groups'.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+10 20 30 40 50 60 70 80 90 100<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>nameRes</span>:<span style='mso-tab-count:2'>        </span>Nombre
+a usar para la variable con el residuo estandarizado.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+res<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>suffixRes</span>:<span style='mso-tab-count:1'>      </span>Indica
+si se agrega el nombre de la variable regresora <st1:City w:st="on"><st1:place
+ w:st="on">como</st1:place></st1:City> sufijo al<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>nombre</span>
+de la variable con el residuo estandarizado ('nameRes'), tras un<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>'_'. Ej: si nameRes=res,
+la variable regresora es x1 y suffixRes=1, el<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>nombre</span>
+de la variable con el residuo es res_x1. <o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Valores posibles: 0
+=&gt; No. 1 =&gt; Si.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+0<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>plot</span>:<span style='mso-tab-count:3'>                 </span>Indica
+si se desea ver los gráficos generados por la macro.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Éstos gráficos pueden
+incluir:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- Gráfico del ajuste
+para cada variable regresora categorizada.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Según el valor <st1:State
+w:st="on"><st1:place w:st="on"><span class=GramE>del</span></st1:place></st1:State>
+parámetro 'plotWhat', en el eje vertical de estos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>gráficos</span>
+se grafica algo distinto:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:5'>                              </span>- <span
+class=GramE>si</span> plotWhat=LOGIT, se grafica el logit de la probabilidad
+predicha<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:5'>                              </span><span class=GramE>y</span>
+de la probabilidad observada para cada grupo de cada variable<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:5'>                              </span><span class=GramE>regresora</span>
+categorizada.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:5'>                              </span>- <span
+class=GramE>si</span> plotWhat=P, PROB o PRED, se grafica directamente las <o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:5'>                              </span><span class=GramE>probabilidades</span>
+predicha y observada.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- El gráfico de residuos
+estandarizados vs. cada variable regresora<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>categorizada</span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:2'>            </span><span style='mso-tab-count:2'>            </span><span
+class=GramE>- Un</span> histograma de los residuos estandarizados para cada
+variable<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>regresora</span>
+categorizada (ver parámetro 'histogram').<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-spacerun:yes'> </span><span style='mso-tab-count:4'>                       </span>-
+Un Normal Q-Q plot de los residuos estandarizados para cada<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>variable</span>
+regresora categorizada (ver parámetro 'qqplot').<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:3'>                  </span><span style='mso-tab-count:
+1'>      </span>Valores posibles: 0 =&gt; No, 1 =&gt; Sí.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+1<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>histogram</span>:<span style='mso-tab-count:1'>      </span>Indica
+si se desea ver un histograma de los residuos estandarizados<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>para</span>
+cada variable regresora categorizada.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Valores posibles: 0
+=&gt; No, 1 =&gt; Sí.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+0<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>qqplot</span>:<span style='mso-tab-count:2'>         </span>Indica
+si se desea ver el Normal Q-Q plot de los residuos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>estandarizados</span>
+para cada variable regresora categorizada.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Se compara la
+distribución de los residuos con la normal estándar.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Valores posibles: 0
+=&gt; No, 1 =&gt; Sí.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+1<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>refline</span>:<span style='mso-tab-count:2'>        </span>Valor
+de <st1:City w:st="on"><st1:place w:st="on">la línea</st1:place></st1:City> de
+referencia para el gráfico de los residuos.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>En el gráfico de los
+residuos vs. variable regresora se ubican dos líneas<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>horizontales</span>,
+una a la altura &amp;RefLine y otra a -&amp;RefLine.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+3.3<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>pointlabels</span>:<span style='mso-tab-count:1'>    </span>Indica
+si se desea usar labels en los puntos mostrando el número de<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>observaciones</span>
+que <st1:City w:st="on"><st1:place w:st="on">caen</st1:place></st1:City> en
+cada categoría de las variables regresoras<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>categorizadas</span>.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Valores posibles: 0
+=&gt; No, 1 =&gt; Sí.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+0<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>bars</span>:<span style='mso-tab-count:3'>                 </span>Indica
+si se desea ver las barras de error entorno <st1:State w:st="on"><st1:place
+ w:st="on">del</st1:place></st1:State> logit de las<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>probabilidades</span>
+predichas y de las proporciones <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+evento de interés.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>Ver
+DESCRIPTION para más información sobre cómo se construyen estas barras.</span><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Valores posibles: 0
+=&gt; No, 1 =&gt; Sí.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+0<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>barwidth</span>:<span style='mso-tab-count:2'>       </span>Número
+por el cual se multiplican los desvíos y errores estándares al<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>construir</span>
+las barras de error en los gráficos logit vs. variable regresora.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Este parámetro tiene
+efecto sólo si bars=1.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+1<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>plotWhat</span>:<span style='mso-tab-count:2'>       </span>Establece
+qué cantidad se desea ver en el eje vertical <st1:State w:st="on"><st1:place
+ w:st="on">del</st1:place></st1:State> gráfico<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><st1:State w:st="on"><st1:place
+ w:st="on"><span class=GramE>del</span></st1:place></st1:State> ajuste por
+variable regresora. Las opciones son:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- LOGIT: <span
+style='mso-tab-count:3'>               </span>se grafica el logit de la
+probabilidad.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:9'>                                                      </span><span
+class=GramE>( logit</span>(p) = log(p/(1-p)) )<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>- P, PROB, PRED:<span
+style='mso-tab-count:1'>  </span>se grafica la probabilidad.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+logit<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>axisX</span>:<span style='mso-tab-count:2'>          </span>Axis
+statement a usar en el eje de las X en los gráficos.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Su valor es de la forma
+&lt;min&gt; to &lt;max&gt; by &lt;step&gt;, aunque<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>la</span>
+parte <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+'by' es opcional.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>axisLogit</span>:<span style='mso-tab-count:1'>      </span>Axis
+statement a usar en el eje <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+logit de las probabilidades en<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>los</span>
+gráficos <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+ajuste para cada variable regresora.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Su valor es de la forma
+&lt;min&gt; to &lt;max&gt; by &lt;step&gt;, aunque<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>la</span>
+parte <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+'by' es opcional.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Sólo tiene efecto si
+plotWhat=LOGIT.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>axisPred</span>:<span style='mso-tab-count:2'>       </span>Axis
+statement a usar en el eje de las probabilidades en<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>los</span>
+gráficos <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+ajuste para cada variable regresora.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Su valor es de la forma
+&lt;min&gt; to &lt;max&gt; by &lt;step&gt;, aunque<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>la</span>
+parte <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+'by' es opcional.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Sólo tiene efecto si
+plotWhat=P, PROB o PRED.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>axisRes</span>:<span style='mso-tab-count:2'>        </span>Axis
+statement a usar en el eje de los residuos estandarizados en<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>los</span>
+gráficos de residuos vs. variable regresora.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Su valor es de la forma
+&lt;min&gt; to &lt;max&gt; by &lt;step&gt;, aunque<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>la</span>
+parte <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+'by' es opcional.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+<span class=GramE>log</span>:<span style='mso-tab-count:3'>                  </span>Indica
+si se desea ver mensajes en el log generados por la macro.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span>Valores posibles: 0
+=&gt; No, 1 =&gt; Sí.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:4'>                        </span><span class=GramE>default</span>:
+1<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>NOTES:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>1.-</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> En relación al ancho de las barras
+de error en los gráficos de logit vs. variable<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>regresora</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'>, notar que para las
+probabilidades predichas, la barra es proporcional al<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>DESVÍO
+estándar, mientras que para las probabilidades observadas el ancho de la barra<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>es</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> proporcional al ERROR estándar
+(ver punto uno en &quot;DESCRIPTION&quot;).<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>La
+razón de esta distinción es la siguiente: no se habla de error en el caso de
+las<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>probabilidades</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> predichas porque éstas
+resultan de promediar los valores de las<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>probabilidades</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> predichas dentro de
+cada grupo de la variable regresora. El desvío<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>estándar</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'> de estos valores es el
+que se <st1:country-region w:st="on"><st1:place w:st="on">usa</st1:place></st1:country-region>
+para construir las barras de error. No se<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>tiene</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> en cuenta en estas barras, el
+error estándar de cada probabilidad predicha<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>(<span
+class=GramE>proveniente</span> de los errores estándares de los parámetros de
+regresión <st1:State w:st="on"><st1:place w:st="on">del</st1:place></st1:State>
+modelo).<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>OTHER
+MACROS AND MODULES USED IN THIS MACRO:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%Categorize<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%CheckInputParameters<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%DefineSymbols<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%GetNroElements<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%GetStat<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%GetVarList<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%MakeListFromName<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%Means<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%Mplot<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%Pretty<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%Qqplot<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%ResetSASOptions<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%SetSASOptions<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>-
+%SymmetricAxis<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>EXAMPLES:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>1.-</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> Dado que se realizó el siguiente
+PROC LOGISTIC:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>proc</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> logistic data=test;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>model</span> flag = x1;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><span
+style='mso-tab-count:1'>      </span><span class=GramE>output</span>
+out=predicted pred=pred;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>run</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'>;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>La
+siguiente invocación a la macro analiza el ajuste en términos de las variables
+x1, x2:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>%<span
+class=GramE>TestLogisticFit(</span>predicted , var=flag x1 x2 , out=fit ,
+pred=pred , event='Acepto');<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>Es
+decir, el ajuste de la regresión logística guardado en el dataset predicted,
+donde<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>flag</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> es la variable respuesta, y x1, x2
+son las potenciales variables regresoras, es<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>analizado</span></span><span style='font-size:10.0pt;
+font-family:"Courier New";color:green;background:white'>.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>La
+probabilidad modelada por la regresión logística es la <st1:State w:st="on"><st1:place
+ w:st="on"><span class=GramE>del</span></st1:place></st1:State> evento
+flag='Acepto'.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>La
+probabilidad predicha esta guardada en la variable 'pred' <st1:State w:st="on"><st1:place
+ w:st="on"><span class=GramE>del</span></st1:place></st1:State> dataset
+predicted.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>La
+opción out= pide generar los datasets fit_x1 y fit_x2 que contienen los datos<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+class=GramE><span style='font-size:10.0pt;font-family:"Courier New";color:green;
+background:white'>usados</span></span><span style='font-size:10.0pt;font-family:
+"Courier New";color:green;background:white'> para realizar los gráficos
+mostrados por la macro.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='font-size:10.0pt;font-family:"Courier New";color:green;background:white'>*/<o:p></o:p></span></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+</div>
+
+</body>
+
+</html>

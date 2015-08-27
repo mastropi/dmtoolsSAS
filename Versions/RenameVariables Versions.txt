@@ -1,0 +1,18 @@
+%RenameVariables Versions: Descripcion de las diferentes versiones
+------------------------------------------------------------------
+Creado: 14/06/06
+
+
+V.1.01: 14/06/06 (DM)
+	- Se limito' el rename de las variables a aquellas entradas del dataset RENAME= que tienen valores no missing en ambas columnas con los nombres originales y nuevos (cuyos nombres estan dados por los parametros OLD= y NEW=).
+
+V.1.02: 14/06/06 (DM)
+	- Se paso' la eliminacion de renames donde el nuevo nombre es igual al viejo en la generacion del dataset _RenameVariables_rename_. Antes esto se estaba haciendo despues de la creacion de este dataset, recorriendo el rename string generado por %CreateInteractions.
+	- Se agrego' mas informacion en el log.
+	- Se agrego' la llamada a %SetSASOptions y %ResetSASOptions
+	- Se agrego' el parametro NOTES=, por si el usuario quiere ver las notas en el log.
+	- Se agrego' una verificacion de que el dataset con los renames a efectuar no exista o bien que no se haya pasado el dataset con los renames ni el archivo de donde importarlos.
+
+V.1.03: 2012/10/08 (DM)
+	- Fixed an error deleting the temporary dataset _RenameVariables_rename_ when the input dataset is not located on the WORK library. The error happened because the library referenced when deleting the temporary dataset was the library of the input dataset.
+	- To be consistent with the conventions of other macros I renamed the temporary dataset from _RenameVariables_rename_ to _rv_rename_ (i.e. the macro initials are used as prefix of the dataset name)

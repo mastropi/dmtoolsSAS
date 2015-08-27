@@ -1,0 +1,81 @@
+%EvaluationChart Versions: Descripcion de las diferentes versiones
+------------------------------------------------------------------
+Creado: 23/11/04
+Nota: Las versiones de esta macro tambien valen para %LiftChart y %GainsChart porque estas macros llaman a %EvaluationChart.
+
+
+
+V.1.01: 18/11/04 (DM)
+	- Se agrego' la posibilidad de que la target variable sea caracter por medio de un vartype que lee el tipo de la variable.
+		
+V.1.02: 24/11/04 (DM)
+	- Se agrego' la posibilidad de hacer un Gains Chart, ademas de un Lift Chart.
+	- Se agrego' un output dataset con los datos necesarios para graficar todas los graficos de evaluacion desde Excel por ejemplo.
+	
+V.1.03: 18/04/05 (DM)
+	- Se agrego' el calculo del KS y del Gini, y de rangos para sus valores basados en las bandas de confianza de la Gains Chart.
+
+V.1.04: 27/07/06 (DM)
+	- Se corrigio' un error que se presentaba cuando la variable con el SCORE (tipicamente p) no toma suficientes valores distintos como para generar el numero de grupos requeridos (tipicamente 10 o 20). La correccion consistio en agregar el statement:
+	IF IN1 AND IN2 AND IN3 THEN DO;
+	en el data step que genera los datasets _EC_Chart_i_ y _EC_KSGini_i_ cerca de la linea 960, donde se hace el siguiente merge:
+		merge 	_EC_Chart_i_(in=in1) end=lastobs
+				_EC_GainsEvent_(in=in2) _EC_GainsNonEvent_(in=in3);
+		by quantile_id;
+	Abajo en el data step se agrego' la linea:
+		if in1 and in2 and in3;
+	(Este error hacia que no se generara ningun grafico)
+
+V.2.01: 2012/06/17 (DM)
+	- Allow for a MULTILEVEL target, which implied:
+		- Defining a FORMAT and an INFORMAT that take that multiple levels of the target into a BINARY target, based on the definition of the event of interest by the user. Now, the event of interest can be a LIST of target values, and all the other levels of the target variable are considered as non-event.
+		Both the format and informat that map the multi-level target into a binary target are called _BINARY (which may be 
+		- Replacing the comparison of the TARGET variable with the event value of interest with a PUT() function that uses the _BINARY format (as now several target values may correspond to the event of interest).
+		- Replacing assignments of the event value to the TARGET variable with an INPUT() function that uses the _BINARY informat (as now several target values may correspond to the event of interet --note that in such a case, the (unformatted) value assigned to the target variable is the largest value among those corresponding to the event of interest).
+	- Allow for CHARACTER target variables (originally this was supposed to be allowed but it did NOT work!)
+	- Fixed the problem of the Gini Lower and Upper bounds being missing because the lower and upper confidence bands for the survival function (SDF_LCL and SDF_UCL)
+	are set to missing by PROC LIFETEST when SURVIVAL = 0 (don't know why!). This fix is simply done by replacing the SDF_LCL and SDF_UCL values with 0 when SURVIVAL = 0 at the beginning of the SET _EC_data_surv_ statement soon after the call to PROC LIFETEST, and inside the "%IF %upcase(&modeli) ~= DT" condition.
+	- Fixed the calculation of the GiniLower and GiniUpper, which was based on incorrect computations of AUC2Lower and AUC2Upper. In fact, the correct values of AUC2Lower and AUC2Upper mix the LOWER and UPPER bounds of GainsEvent and GainsNonEvent, which clearly define the smallest and largest possible areas under the curve.
+	- Added BOUNDS for the Event and Non Event Gains Curves given by the BEST Event and Non-Event Curves... this is done at the data step where the _EC_Charts_i_, _EC_GainsEvent_ and _EC_GainsNonEvent_ datasets are put together to update the _EC_Charts_i_ dataset and create the _EC_KSGini_i_ dataset.
+	- Extended the computation of the Evaluation Chart to ANY set of percentile values (i.e. that are NOT necessary equally spaced).
+	This was done by:
+		- removing the calculation of the Best Curves in the _EC_Best_ dataset (which was only done for the case where BY variables were passed with the goal of having the Best Curves computed for ALL the data --instead of BY groups)
+		- Using the QUANTILE variable (instead of the &STEP variable to compute the Rank, RankLower and RankUpper values in the _EC_KSGINI_I_ dataset).
+	Note that the extension does NOT allow for the specification of ANY percentile values (such as the list 6, 14, 21, 75, 94), as still the step between the percentile values is assumed to be constant, except for the last interval, which can be different from the rest (as in 6%, 12%, ..., 96%, 100% as indicated above).
+	- Performed the following additional changes to improve the macro:
+		- Added a new macro variable called 'bFoundEvent' ('b' stands for boolean) that checks whether the event value is found among the target values. if it is not found, the macro issues an error message and stops.
+		- Removed the call to the %InsertInList macro that defines the order in which the variables in the _EC_chart_i_ dataset were stored (and thus defined also the order in which the variables in the output dataset &OUT were stored). Now the order of the variables in the output dataset are explicitly listed when the output dataset is created (so that we know exactly what variables are stored in the output dataset, instead of having to figure this out by going over the macro code).
+		- Removed the call to the %GetVarNames macro that reads the quantile values from the _EC_Chart_ dataset to be used for the plot, as these values were not really used (the line that used it was already commented out as the result of using it was not nice).
+		- Added new parameters:
+			- OVERLAY= which is a flag indicating whether the Evaluation Charts for the different datasets or groups should be displayed on the same plot. If yes, we use SGPLOT to generate the graph, if no, we use SGPANEL.
+			- BEST= which is a flag indicating whether the Best Curve should be plotted.
+			The following 2 parameters were created in order to see the graphs generated by the macro in Enterprise Miner (using the %EM_REGISTER and %EM_REPORT macros from within Enterprise Miner --NOT called by %EvaluationChart though. They should be called by the user writing the code to run the %EvaluationChart macro)
+			- ODSFILE= which specifies the name of the file where the Evaluation Chart is saved (if desired)
+			- ODSFILETYPE=,	which specifies the type of the file specified in ODSFILE= parameter (default: pdf)
+			- LIBFORMAT=, which indicates the library where the target formats defined by the macro are stored (default: WORK). This was added in order to be able to run the macro from within Enteprise Miner and have EM find the format (this is done by passing the value of this parameter as LIBFORMAT=APFMTLIB).
+			NOTE: All these parameters were also added to %LiftChart and %GainsChart macros.
+		- Migrated the plot generation to the new ODS Graphics capability (using the SGPLOT and SGPANEL procedures). The plot section is much clear now.
+		- Removed the local macro variable &PCTLNAME which was only referenced in the DROP statement of the update of the _EC_DATA_SURV_ dataset soon after it is generated by PROC LIFETEST. This was not used nor defined anywhere else (apart from being defined as LOCAL variable).
+		- Renamed all references to compound names (i.e. constructed using the variable names passed by the user, such as &TARGET and &SCORE --e.g. &TARGET._PREV or &SCORE._quant) in order to allow for the names of the variables containing the target and the score to have 32 characters. NOTE HOWEVER that, due to the fact that the %Categorize macro...
+		- Removed the RENAME of the variables containing the Confidence Bands, so that the user does not need to worry about how to name them on an hypothetical later use... in any case the information about the confidence level is stored at the column label.
+		- Removed the computation of the Best Curves based on ALL the data. Originally this was done only when BY variables were used, and the goal was to have the Best Curves calculated for ALL of the data (instead of BY groups). Removing this calculation came about once the macro was enhanced to receive ANY set of percentile values specified by the user, that is not only equally spaced percentiles (see more info above). This fact implied that when computing the Best Curves, I was no longer able to use the simple implementation based on equally spaced percentiles, but would rather have to repeat the process that had already been done for each BY variable combination, this time for the whole dataset. I could have implemented this but did not want to mess up the code further, as I would have probably re-written the repeatable process as a locally defined macro which would be called by the DO loop and by the computation based on the whole dataset.
+		(note that I had started implementing the Best Curves calculation based on ANY set of percentile values in backup\EvaluationChart-201206Jun22-v201206Jun22-AfterStartingToAdaptECBestToAnyPercentileValues...NotFinished.sas, where however I had not defined the aforementioned locally defined macro --> to see where I left look for "PENDING-2012/06/22", where the problem of the current implementation is described).
+
+V.3.01: 2012/06/25 (DM)
+	- Simplified the computation of the Lift and Gains curves by fully using PROC LIFETEST. In fact, PROC LIFETEST computes the survival function on the score ranks which is equal to (1 - Gains), as is apparent at the data step that creates the _EC_GainsEvent_ and _EC_GainsNonEvent_ datasets from the _EC_data_surv_ dataset by the lines:
+		- cdf = 1 - survival;
+		- GainsEvent = cdf;		* For the Event target values;
+		- GainsNonEvent = cdf;	* For the Non-Event target values;
+	So, instead of computing myself the values of GainsEvent and GainsNonEvent, I use the values indicated here derived from the OUTSURV= output generated by PROC LIFETEST. Note also that, prior to changing the macro, I verified that the CDF value generated by PROC LIFETEST coincided with the GAINS value computed by myself (using the CumN, TotalHits, etc. variables).
+	- Fixed an issue with the LEAF variable used in the iteration on the different &NRO_DATA to analyze. There was a line setting this variable when &MODELi = DT which read: %let leaf = &leaf;
+	This does not make sense, so the change consisted in creating a new macro variable called LEAFi that is to &LEAF when &MODELi = DT.
+
+	- Added new parameters:
+		- BANDTYPE= which indicates the type of confidence band/interval to compute, whether simultaneous or pointwise. Accepted values are POINT or SIMUL. The default value when none is specified or if the value is mispelled is SIMUL. Note that the macro parses this parameter checking only the first 5 characters.
+
+V.3.02: 2015/08/03 (DM)
+	- Changed the value required for parameter ODSFILE= from an unquoted name to a quoted name. This is to make it consistent with:
+		- how SAS tends to deal with these string-type parameters.
+		- how this same parameter is implemented in the newer %PHTestPlots() macro that is used to graphically tests the Proportional Hazards assumption in Cox Regression Models for Survival Analysis.
+
+		

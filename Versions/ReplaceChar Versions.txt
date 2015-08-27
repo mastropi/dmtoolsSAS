@@ -1,0 +1,12 @@
+%ReplaceChar Versions: Descripcion de las diferentes versiones
+--------------------------------------------------------------
+Creado: 18/08/06
+
+
+
+V.1.01: 18/08/06 (DM)
+	- Se agregaron parses del parametro POS para evitar errores para casos extremos como por ej:
+		- pos=1 y el nombre NAME tiene un solo caracter.
+		- pos esta' fuera de rango respecto a la longitud del nombre NAME.
+	- Se renombro' el parametro CHAR por STR porque la macro puede perfectamente reemplazar un caracter por un string.
+	- Se agregaron funciones %QUOTE encerrando el parametro &name en las funciones %substr por si name tiene comas.

@@ -1,0 +1,37 @@
+%VariableImpact Versions: Descripcion de las diferentes versiones
+-----------------------------------------------------------------
+Creado: 24/1/05
+
+
+
+V.1.01: 4/1/05 (DM)
+	- Agregue' la opcion MISSING=0 que dice si los missing values se consideran o no en el calculo de los COUNT y PERCENT de los valores de las variables. Por default, NO se consideran (como en el default del PROC FREQ).
+
+V.1.02: 8/6/05 (DM)
+	- Agregue' el parametro TARGET=, para poder hacer frecuencias cruzadas de las variables con una segunda variable.
+	- Corregi' el problema de que la variable NUMVALUE quedaba en el output dataset cuando todas las variables eran de un solo tipo.
+
+V.1.03: 14/06/06 (DM)
+	- Corregi' error cuando se hacia un procesamiento por BY variables, ya que no ordenaba por las BY variables. Notar tambien que intente' hacer el procesamiento por BY variables generando un indice, pero aparentemente eso tarda mas que ordenar. Al menos para una sola BY variable. (El codigo de creacion del indice esta en la macro, aunque hay que modificarlo para que se cree el indice SIN ordenar por las BY variables.)
+	
+V.1.04: 12/08/06 (DM)
+	- Corregi' un error que ocurria cuando las variables de analisis eran todas caracter. El error era que en la actualizacion del dataset _FreqMult_out&i con un data step estaba la siguiente linea:
+		%if %upcase(&vartype) = C %then %do;
+	y deberia estar la siguiente linea:
+		%if %scan(&vartype, &i, ' ') = C %then %do;
+	- Elimine' el WARNING que aparecia de que la variable DESCENDING no existe al hacer el KEEP de las variables BY al leer el input dataset.
+	- Agregue' el %CheckInputParameters.
+
+V.1.05: 31/08/06 (DM)
+	- Se modifico' la parte de CheckInputParameters para que solamente se haga si no hay opcion RENAME en los data options, porque si es asi seguramente alguna de las variables pasadas en los parametros siguientes (BY, VAR, etc.) no va a ser encontrada. Y es muy dificil definir cual es el nuevo nombre de las variables.
+*** NOTAR SIN EMBARGO QUE HAY QUE CORREGIR ERROR DE CALCULO EN EL VALOR DE PERCENT AL HACER EL CALCULO POR BY VARIABLES. ***
+
+V.2.01: 2015/08/05 (DM)
+	- Added the possibility of generating the output in WIDE format, i.e. one row per analyzed variable-BY variables-TARGET variable combination that lists all the values taken by the variable in a single cell.
+	- Two new parameters were added: transpose=0, maxlengthvalues=255 which are used when requesting the WIDE format output.
+	- Changed the sorting of the output dataset to: VAR, BY-variables, value taken by VAR, TARGET variable, instead of maintaining the order of the variables as listed by the user at the calling statement.
+	- Documentation was improved.
+
+
+
+

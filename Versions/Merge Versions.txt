@@ -1,0 +1,21 @@
+%Merge Versions: Descripcion de las diferentes versiones
+--------------------------------------------------------
+Creado: 27/4/04
+
+
+
+V.1.01: 27/4/04 (DM)
+	- Se modifico' el chequeo de los parametros pasados a la macro de la siguiente manera: antes de chequear si las variables listadas en el parametro by= existen, se verifica si entre las opciones de algun dataset hay un RENAME, porque puede ser que con este rename se este' renombrando una de las variables que se desean usar en el by statement.
+	Notar que NO se hace un chequeo de si el rename es hecho correctamente o no, porque esto seria mucho lio.
+	- Se agrego' la macro variable &mergest que genera el merge statement. La idea es que si hay by variables, las data options que vienen con los datasets se ejecutan en el PROC SORT que se hace antes del merge, con lo cual no es necesario volver a usar los data options en el merge statement posterior. En caso contrario, si no hay by variables, es necesario usar los data options en el merge statement.
+
+V.1.02: 13/7/04 (DM)
+	- Se agrego' el parametro SORT=0, que indica si se desea conservar el orden original de las observaciones en los datasets mergeados y en el output dataset, o mantener el orden de las by variables luego del merge.
+	Default: 0 => conservar el orden original.
+	Notar que en la version 1.01, los input datasets se conservaban con el orden original mientras que el output dataset siempre era generado con el orden de las by variables.
+	- Se agrego' el parametro HELP=0, para poder tener acceso al usage de la macro.
+
+V.1.03: 20/1/05 (DM)
+	- Modifiqué la macro para que no modifique siempre los input datasets como lo estaba haciendo hasta ahora. Solamente los modifica si SORT=1, porque esto pide que los input datasets sean sorteados por las BY variables.
+	Asimismo modifique' la generacion del output dataset: ahora el output dataset siempre queda ordenado por las BY variables, no como antes, que si SORT=0, quedaba ordenado por el orden establecido por el primer dataset mergeado. Esto lo cambié porque cuando no hay una IF condition (pasado en CONDITION=) que pide quedarse solamente con las observaciones que aparecen en el primer dataset, el orden de las observaciones no siempre es el orden del primer dataset porque pueden aparecer observaciones provenientes del segundo dataset que no están en el primer dataset.
+	Todo esto pertmitio' tambien que se eliminara la generacion de la variable _OBS_ con la cual se restauraba el orden de las observaciones presentes en el primer dataset mergeado, aplicandoselo al output dataset.

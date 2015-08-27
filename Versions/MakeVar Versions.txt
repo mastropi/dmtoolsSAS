@@ -1,0 +1,8 @@
+%MakeVar Versions: Descripcion de las diferentes versiones
+----------------------------------------------------------
+Creado: 5/1/04
+
+
+
+V.1.01: 5/1/04 (DM)
+	- Se agrego' el parametro log= que, si vale 1, muestra la lista generada en el log. Por default log=0 (para no tener que cambiar todas las llamadas a la macro desde otras macros. En rigor, seria conveniente que por default fuera log=1, porque eso seria pensar en el usuario, pero tal vez el cambio lo haga mas adelante.)

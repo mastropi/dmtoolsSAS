@@ -1,0 +1,40 @@
+%CutMahalanobisChi Versions: Descripcion de las diferentes versiones
+--------------------------------------------------------------------
+Creado: 13/1/03
+
+
+
+V.1.01: 13/1/03 (DM)
+	- Correccion del error que ocurria cuando habia una opcion 'where' en el dataset de analisis, en el data step que elimina las observaciones con missing values tambien con un where statement.
+	Se soluciono' agregando un %if %ExistsOption(&data , where) antes de eliminar los missing values.
+	- Modificacion en la presentacion del porcentaje de outliers detectados (ahora entre parentesis luego del numero total de outliers).
+
+V.1.02: 15/1/03 (DM)
+	- Correccion del problema de que la distancia de Mahalanobis podia estar mal calculada, en el caso de que el orden de las variables listadas en var= no fuera el mismo que el orden en que aparece en el input dataset. Se soluciono' el problema agregando un 'format &var' statement al 'setear' el input dataset en un dataset local.
+	- Se corrigio' el hecho de que no se estaba en realidad calculando la distancia de Mahalanobis, sino el cuadrado de la distancia de Mahalanobis. Esto se corrigio' tomando la raiz cuadrada de cinv para calcular &max y cambiando el IML module Mahalanobis, para que devuelva directamente la raiz cuadrada de la distancia al cuadrado. 
+	- Se agrego' a la salida del log y al dataset de salida (outAll), el valor de corte para decidir si una obs es outlier. La variable se llama 'threshold'.
+	- Seteo del option nonotes dentro de la macro.
+
+V.1.03: 22/1/03 (DM)
+	- Se agrego' la opcion plot=, que grafica los outliers detectados usando la macro %scatter cuando plot=1.
+	
+V.1.04: 3/2/03 (DM)
+	- Se modifico' la forma de calcular el porcentaje de outliers detectados y se corrigio' el problema de que el mensaje en el log sobre los outliers detectados solamente se mostraban cuando se especificaba un dataset de salida en la opcion out=.
+	
+V.1.05: 2/6/03 (DM)
+	- Se cambio' la correccion hecha al nivel alpha para tener en cuenta un numero elevado de observaciones. Ahora la correccion es: alpha_new = (1 - (1 - alpha)^1/n).
+	Esta correccion tiene la ventaja de que el valor suministrado de alpha tiene que estar entre 0 y 1, no puede ser superior a 1 como ocurria en la correccion anterior (alpha/n , que es la correccion de Bonferroni).
+	La correccion es valida si los distintos tests (es decir los tests que evaluan si cada observacion es outlier o no) son independientes, lo cual suena razonable si los datos corresponden a una muestra aleatoria.
+	- Se agrego' la opcion adjust=1, que permite pedir no ajustar el alpha por el numero de observaciones (pasando adjust=0)
+	- Se agrego' el plot de las distancias de Mahalanobis usadas para la deteccion de outliers por Hadi vs. numero de observacion.
+	- Se corrigio' el hecho de que si la variable en la que se basa la deteccion de outliers es una sola, se hace el grafico de la variable vs. numero de observacion.
+
+V.1.06: 29/7/04 (DM)
+	Los cambios mas importantes realizados son:
+	- Se cambio' el nombre de la variable que identifica los grupos (que es util cuando hay by variables), de _CMC_CODE_ a _GROUP_.
+	A la vez, se agrego' la informacion del group mapping cuando hay mas de una by variable. Es decir se muestra en el output window (siempre que log=1) a que' combinacion de las by variables corresponde cada valor de la variable _GROUP_.
+	- En el grafico de scatter plot, se agrego' las siguientes condiciones para hacerlo:
+		- el nro. de variables este entre 2 y maxNVarForScatter (= 9 en esta version)
+		- el nro. de variables multiplicado por el nro. de observaciones analizadas sea menor o igual que 50000 (para que el scatter plot no demore mucho en generarse --el valor 50000 fue fijado a ojo, pero parece que el tiempo empleado no es exageradamente grande).
+	- Se eliminaron los multiples FORMAT que reordenaban las variables en el input dataset para que aparecieran en el mismo orden en que eran listadas por el usuario en var=. Se dejo' solamente el primer format que se usa en la generacion del input dataset temporario _CutMahalanobisChi_data_, ya que con el es suficiente.
+	- Se elimino' el dataset temporario _CutMahalanobisChi_ porque no era necesario generarlo, ya que se podia trabajar con _CutMahalanobisChi_data_ directamente.

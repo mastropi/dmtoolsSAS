@@ -1,0 +1,221 @@
+/* %MACRO SymmetricAxis
+Version: 1.01
+Author: Daniel Mastropietro
+Created: 23-May-03
+Modified: 18-Jul-03
+
+DESCRIPTION:
+Generates a string to be used in a vaxis= or haxis= option in high
+resolution graphs, specifying a symmetric axis about 0.
+Optionally this string is stored in a global macro variable so that the
+above option can be set in a high resolution graph procedure (like GPLOT).
+
+If requested, the macro also generates two other global macro variables, one
+containing the maximum absolute value of the symmetric axis option used
+and another one containing the value of the step giving the axis tick marks.
+
+Application: This macro quantity is useful when one wants to make a graph using
+symmetric axes about 0 (to get a quick visual feeling of the plot without
+having to "read" the minimum an maximum values plotted in the axis because they
+are set to be equal and opposite in sign), or when one wants to make several
+graphs having the same vertical or horizontal axis, symmetric about 0.
+
+(Another way of doing it which has the advantage that one can have the macro return values to be assigned
+to macro variables is via the use of SAS I/O functions, by opening the dataset with open and then going over
+the records of the dataset and getting the maximum value. The problem with this is that this could
+be slower...?)
+
+USAGE:
+%SymmetricAxis(
+	_data_ ,		*** List of input datasets
+	var=_NUMERIC_ ,	*** Variables over which the maximum value for the axis is computed
+	axis= ,			*** Macro variable where the string with the axis statement is stored 
+	nrodiv=10 ,		*** Number of divisions used in the axis (= #ticks - 1)
+	axismax= ,		*** Macro variable where the axis' maximum absolute value is stored
+	step= ,			*** Macro variable where the step between axis tick marks is stored
+	log=1);			*** Show messages in the log?
+
+REQUESTED PARAMETERS:
+- _data_:		Blank-separated list of input datasets, over which the maximum
+				absolute value over ALL variables listed in 'var' is computed.
+				NOTE: The dataset names cannot have any options.
+
+OPTIONAL PARAMETERS:
+- var:			Blank-separated list of variables over whose values
+				the maximum absolute value is computed.
+				default: _NUMERIC_, i.e. all the numeric variables in '_data_'.
+
+- axis:			Name of the macro variable where the axis statement to
+				to set the values of the axis of an hypothetical plot is stored.
+				IMPORTANT: The name cannot be 'axis'.
+
+- nrodiv:		Number of divisions to be used between -&axismax and &axismax
+				in order to get the value of &step. It corresponds to the number
+				of divisions into which the axis statement would be divided
+				in an hypothetical plot.
+				default: 10
+
+- axismax:		Name of the macro variable where the maximum absolute value
+				is stored.
+				If the parameter is not provided, the value is printed in the log.
+				IMPORTANT: The name cannot be 'axismax'.
+
+- step:			Name of the macro variable where the step is stored.
+				If the parameter is not provided, the value is printed in the log.
+				IMPORTANT: The name cannot be 'step'.
+
+- log:			Indicates whether to show messages in the log.
+				Possible values: 0 => No, 1 => Yes.
+				default: 1
+
+NOTES:
+1.- Parameter '_data_' does not accept options, only dataset names.
+
+2.- The maximum absolute value of the axis option is computed as the maximum
+absolute value among all the variables specified in the 'var' parameter
+contained in the input datasets, which is then rounded to a "nice" value by the
+following algorithm:
+(Given that maxabs is the maximum absolute value obtained, and assuming that
+it is different from 0)
+
+exp = round( log10(maxabs/10) - log10(1.5) );
+axismax = ceil( maxabs*10**(-exp) ) * 10**exp;
+
+This is done in order to have axis with "nice" extreme values. For example
+0.37 is "rounded" to 0.4, 28.6 is rounded to 29, etc.
+
+3.- The number of variables in 'var' can be more than 1, in which case
+the maximum absolute value among ALL listed variables is used for the
+generation of the axis statement option.
+
+OTHER MACROS AND MODULES USED IN THIS MACRO:
+- %GetNroElements
+- %MakeList
+- %Means
+- %SetSASOptions
+- %ResetSASOptions
+
+SEE ALSO:
+- %GetStat
+
+EXAMPLES:
+1.- %SymmetricAxis(toplot1 toplot2 , var=y1 y2 , axis=vaxis);
+proc gplot data=toplot1;
+	plot y1*x y2*x / vaxis=&vaxis;
+proc gplot data=toplot2;
+	plot y2*x y2*x / vaxis=&vaxis;
+run;
+quit;
+
+This code plots y1 vs. x and y2 vs. x in separate plots, both having the same
+and symmetric vertical axis, varying from -<max> to <max> in steps of <max>/10.
+(in fact, 10 is the default for macro parameter 'nrodiv', which generates
+the step to be used in the axis, based on <max>).
+Note that <max> is the maximum absolute value of both y1 AND y2 in datasets
+toplot1 and toplot2, rounded to a "nice" close enough value so that the extreme
+axis values showing in the plot are "nice".
+Note that a macro variable named &vaxis is generated by the macro, which is
+used in the vertical axis option vaxis=&vaxis of the plot statement, that specifies
+the forementioned vertical axis. The option is given by:
+vaxis=-<max> to <max> by <max>/10.
+
+2.- %SymmetricAxis(toplot , var=y1 y2 , axismax=max , step=stp , axis=vaxis , nrodiv=15);
+proc gplot data=toplot;
+	var y1*x y2*x / overlay vaxis=&vaxis;
+run;
+quit;
+
+This code generates the plots of y1 vs. x and y2 vs. x on the same graph, with a
+vertical symmetric axis running from -<max> to <max> in steps of <max> / 15, where
+<max> is the maximum absolute value of both y1 AND y2 in dataset toplot, rounded
+to an interger close enough, so that the values showing in the plot are "nice".
+
+In addition, the macro variables &max and &stp are generated with values <max>
+and <step> respectively. Also, macro variable &vaxis is generated as:
+'-&max to &max by &step', which is used in the vaxis= option of the plot statement that
+specifies the forementioned vertical axis.
+*/
+&rsubmit;
+%MACRO SymmetricAxis(_data_ , var=_NUMERIC_ , axis= , nrodiv=10 , axismax= , step= , log=1)
+	/ store des="Generates a macro variable with the axis statement necessary to create a symmetric axis about 0";
+%local __axis__ __maxabs__ __axismax__ __step__;
+%local __i__ __nro_datas__ __data__;
+
+%SetSASOptions;
+
+%let __nro_datas__ = %GetNroElements(&_data_);
+%do __i__ = 1 %to &__nro_datas__;
+	%let __data__ = %scan(&_data_ , &__i__ , ' ');
+	%means(&__data__ , var=&var , stat=min max , out=_SymmetricAxis_minmax_, log=0);
+	data _SymmetricAxis_minmax_;
+		set _SymmetricAxis_minmax_;
+		array max_values{*} _NUMERIC_;
+		%* Taking the absolute values of the min and max of the variables specified in &var;
+		do j = 1 to dim(max_values);
+			max_values(j) = abs(max_values(j));
+		end;
+		maxabs = max(of max_values(*));
+		%*** Rounding upward to the next closest number, where closest depends on the magnitude of the
+		%*** absolute value, being proportional to the 10th of its value. For ex., if maxabs = 0.37, then 
+		%*** the closest number would be 0.38. If maxabs = 37, the closest number would be 38.
+		%*** Note: this same thing is done by macro %Pretty, which however operates in the
+		%*** macro environment, not in a data step environment;
+		exp = round( log10(maxabs/10) - log10(1.5) );		%* assuming maxabs ~= 0;
+			%* The log10(1.5) is used to have the log10 of values smaller than 3.5 (for example) be rounded
+			%* to the log10(3), and the values larger than 3.5 be rounded to log10(4). Otherwise the
+			%* cutoff for the rounding function is the 0.5 cutoff applied to the log10, not to the original
+			%* number;
+		%* The following rounds the maximum absolute value to the closest "nice" number.
+		%* Ex: 0.38 is rounded to 0.4, 38.5 is rounded to 39, etc.;
+		maxabs = ceil( maxabs*10**(-exp) ) * 10**exp;		%* The use of ceil instead of round is important;
+		call symput('__maxabs__' , maxabs);
+	run;
+	%if &__i__ = 1 %then
+		%let __axismax__ = &__maxabs__;
+	%* Assigning the new maximum;
+	%if &__maxabs__ > &__axismax__ %then
+		%let __axismax__ = &__maxabs__;
+%end;
+%* Assigning the variables to return;
+%if &__axismax__ =  or &__axismax__ = . %then %do;
+	%put SYMMETRICAXIS: WARNING - The maximum value among all variables in %upcase(&var) is missing.;
+	%put SYMMETRICAXIS: No requested macro variables are created.;
+%end;
+%else %do;
+	%let __step__ = %sysevalf(2*&__axismax__ / &nrodiv);
+	%let __axis__ = -&__axismax__ to &__axismax__ by &__step__;
+	%if %quote(&axis) ~= %then %do;
+		%global &axis;
+		%let &axis = &__axis__;
+		%if &log %then %put SYMMETRICAXIS: Global macro variable %upcase(&axis) created.;
+	%end;
+	%if %quote(&axismax) ~= %then %do;
+		%global &axismax;
+		%let &axismax = &__axismax__;
+		%if &log %then %put SYMMETRICAXIS: Global macro variable %upcase(&axismax) created.;
+	%end;
+	%if %quote(&step) ~= %then %do;
+		%global &step;
+		%let &step = &__step__;
+		%if &log %then %put SYMMETRICAXIS: Global macro variable %upcase(&step) created.;
+	%end;
+	%if &log %then %do;
+		%put;
+		%put SYMMETRICAXIS: Generated axis statement: &__axis__..;
+		%put SYMMETRICAXIS: Maximum value used in the above axis statement is based on variable(s);
+		%put SYMMETRICAXIS: %upcase(%MakeList(&var , sep=%str(, )));
+		%put SYMMETRICAXIS: in dataset(s);
+		%put SYMMETRICAXIS: %upcase(%MakeList(&_data_ , sep=%str( , ))).;
+		%put SYMMETRICAXIS: The step between tick marks is computed as 2*&__axismax__/&nrodiv..;
+		%put;
+	%end;
+%end;
+
+proc datasets nolist;
+	delete _SymmetricAxis_minmax_;
+run;
+quit;
+
+%ResetSASOptions;
+%MEND SymmetricAxis;
+

@@ -1,0 +1,24 @@
+%FindInList Versions: Descripcion de las diferentes versiones
+-------------------------------------------------------------
+Creado: 17/1/05
+
+
+
+V.1.01: 17/1/05 (DM)
+	- Se agrego' el parametro SEP= que establece la separacion entre los nombres en la lista de nombres a buscar y en la lista donde buscar dichos nombres. 
+	Notar que la busqueda de SEP en la lista de nombres para seleccionar los nombres requeridos por el usuario es CASE SENSITIVE. Esto es asi', porque si se desea conservar el lower case o upper case de los nombres en la lista en el output dataset, la busqueda de SEP debe ser CASE SENSITIVE.
+	Al agregar esta posibilidad, se elimino' el uso de la funcion INDEXW (porque no permite definir otro separador que no sea el espacio en blanco para buscar una palabra) y se empezo' a usar la funcion %SCAN, que si' permite definir separadores que no sean el espacio en blanco.
+
+V.1.02: 14/2/05 (DM)
+	- Se agregaron los parametros MATCH=ALL y SORTED=0.
+		- El parametro MATCH= define el numero de ocurrencias en la lista LIST de los nombres listados en NAMES que se desea ver. El valor ALL significa que se desea ver todas las ocurrencias. En caso contrario, se establece el numero de ocurrencias deseadas (1, 2, etc.). Pasar MATCH=ALL es equivalente a pasar MATCH=0.
+		- El parametro SORTED= establece si la lista de nombres en LIST esta' ordenada alfabeticamente. Tiene efecto solamente cuando el separador es un caracter distinto al espacio en blanco y se usa para acelerar un poquito el proceso de busqueda. De hecho, en estos casos el proceso de busqueda es mas lento que cuando el separador es el espacio en blanco, pues se barren con %SCAN todos los nombres presentes en LIST para buscar cada nombre listado en NAMES, en lugar de usar la funcion INDEXW para buscar los nombres en LIST. Esto es asi porque INDEXW solamente funciona cuando el separador es el espacio en blanco, ya que encuentra matches con palabras completas (y una palabra es completa hasta que encuentra un espacio).
+		En realidad, el hecho de que la funcion INDEXW ande bien o mal NO depende del separador, sino que basta que los nombres en LIST no tengan espacios en blanco como parte del nombre.
+		Por ej., INDEXW anda bien en una lista separada por comas como:
+			PEPE, QQ, CC_KNT
+		pero anda mal en una lista separada por comas como:
+			PEPE, QQ RR, CC_KNT
+		ya que 'QQ RR' no es identificada como una sola palabra, sino como 2 palabras.
+		Sin embargo, no programe' la busqueda rapida en estos casos porque requiere de un proceso mas delicado al asignar el valor a la macro variable FirstPartOfList, ya que es necesario buscar la posicion de ocurrencia del separador antes y despues de la posicion del nombre encontrado en la lista.
+
+		El uso de SORTED=1 acelera el proceso de busqueda porque los nombres listados en NAMES son buscados en LIST hasta que las dos primeras letras del nombre de LIST con el que se compara vengan en el orden alfabetico despues que las dos primeras letras del nombre que se esta' buscando, ya que al estar la lista ordenada, es imposible que el nombre buscado este' en lo que quede de la lista.

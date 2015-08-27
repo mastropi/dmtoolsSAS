@@ -1,0 +1,9 @@
+%GetVarAttrib Versions: Description of the different versions
+-------------------------------------------------------------
+Created: 07-Jun-2012
+
+
+V.1.00: 2012/06/07 (DM)
+	- Created the macro in order to consolidate the retrieval of ANY attribute of a variable in a datset.
+	Possible attributes are defined by the different existing SAS file I/O function (e.g. vartype, varlen, varlabel, varnum, etc.)
+	- Note that after the creation of this macro, the already existing macro %GetVarType now calls this macro.

@@ -1,0 +1,8 @@
+%LogisticRegression Versions: Descripcion de las diferentes versiones
+---------------------------------------------------------------------
+Creado: 7/9/05
+
+
+
+V.1.03: 7/9/05 (DM)
+	- Corregi' el error de que el Intercept era una "variable" que podia ser eliminada con el selection=backward. Para ello simplemente agregue' dos WHERE statements en la seccion de eliminacion de variables antes de fijarme su p-valor, filrando los nombres de las variables a que no sean iguales a "INTERCEPT".

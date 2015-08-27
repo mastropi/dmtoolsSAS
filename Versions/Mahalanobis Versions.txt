@@ -1,0 +1,29 @@
+%Mahalanobis Versions: Descripcion de las diferentes versiones
+--------------------------------------------------------------
+Creado: 15/1/03
+
+
+
+V.1.01: 15/1/03 (DM)
+	- Correccion del problema de que la distancia de Mahalanobis podia estar mal calculada, en el caso de que el orden de las variables listadas en var= no fuera el mismo que el orden en que aparece en el input dataset. Se soluciono' el problema agregando un 'format &var' statement al 'setear' el input dataset en un dataset local.
+	- Seteo del option nonotes dentro de la macro.
+
+V.1.02: 27/5/03 (DM)
+	- Agregado de las opciones obs=, threshold= y plot=.
+	El parametro plot= pide un grafico de las distancias de Mahalanobis en funcion de la variable especificada en obs=. Si no se especifica ninguna valor en obs=, se genera una variable interna (que no afecta el dataset de entrada o de salida) llamada 'obs' que se utiliza para graficar las distancias de Mahalanobis.
+	El parametro threshold= permite especificar un valor umbral a indicar en el grafico de las distancias de Mahalanobis.
+	Si se especifica un dataset de salida en el parametro outDistance= y el parametro obs= es no vacio, el dataset especificado en outDistance contiene la variable especificada en obs= y la variable con las distancias de Mahalanobis.
+
+V.1.03: 28/7/04 (DM)
+	Los cambios mas importantes realizados son:
+	- Se agrego' el chequeo de valores missing en las variables de analisis pasadas en var=. Cuando alguna de dichas variables tiene un valor missing no es considerada en el calculo de la distancia de Mahalanobis, pero la observacion es mantenida en el dataset de salida o en la salida mostrada en el output window, donde la distancia de Mahalanobis aparece missing.
+	Notar que el chequeo de los valores missing se hizo tanto en el calculo del centroide (con la macro %Means) como en el calculo de la distancia de Mahalanobis (en el IML). No es necesario hacerlo explicitamente en la macro %Cov porque esta se encarga de no considerar los valores missing en el calculo de la matriz de covarianza, ya que el PROC CORR alli utilizado usa la opcion NOMISS.
+	- En la generacion del dataset interno (_Mahalanobis_data_) con los datos del input dataset, se agrego' la creacion de una variable auxiliar _OBS_ que contiene el numero de observacion interno. Esta variable es usada luego para mergear los datos de entrada con las distancias de Mahalanobis calculadas y evitar algun problema circunstancial de que alguno de dichos datos sea desordenada en el medio del proceso de calculo.
+	- A raiz de la creacion de la variable _OBS_ en el input dataset interno, se modifico' la funcionalidad del parametro id=, que ahora solamente cumple la funcion de ser usado como parametro en el grafico de las distancias de Mahalanobis (cuando es solicitado) y de aparecer en el dataset &outDistance con las distancias de Mahalanobis (si es que es requerido; en caso contrario aparece en el listado de las distancias en el output window).
+	- Se agrego' el parametro checkError=error para que desde afuera se pueda saber si la macro dio error (cualquiera de los errores que son factibles de ser detectados al principio de la macro).
+	Debido a la creacion de esta macro variable que es "devuelta" al exterior, se modificaron los nombres de las macro variables locales, agregando un underscore antes y despues del nombre, para disminuir la probabilidad de superposicion entre el nombre de la macro variable pasada en checkError y el nombre de alguna de las macro variables definidas localmente.
+	- Al final de la macro, se agrego' la generacion de los output datasets (siempre que el usuario los hubiera solicitado) en caso de que la macro en realidad no se hubiese ejecutado por el hecho de haberse encontrado problemas en los datos (por ej. que no haya suficientes observaciones validas para calcular la matriz de covarianza). En este caso, tanto para el dataset &out como &outDistance, se genera el mismo dataset que se generaria si la macro se hubiese ejecutado correctamente pero con todos los valores de la distancia de Mahalanobis en missing.
+	La motivacion de hacer esto fue evitar problemas de ejecucion de la macro %CutMahalanobisChi cuando se hace un procesamiento por BY variables. Es decir, es posible en estos casos que el numero de observaciones por alguna combinacion de by variables no sea suficiente para hacer los calculos de la distancia de Mahalanobis, por lo cual es bueno detectar el problema y ademas es bueno que en el output dataset generado por %CutMahalanobisChi aparezcan esas observaciones no validas, aunque con valor missing en la distancia de Mahalanobis. Por esto es que se modifico' la macro %Mahalanobis para que siempre creara un output dataset cuando este fuera requerido por el usuario.
+
+V.1.04: 2011/08/12 (DM)
+	Changed the call to macro %Means by attaching the WHERE condition to the dataset name, as there is no longer a WHERE= parameter in %Means (as per version V1.11).

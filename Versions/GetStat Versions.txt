@@ -1,0 +1,10 @@
+%GetStat Versions: Descripcion de las diferentes versiones
+----------------------------------------------------------
+Creado: 18/7/03
+
+
+
+V.1.02: 18/7/03 (DM)
+	- Se agrego' la opcion prefix=.
+	- En caso de ser solicitado, el output dataset generado contiene el estadistico de las variables listadas en var= en variables cuyos nombres coinciden con los nombres de las macro variables globales generadas.
+

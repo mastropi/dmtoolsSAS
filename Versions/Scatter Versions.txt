@@ -1,0 +1,12 @@
+%Scatter Versions: Descripcion de las diferentes versiones
+----------------------------------------------------------
+Creado: 29/4/03
+
+
+
+V.1.01: 29/4/03 (DM)
+	- Se agregaron las opciones: nolabels (para eliminar los labels de los ejes), novalues (para eliminar los valores de las variables en los tick marks), sizevalue (para determinar el tamanho de letra de los valores en los tick marks) y format (para especificar el formato a utilizar para los valores en los tick marks).
+	La motivacion de agregar estas opciones se debe a que cuando se pedian scatter plots de muchas variables, los graficos no aparecian muy bien cuando los valores de las variables eran muy grandes, ya que ocupaban mucho espacio. Y no hay una forma en SAS para fijar el tamanho del data area (en base a las respuestas del technical support (por ej. la dada en el mail de Hugo Madorno el 24/4/03)).
+
+V.1.02: 6/5/03 (DM)
+	- Se agrego' la opcion with= para especificar una lista de variables contra las cuales se desean graficar las variables listadas en 'var', y no necesariamente graficar todas las listadas en 'var' entre si. Ej: %scatter(data , var=x y z , with=x w).

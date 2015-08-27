@@ -1,0 +1,12 @@
+%All Versions: Descripcion de las diferentes versiones
+------------------------------------------------------
+Creado: 30/12/03
+Nota: La version el momento de crear este archivo era 1.05.
+
+
+V.1.06: 30/12/03 (DM)
+	- Se modificaron los operadores logicos: de AND y OR se paso' a & y | respectivamente. La razon es que de esta manera la macro puede ser usada desde el SAS/IML sin problemas. En el SAS comun, los simbolos & y | son tambien identificados como AND y OR.
+	Notar que antes de hacer el cambio se habia intentado agregar un parametro mas a la macro (operator=) donde se especificase el operador a usar, pero esto fue sin exito, pues llamando a la macro desde el IML con operator=| por ej. generaba bastante caos, pues el IML procesa primero el operador | y luego llama a la macro!
+
+V.1.07: 23/10/04 (DM)
+	- Se agrego' el parametro PAIRWISE= que pide que la comparacion pedida entre las variables y los valores sea pairwise, es decir que se haga entre la primera variable y el primer valor, entre la segunda variable y el segundo valor y asi sucesivamente. Claramente el numero de variables y de valores debe ser el mismo.
