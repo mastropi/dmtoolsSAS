@@ -1,0 +1,21 @@
+%LorenzCurve Versions: Description of the different versions
+------------------------------------------------------------
+Created: 15-May-2015
+Author: Daniel Mastropietro
+
+
+V.1.00: 2015/08/03 (DM)
+	- Macro created to compute Lorenz curves on a non-negative target variable in terms of a set of input variables.
+	The goal is to generate a number summarizing the predictive power of a variable on a non-negative continuous target variable, similar to the Gini Index for binary target. An example (motivating example) is the Time to Event used in Survival Models.
+	The current macro signature is as follows:
+	%LorenzCurve(
+		data,					*** Input dataset.
+		target=,				*** Target variable (assumed non-negative)
+		var=,					*** List of input variables.
+		missing=1,				*** Whether missing values in the input variables are allowed.
+		out=, 					*** Output dataset containing the area between the Lorenz Curve and the diagonal
+		plot=1,					*** Whether to plot the Lorenz curve of each analysis variable
+		log=1)					*** Show messages in log?
+
+V.1.01: 2015/08/29 (DM)
+	- New parameters SORTBY=, ODSPATH=, ODSFILE=, and ODSFILETYPE=, the first one used to define the order of the output dataset (defaults to "descending area") and the three last ones to generate ODS output file containing the Lorenz curves.

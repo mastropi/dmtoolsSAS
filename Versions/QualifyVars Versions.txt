@@ -1,0 +1,21 @@
+%QualifyVars Versions: Description of the different versions
+------------------------------------------------------------
+Created: 03-Aug-2015
+Author: Daniel Mastropietro
+
+
+V.1.00: 2015/08/03 (DM)
+	- Macro created to qualify a set of variables into categorical or interval (continuous) and compute percent of missing and zeros.
+	The current macro signature is as follows:
+	%QualifyVars(
+		data,						*** Input dataset (data options are allowed)
+		var=_ALL_,					*** List of variables to qualify.
+		maxnfreq=10,				*** Max. number of distinct values to list the distinct values.
+		maxncat=10,					*** Max. number of distinct values to qualify variable as categorical.
+		out=,						*** Output dataset (data options are allowed).
+		sortby=level nvalues var,	*** Sorting criteria of the output dataset.
+		log=1);						*** Show messages in log?
+
+V.1.01: 2015/08/28 (DM)
+	- Fixed a bug where an error occurred when no variable qualified for generating the list of distinct values taken.
+	- Changed the assignment of the level variable so that character variables are ALWAYS assigned a "categorical" level.

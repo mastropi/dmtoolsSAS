@@ -1,12 +1,12 @@
-/* QualifyVars.sas
-Version:		1.00
+/* MACRO %QualifyVars
+Version:		1.01
 Author:			Daniel Mastropietro
 Created:		03-Aug-2015
-Modified:		06-Aug-2015
+Modified:		28-Aug-2015 (previous: 06-Aug-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
-Qualifies a set of varibales into categorical or continuous based on the number of distinct values.
+Qualifies a set of varibales into categorical or interval (continuous) based on the number of distinct values.
 In addition it computes the following summary information:
 - #zeros, %zeros
 - #missing, %missing
@@ -15,13 +15,50 @@ In addition it computes the following summary information:
 
 USAGE:
 %QualifyVars(
-		data,						*** Input dataset (data options are allowed)
-		var=_ALL_,					*** List of variables to qualify.
-		maxnfreq=10,				*** Max. number of distinct values to list the distinct values.
-		maxncat=10,					*** Max. number of distinct values to qualify variable as categorical.
-		out=,						*** Output dataset (data options are allowed)
-		sortby=level nvalues var,	*** List of variables to sort the output dataset by.
-		log=1);						*** Show messages in log?
+	data,						*** Input dataset (data options are allowed)
+	var=_ALL_,					*** List of variables to qualify.
+	maxnfreq=10,				*** Max. number of distinct values to list the distinct values.
+	maxncat=10,					*** Max. number of distinct values to qualify variable as categorical.
+	out=,						*** Output dataset (data options are allowed).
+	sortby=level nvalues var,	*** Sorting criteria of the output dataset.
+	log=1);						*** Show messages in log?
+
+REQUIRED PARAMETERS:
+- data:			Input dataset. Data options can be specified as in a data= SAS option..
+
+OPTIONAL PARAMETERS:
+- var:			List of variables to analyze.
+				default: _ALL_
+
+- maxnfreq:		Maximum number of distinct values that a variable can take in order to show
+				the distinct values taken by the variable. 
+				default: 10
+
+- maxncat:		Maximum number of distinct values for a variable to be classified as categorical. 
+				default: 10
+
+- out:			Output dataset containing the variable qualification.
+				It contains the following columns in the order given:
+				- var         Char     Variable Name
+				- label       Char     Variable Label
+				- nobs        Num      Total Number of Observations in input dataset
+				- type        Char     Variable Type
+				- level       Char     Assigned level of variable (categorical or interval)
+				- values      Char     Values taken by categorical variables with less than maxnfreq distinct values.
+				- nvalues     Num      Number of Different Values
+				- nmiss       Num      Number of Missing Values
+				- nzeros      Num      Number of Zeros
+				- pvalues     Num      Percent of Distinct Values
+				- pmiss       Num      Percent of Missing Values
+				- pzeros      Num      Percent of Zeros
+
+- sortby:		List of variables to sort the output dataset by.
+				default: level nvalues var (so that categorical variables are listed on top and
+				they are sorted by increasing number of distinct values taken)
+
+- log:			Show messages in the log?
+				Possible values: 0 => No, 1 => Yes.
+				default: 1	
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %GetDataName
@@ -84,7 +121,9 @@ proc sql;
 	create table _qv_sql_ as
 	select
 		count(*) as nobs
-	%let maxlengthlabel = 1;
+	%let maxlengthlabel = 10;	%* Set the minimum maxlengthlabel to 10 which is a length larger than the strings CHARACTER and NUMERIC
+								%* which are the possible values taken by the T* columns. This is to avoid truncation of 
+								%* data when transposing the SQL output to create the _qv_char_ dataset;
 	%do i = 1 %to &nro_vars;
 		%let _var_ = %scan(&var, &i, ' ');
 		%let _label_ = %GetVarAttrib(&data, &_var_, varlabel);
@@ -177,9 +216,11 @@ quit;
 %let nro_var4freq = %GetNroElements(&var4freq);
 
 %* Compute frequency tables;
-%if &log %then
-	%put QUALIFYVARS: Finding the values taken by &nro_var4freq variables with at most &maxNFreq levels...;
-%FreqMult(&data, var=&var4freq, out=_qv_freq_, missing=1, transpose=1, log=0);
+%if &nro_var4freq > 0 %then %do;
+	%if &log %then
+		%put QUALIFYVARS: Finding the values taken by &nro_var4freq variables with at most &maxNFreq levels...;
+	%FreqMult(&data, var=&var4freq, out=_qv_freq_, missing=1, transpose=1, log=0);
+%end;
 
 %*** Put all summary info together;
 proc sort data=_qv_char_; by var;
@@ -188,13 +229,17 @@ data _qv_out_;
 	format var label nobs type level values nvalues nmiss nzeros pvalues pmiss pzeros;
 	merge 	_qv_char_
 			_qv_num_
-			_qv_freq_;
+			%if &nro_var4freq > 0 %then %do; _qv_freq_(keep=var values) %end;
+			;
 	by var;
 	if _N_ = 1 then set _qv_sql_(keep=nobs);
-	if nvalues <= &maxNCat then
+	%if &nro_var4freq = 0 %then %do;
+	values = "";	%* When distinct values are not reported for any variables, set the character variable coming from _qv_freq_ to missing;
+	%end;
+	if type = "character" or nvalues <= &maxNCat then
 		level = "categorical";
 	else
-		level = "numeric";
+		level = "interval";
 	%* Compute percentage of missing and zeros;
 	format pvalues percent7.3;			%* The percentage of pvalues are expected to be quite small for categorical variables, that is why I use more decimals;
 	format pmiss pzeros percent7.1;
@@ -231,7 +276,7 @@ proc datasets nolist;
 	delete 	_qv_sql_
 			_qv_char_
 			_qv_num_
-			_qv_freq_
+			%if &nro_var4freq > 0 %then %do; _qv_freq_ %end;
 			_qv_out_;
 quit;
 

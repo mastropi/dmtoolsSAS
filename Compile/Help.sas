@@ -2,7 +2,7 @@
 Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	09-Dec-2003
-Modified: 	15-May-2015
+Modified: 	01-Sep-2015
 
 DESCRIPTION:
 Shows help on how to invoke a macro.
@@ -44,6 +44,8 @@ LIFTCHART
 LORENZCURVE
 MEANS
 MERGE
+PHTESTPLOT
+PLOTBINNED
 SORT
 STANDARDIZE
 TESTLOGISTICFIT
@@ -56,7 +58,7 @@ help is available when calling %Help(<macro-name>).
 REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 %if %quote(&macro) = %then %do;
 	%put;
-	%put %quote(                        AVAILABLE MACROS AS OF 4 May 2005);
+	%put %quote(                        AVAILABLE MACROS AS OF 27-Aug-2015);
 %*	%put MACROS DISPONIBLES AL 10/6/04:;
 	%if %upcase(%quote(&by)) = TOPIC %then %do;
 		%put %quote(                                  -- BY TOPIC --);
@@ -74,6 +76,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	CreatePrevPostVar %quote(   Create a variable containing previous and posterior values of variables,);
 		%put 	%quote(                     where the 'previous' and 'posterior' conditions are defined by a certain);
 		%put 	%quote(                     matching criterion.);
+		%put	DataComputeWithMissing %quote(Generate data statements to handle missing values in a computed variable.);
 		%put	Drop %quote(                Drop a set of variables in a dataset, regardless if they exist or not.);
 		%put	GetVarList %quote(          Get the list of variables in a dataset associated with more complex listing);
 		%put	%quote(                     %(like x1-x9, _NUMERIC_, etc.%).);
@@ -96,7 +99,9 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	DetectOutliersHadi %quote(  Detect univariate outliers using the Box-Cox transformation and the Hadi algorithm.);
 		%put	DetectOutliersMAD*%quote(   Detect univariate outliers based on the MAD.);
 		%put 	Hadi* %quote(               Robustly detect multivariate oultiers using Hadi method.);
+		%put	LorenzCurve* %quote(        Plot the Lorenz Curve for a set of variables w.r.t. a non-negative target.);
 		%put	Mahalanobis	%quote(         Compute Mahalanobis distance of a set of variables.);
+		%put 	PHTestPlot* %quote(         Make plots of survival curves to visually check proportional hazards assumption.);
 		%put	Qqplot %quote(              Make Q-Q plots for a set of variables.);
 		%put;
 		%put GENERAL STATISTICS;
@@ -113,6 +118,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	DefineSymbols %quote(       Define plotting symbols.);
 		%put	GraphXY	%quote(             Make a 2D plot of Y vs. X);
 		%put	MPlot %quote(               Make multiple plots in the same window.);
+		%put 	PlotBinned* %quote(         Make 2D scatter or bubble plots of a target variable vs. binned continuous variables.);
 		%put	Scatter	%quote(             Make 2D scatter plots among pairwise variables.);
 		%put	SetAxis %quote(             Create the string for an AXIS statement so that pretty values are shown.);
 		%put	SymmetricAxis %quote(       Create the string for an AXIS statement so that the axis);
@@ -129,10 +135,10 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	LiftChart* %quote(          Plot the Lift Chart for a model with a discrete target.);
 		%put	LogisticRegression %quote(  Perform a Logistic Regression iteratively by eliminating influential);
 		%put	%quote(                     observations.);
-		%put	LorenzCurve %quote(         Plot the Lorenz Curve for a set of variables w.r.t. a non-negative target.);
 		%put	PartialPlots %quote(        Make partial plots to graphically assess the linearity of variables in a;
 		%put 	%quote(                     linear regression.);
 		%put	PiecewiseTransf %quote(     Perform a linear piecewise transformation on continuous variables.); 
+		%put	QualifyVars %quote(         Automatically qualify variables into categorical or continuous.);
 		%put	TestLogisticFit* %quote(    Test the fit of a logistic regression model.);
 		%put	VariableImpact*	%quote(     Make plots to evaluate the univariate impact of a set of continuous variable);
 		%put	%quote(                     on a binary target.);
@@ -141,11 +147,15 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put -----;
 		%put	Compute	%quote(             Evaluate a given function by forcing the evaluation of its argument.);
 		%put	EvalExp %quote(             Force the evaluation of an expression.);
+		%put 	ExecTimeStart %quote(       Start the clock to measure execution time of a macro.);
+		%put 	ExecTimeStop %quote(        Measure the time elapsed since macro ExecTimeStart was last called.);
 		%put	ExistData %quote(           Check if a dataset exists.);
 		%put	ExistMacroVar %quote(       Check if a macro variable exists.);
 		%put	ExistVar %quote(            Check if all variables in a given list exist in a dataset.);
 		%put	Getnobs	%quote(             Get the nro. of observations and variables in a dataset.);
 		%put	Help %quote(                Show this help information.);
+		%put 	ODSOutputClose %quote(      Close an open ODS output file.);
+		%put 	ODSOutputOpen %quote(       Open an ODS output file for writing.);
 		%put;
 		%put STRING MANIPULATION;
 		%put -------------------;
@@ -221,6 +231,8 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put E;
 		%put	EvalExp %quote(             Force the evaluation of an expression.);
 		%put	EvaluationChart* %quote(    Plot an evaluation chart for a model with a binary target.);
+		%put 	ExecTimeStart %quote(       Start the clock to measure execution time of a macro.);
+		%put 	ExecTimeStop %quote(        Measure the time elapsed since macro ExecTimeStart was last called.);
 		%*%put	Exist	;
 		%put	ExistData %quote(           Check if a dataset exists.);
 		%put	ExistMacroVar %quote(       Check if a macro variable exists.);
@@ -265,7 +277,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	LiftChart* %quote(          Plot the lift chart for a model with a discrete target.);
 		%put	LogisticRegression %quote(  Perform a Logistic Regression iteratively by eliminating influential);
 		%put	%quote(                     observations.);
-		%put	LorenzCurve %quote(         Plot the Lorenz Curve for a set of variables w.r.t. a non-negative target.);
+		%put	LorenzCurve* %quote(        Plot the Lorenz Curve for a set of variables w.r.t. a non-negative target.);
 		%put;
 		%put M;
 		%put	Mahalanobis	%quote(         Compute Mahalanobis distance of a set of variables.);
@@ -277,10 +289,16 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	Merge* %quote(              Merge 2 datasets without having them sorted by the by variables.);
 		%put	MPlot %quote(               Make multiple plots in the same window.);
 		%put;
+		%put O;
+		%put 	ODSOutputClose %quote(      Close an open ODS output file.);
+		%put 	ODSOutputOpen %quote(       Open an ODS output file for writing.);
+		%put;
 		%put P;
 		%put	PartialPlots %quote(        Make partial plots to graphically assess the linearity of variables in a;
 		%put 	%quote(                     linear regression.);
+		%put 	PHTestPlot* %quote(         Make plots of survival curves to visually check proportional hazards assumption.);
 		%put	PiecewiseTransf %quote(     Perform a linear piecewise transformation on continuous variables.); 
+		%put 	PlotBinned* %quote(         Make 2D scatter or bubble plots of a target variable vs. binned continuous variables.);
 		%put	PrintNameList %quote(       Print a list of names in one column in the output window.);
 		%*%put	Pretty	;
 		%*%put	PrintDataDoesNotExist	;
@@ -288,6 +306,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%*%put	PrintVarDoesNotExist	;
 		%put;
 		%put Q;
+		%put	QualifyVars %quote(         Automatically qualify variables into categorical or continuous.);
 		%put	Qqplot %quote(              Make Q-Q plots for a set of variables.);
 		%put;
 		%put R;

@@ -1,8 +1,8 @@
 /* MACRO %PlotBinned
-Version: 		1.00
+Version: 		1.02
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		13-Aug-2015
+Modified: 		01-Sep-2015 (previous: 29-Aug-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -19,6 +19,9 @@ USAGE:
 	groupsize=,				*** Nro. of cases each group should contain when categorizing continuous variables.
 	groups=20,				*** Nro. of groups to use in the categorization of continuous variables.
 	value=mean,				*** Name of the statistic for both the input and target variable in each bin.
+	plot=1,					*** Whether to generate the binned plots.
+	out=,					*** Output dataset with the data needed to reproduce the plots.
+	outcorr=,				*** Output dataset containing the correlation between the binned vs. predicted LOESS values.
 	bubble=1,				*** Whether to generate a bubble plot instead of a scatter plot.
 	xaxisorig=0,			*** Whether to use the original input variable range on the X axis.
 	yaxisorig=1,			*** Whether to use the original target variable range on the Y axis.
@@ -28,7 +31,7 @@ USAGE:
 	log=1);					*** Show messages in log?
 
 REQUIRED PARAMETERS:
-- data:			Input dataset. Data options can be specified as in a data= SAS option..
+- data:			Input dataset. Data options can be specified as in a data= SAS option.
 
 - target:		Target variable containing the time to the event of interest.
 
@@ -58,6 +61,34 @@ OPTIONAL PARAMETERS:
 				representation of each bin.
 				default: mean
 
+- plot:			Whether to generate the binned plots or just the output dataset
+				needed to generate the plots (if parameter OUT is non empty of course).
+				Possible values: 0 => No, 1 => Yes.
+				default: 1
+
+- out:			Output dataset with the data needed to reproduce the plots.
+				Data options can be specified as in a data= SAS option.
+				The dataset contains the following columns:
+				- VAR: Input variable name
+				- VALUE: Value representing each bin
+				- NOBS: Number of cases in each bin
+				- <TARGET>: Value of the target variable in each bin
+				- FIT_LOESS_LOW: Lower limit of the 95% confidence interval for the predicted value
+				- FIT_LOESS: LOESS fit in each bin
+				- FIT_LOESS_UPP: Upper limit of the 95% confidence interval for the predicted value
+				default: no output dataset is created
+
+- outcorr:		Output dataset containing the correlation between binned values and
+				predicted LOESS values by analyzed variable.
+				Data options can be specified as in a data= SAS option.
+				The dataset contains the following columns:
+				- VAR: Input variable name
+				- N: Number of bins on which the correlation is computed
+				- CORR: Weighted (by N) correlation between binned values and predicted LOESS values
+				- CORR: Normalized weighted correlation by the target variable range
+				- TARGET_RANGE: Target variable range in the original data
+				default: no output dataset is created
+
 - bubble		Whether to generate a bubble plot instead of a scatter plot.
 				default: 1
 
@@ -83,7 +114,10 @@ OPTIONAL PARAMETERS:
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Categorize
+- %ExecTimeStart
+- %ExecTimeStop
 - %GetNroElements
+- %MakeListFromName
 - %MakeListFromVar
 - %RemoveFromList
 - %Rep
@@ -103,6 +137,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 		groupsize=,
 		groups=20,
 		value=mean,
+		out=,
+		outcorr=,
+		plot=1,
 		bubble=1,
 		xaxisorig=0,
 		yaxisorig=1,
@@ -123,12 +160,15 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put groupsize= , %quote(           *** Nro. of cases each group should contain when categorizing continuous variables.);
 	%put groups=3 , %quote(             *** Nro. of groups to use in the categorization of continuous variables.);
 	%put value=mean , %quote(           *** Name of the statistic for both the input and target variable in each bin.);
+	%put plot=1 , %quote(               *** Whether to generate the binned plots.);
+	%put out= , %quote(                 *** Output dataset with the data needed to reproduce the plots.);
+	%put outcorr= , %quote(             *** Output dataset containing the correlation between binned and predicted LOESS values.);
 	%put bubble=1 , %quote(             *** Whether to generate a bubble plot instead of a scatter plot.);
 	%put xaxisorig=1 , %quote(          *** Whether to use the original input variable range on the X axis.);
 	%put yaxisorig=1 , %quote(          *** Whether to use the original target variable range on the Y axis.);
 	%put odspath= ,	%quote(		        *** Quoted name of the path where all generated files should be saved.);
 	%put odsfile= ,	%quote(		        *** Quoted name of the file where the plots are saved.);
-	%put odsfiletype=html, %quote(	    *** Type of the file specified in ODSFILE or output format.);
+	%put odsfiletype=pdf, %quote(	    *** Type of the file specified in ODSFILE or output format.);
 	%put log=1) %quote(                 *** Show messages in log?);
 %MEND ShowMacroCall;
 
@@ -147,7 +187,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %local condition;
 %local _var_;
 %local _vartype_;
-%local datetime_start;
+%local nobs nvars;
 
 %* Show input parameters;
 %if &log %then %do;
@@ -163,6 +203,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put PLOTBINNED: - groupsize = %quote(    &groupsize);
 	%put PLOTBINNED: - groups = %quote(       &groups);
 	%put PLOTBINNED: - value = %quote(        &value);
+	%put PLOTBINNED: - plot = %quote(         &plot);
+	%put PLOTBINNED: - out = %quote(          &out);
+	%put PLOTBINNED: - outcorr = %quote(      &outcorr);
 	%put PLOTBINNED: - bubble = %quote(       &bubble);
 	%put PLOTBINNED: - xaxisorig = %quote(    &xaxisorig);
 	%put PLOTBINNED: - yaxisorig = %quote(    &yaxisorig);
@@ -174,20 +217,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %end;
 
 %SetSASOptions;
-
-%* Keep track of total exceution time;
-%* Ref: http://www.sascommunity.org/wiki/Tips:Program_run_time;
-%let datetime_start = %sysfunc(DATETIME()) ;
-
-%if %quote(&odsfile) ~= %then %do;
-	%if %upcase(%quote(&odsfiletype)) = HTML and %quote(&odspath) ~= %then %do;
-		%* This distinction of HTML output is necessary because this is the only format that accepts the PATH= option...;
-		%* (the reason being that the HTML output stores graphs in separate files (e.g. PNG files that are linked to the HTML output);
-		ods &odsfiletype path=&odspath file=&odsfile style=statistical;
-	%end;
-	%else %do;
-		ods &odsfiletype file=&odsfile style=statistical;
-	%end;
+%ExecTimeStart;
+%if &plot %then %do;
+	%ODSOutputOpen(&odspath, &odsfile, odsfiletype=&odsfiletype);
 %end;
 
 /*--------------------------------- Parse input parameters -----------------------------------*/
@@ -203,10 +235,10 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	run;
 	%let varclass = %MakeListFromVar(_PB_vartypes_, var=var, log=0);
 	%* Keep just the categorical variables that also appear in VAR;
-	%* NOTE that I cannot subset the dataset above to the variables appearing in VAR because the
-	%* when using the %MakeList macro to generate the list of variable names to search for
-	%* SAS gives an error in the WHERE statement that is completely NONSENSE!! as the WHERE statement
-	%* is perfectly well constructed!!;
+	%* NOTE that I cannot subset the dataset above to the variables appearing in VAR because
+	%* when using the %MakeListFromVar macro to generate the list of variable names to search for
+	%* SAS gives an error in the WHERE statement stating that it is flawed, that is completely NONSENSE!!
+	%* as the WHERE statement is perfectly well constructed!!;
 	%let varclass = %KeepInList(&varclass, &var, log=0);
 %end;
 
@@ -217,6 +249,12 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %*** EXCLUDE=;
 %let condition = not in (&exclude);
+
+%*** OUT=;
+%* Delete local output dataset because data is appended to it;
+proc datasets nolist;
+	delete _PB_out_;
+quit;
 /*--------------------------------- Parse input parameters -----------------------------------*/
 
 %*** Prepare data;
@@ -233,73 +271,183 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %* Restate the list of variables to analyze to the original list of variables (i.e. including the categorical variables);
 %let vartype = %Rep(N, %GetNroElements(&var)) %Rep(C, %GetNroElements(&varclass));
 %let var = &var &varclass;
+%let nro_vars = %GetNroElements(&var);
 
-%* Compute min and max values of the target variable;
 %if &xaxisorig or &yaxisorig %then %do;
-	%* Read the min and max of the input and target variables from the original data;
-	%GetStat(_PB_data_, var=&var &target, stat=min, name=%MakeList(&var, suffix=_MIN) _TARGET_MIN_, log=0);
-	%GetStat(_PB_data_, var=&var &target, stat=max, name=%MakeList(&var, suffix=_MAX) _TARGET_MAX_, log=0);
+	%* Read the MIN and MAX values of the input and target variables from the original data;
+	%* Note that I store the MIN and MAX of the input variables into macro variables named _VAR1_MIN, _VAR2_MIN, etc.
+	%* in order to avoid problems with too long names (the limit of 32 characters also applies to the macro variable names!!);
+	%GetStat(_PB_data_, var=&var &target, stat=min, name=%MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MIN) _TARGET_MIN_, log=0);
+	%GetStat(_PB_data_, var=&var &target, stat=max, name=%MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MAX) _TARGET_MAX_, log=0);
 %end;
 
 %*** Iterate on each input variable;
-%let nro_vars = %GetNroElements(&var);
 %do i = 1 %to &nro_vars;
 	%let _var_ = %scan(&var, &i , ' ');
 	%let _vartype_ = %scan(&vartype, &i, ' ');
 	%if &log %then %do;
 		%if &_vartype_ = C %then
-			%put PLOTBINNED: Plotting %upcase(&target) vs. (categorical) variable &i of &nro_vars: %upcase(&_var_)...;
+			%put PLOTBINNED: Computing data for plot of %upcase(&target) vs. (categorical) variable &i of &nro_vars: %upcase(&_var_)...;
 		%else
-			%put PLOTBINNED: Plotting %upcase(&target) vs. &groups bins of (continuous) variable &i of &nro_vars: %upcase(&_var_)...;
+			%put PLOTBINNED: Computing data for plot of %upcase(&target) vs. &groups bins of (continuous) variable &i of &nro_vars: %upcase(&_var_)...;
 	%end;
-	%Means(_PB_data_, by=&_var_, var=&target, stat=&value n, name=&target _n_, out=_PB_means_, log=0);
+	%Means(_PB_data_, by=&_var_, var=&target, stat=&value n, name=&target nobs, out=_PB_means_, log=0);
 
-	%if ~&yaxisorig %then %do;
-		%* Read the min and max of the target variable from the aggregated data;
-		%GetStat(_PB_means_, var=&target, stat=min, name=_TARGET_MIN_, log=0);
-		%GetStat(_PB_means_, var=&target, stat=max, name=_TARGET_MAX_, log=0);
-	%end;
-	ods proclabel="%upcase(&_VAR_)";
-	title "Bin plot of %upcase(&TARGET) vs. %upcase(&_VAR_)";
-	proc sgplot data=_PB_means_;
-		%*** BUBBLE or SCATTER;
-		%if &bubble %then %do;
-		bubble x=&_var_ y=&target size=_n_ / datalabel=_n_;
-		%end;
-		%else %do;
-		scatter x=&_var_ y=&target / datalabel=_n_ markerattrs=(symbol=CircleFilled);
-		%end;
-
-		%*** CATEGORICAL or CONTINUOUS;
-		%if &_vartype_ = C %then %do;
-		%* Linear interpolation for categorical variables;
-		series x=&_var_ y=&target / lineattrs=(color="red");
-		%end;
-		%else %do;
-		%* LOESS curve for continuous variables;
-		loess x=&_var_ y=&target  / weight=_N_ 
-									lineattrs=(color=red) interpolation=cubic
-									CLM clmattrs=(clmfillattrs=(color="light grayish red")) clmtransparency=0.7;
-		%end;
-
-		%*** AXIS LIMITS;
-		%* Set horizontal axis to reflect the original input variable scale;
-		%if &xaxisorig %then %do;
-		xaxis min=&&&_var_._MIN max=&&&_var_._MAX;
-		%end;
-		%* Set common vertical axis limits;
-		yaxis min=&_TARGET_MIN_ max=&_TARGET_MAX_;
+	%* Add the variable information;
+	data _PB_means_;
+		length var $32;
+		set _PB_means_;
+		var = "&_var_";
 	run;
-	title;
+
+	%* Compute the fitted loess;
+	ods exclude all;	%* Avoid showing any output in any of the active outputs;
+	proc loess data=_PB_means_ plots=none;
+		%* NOTE: The options of the MODEL statement request to do a global search for the best smoothing parameter
+		%* on the default range (interval (0,1]). The AICC criterion is used instead of GCV because it is 
+		%* more modern and more robust. We could also use a variation of it AICC1, in order ot improve the
+		%* undersmoothing sometimes observed with AICC. For more info, see the SAS documentation.
+		%* Note that the default range is (0, 1] because the smoothing parameter in the LOESS context represents
+		%* the proportion of data that is used at each local regression around an X point where X is the input vector.
+		%* For more info see: http://www.ats.ucla.edu/stat/sas/library/loesssugi.pdf;
+		%* THIS IS IMPORTANT BECAUSE OTHERWISE THE LOESS FIT OF THE PLOT MAY BE VERY DIFFERENT FROM THE LOESS FIT HERE;
+		model &target = &_var_ / select=aicc(global);
+		weight nobs;
+		output 	out=_PB_means_(keep=var &_var_ nobs &target fit_loess fit_loess_low fit_loess_upp)
+				predicted=fit_loess LCLM=fit_loess_low UCLM=fit_loess_upp;
+	run;
+	ods exclude none;
+	%* Append the plotted data to the output dataset;
+	proc append base=_PB_out_ data=_PB_means_(rename=(&_var_=value));
+	run;
+	
+	%if &plot %then %do;
+		%if ~&yaxisorig %then %do;
+			%* Read the min and max of the target variable from the aggregated data;
+			%GetStat(_PB_means_, var=&target, stat=min, name=_TARGET_MIN_, log=0);
+			%GetStat(_PB_means_, var=&target, stat=max, name=_TARGET_MAX_, log=0);
+		%end;
+		ods proclabel="%upcase(&_VAR_)";
+		title "Bin plot of %upcase(&TARGET) vs. %upcase(&_VAR_)";
+		proc sgplot data=_PB_means_;
+			%*** BUBBLE or SCATTER;
+			%if &bubble %then %do;
+			bubble x=&_var_ y=&target size=nobs / datalabel=nobs;
+			%end;
+			%else %do;
+			scatter x=&_var_ y=&target / datalabel=nobs markerattrs=(symbol=CircleFilled);
+			%end;
+
+			%*** CATEGORICAL or CONTINUOUS;
+			%if &_vartype_ = C %then %do;
+			%* Linear interpolation for categorical variables;
+			series x=&_var_ y=&target / lineattrs=(color="red");
+			%end;
+			%else %do;
+			%* LOESS curve for continuous variables;
+			loess x=&_var_ y=&target  / weight=nobs 
+										lineattrs=(color=red) interpolation=cubic
+										CLM clmattrs=(clmfillattrs=(color="light grayish red")) clmtransparency=0.7;
+			%end;
+
+			%*** AXIS LIMITS;
+			%* Set horizontal axis to reflect the original input variable scale;
+			%if &xaxisorig %then %do;
+			xaxis min=&&&_var&i._MIN max=&&&_var&i._MAX;
+			%end;
+			%* Set common vertical axis limits;
+			yaxis min=&_TARGET_MIN_ max=&_TARGET_MAX_;
+		run;
+		title;
+	%end;
 %end;
-%* Close the ODS output;
-%if %quote(&odsfile) ~= %then %do; 
-ods &odsfiletype close;
+
+%if &plot %then %do;
+	%ODSOutputClose(&odsfile, odsfiletype=&odsfiletype);
+%end;
+
+%if %quote(&out) ~= %then %do;
+	data &out;
+		format var;
+		format value BEST8.;	%* This format is to make sure that values are not shown as integer values when there are integer-valued analysis variables;
+		format nobs &target;
+		format fit_loess_low fit_loess fit_loess_upp;
+		set _PB_out_;
+		label 	value = " "
+				nobs = " "
+				fit_loess_low = "Lower Limit of 95% Confidence Band for Loess Fit"
+				fit_loess = "Weighted Loess Fit"
+				fit_loess_upp = "Upper Limit of 95% Confidence Band for Loess Fit";
+	run;
+	%if &log %then %do;
+		%callmacro(getnobs, _PB_out_ return=1, nobs nvars);
+		%put PLOTBINNED: Dataset %upcase(&out) created with &nobs observations and &nvars variables;
+		%put PLOTBINNED: with the data that can be used to reproduce the plots.;
+	%end;
+%end;
+
+%*** Output dataset containing the correlation between the observed binned values and the predicted LOESS values;
+%if %quote(&outcorr) ~= %then %do;
+	%* Compute the range of the target variable in the original data to be used for the normalized correlation calculation
+	%* which can be used as a measure of predictive power of the target by each input variable;
+	%GetStat(_PB_data_, var=&target, stat=range, name=_TARGET_RANGE_, log=0);
+
+	%*** Compute the correlation between the observed and predicted LOESS values;
+	proc sort data=_PB_out_;
+		by var value;
+	run;
+	proc corr data=_PB_out_ out=_PB_corr_ noprint;
+		by var;
+		var &target;
+		with fit_loess;
+		%* Use the same weight as for the LOESS fit;
+		weight nobs;
+	run;
+	%* Transpose;
+	proc transpose data=_PB_corr_ out=_PB_corr_(keep=var n corr);
+		where _TYPE_ in ("N", "CORR");
+		by var;
+		id _TYPE_;
+		var &target;
+	run;
+
+	%* Compute the range of the target variable so that the input variable spanning a larger range of the target variable
+	%* would be considered to be more predictive of the target variable;
+	%* The span of the target variable range is then measured as a percentage of its original range;
+	proc means data=_PB_out_ range noprint;
+		by var;
+		var &target;
+		output out=_PB_range_ range=range;
+	run;
+	data _PB_corr_;
+		format var n corr corr_std target_range;
+		merge 	_PB_corr_
+				_PB_range_(keep=var range rename=(range=target_range));
+		by var;
+		corr_std = corr * target_range / &_TARGET_RANGE_;
+		label 	n = "Number of bins"
+				target_range = "Target variable range"
+				corr = "Weighted correlation between observed binned values and predicted LOESS values"
+				corr_std = "Weighted correlation normalized by spanned target range";
+	run;
+	proc sort data=_PB_corr_ out=&outcorr;
+		by descending corr_std;
+	run;
+	%if &log %then %do;
+		%callmacro(getnobs, _PB_corr_ return=1, nobs nvars);
+		%put PLOTBINNED: Dataset %upcase(&outcorr) created with &nobs observations and &nvars variables;
+		%put PLOTBINNED: containing two correlation measures of the binned observed vs. predicted LOESS values.;
+	%end;
 %end;
 
 proc datasets nolist;
 	delete  _PB_data_
 			_PB_means_
+			_PB_out_
+			%if %quote(&outcorr) ~= %then %do;
+			_PB_corr_
+			_PB_range_
+			%end;
 			%if %quote(&datavartype) ~= %then %do;
 			_PB_vartypes_
 			%end;
@@ -309,7 +457,9 @@ quit;
 %* Delete global macro variables created here;
 %symdel _TARGET_MIN_ _TARGET_MAX_;
 %if &xaxisorig or &yaxisorig %then
-	%symdel %MakeList(&var, suffix=_MIN) %MakeList(&var, suffix=_MAX);
+	%symdel %MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MIN) %MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MAX);
+%if %quote(&outcorr) ~= %then
+	%symdel _TARGET_RANGE_;
 
 %if &log %then %do;
 	%put;
@@ -317,11 +467,7 @@ quit;
 	%put;
 %end;
 
-%let datetime_end = %sysfunc(DATETIME());
-%put *** START TIME: %quote(   %sysfunc(putn(&datetime_start, datetime20.)));
-%put *** END TIME: %quote(     %sysfunc(datetime(), datetime20.));
-%put *** EXECUTION TIME: %sysfunc(putn(%sysevalf(&datetime_end - &datetime_start.), hhmm8.2)) (hh:mm);
-
+%ExecTimeStop;
 %ResetSASOptions;
 
 %end;

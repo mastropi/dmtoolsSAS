@@ -1,0 +1,10 @@
+%* MACRO %ODSOutputClose;
+%* Created: 01-Sep-2015;
+%* Author: Daniel Mastropietro;
+%* Close an open ODS output file;
+%* SEE ALSO: %ODSOutputOpen;
+%MACRO ODSOutputClose(odsfile, odsfiletype=pdf) / store des="Closes an open ODS output file";
+%if %quote(&odsfile) ~= %then %do; 
+ods &odsfiletype close;
+%end;
+%MEND ODSOutputClose;

@@ -1,8 +1,8 @@
-/* Macro %LorenzCurve
-Version: 		1.00
+/* MACRO %LorenzCurve
+Version: 		1.01
 Author: 		Daniel Mastropietro
 Created:		15-May-2015
-Modified:		09-Jul-2015
+Modified:		29-Aug-2015 (previous: 09-Jul-2015)
 SAS version:	9.4
 
 DESCRIPTION:
@@ -18,13 +18,17 @@ smallest variable value.
 
 USAGE:
 %LorenzCurve(
-	data,		*** Input dataset.
-	target=,	*** Target variable (assumed non-negative)
-	var=,		*** List of input variables.
-	missing=1,	*** Whether missing values in the input variables are allowed.
-	out=, 		*** Output dataset containing the area between the Lorenz Curve and the diagonal
-	plot=1,		*** Whether to plot the Lorenz curve of each analysis variable
-	log=1)		*** Show messages in log?
+	data,					*** Input dataset.
+	target=,				*** Target variable (assumed non-negative)
+	var=,					*** List of input variables.
+	missing=1,				*** Whether missing values in the input variables are allowed.
+	out=, 					*** Output dataset containing the area between the Lorenz Curve and the diagonal
+	sortby=descending area,	*** Sorting criteria of the output dataset.
+	plot=1,					*** Whether to plot the Lorenz curve of each analysis variable
+	odspath=, 				*** Quoted name of the path where all generated files should be saved.
+	odsfile=,				*** Quoted name of the file where the plots are saved.
+	odsfiletype=pdf,		*** Type of the file specified in ODSFILE or output format.
+	log=1)					*** Show messages in log?
 
 REQUIRED PARAMETERS:
 - data:			Input dataset. It can contain additional options as in any data=
@@ -51,9 +55,22 @@ OPTIONAL PARAMETERS:
 				sorting perfectly sorts the target variable values.
 				default: <data>_lorenz
 
+- sortby:		Sorting criteria of the output dataset.
+				default: descending area (i.e. by descending Lorenz area)
+
 - plot:			Whether to plot the Lorenz curve of each analysis variable.
 				Possible values: 0 => No, 1 => Yes.
 				default: 1
+
+- odspath:		Quoted name of the path containing the files where plots should be saved.
+				This is only valid for HTML output.
+				default: none
+
+- odsfile:		Quoted name of the file where plots should be saved.
+				default: none
+
+- odsfiletype:	Type of the file specified in the ODSFILE= option.
+				default: pdf
 
 - log:			Show messages in log?
 				Possible values: 0 => No, 1 => Yes.
@@ -70,6 +87,8 @@ NOTES:
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %CheckInputParameters
+- %ExecTimeStart
+- %ExecTimeStop
 - %GetDataName
 - %Getnobs
 - %GetNroElements
@@ -86,14 +105,19 @@ in general a continuous variable, similar to the Gini index for binary targets.
 */
 
 &rsubmit;
-%MACRO LorenzCurve(	data,
-					target=,
-					var=,
-					missing=1,
-					out=,
-					plot=1,
-					log=1,
-					help=0) / store des="Plots the Lorenz Curve for a non-negative target variable and its area w.r.t. the diagonal";
+%MACRO LorenzCurve(	
+		data,
+		target=,
+		var=,
+		missing=1,
+		out=,
+		sortby=descending area,
+		plot=1,
+		odspath=,
+		odsfile=,
+		odsfiletype=pdf,
+		log=1,
+		help=0) / store des="Plots the Lorenz Curve for a non-negative target variable and its area w.r.t. the diagonal";
 %local error;
 
 %let error = 0;
@@ -108,7 +132,11 @@ in general a continuous variable, similar to the Gini index for binary targets.
 	%put missing=1 , %quote(            *** Whether missing values in the input variables are allowed.);
 	%put out= , %quote(                 *** Output dataset containing the area between the Lorenz Curve);
 	%put %quote(                        *** and the diagonal %(in absolute value%) for each variable.);
+	%put sortby= , %quote(              *** Sorting criteria of the output dataset.);
 	%put plot= , %quote(                *** Whether to plot the Lorenz curve of each analysis variable.);
+	%put odspath= ,	%quote(		        *** Quoted name of the path where all generated files should be saved.);
+	%put odsfile= ,	%quote(		        *** Quoted name of the file where the plots are saved.);
+	%put odsfiletype=pdf, %quote(	    *** Type of the file specified in ODSFILE or output format.);
 	%put log=1) %quote(                 *** Show messages in log?);
 %MEND ShowMacroCall;
 
@@ -144,7 +172,11 @@ in general a continuous variable, similar to the Gini index for binary targets.
 	%put LORENZCURVE: - var = %quote(          &var);
 	%put LORENZCURVE: - missing = %quote(      &missing);
 	%put LORENZCURVE: - out = %quote(          &out);
+	%put LORENZCURVE: - sortby = %quote(       &sortby);
 	%put LORENZCURVE: - plot = %quote(         &plot);
+	%put LORENZCURVE: - odspath = %quote(      &odspath);
+	%put LORENZCURVE: - odsfile = %quote(      &odsfile);
+	%put LORENZCURVE: - odsfiletype = %quote(  &odsfiletype);
 	%put LORENZCURVE: - log = %quote(          &log);
 	%put;
 %end;
@@ -167,6 +199,11 @@ in general a continuous variable, similar to the Gini index for binary targets.
 %if ~&error %then %do;
 
 %SetSASOptions;
+%ExecTimeStart;
+
+%if &plot %then %do;
+	%ODSOutputOpen(&odspath, &odsfile, &odsfiletype);
+%end;
 
 %* Create a copy of the input dataset where any included data options are applied;
 data _LC_data_;
@@ -288,6 +325,17 @@ quit;
 	%end;
 %end;
 
+%if &plot %then %do;
+	%ODSOutputClose(&odspath, &odsfile, &odsfiletype);
+%end;
+
+%* Sort output dataset;
+%if %quote(&sortby) ~= %then %do;
+	proc sort data=&out_name;
+		by &sortby;
+	run;
+%end;
+
 %* Label of output dataset;
 proc datasets library=&out_lib nolist;
 	modify &out_name (label = "Lorenz curve areas for dataset %quote(&data)");
@@ -306,6 +354,7 @@ quit;
 	%put;
 %end;
 
+%ExecTimeStop;
 %ResetSASOptions;
 %end;	%* if ~&error;
 
