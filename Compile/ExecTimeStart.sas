@@ -7,6 +7,7 @@
 %* - %ExecTimeStop
 %* - %SetSASOptions
 %* - %ResetSASOptions;
+&rsubmit;
 %MACRO ExecTimeStart / store des="Starts the clock to measure execution time of a macro";
 %* Mesure the execution time for the outer-most macro being executed;
 %* The macro variable _Macro_Call_Level_ is handled by %SetSASOptions and %ResetSASOptions;

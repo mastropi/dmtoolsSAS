@@ -3,8 +3,16 @@
 %* Author: Daniel Mastropietro;
 %* Close an open ODS output file;
 %* SEE ALSO: %ODSOutputOpen;
-%MACRO ODSOutputClose(odsfile, odsfiletype=pdf) / store des="Closes an open ODS output file";
+&rsubmit;
+%MACRO ODSOutputClose(odsfile, odsfiletype=pdf, macro=, log=0) / store des="Closes an open ODS output file";
 %if %quote(&odsfile) ~= %then %do; 
-ods &odsfiletype close;
+	ods &odsfiletype close;
+	%if &log %then %do;
+		%put;
+		%if %quote(&macro) ~= %then
+			%put %upcase(&macro): %upcase(&odsfiletype) file %quote(&odsfile) created by ODS.;
+		%else
+			%put %upcase(&odsfiletype) file %quote(&odsfile) created by ODS.;
+	%end;
 %end;
 %MEND ODSOutputClose;

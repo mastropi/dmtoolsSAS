@@ -68,7 +68,6 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %ResetSASOptions
 - %SetSASOptions
 */
-
 &rsubmit;
 %MACRO QualifyVars(
 		data,
@@ -88,6 +87,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %local var4freq;
 
 %SetSASOptions;
+%ExecTimeStart;
 
 %if &log %then %do;
 	%put;
@@ -286,6 +286,7 @@ quit;
 	%put;
 %end;
 
+%ExecTimeStop;
 %ResetSASOptions;
 
 %MEND QualifyVars;

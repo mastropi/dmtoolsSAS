@@ -108,7 +108,7 @@ run;
 * Compile macros;
 %macro runit;
 %if &run %then %do;
-	%include "&compiledir\&codefile";
+	%include "&compiledir\&codefile" / source;
 %end;
 %mend runit;
 %runit;

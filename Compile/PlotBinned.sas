@@ -124,7 +124,6 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %ResetSASOptions
 - %SetSASOptions
 */
-
 &rsubmit;
 %MACRO PlotBinned(
 		data,
@@ -185,6 +184,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %local varlist;
 %local vartype;
 %local condition;
+%local maxlengthlabel;
+%local _label_;
 %local _var_;
 %local _vartype_;
 %local nobs nvars;
@@ -216,10 +217,10 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put;
 %end;
 
-%SetSASOptions;
+%SetSASOptions(varlenchk=nowarn);	%* Set the VARLENCHECK= option to NOWARN in order to avoid a warning message when the length of the LABEL variable is shortened in this macro;
 %ExecTimeStart;
 %if &plot %then %do;
-	%ODSOutputOpen(&odspath, &odsfile, odsfiletype=&odsfiletype);
+	%ODSOutputOpen(&odspath, &odsfile, odsfiletype=&odsfiletype, macro=PLOTBINNED, log=&log);
 %end;
 
 /*--------------------------------- Parse input parameters -----------------------------------*/
@@ -259,8 +260,11 @@ quit;
 
 %*** Prepare data;
 %if %quote(&var) ~= %then %do;
-	%put PLOTBINNED: Categorizing continuous variables...;
+	%if &log %then
+		%put PLOTBINNED: Categorizing continuous variables...;
 	%Categorize(&data, var=&var, condition=&condition, alltogether=&alltogether, groupsize=&groupsize, groups=&groups, both=0, value=&value, varvalue=&var, out=_PB_data_(keep=&target &var &varclass), log=0);
+	%if &log %then
+		%put;
 %end;
 %else %do;
 	data _PB_data_(keep=&target &varclass);
@@ -282,22 +286,28 @@ quit;
 %end;
 
 %*** Iterate on each input variable;
+%let maxlengthlabel = 0;
 %do i = 1 %to &nro_vars;
 	%let _var_ = %scan(&var, &i , ' ');
 	%let _vartype_ = %scan(&vartype, &i, ' ');
 	%if &log %then %do;
 		%if &_vartype_ = C %then
-			%put PLOTBINNED: Computing data for plot of %upcase(&target) vs. (categorical) variable &i of &nro_vars: %upcase(&_var_)...;
+			%put PLOTBINNED: Computing plot of %upcase(&target) vs. (categorical) variable &i of &nro_vars: %upcase(&_var_);
 		%else
-			%put PLOTBINNED: Computing data for plot of %upcase(&target) vs. &groups bins of (continuous) variable &i of &nro_vars: %upcase(&_var_)...;
+			%put PLOTBINNED: Computing plot of %upcase(&target) vs. binned (continuous) variable &i of &nro_vars: %upcase(&_var_);
 	%end;
 	%Means(_PB_data_, by=&_var_, var=&target, stat=&value n, name=&target nobs, out=_PB_means_, log=0);
 
+	%* Read the variable label;
+	%let _label_ = %GetVarAttrib(_PB_data_, &_var_, varlabel);
+	%let maxlengthlabel = %sysfunc(max(&maxlengthlabel, %length(%quote(&_label_))));
+
 	%* Add the variable information;
 	data _PB_means_;
-		length var $32;
+		length var $32 label $500;	%* Use 500 as label length to be kind of safe that we do not truncate any labels;
 		set _PB_means_;
 		var = "&_var_";
+		label = "%quote(&_label_)";
 	run;
 
 	%* Compute the fitted loess;
@@ -313,7 +323,7 @@ quit;
 		%* THIS IS IMPORTANT BECAUSE OTHERWISE THE LOESS FIT OF THE PLOT MAY BE VERY DIFFERENT FROM THE LOESS FIT HERE;
 		model &target = &_var_ / select=aicc(global);
 		weight nobs;
-		output 	out=_PB_means_(keep=var &_var_ nobs &target fit_loess fit_loess_low fit_loess_upp)
+		output 	out=_PB_means_(keep=var label &_var_ nobs &target fit_loess fit_loess_low fit_loess_upp)
 				predicted=fit_loess LCLM=fit_loess_low UCLM=fit_loess_upp;
 	run;
 	ods exclude none;
@@ -363,15 +373,17 @@ quit;
 %end;
 
 %if &plot %then %do;
-	%ODSOutputClose(&odsfile, odsfiletype=&odsfiletype);
+	%ODSOutputClose(&odsfile, odsfiletype=&odsfiletype, macro=PLOTBINNED, log=&log);
 %end;
 
 %if %quote(&out) ~= %then %do;
 	data &out;
-		format var;
+		format var $32. label $&maxlengthlabel..;
 		format value BEST8.;	%* This format is to make sure that values are not shown as integer values when there are integer-valued analysis variables;
 		format nobs &target;
 		format fit_loess_low fit_loess fit_loess_upp;
+		%* Set the final length of the label variable;
+		length label $&maxlengthlabel;
 		set _PB_out_;
 		label 	value = " "
 				nobs = " "
@@ -381,6 +393,7 @@ quit;
 	run;
 	%if &log %then %do;
 		%callmacro(getnobs, _PB_out_ return=1, nobs nvars);
+		%put;
 		%put PLOTBINNED: Dataset %upcase(&out) created with &nobs observations and &nvars variables;
 		%put PLOTBINNED: with the data that can be used to reproduce the plots.;
 	%end;
@@ -397,16 +410,16 @@ quit;
 		by var value;
 	run;
 	proc corr data=_PB_out_ out=_PB_corr_ noprint;
-		by var;
+		by var label;
 		var &target;
 		with fit_loess;
 		%* Use the same weight as for the LOESS fit;
 		weight nobs;
 	run;
 	%* Transpose;
-	proc transpose data=_PB_corr_ out=_PB_corr_(keep=var n corr);
+	proc transpose data=_PB_corr_ out=_PB_corr_(keep=var label n corr);
 		where _TYPE_ in ("N", "CORR");
-		by var;
+		by var label;
 		id _TYPE_;
 		var &target;
 	run;
@@ -420,13 +433,19 @@ quit;
 		output out=_PB_range_ range=range;
 	run;
 	data _PB_corr_;
-		format var n corr corr_std target_range;
+		format var $32. label $&maxlengthlabel..;
+		format n corr corr_std target_range;
+		format target_range_rel percent7.1;
+		%* Set the final length of the label variable;
+		length label $&maxlengthlabel;
 		merge 	_PB_corr_
 				_PB_range_(keep=var range rename=(range=target_range));
 		by var;
-		corr_std = corr * target_range / &_TARGET_RANGE_;
+		target_range_rel = target_range / &_TARGET_RANGE_;
+		corr_std = corr * target_range_rel;
 		label 	n = "Number of bins"
-				target_range = "Target variable range"
+				target_range = "Range of target variable"
+				target_range_rel = "Relative range of target variable (input data range = %sysfunc(putn(&_TARGET_RANGE_, best8.)))"
 				corr = "Weighted correlation between observed binned values and predicted LOESS values"
 				corr_std = "Weighted correlation normalized by spanned target range";
 	run;
@@ -435,6 +454,7 @@ quit;
 	run;
 	%if &log %then %do;
 		%callmacro(getnobs, _PB_corr_ return=1, nobs nvars);
+		%put;
 		%put PLOTBINNED: Dataset %upcase(&outcorr) created with &nobs observations and &nvars variables;
 		%put PLOTBINNED: containing two correlation measures of the binned observed vs. predicted LOESS values.;
 	%end;

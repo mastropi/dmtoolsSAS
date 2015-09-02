@@ -7,6 +7,7 @@
 %* - %ExecTimeStart
 %* - %SetSASOptions
 %* - %ResetSASOptions;
+&rsubmit;
 %MACRO ExecTimeStop / store des="Measures the time elapsed since %ExecTimeStart was last called";
 %local _datetime_end_;
 %local _diff_time_;

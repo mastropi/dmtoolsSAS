@@ -154,6 +154,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %end;
 
 %SetSASoptions;
+%ExecTimeStart;
+%ODSOutputOpen(&odspath, &odsfile, odsfiletype=&odsfiletype, macro=PHTESTPLOTS, log=&log);
 
 %* Keep track of total exceution time;
 %* Ref: http://www.sascommunity.org/wiki/Tips:Program_run_time;
@@ -161,17 +163,6 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %let nro_varclass = %GetNroElements(&varclass);
 %let nro_varnum = %GetNroElements(&varnum);
-
-%if %quote(&odsfile) ~= %then %do;
-	%if %upcase(%quote(&odsfiletype)) = HTML and %quote(&odspath) ~= %then %do;
-		%* This distinction of HTML output is necessary because this is the only format that accepts the PATH= option...;
-		%* (the reason being that the HTML output stores graphs in separate files (e.g. PNG files that are linked to the HTML output);
-		ods &odsfiletype path=&odspath file=&odsfile style=statistical;
-	%end;
-	%else %do;
-		ods &odsfiletype file=&odsfile style=statistical;
-	%end;
-%end;
 
 %do i = 1 %to &nro_varclass;
 	%let _var_ = %scan(&varclass , &i , ' ');
@@ -217,9 +208,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	title;
 %end;
 %* Close the ODS output;
-%if %quote(&odsfile) ~= %then %do; 
-ods &odsfiletype close;
-%end;
+%ODSOutputClose(&odsfile, odsfiletype=&odsfiletype, macro=PHTESTPLOTS, log=&log);
 
 %if &nro_varnum > 0 %then %do;
 	proc datasets nolist;
@@ -233,11 +222,7 @@ ods &odsfiletype close;
 	%put;
 %end;
 
-%let datetime_end = %sysfunc(DATETIME());
-%put *** START TIME: %quote(   %sysfunc(putn(&datetime_start, datetime20.)));
-%put *** END TIME: %quote(     %sysfunc(datetime(), datetime20.));
-%put *** EXECUTION TIME: %sysfunc(putn(%sysevalf(&datetime_end - &datetime_start.), hhmm8.2)) (hh:mm);
-
+%ExecTimeStop;
 %ResetSASoptions;
 
 %end;	%* %if ~%CheckInputParameters;

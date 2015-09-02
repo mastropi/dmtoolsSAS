@@ -202,7 +202,7 @@ in general a continuous variable, similar to the Gini index for binary targets.
 %ExecTimeStart;
 
 %if &plot %then %do;
-	%ODSOutputOpen(&odspath, &odsfile, &odsfiletype);
+	%ODSOutputOpen(&odspath, &odsfile, &odsfiletype, macro=LORENZCURVE, log=&log);
 %end;
 
 %* Create a copy of the input dataset where any included data options are applied;
@@ -326,7 +326,7 @@ quit;
 %end;
 
 %if &plot %then %do;
-	%ODSOutputClose(&odspath, &odsfile, &odsfiletype);
+	%ODSOutputClose(&odspath, &odsfile, &odsfiletype, macro=LORENZCURVE, log=&log);
 %end;
 
 %* Sort output dataset;

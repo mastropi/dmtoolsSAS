@@ -20,12 +20,15 @@ avoid showing SAS messages in the log.
 
 OTHER MACROS USED IN THIS MACRO:
 - %ExistMacroVar
+
+HISTORY:
+- 2015/09/02: Added VARLENCHK= parameter to set the VARLENCHK= option.
 */
 &rsubmit;
-%MACRO SetSASOptions(notes=0, labels=1) / store des="Sets SAS options prior to a macro execution";
+%MACRO SetSASOptions(notes=0, labels=1, varlenchk=warn) / store des="Sets SAS options prior to a macro execution";
 %*Setting nonotes options and getting current options settings;
 %if ~%ExistMacroVar(_Macro_Call_Level_) %then %do;
-	%global _Macro_Call_Level_ _notes_option_ _label_option_ _lastds_;
+	%global _Macro_Call_Level_ _notes_option_ _label_option_ _lastds_ _varlenchk_option_;
 	%let _Macro_Call_Level_ = 1;
 
 	%* SAS notes settings;
@@ -53,6 +56,11 @@ OTHER MACROS USED IN THIS MACRO:
 	%else %do;
 	options nolabels;
 	%end;
+
+	%* VARLENCHECK option: NOWARN, WARN or ERROR when the length of a variable is shortened;
+	%let _varlenchk_option_ = %sysfunc(getoption(varlenchk));
+	options varlenchk=&varlenchk;
+
 	%* Name of the last dataset used;
 	%let _lastds_=&syslast;
 %end;
