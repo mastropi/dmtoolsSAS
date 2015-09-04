@@ -1,8 +1,8 @@
 /* MACRO %LorenzCurve
-Version: 		1.01
+Version: 		1.02
 Author: 		Daniel Mastropietro
 Created:		15-May-2015
-Modified:		29-Aug-2015 (previous: 09-Jul-2015)
+Modified:		04-Sep-2015 (previous: 29-Aug-2015)
 SAS version:	9.4
 
 DESCRIPTION:
@@ -22,6 +22,7 @@ USAGE:
 	target=,				*** Target variable (assumed non-negative)
 	var=,					*** List of input variables.
 	missing=1,				*** Whether missing values in the input variables are allowed.
+	condition=,				*** Condition to be satisfied by each input variable to be included in the analysis.
 	out=, 					*** Output dataset containing the area between the Lorenz Curve and the diagonal
 	sortby=descending area,	*** Sorting criteria of the output dataset.
 	plot=1,					*** Whether to plot the Lorenz curve of each analysis variable
@@ -44,6 +45,10 @@ OPTIONAL PARAMETERS:
 				and are represented by the leftmost non-zero value in the Lorenz Curve.
 				Possible values: 0 => No, 1 => Yes.
 				default: 1
+
+- condition:	Condition to be satisfied by each input variable to be included in the analysis.
+				It should be given as just the right hand side of a WHERE expression.
+				Ex: ~= 0
 
 - out:			Output dataset containing the area between the Lorenz Curve and the diagonal
 				(perfect equality line). The absolute value of the area is reported.
@@ -93,6 +98,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Getnobs
 - %GetNroElements
 - %GetStat
+- %GetVarLabel
 - %ResetSASOptions
 - %SetSASOptions
 
@@ -109,6 +115,7 @@ in general a continuous variable, similar to the Gini index for binary targets.
 		target=,
 		var=,
 		missing=1,
+		condition=,
 		out=,
 		sortby=descending area,
 		plot=1,
@@ -129,6 +136,7 @@ in general a continuous variable, similar to the Gini index for binary targets.
 	%put target= , (REQUIRED) %quote(   *** Target variable %(assumed non-negative%).);
 	%put var= , (REQUIRED) %quote(      *** List of input variables.);
 	%put missing=1 , %quote(            *** Whether missing values in the input variables are allowed.);
+	%put condition= , %quote(           *** Condition to be satisfied by each input variable to be included in the analysis.);
 	%put out= , %quote(                 *** Output dataset containing the area between the Lorenz Curve);
 	%put %quote(                        *** and the diagonal %(in absolute value%) for each variable.);
 	%put sortby= , %quote(              *** Sorting criteria of the output dataset.);
@@ -152,6 +160,8 @@ in general a continuous variable, similar to the Gini index for binary targets.
 %local out_lib;
 %local out_name;
 %local i;
+%local maxlengthlabel;
+%local _label_;
 %local _var_;
 %local nvar;
 %local nobs;			%* Number of valid observations (based on the target variable);
@@ -170,6 +180,7 @@ in general a continuous variable, similar to the Gini index for binary targets.
 	%put LORENZCURVE: - target = %quote(       &target);
 	%put LORENZCURVE: - var = %quote(          &var);
 	%put LORENZCURVE: - missing = %quote(      &missing);
+	%put LORENZCURVE: - condition = %quote(    &condition);
 	%put LORENZCURVE: - out = %quote(          &out);
 	%put LORENZCURVE: - sortby = %quote(       &sortby);
 	%put LORENZCURVE: - plot = %quote(         &plot);
@@ -197,7 +208,7 @@ in general a continuous variable, similar to the Gini index for binary targets.
 %*----------------------- Parse input parameters ----------------------;
 %if ~&error %then %do;
 
-%SetSASOptions;
+%SetSASOptions(varlenchk=nowarn);
 %ExecTimeStart;
 
 %if &plot %then %do;
@@ -217,25 +228,32 @@ proc datasets nolist;
 quit;
 
 %let nvar = %GetNroElements(&var);
+%let maxlengthlabel = 0;
 %do i = 1 %to &nvar;
 	%let _var_ = %scan(&var, &i, ' ');
+	%let _label_ = %GetVarLabel(_LC_data_, &_var_);
+	%let maxlengthlabel = %sysfunc(max(&maxlengthlabel, %length(%quote(&_label_))));
 
 	%* Sum the target variable for each value of the input variable so that we have unique values in the input variable;
 	proc means data=_LC_data_ sum noprint;
+		%if %quote(&condition) ~= %then %do;
+		where &_var_ &condition;
+		%end;
 		class &_var_ %if &missing %then %do; / missing %end;;	%* include missing values as a valid class value (this should show up as the first value of the input variable);
 		var &target;
 		output out=_LC_data_means_ n=ntarget sum=&target;
 	run;
 
 	%* Computation of F(x), cdf of x, and L(F), Lorenz curve;
-	data _LC_data_means_ _LC_area_(keep=var nobs area_prp rename=(area_prp=area));
+	data _LC_data_means_ _LC_area_(keep=var label nobs area_prp rename=(area_prp=area));
 		format var nobs;
 		format area_prp percent7.2;
 		label 	var = "Input variable"
 				nobs = "Number of valid cases"
 				area_prp = "Area between Lorenz curve and perfect equality line";
-		length var $32;
+		length var $32 label $500;	%* Use 500 as label length to be kind of safe that we do not truncate any labels;
 		var = "&_var_";
+		label = "%quote(&_label_)";
 		if _N_ = 1 then do;
 			%* Read the overall statistics (with the totals);
 			set _LC_data_means_(where=(_TYPE_=0)
@@ -328,15 +346,16 @@ quit;
 
 %* Create output dataset and sort it if requested;
 %if %quote(&out) ~= %then %do;
+	data _LC_out_;
+		format var label;
+		%* Set the final length of the label variable;
+		length label $&maxlengthlabel;
+		set _LC_out_;
+	run;
 	%if %quote(&sortby) ~= %then %do;
 		%* Sort output dataset;
 		proc sort data=_LC_out_ out=&out;
 			by &sortby;
-		run;
-	%end;
-	%else %do;
-		data &out;
-			set _LC_out_;
 		run;
 	%end;
 

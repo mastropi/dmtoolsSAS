@@ -85,6 +85,15 @@ OPTIONAL PARAMETERS:
 - alltogether:	Whether the values excluded from the categorization process because of
 				the CONDITION specification should be left as is in the output dataset
 				or grouped all together into a single category.
+				When alltogether = 1 and statistic-valued categorized variables are
+				requested with the VALUE= parameter, the representative value stored for
+				the single group containing all the excluded values takes into account
+				the possibly different NUMBER OF CASES where the input variable takes
+				each of the excluded values. For example, if VALUE=mean, then the
+				representative value stored in the statistic-valued categorized variable
+				is the mean of the excluded cases, which is equivalent to computing the
+				WEIGHTED average of each excluded value (i.e. weighted by the number of
+				cases where the input variable takes each of the excluded values).
 				default: 1
 
 - varcat:		List of names to be used for the integer-valued categorized variables.
@@ -120,12 +129,12 @@ OPTIONAL PARAMETERS:
 				BOTH=0 option.
 				default: _cat
 
-- value:		Valor a usar para las categorías de las variables categorizadas.
-				Puede ser cualquier statistic keyword válida en PROC MEANS.
-				(Ej: mean, median, q3, etc.)
-				Si su valor es vacío (el default), los valores asignados a las variables
-				categorizadas son números enteros consecutivos entre 1 y el número de grupos
-				en que se desea categorizar las variables.
+- value:		Value to use for the statistic-based categorized variables.
+				Any statistic keyword valid in PROC MEANS is accepted.
+				(e.g. mean, median, q3, etc.)
+				If VALUE= is empty (default), the values assigned to the categorized
+				variables are consecutive integer numbers between 1 and the number of
+				requested groups or categories.
 				The name of the variables containing the statistic requested by this
 				parameter (a.k.a. statistic-valued categorized variables) are formed by adding
 				the suffix _&VALUE to either the suffix specified in parameter SUFFIX

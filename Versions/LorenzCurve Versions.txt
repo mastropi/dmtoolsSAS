@@ -19,3 +19,8 @@ V.1.00: 2015/08/03 (DM)
 
 V.1.01: 2015/08/29 (DM)
 	- New parameters SORTBY=, ODSPATH=, ODSFILE=, and ODSFILETYPE=, the first one used to define the order of the output dataset (defaults to "descending area") and the three last ones to generate ODS output file containing the Lorenz curves.
+
+V.1.02: 2015/09/04 (DM)
+	- New parameter CONDITION= which allows the user to pass a condition that needs to be satisfied by each input variable defining cases to be included in the analysis.
+	- Added the LABEL variable in the output dataset containing the input variable labels.
+

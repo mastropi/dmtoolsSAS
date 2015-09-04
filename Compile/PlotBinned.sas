@@ -16,6 +16,8 @@ USAGE:
 	var=_NUMERIC_, 		    *** List of input variables to analyze.
 	varclass=, 				*** List of categorical input variables among those listed in VAR.
 	datavartype=,			*** Dataset containing the type or level of the variables listed in VAR.
+	exclude=,				*** List of values taken by the analyzed variable to treat as separate bins.
+	alltogether=0,			*** Whehter the excluded values should be put into the same bin.
 	groupsize=,				*** Nro. of cases each group should contain when categorizing continuous variables.
 	groups=20,				*** Nro. of groups to use in the categorization of continuous variables.
 	value=mean,				*** Name of the statistic for both the input and target variable in each bin.
@@ -49,6 +51,19 @@ OPTIONAL PARAMETERS:
 						 continuous except those with LEVEL = "categorical" (not case sensitive).
 				Typically this dataset is created by the %QualifyVars macro.
 				default: empty
+
+- exclude		List of values taken by the analyzed variable to treat as separate bins.
+				The values should be separated by commas.
+				Ex: exclude=%quote(0, 1)
+				default: empty
+
+- alltogether	Whether the excluded values listed in EXCLUDE= should be put into the same bin.
+				Possible values: 0 => No (put each value into a separate bin)
+								 1 => Yes (put all excluded values into the same bin. In this case
+											the representative value of the bin will be based on the
+											statistic specified in VALUE= weighted by the number of
+											cases in each excluded value)
+				default: 0
 
 - groupsize:	Number of cases each group or bin should contain.
 				This option overrides the GROUPS parameter.
@@ -117,6 +132,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %ExecTimeStart
 - %ExecTimeStop
 - %GetNroElements
+- %GetVarLabel
 - %MakeListFromName
 - %MakeListFromVar
 - %RemoveFromList
@@ -156,6 +172,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put var=_NUMERIC_, %quote(         *** List of input variables to analyze.);
 	%put varclass= , %quote(            *** List of categorical input variables among those listed in VAR.);
 	%put datavartype= , %quote(         *** Dataset containing the type or level of the variables listed in VAR.);
+	%put exclude= ,	%quote(             *** List of values taken by the analyzed variable to treat as separate bins.);
+	%put alltogether=0 , %quote(        *** Whehter the excluded values should be put into the same bin.);
 	%put groupsize= , %quote(           *** Nro. of cases each group should contain when categorizing continuous variables.);
 	%put groups=3 , %quote(             *** Nro. of groups to use in the categorization of continuous variables.);
 	%put value=mean , %quote(           *** Name of the statistic for both the input and target variable in each bin.);
@@ -201,6 +219,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put PLOTBINNED: - var = %quote(          &var);
 	%put PLOTBINNED: - varclass = %quote(     &varclass);
 	%put PLOTBINNED: - datavartype = %quote(  &datavartype);
+	%put PLOTBINNED: - exclude = %quote(      &exclude);
+	%put PLOTBINNED: - alltogether = %quote(  &alltogether);
 	%put PLOTBINNED: - groupsize = %quote(    &groupsize);
 	%put PLOTBINNED: - groups = %quote(       &groups);
 	%put PLOTBINNED: - value = %quote(        &value);
@@ -299,7 +319,7 @@ quit;
 	%Means(_PB_data_, by=&_var_, var=&target, stat=&value n, name=&target nobs, out=_PB_means_, log=0);
 
 	%* Read the variable label;
-	%let _label_ = %GetVarAttrib(_PB_data_, &_var_, varlabel);
+	%let _label_ = %GetVarLabel(_PB_data_, &_var_);
 	%let maxlengthlabel = %sysfunc(max(&maxlengthlabel, %length(%quote(&_label_))));
 
 	%* Add the variable information;

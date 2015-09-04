@@ -78,6 +78,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put 	%quote(                     matching criterion.);
 		%put	DataComputeWithMissing %quote(Generate data statements to handle missing values in a computed variable.);
 		%put	Drop %quote(                Drop a set of variables in a dataset, regardless if they exist or not.);
+		%put 	GetVarLabel %quote(         Get the label of a variable in a dataset.);
 		%put	GetVarList %quote(          Get the list of variables in a dataset associated with more complex listing);
 		%put	%quote(                     %(like x1-x9, _NUMERIC_, etc.%).);
   		%put	GetVarNames	%quote(         Get the names of the variables present in a dataset.);
@@ -254,6 +255,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	GetNroElements %quote(      Get the nro. of elements in a list.);
 		%put	GetStat	%quote(             Get the value of ONE specified statistic for a set of variables);
 		%put	%quote(                     in a dataset.);
+		%put 	GetVarLabel %quote(         Get the label of a variable in a dataset.);
 		%put	GetVarList %quote(          Get the list of variables associated with more complex listing);
 		%put	%quote(                     %(like hyphen, _NUMERIC_, etc.%).);
 		%put	GetVarNames	%quote(         Get the names of the variables present in a dataset.);
