@@ -103,7 +103,6 @@ APPLICATIONS:
 Get a graphical and quantitative measure of the input variable strength in predicting a numeric target variable,
 in general a continuous variable, similar to the Gini index for binary targets.
 */
-
 &rsubmit;
 %MACRO LorenzCurve(	
 		data,
@@ -202,7 +201,7 @@ in general a continuous variable, similar to the Gini index for binary targets.
 %ExecTimeStart;
 
 %if &plot %then %do;
-	%ODSOutputOpen(&odspath, &odsfile, &odsfiletype, macro=LORENZCURVE, log=&log);
+	%ODSOutputOpen(&odspath, &odsfile, odsfiletype=&odsfiletype, macro=LORENZCURVE, log=&log);
 %end;
 
 %* Create a copy of the input dataset where any included data options are applied;
@@ -212,11 +211,9 @@ data _LC_data_;
 		call symput ('ntotal', trim(left(put(_N_, comma15.0))));
 run;
 
-%* Delete the output dataset in case it exists;
-%let out_lib = %GetLibraryName(&out);
-%let out_name = %GetDataName(&out);
-proc datasets library=&out_lib nolist;
-	delete &out_name;
+%* Delete the temporary output dataset because it is used as base dataset in a PROC APPEND;
+proc datasets nolist;
+	delete _LC_out_;
 quit;
 
 %let nvar = %GetNroElements(&var);
@@ -299,7 +296,7 @@ quit;
 	run;
 
 	%* Append the area for this variable into the output dataset with all the areas;
-	proc append base=&out data=_LC_area_ FORCE;
+	proc append base=_LC_out_ data=_LC_area_ FORCE;
 	run;
 
 	%* Plot Lorenz curve;
@@ -326,26 +323,37 @@ quit;
 %end;
 
 %if &plot %then %do;
-	%ODSOutputClose(&odspath, &odsfile, &odsfiletype, macro=LORENZCURVE, log=&log);
+	%ODSOutputClose(&odsfile, odsfiletype=&odsfiletype, macro=LORENZCURVE, log=&log);
 %end;
 
-%* Sort output dataset;
-%if %quote(&sortby) ~= %then %do;
-	proc sort data=&out_name;
-		by &sortby;
-	run;
-%end;
+%* Create output dataset and sort it if requested;
+%if %quote(&out) ~= %then %do;
+	%if %quote(&sortby) ~= %then %do;
+		%* Sort output dataset;
+		proc sort data=_LC_out_ out=&out;
+			by &sortby;
+		run;
+	%end;
+	%else %do;
+		data &out;
+			set _LC_out_;
+		run;
+	%end;
 
-%* Label of output dataset;
-proc datasets library=&out_lib nolist;
-	modify &out_name (label = "Lorenz curve areas for dataset %quote(&data)");
-quit;
+	%* Add label to output dataset;
+	%let out_lib = %GetLibraryName(&out);
+	%let out_name = %GetDataName(&out);
+	proc datasets library=&out_lib nolist;
+		modify &out_name (label = "Lorenz curve areas for dataset %quote(&data)");
+	quit;
+%end;
 
 %* Delete temporary datasets;
 proc datasets nolist;
 	delete 	_LC_data_
 			_LC_data_means_
-			_LC_area_;
+			_LC_area_
+			_LC_out_;
 quit;
 
 %if &log %then %do;
