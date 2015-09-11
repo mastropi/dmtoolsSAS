@@ -13,3 +13,8 @@ V.1.03: 31/08/06 (DM)
 V.1.04: 2015/08/10 (DM)
 	- Added new parameter OUTVIF= in order to create an output dataset with the history of the VIFs at each iteration.
 	- Added call to new macro %AddLabels to add a column with the labels of the variables (if any) to all the output datasets.
+
+V.1.05: 2015/09/11 (DM)
+	- Added new parameter DATACORR= in order to pass a dataset containing correlation of the analysis variables with an hypothetical target. This correlation is used in the one-by-one variable removal process to select the variable to remove so that among competing variables, we select the one with the smallest correlation with the target.
+	The actual selection criterion is actually one that combines the VIF value with the variable correlation, after standardization of such values. More details on the process are described in the comments at the top of the macro.
+	Note that this correlation value is NOT used for the sub-process that removes several variables simultaneously based on the THRLARGE parameter. In this case only the VIF value is used 

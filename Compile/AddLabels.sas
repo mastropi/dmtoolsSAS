@@ -17,7 +17,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %local fLabels;
 %local order;
 
-%SetSASOptions;
+%SetSASOptions(varlenchk=NOWARN);
 
 %if &log %then %do;
 	%put;

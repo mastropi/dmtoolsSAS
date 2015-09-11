@@ -2,7 +2,7 @@
 Version: 		1.02
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		01-Sep-2015 (previous: 29-Aug-2015)
+Modified: 		10-Sep-2015 (previous: 01-Sep-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -100,7 +100,7 @@ OPTIONAL PARAMETERS:
 				- VAR: Input variable name
 				- N: Number of bins on which the correlation is computed
 				- CORR: Weighted (by N) correlation between binned values and predicted LOESS values
-				- CORR: Normalized weighted correlation by the target variable range
+				- CORR_ADJ: Normalized weighted correlation by the target variable range
 				- TARGET_RANGE: Target variable range in the original data
 				default: no output dataset is created
 
@@ -454,7 +454,7 @@ quit;
 	run;
 	data _PB_corr_;
 		format var $32. label $&maxlengthlabel..;
-		format n corr corr_std target_range;
+		format n corr corr_adj target_range;
 		format target_range_rel percent7.1;
 		%* Set the final length of the label variable;
 		length label $&maxlengthlabel;
@@ -462,15 +462,15 @@ quit;
 				_PB_range_(keep=var range rename=(range=target_range));
 		by var;
 		target_range_rel = target_range / &_TARGET_RANGE_;
-		corr_std = corr * target_range_rel;
+		corr_adj = corr * target_range_rel;
 		label 	n = "Number of bins"
 				target_range = "Range of target variable"
 				target_range_rel = "Relative range of target variable (input data range = %sysfunc(putn(&_TARGET_RANGE_, best8.)))"
 				corr = "Weighted correlation between observed binned values and predicted LOESS values"
-				corr_std = "Weighted correlation normalized by spanned target range";
+				corr_adj = "Weighted correlation normalized by the spanned target range";
 	run;
 	proc sort data=_PB_corr_ out=&outcorr;
-		by descending corr_std;
+		by descending corr_adj;
 	run;
 	%if &log %then %do;
 		%callmacro(getnobs, _PB_corr_ return=1, nobs nvars);
