@@ -1,8 +1,8 @@
 /* MACRO %QualifyVars
-Version:		1.01
+Version:		1.02
 Author:			Daniel Mastropietro
 Created:		03-Aug-2015
-Modified:		28-Aug-2015 (previous: 06-Aug-2015)
+Modified:		29-Sep-2015 (previous: 28-Aug-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -17,8 +17,8 @@ USAGE:
 %QualifyVars(
 	data,						*** Input dataset (data options are allowed)
 	var=_ALL_,					*** List of variables to qualify.
-	maxnfreq=10,				*** Max. number of distinct values to list the distinct values.
-	maxncat=10,					*** Max. number of distinct values to qualify variable as categorical.
+	maxncat=50,					*** Max. number of distinct values to qualify variable as categorical.
+	maxnfreq=50,				*** Max. number of distinct values to list the distinct values.
 	out=,						*** Output dataset (data options are allowed).
 	sortby=level nvalues var,	*** Sorting criteria of the output dataset.
 	log=1);						*** Show messages in log?
@@ -30,12 +30,13 @@ OPTIONAL PARAMETERS:
 - var:			List of variables to analyze.
 				default: _ALL_
 
-- maxnfreq:		Maximum number of distinct values that a variable can take in order to show
-				the distinct values taken by the variable. 
-				default: 10
-
 - maxncat:		Maximum number of distinct values for a variable to be classified as categorical. 
-				default: 10
+				default: 50
+
+- maxnfreq:		Maximum number of distinct values that a variable can take in order to show
+				the distinct values taken by the variable.
+				When empty, it is set to the same value as MAXNCAT.
+				default: empty
 
 - out:			Output dataset containing the variable qualification.
 				It contains the following columns in the order given:
@@ -72,8 +73,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %MACRO QualifyVars(
 		data,
 		var=_ALL_,
-		maxnfreq=10,
-		maxncat=10,
+		maxncat=50,
+		maxnfreq=,
 		out=,
 		sortby=level nvalues var,
 		log=1) / store des="Qualifies variables into categorical or continuous based on the number of distinct values";
@@ -96,8 +97,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put QUALIFYVARS: Input parameters:;
 	%put QUALIFYVARS: - Input dataset = %quote(    &data);
 	%put QUALIFYVARS: - var = %quote(              &var);
-	%put QUALIFYVARS: - maxnfreq = %quote(         &maxnfreq);
 	%put QUALIFYVARS: - maxncat = %quote(          &maxncat);
+	%put QUALIFYVARS: - maxnfreq = %quote(         &maxnfreq);
 	%put QUALIFYVARS: - out = %quote(              &out);
 	%put QUALIFYVARS: - sortby = %quote(           &sortby);
 	%put QUALIFYVARS: - log = %quote(              &log);
@@ -105,6 +106,10 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %end;
 
 /*---------------------------------- Parse input parameters ---------------------------------*/
+%*** MAXNFREQ=;
+%if %quote(&maxNFreq) = %then
+	%let maxNFreq = &maxNCat;
+
 %*** VAR=;
 %let var = %GetVarList(&data, var=&var, log=0);
 %let nro_vars = %GetNroElements(&var);
