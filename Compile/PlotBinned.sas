@@ -1,8 +1,8 @@
 /* MACRO %PlotBinned
-Version: 		1.03
+Version: 		1.04
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		20-Sep-2015 (previous: 10-Sep-2015)
+Modified: 		28-Sep-2015 (previous: 20-Sep-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -17,7 +17,7 @@ USAGE:
 	varclass=, 					*** List of categorical input variables among those listed in VAR.
 	datavartype=,				*** Dataset containing the type or level of the variables listed in VAR.
 	exclude=,					*** List of values taken by the analyzed variable to treat as separate bins.
-	alltogether=0,				*** Whehter the excluded values should be put into the same bin.
+	alltogether=0,				*** Whether the excluded values should be put into the same bin.
 	groupsize=,					*** Nro. of cases each group should contain when categorizing continuous variables.
 	groups=20,					*** Nro. of groups to use in the categorization of continuous variables.
 	value=mean,					*** Name of the statistic for both the input and target variable in each bin.
@@ -181,7 +181,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put varclass= , %quote(               *** List of categorical input variables among those listed in VAR.);
 	%put datavartype= , %quote(            *** Dataset containing the type or level of the variables listed in VAR.);
 	%put exclude= ,	%quote(                *** List of values taken by the analyzed variable to treat as separate bins.);
-	%put alltogether=0 , %quote(           *** Whehter the excluded values should be put into the same bin.);
+	%put alltogether=0 , %quote(           *** Whether the excluded values should be put into the same bin.);
 	%put groupsize= , %quote(              *** Nro. of cases each group should contain when categorizing continuous variables.);
 	%put groups=3 , %quote(                *** Nro. of groups to use in the categorization of continuous variables.);
 	%put value=mean , %quote(              *** Name of the statistic for both the input and target variable in each bin.);
@@ -279,7 +279,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%let var = %RemoveFromList(&var, &varclass, log=0);
 
 %*** EXCLUDE=;
-%let condition = not in (&exclude);
+%let condition = ;
+%if %quote(&exclude) ~= %then
+	%let condition = not in (&exclude);
 
 %*** OUT=;
 %* Delete local output dataset because data is appended to it;

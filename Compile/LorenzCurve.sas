@@ -139,8 +139,8 @@ in general a continuous variable, similar to the Gini index for binary targets.
 	%put condition= , %quote(           *** Condition to be satisfied by each input variable to be included in the analysis.);
 	%put out= , %quote(                 *** Output dataset containing the area between the Lorenz Curve);
 	%put %quote(                        *** and the diagonal %(in absolute value%) for each variable.);
-	%put sortby= , %quote(              *** Sorting criteria of the output dataset.);
-	%put plot= , %quote(                *** Whether to plot the Lorenz curve of each analysis variable.);
+	%put sortby=descending area, %quote(*** Sorting criteria of the output dataset.);
+	%put plot=1 , %quote(               *** Whether to plot the Lorenz curve of each analysis variable.);
 	%put odspath= ,	%quote(		        *** Quoted name of the path where all generated files should be saved.);
 	%put odsfile= ,	%quote(		        *** Quoted name of the file where the plots are saved.);
 	%put odsfiletype=pdf, %quote(	    *** Type of the file specified in ODSFILE or output format.);
