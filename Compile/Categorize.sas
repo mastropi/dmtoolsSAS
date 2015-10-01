@@ -740,7 +740,7 @@ run;
 			retain _categorize_count_ 0;
 			%* If the first value is a missing value (which is the same as asking if the
 			%* variable has missing values --since the dataset is sorted by &_var_), then the
-			%* first categorized value is 0, which is assigned to the missing value; 
+			%* first categorized value is also missing; 
 			if _N_ = 1 then do;
 				if &_var_ = . then
 					_VAR&i._CAT_ = .;
@@ -750,7 +750,7 @@ run;
 			/* DM-2015/08/13: Added this ELSE IF statement to fix a bug when the analysis variable has a missing value.
 			In fact, when this is the case, all the values of the categorized variable are missing! (since below
 			we do _VAR&i._CAT_ + 1 and the result is missing when _VAR&i._CAT_ is missing.
-			The condition checks that the first group of variable values is equal to missing (_VAR&i._CAT_ = .
+			The condition checks that the first group of variable values is equal to missing (_VAR&i._CAT_ = .)
 			and if that group ended in the previous record (first.&_var_). */
 			else if first.&_var_ and _VAR&i._CAT_ = . then
 				_VAR&i._CAT_ = 1;

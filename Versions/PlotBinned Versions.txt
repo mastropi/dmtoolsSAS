@@ -35,3 +35,6 @@ V.1.03: 2015/09/20 (DM)
 
 V.1.04: 2015/09/28 (DM)
 	- Fixed a bug with the EXCLUDE= parameter: when this was empty, an error occurred with the %Categorize macro because the case when EXCLUDE= could be empty was NOT considered!
+
+V.1.05: 2015/10/01 (DM)
+	- Renamed parameter EXCLUDE= with VALUESLETALONE= in order to give a better sense of what it does. In fact those values are NOT excluded from the plot but simply treated as a separate value during the binning process!

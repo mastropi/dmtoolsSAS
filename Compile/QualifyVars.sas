@@ -62,6 +62,9 @@ OPTIONAL PARAMETERS:
 				default: 1	
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
+- %ExecTimeStart
+- %ExecTimeStop
+- %FreqMult
 - %GetDataName
 - %GetNroElements
 - %GetVarAttrib

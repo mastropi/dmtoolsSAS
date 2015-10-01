@@ -1,8 +1,8 @@
 /* MACRO %PlotBinned
-Version: 		1.04
+Version: 		1.05
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		28-Sep-2015 (previous: 20-Sep-2015)
+Modified: 		01-Oct-2015 (previous: 28-Sep-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -16,8 +16,8 @@ USAGE:
 	var=_NUMERIC_, 		    	*** List of input variables to analyze.
 	varclass=, 					*** List of categorical input variables among those listed in VAR.
 	datavartype=,				*** Dataset containing the type or level of the variables listed in VAR.
-	exclude=,					*** List of values taken by the analyzed variable to treat as separate bins.
-	alltogether=0,				*** Whether the excluded values should be put into the same bin.
+	valuesLetAlone=,			*** List of values taken by the analyzed variable to treat as separate bins.
+	alltogether=0,				*** Whether the let-alone values should be put into the same bin.
 	groupsize=,					*** Nro. of cases each group should contain when categorizing continuous variables.
 	groups=20,					*** Nro. of groups to use in the categorization of continuous variables.
 	value=mean,					*** Name of the statistic for both the input and target variable in each bin.
@@ -34,105 +34,105 @@ USAGE:
 	log=1);						*** Show messages in log?
 
 REQUIRED PARAMETERS:
-- data:			Input dataset. Data options can be specified as in a data= SAS option.
+- data:				Input dataset. Data options can be specified as in a data= SAS option.
 
-- target:		Target variable containing the time to the event of interest.
+- target:			Target variable containing the time to the event of interest.
 
 OPTIONAL PARAMETERS:
-- var:			List of input variables to analyze.
-				default: _NUMERIC_
+- var:				List of input variables to analyze.
+					default: _NUMERIC_
 
-- varclass:		List of categorical variables to analyze among those listed in VAR.
-				default: empty
+- varclass:			List of categorical variables to analyze among those listed in VAR.
+					default: empty
 
-- datavartype:	Dataset containing the type or level of the variables listed in VAR.
-				The dataset should at least contain the following columns:
-				- VAR: name of the variable whose type is given
-				- LEVEL: type or level of the variable. All variables are considered
-						 continuous except those with LEVEL = "categorical" (not case sensitive).
-				Typically this dataset is created by the %QualifyVars macro.
-				default: empty
+- datavartype:		Dataset containing the type or level of the variables listed in VAR.
+					The dataset should at least contain the following columns:
+					- VAR: name of the variable whose type is given
+					- LEVEL: type or level of the variable. All variables are considered
+							 continuous except those with LEVEL = "categorical" (not case sensitive).
+					Typically this dataset is created by the %QualifyVars macro.
+					default: empty
 
-- exclude		List of values taken by the analyzed variable to treat as separate bins.
-				The values should be separated by commas.
-				Ex: exclude=%quote(0, 1)
-				default: empty
+- valuesLetAlone:	List of values taken by the analyzed variable to treat as separate bins.
+					The values should be separated by commas.
+					Ex: valuesLetAlone=%quote(0, 1)
+					default: empty
 
-- alltogether	Whether the excluded values listed in EXCLUDE= should be put into the same bin.
-				Possible values: 0 => No (put each value into a separate bin)
-								 1 => Yes (put all excluded values into the same bin. In this case
+- alltogether		Whether the let-alone values listed in VALUESLETALONE= should be put into the same bin.
+					Possible values: 0 => No (put each value into a separate bin)
+								 	 1 => Yes (put all let-alone values into the same bin. In this case
 											the representative value of the bin will be based on the
 											statistic specified in VALUE= weighted by the number of
-											cases in each excluded value)
-				default: 0
+											cases in each value to let alone)
+					default: 0
 
-- groupsize:	Number of cases each group or bin should contain.
-				This option overrides the GROUPS parameter.
-				default: empty
+- groupsize:		Number of cases each group or bin should contain.
+					This option overrides the GROUPS parameter.
+					default: empty
 
-- groups:		Number of groups in which to categorize continuous variables for the plot.
-				default: 20
+- groups:			Number of groups in which to categorize continuous variables for the plot.
+					default: 20
 
-- value:		Name of the statistic for both the input and target variable to use as 
-				representation of each bin.
-				default: mean
+- value:			Name of the statistic for both the input and target variable to use as 
+					representation of each bin.
+					default: mean
 
-- plot:			Whether to generate the binned plots or just the output dataset
-				needed to generate the plots (if parameter OUT is non empty of course).
-				Possible values: 0 => No, 1 => Yes.
-				default: 1
+- plot:				Whether to generate the binned plots or just the output dataset
+					needed to generate the plots (if parameter OUT is non empty of course).
+					Possible values: 0 => No, 1 => Yes.
+					default: 1
 
-- out:			Output dataset with the data needed to reproduce the plots.
-				Data options can be specified as in a data= SAS option.
-				The dataset contains the following columns:
-				- VAR: Input variable name
-				- VALUE: Value representing each bin
-				- NOBS: Number of cases in each bin
-				- <TARGET>: Value of the target variable in each bin
-				- FIT_LOESS_LOW: Lower limit of the 95% confidence interval for the predicted value
-				- FIT_LOESS: LOESS fit in each bin
-				- FIT_LOESS_UPP: Upper limit of the 95% confidence interval for the predicted value
-				default: no output dataset is created
+- out:				Output dataset with the data needed to reproduce the plots.
+					Data options can be specified as in a data= SAS option.
+					The dataset contains the following columns:
+					- VAR: Input variable name
+					- VALUE: Value representing each bin
+					- NOBS: Number of cases in each bin
+					- <TARGET>: Value of the target variable in each bin
+					- FIT_LOESS_LOW: Lower limit of the 95% confidence interval for the predicted value
+					- FIT_LOESS: LOESS fit in each bin
+					- FIT_LOESS_UPP: Upper limit of the 95% confidence interval for the predicted value
+					default: no output dataset is created
 
-- outcorr:		Output dataset containing the correlation between binned values and
-				predicted LOESS values by analyzed variable.
-				Data options can be specified as in a data= SAS option.
-				The dataset contains the following columns:
-				- VAR: Input variable name
-				- N: Number of bins on which the correlation is computed
-				- CORR: Weighted (by N) correlation between binned values and predicted LOESS values
-				- CORR_ADJ: Normalized weighted correlation by the target variable range
-				- TARGET_RANGE: Target variable range in the original data
-				default: no output dataset is created
+- outcorr:			Output dataset containing the correlation between binned values and
+					predicted LOESS values by analyzed variable.
+					Data options can be specified as in a data= SAS option.
+					The dataset contains the following columns:
+					- VAR: Input variable name
+					- N: Number of bins on which the correlation is computed
+					- CORR: Weighted (by N) correlation between binned values and predicted LOESS values
+					- CORR_ADJ: Normalized weighted correlation by the target variable range
+					- TARGET_RANGE: Target variable range in the original data
+					default: no output dataset is created
 
-- bubble		Whether to generate a bubble plot instead of a scatter plot.
-				default: 1
+- bubble			Whether to generate a bubble plot instead of a scatter plot.
+					default: 1
 
-- xaxisorig		Whether to use the original input variable range on the X axis.
-				default: 0
+- xaxisorig			Whether to use the original input variable range on the X axis.
+					default: 0
 
-- yaxisorig		Whether to use the original target variable range on the Y axis.
-				default: 1
+- yaxisorig			Whether to use the original target variable range on the Y axis.
+					default: 1
 
-- odspath:		Quoted name of the path containing the files where plots should be saved.
-				This is only valid for HTML output.
-				default: none
+- odspath:			Quoted name of the path containing the files where plots should be saved.
+					This is only valid for HTML output.
+					default: none
 
-- odsfile:		Quoted name of the file where plots should be saved.
-				default: none
+- odsfile:			Quoted name of the file where plots should be saved.
+					default: none
 
-- odsfiletype:	Type of the file specified in the ODSFILE= option.
-				default: pdf
+- odsfiletype:		Type of the file specified in the ODSFILE= option.
+					default: pdf
 
-- imagerootname:Root name to be used for the image file name generated by ODS graphics.
-				Each plot is stored in a file named as <imagerootname>-<TARGET>-<K>-<VAR> where
-				<K> and <VAR> are respectively the number and name of the currently analyzed variable
-				in the order they are passed to the VAR= parameter.
-				default: PlotBinned
+- imagerootname:	Root name to be used for the image file name generated by ODS graphics.
+					Each plot is stored in a file named as <imagerootname>-<TARGET>-<K>-<VAR> where
+					<K> and <VAR> are respectively the number and name of the currently analyzed variable
+					in the order they are passed to the VAR= parameter.
+					default: PlotBinned
 
-- log:			Show messages in the log?
-				Possible values: 0 => No, 1 => Yes.
-				default: 1
+- log:				Show messages in the log?
+					Possible values: 0 => No, 1 => Yes.
+					default: 1
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Categorize
@@ -154,7 +154,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 		var=_NUMERIC_,
 		varclass=,
 		datavartype=,
-		exclude=,
+		valuesLetAlone=,
 		alltogether=0, 
 		groupsize=,
 		groups=20,
@@ -180,8 +180,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put var=_NUMERIC_, %quote(            *** List of input variables to analyze.);
 	%put varclass= , %quote(               *** List of categorical input variables among those listed in VAR.);
 	%put datavartype= , %quote(            *** Dataset containing the type or level of the variables listed in VAR.);
-	%put exclude= ,	%quote(                *** List of values taken by the analyzed variable to treat as separate bins.);
-	%put alltogether=0 , %quote(           *** Whether the excluded values should be put into the same bin.);
+	%put valuesLetAlone= ,	%quote(        *** List of values taken by the analyzed variable to treat as separate bins.);
+	%put alltogether=0 , %quote(           *** Whether the let-alone values should be put into the same bin.);
 	%put groupsize= , %quote(              *** Nro. of cases each group should contain when categorizing continuous variables.);
 	%put groups=3 , %quote(                *** Nro. of groups to use in the categorization of continuous variables.);
 	%put value=mean , %quote(              *** Name of the statistic for both the input and target variable in each bin.);
@@ -223,27 +223,27 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put PLOTBINNED: Macro starts;
 	%put;
 	%put PLOTBINNED: Input parameters:;
-	%put PLOTBINNED: - Input dataset = %quote(&data);
-	%put PLOTBINNED: - target = %quote(       &target);
-	%put PLOTBINNED: - var = %quote(          &var);
-	%put PLOTBINNED: - varclass = %quote(     &varclass);
-	%put PLOTBINNED: - datavartype = %quote(  &datavartype);
-	%put PLOTBINNED: - exclude = %quote(      &exclude);
-	%put PLOTBINNED: - alltogether = %quote(  &alltogether);
-	%put PLOTBINNED: - groupsize = %quote(    &groupsize);
-	%put PLOTBINNED: - groups = %quote(       &groups);
-	%put PLOTBINNED: - value = %quote(        &value);
-	%put PLOTBINNED: - plot = %quote(         &plot);
-	%put PLOTBINNED: - out = %quote(          &out);
-	%put PLOTBINNED: - outcorr = %quote(      &outcorr);
-	%put PLOTBINNED: - bubble = %quote(       &bubble);
-	%put PLOTBINNED: - xaxisorig = %quote(    &xaxisorig);
-	%put PLOTBINNED: - yaxisorig = %quote(    &yaxisorig);
-	%put PLOTBINNED: - odspath = %quote(      &odspath);
-	%put PLOTBINNED: - odsfile = %quote(      &odsfile);
-	%put PLOTBINNED: - odsfiletype = %quote(  &odsfiletype);
-	%put PLOTBINNED: - imagerootname = %quote(&imagerootname);
-	%put PLOTBINNED: - log = %quote(          &log);
+	%put PLOTBINNED: - Input dataset = %quote( &data);
+	%put PLOTBINNED: - target = %quote(        &target);
+	%put PLOTBINNED: - var = %quote(           &var);
+	%put PLOTBINNED: - varclass = %quote(      &varclass);
+	%put PLOTBINNED: - datavartype = %quote(   &datavartype);
+	%put PLOTBINNED: - valuesLetAlone = %quote(&valuesLetAlone);
+	%put PLOTBINNED: - alltogether = %quote(   &alltogether);
+	%put PLOTBINNED: - groupsize = %quote(     &groupsize);
+	%put PLOTBINNED: - groups = %quote(        &groups);
+	%put PLOTBINNED: - value = %quote(         &value);
+	%put PLOTBINNED: - plot = %quote(          &plot);
+	%put PLOTBINNED: - out = %quote(           &out);
+	%put PLOTBINNED: - outcorr = %quote(       &outcorr);
+	%put PLOTBINNED: - bubble = %quote(        &bubble);
+	%put PLOTBINNED: - xaxisorig = %quote(     &xaxisorig);
+	%put PLOTBINNED: - yaxisorig = %quote(     &yaxisorig);
+	%put PLOTBINNED: - odspath = %quote(       &odspath);
+	%put PLOTBINNED: - odsfile = %quote(       &odsfile);
+	%put PLOTBINNED: - odsfiletype = %quote(   &odsfiletype);
+	%put PLOTBINNED: - imagerootname = %quote( &imagerootname);
+	%put PLOTBINNED: - log = %quote(           &log);
 	%put;
 %end;
 
@@ -278,10 +278,10 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %if %quote(&varclass) ~= %then
 	%let var = %RemoveFromList(&var, &varclass, log=0);
 
-%*** EXCLUDE=;
+%*** VALUESLETALONE=;
 %let condition = ;
-%if %quote(&exclude) ~= %then
-	%let condition = not in (&exclude);
+%if %quote(&valuesLetAlone) ~= %then
+	%let condition = not in (&valuesLetAlone);
 
 %*** OUT=;
 %* Delete local output dataset because data is appended to it;
