@@ -13,7 +13,7 @@ USAGE:
 %PlotBinned(
 	data , 						*** Input dataset.
 	target=, (REQUIRED) 		*** Target variable to plot in the Y axis.
-	var=_NUMERIC_, 		    	*** List of input variables to analyze.
+	var=_NUMERIC_,				*** List of input variables to analyze.
 	varclass=, 					*** List of categorical input variables among those listed in VAR.
 	datavartype=,				*** Dataset containing the type or level of the variables listed in VAR.
 	valuesLetAlone=,			*** List of values taken by the analyzed variable to treat as separate bins.

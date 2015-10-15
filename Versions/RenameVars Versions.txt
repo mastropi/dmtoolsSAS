@@ -1,5 +1,5 @@
-%RenameVariables Versions: Descripcion de las diferentes versiones
-------------------------------------------------------------------
+%RenameVars Versions: Descripcion de las diferentes versiones
+-------------------------------------------------------------
 Creado: 14/06/06
 
 
@@ -16,3 +16,6 @@ V.1.02: 14/06/06 (DM)
 V.1.03: 2012/10/08 (DM)
 	- Fixed an error deleting the temporary dataset _RenameVariables_rename_ when the input dataset is not located on the WORK library. The error happened because the library referenced when deleting the temporary dataset was the library of the input dataset.
 	- To be consistent with the conventions of other macros I renamed the temporary dataset from _RenameVariables_rename_ to _rv_rename_ (i.e. the macro initials are used as prefix of the dataset name)
+
+V.1.04: 2015/10/15 (DM)
+	- Renamed the macro name from %RenameVariables to %RenameVars to make it compliant with other macro names such as %SetVarOrder, %VarOrder, etc.

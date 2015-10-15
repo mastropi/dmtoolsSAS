@@ -62,6 +62,16 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 %*	%put MACROS DISPONIBLES AL 10/6/04:;
 	%if %upcase(%quote(&by)) = TOPIC %then %do;
 		%put %quote(                                  -- BY TOPIC --);
+		%put TOPICS (sorted alphabetically);
+		%put ------;
+		%put DATA MANIPULATION;
+		%put EXPLORATORY DATA ANALYSIS;
+		%put GENERAL STATISTICS;
+		%put GRAPHS;
+		%put MODELING;
+		%put OTHER;
+		%put STRING MANIPULATION;
+		%put;
 		%put %quote(%(An asterisk %(*%) next to the macro name indicates that help is available for the macro%));
 		%put;
 		%put DATA MANIPULATION;
@@ -85,6 +95,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	GetVarOrder	%quote(         Get the order in which variables are stored in a dataset.);
 		%put 	GetVarType %quote(          Get the type of a variable (C(haracter) or N(umeric)) in a dataset.);
 		%put	Merge* %quote(              Merge 2 datasets without having them sorted by the by variables.);
+		%put	RenameVariables %quote(     Rename variables in a dataset based on another dataset of rename pairs.);
 		%put	SetVarOrder	%quote(         Set the order in which variables are stored in a dataset.);
 		%put	Standardize* %quote(        Center and standardize variables.);
 		%put	Sort* %quote(               User friendly PROC SORT. Several datasets can be sorted simultaneously.);
@@ -125,8 +136,8 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	SymmetricAxis %quote(       Create the string for an AXIS statement so that the axis);
 		%put	%quote(                     is symmetric around 0.);
 		%put;
-		%put MODELLING;
-		%put ---------;
+		%put MODELING;
+		%put --------;
 		%put 	DetectCollinearities*%quote(Detect collinearities among variables.);
 		%put	Dfbetas* %quote(            Detect influential observations with the DFBETA criterion.);
 		%put	EvaluationChart* %quote(    Plot an evaluation chart for a model with a categorical target.);
@@ -312,6 +323,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	Qqplot %quote(              Make Q-Q plots for a set of variables.);
 		%put;
 		%put R;
+		%put	RenameVariables %quote(     Rename variables in a dataset based on another dataset of rename pairs.);
 		%put	RemoveFromList %quote(      Remove a set of names from a given list.);
 		%put	RemoveRepeated %quote(      Remove repeated names from a given list.);
 		%put	Rep %quote(                 Generate a list of one value repeated a number of times.);

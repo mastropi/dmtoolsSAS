@@ -1,8 +1,8 @@
-/* MACRO %RenameVariables
-Version: 1.02
-Author: Daniel Mastropietro
-Created: 09-Sep-05
-Modified: 19-Aug-06
+/* MACRO %RenameVars
+Version: 	1.04
+Author: 	Daniel Mastropietro
+Created: 	09-Sep-2005
+Modified: 	15-Oct-2015 (previous: 19-Aug-2006) (renamed from %RenameVariables to make it compliant with other macro names)
 
 DESCRIPTION:
 This macro renames variables in a dataset.
@@ -11,13 +11,13 @@ containing two columns, one with the list of the old names and the other with th
 of the new names of the variables to be renamed.
 
 USAGE:
-%RenameVariables(
+%RenameVars(
 	data,			*** Input dataset where the rename is to be carried out
 	rename=,		*** Name of the dataset containing the rename information
 	import=0,		*** Whether to import the rename information from the file specified in FILE=
 	file=,			*** Name of the file to be imported containing the rename information
 	type=CSV,		*** Type of file specified in FILE=
-	old=original,	*** Name of the variable in dataset RENAME= containing the old variable names
+	old=old,		*** Name of the variable in dataset RENAME= containing the old variable names
 	new=new,		*** Name of the variable in dataset RENAME= containing the new variable names
 	norepeated=1,	*** Whether there might be repeated names in the new variable names list
 	notes=0,		*** Show SAS notes in the log?
@@ -101,12 +101,12 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %SetSASOptions
 */
 &rsubmit;
-%MACRO RenameVariables(	data,
+%MACRO RenameVars(	data,
 						rename=_rename_,
 						import=0,
 						file=, 
 						type=CSV,
-						old=original,
+						old=old,
 						new=new,
 						norepeated=1,
 						notes=0,
@@ -122,24 +122,24 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %if &log %then %do;
 	%put;
-	%put RENAMEVARIABLES: Macro starts;
+	%put RENAMEVARS: Macro starts;
 	%put;
 %end;
 
 %* Read file with old and new names;
 %if &import %then %do;
-	%put RENAMEVARIABLES: Importing the rename information from;
-	%put RENAMEVARIABLES: &file of type %upcase(&type)...;
+	%put RENAMEVARS: Importing the rename information from;
+	%put RENAMEVARS: &file of type %upcase(&type)...;
 	%Import(&rename, &file, type=&type);
 %end;
 %let renamedat = &rename;
 
 %if %quote(&renamedat) = %then %do;
-	%put RENAMEVARIABLES: ERROR - No rename information was specified.;
-	%put RENAMEVARIABLES: Either the RENAME= parameter or IMPORT=1 and the FILE= paramater must be passed.;
+	%put RENAMEVARS: ERROR - No rename information was specified.;
+	%put RENAMEVARS: Either the RENAME= parameter or IMPORT=1 and the FILE= paramater must be passed.;
 %end;
 %else %if not %sysfunc(exist(&renamedat)) %then
-	%put RENAMEVARIABLES: ERROR - Dataset %upcase(&renamedat) with the rename information does not exist.;
+	%put RENAMEVARS: ERROR - Dataset %upcase(&renamedat) with the rename information does not exist.;
 %else %do;
 	%* Read old and new names;
 	%* The dataset is filtered to the records that have a value for both the OLD
@@ -153,7 +153,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 		where not missing(&old) and not missing(&new) and upcase(&old) ~= upcase(&new);
 	run;
 	%if &log %then
-		%put RENAMEVARIABLES: Reading the old and the new names from dataset %upcase(&renamedat)...;
+		%put RENAMEVARS: Reading the old and the new names from dataset %upcase(&renamedat)...;
 	%let oldlist = %MakeListFromVar(_rv_rename_, var=&old, log=0);
 	%let newlist = %MakeListFromVar(_rv_rename_, var=&new, log=0);
 
@@ -162,10 +162,10 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%* are going to be carried out by leaving a space before and after the = sign, for better readability
 	%* of the old and new names of the variables;
 	%if &log %then
-		%put RENAMEVARIABLES: Creating the rename strings...;
+		%put RENAMEVARS: Creating the rename strings...;
 	%CreateInteractions(var=&oldlist, with=&newlist, join=%quote( = ), allInteractions=0, sep=;, macrovar=renamestr, log=0);
 	%if &log %then %do;
-		%put RENAMEVARIABLES: The following is the list of renames to be applied:;
+		%put RENAMEVARS: The following is the list of renames to be applied:;
 		%puts(%quote(&renamestr), sep=;);
 		%put;
 	%end;
@@ -178,8 +178,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 		%let nro_newlist_norep = %GetNroElements(&newlist_norep);
 		%let nro_newlist = %GetNroElements(&newlist);
 		%if &nro_newlist_norep < &nro_newlist %then %do;
-			%put RENAMEVARIABLES: WARNING - Some of the new variable names are repeated.;
-			%put RENAMEVARIABLES: The number of repeated variable names is %eval(&nro_newlist - &nro_newlist_norep).;
+			%put RENAMEVARS: WARNING - Some of the new variable names are repeated.;
+			%put RENAMEVARS: The number of repeated variable names is %eval(&nro_newlist - &nro_newlist_norep).;
 		%end;
 	%end;
 
@@ -208,9 +208,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %if &log %then %do;
 	%put;
-	%put RENAMEVARIABLES: Macro ends;
+	%put RENAMEVARS: Macro ends;
 	%put;
 %end;
 
 %ResetSASOptions;
-%MEND RenameVariables;
+%MEND RenameVars;

@@ -40,18 +40,18 @@ OPTIONAL PARAMETERS:
 
 - out:			Output dataset containing the variable qualification.
 				It contains the following columns in the order given:
-				- var         Char     Variable Name
-				- label       Char     Variable Label
-				- nobs        Num      Total Number of Observations in input dataset
-				- type        Char     Variable Type
-				- level       Char     Assigned level of variable (categorical or interval)
-				- values      Char     Values taken by categorical variables with less than maxnfreq distinct values.
-				- nvalues     Num      Number of Different Values
-				- nmiss       Num      Number of Missing Values
-				- nzeros      Num      Number of Zeros
-				- pvalues     Num      Percent of Distinct Values
-				- pmiss       Num      Percent of Missing Values
-				- pzeros      Num      Percent of Zeros
+				- var		Char	Variable Name
+				- label		Char	Variable Label
+				- nobs		Num		Total Number of Observations in input dataset
+				- type		Char	Variable Type
+				- level		Char	Assigned level of variable (categorical or interval)
+				- values	Char	Values taken by categorical variables with less than maxnfreq distinct values.
+				- nvalues	Num		Number of Different Values
+				- nmiss		Num		Number of Missing Values
+				- nzeros	Num		Number of Zeros
+				- pvalues	Num		Percent of Distinct Values
+				- pmiss		Num		Percent of Missing Values
+				- pzeros	Num		Percent of Zeros
 
 - sortby:		List of variables to sort the output dataset by.
 				default: level nvalues var (so that categorical variables are listed on top and

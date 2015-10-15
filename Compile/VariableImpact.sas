@@ -27,7 +27,7 @@ USAGE:
 	var=, 			*** List of predictor variables to analyze.
 	event=1,		*** Event of interest for target variable.
 	condition=,		*** Condition that the values of each predictor variable must satisfy
-						in order to be included	in the analysis.
+					***	in order to be included	in the analysis.
 	value=mean, 	*** Value to use to categorize predictor variables.
 	groups=10,		*** Nro. of groups to use in the categorization.
 	groupsize=,		*** Size of each category.

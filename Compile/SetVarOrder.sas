@@ -1,4 +1,4 @@
-/* %MACRO SetVarOrder
+/* MACRO %SetVarOrder
 Version: 1.00
 Author: Daniel Mastropietro
 Created: 13-Aug-04
