@@ -1,4 +1,4 @@
-/* AddLabels.sas
+/* MACRO %AddLabels.sas
 Created:		07-Aug-2015
 Modified:		07-Aug-2015
 Author:			Daniel Mastropietro

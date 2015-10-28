@@ -1,8 +1,8 @@
 /* MACRO %PlotBinned
-Version: 		1.05
+Version: 		1.06
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		01-Oct-2015 (previous: 28-Sep-2015)
+Modified: 		28-Oct-2015 (previous: 01-Oct-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -15,6 +15,7 @@ USAGE:
 	target=, (REQUIRED) 		*** Target variable to plot in the Y axis.
 	var=_NUMERIC_,				*** List of input variables to analyze.
 	varclass=, 					*** List of categorical input variables among those listed in VAR.
+	by=,						*** BY variables.
 	datavartype=,				*** Dataset containing the type or level of the variables listed in VAR.
 	valuesLetAlone=,			*** List of values taken by the analyzed variable to treat as separate bins.
 	alltogether=0,				*** Whether the let-alone values should be put into the same bin.
@@ -43,6 +44,9 @@ OPTIONAL PARAMETERS:
 					default: _NUMERIC_
 
 - varclass:			List of categorical variables to analyze among those listed in VAR.
+					default: empty
+
+- by:				BY variables.
 					default: empty
 
 - datavartype:		Dataset containing the type or level of the variables listed in VAR.
@@ -153,6 +157,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 		target=,
 		var=_NUMERIC_,
 		varclass=,
+		by=,
 		datavartype=,
 		valuesLetAlone=,
 		alltogether=0, 
@@ -179,6 +184,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put target= , (REQUIRED) %quote(      *** Target variable to plot in the Y axis.);
 	%put var=_NUMERIC_, %quote(            *** List of input variables to analyze.);
 	%put varclass= , %quote(               *** List of categorical input variables among those listed in VAR.);
+	%put by= , %quote(                     *** BY variables.);
 	%put datavartype= , %quote(            *** Dataset containing the type or level of the variables listed in VAR.);
 	%put valuesLetAlone= ,	%quote(        *** List of values taken by the analyzed variable to treat as separate bins.);
 	%put alltogether=0 , %quote(           *** Whether the let-alone values should be put into the same bin.);
@@ -201,11 +207,13 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %if &help %then %do;
 	%ShowMacroCall;
 %end;
-%else %if ~%CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&target), requiredParamNames=data target=, check=target varclass, macro=PLOTBINNED) %then %do;
-	%ShowMacroCall;
-%end;
-%else %do;
+/* THE FOLLOWING CHECK DOES NOT WORK WHEN THE INPUT DATASET HAS DATA OPTIONS! as it says that parameter DATA was not passed... WHY?? */
+/*%else %if ~%CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&target), requiredParamNames=data target=, check=target varclass, macro=PLOTBINNED) %then %do;*/
+/*	%ShowMacroCall;*/
+/*%end;*/
+/*%else %do;*/
 /************************************* MACRO STARTS ******************************************/
+%local bystr;
 %local i;
 %local nro_vars;
 %local varlist;
@@ -227,6 +235,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put PLOTBINNED: - target = %quote(        &target);
 	%put PLOTBINNED: - var = %quote(           &var);
 	%put PLOTBINNED: - varclass = %quote(      &varclass);
+	%put PLOTBINNED: - by = %quote(            &by);
 	%put PLOTBINNED: - datavartype = %quote(   &datavartype);
 	%put PLOTBINNED: - valuesLetAlone = %quote(&valuesLetAlone);
 	%put PLOTBINNED: - alltogether = %quote(   &alltogether);
@@ -254,6 +263,11 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %end;
 
 /*--------------------------------- Parse input parameters -----------------------------------*/
+%*** BY=;
+%let bystr = ;
+%if %quote(&by) ~= %then
+	%let bystr = by &by;
+
 %*** DATAVARTYPE=;
 %if %quote(&datavartype) ~= %then %do;
 	%* Read the variable type or level (continuous categorical) from the dataset given here.
@@ -294,12 +308,12 @@ quit;
 %if %quote(&var) ~= %then %do;
 	%if &log %then
 		%put PLOTBINNED: Categorizing continuous variables...;
-	%Categorize(&data, var=&var, condition=&condition, alltogether=&alltogether, groupsize=&groupsize, groups=&groups, both=0, value=&value, varvalue=&var, out=_PB_data_(keep=&target &var &varclass), log=0);
+	%Categorize(&data, by=&by, var=&var, condition=&condition, alltogether=&alltogether, groupsize=&groupsize, groups=&groups, both=0, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &varclass), log=0);
 	%if &log %then
 		%put;
 %end;
 %else %do;
-	data _PB_data_(keep=&target &varclass);
+	data _PB_data_(keep=&by &target &varclass);
 		set &data;
 	run;
 %end;
@@ -328,7 +342,7 @@ quit;
 		%else
 			%put PLOTBINNED: Computing plot of %upcase(&target) vs. binned (continuous) variable &i of &nro_vars: %upcase(&_var_);
 	%end;
-	%Means(_PB_data_, by=&_var_, var=&target, stat=&value n, name=&target nobs, out=_PB_means_, log=0);
+	%Means(_PB_data_, by=&by &_var_, var=&target, stat=&value n, name=&target nobs, out=_PB_means_, log=0);
 
 	%* Read the variable label;
 	%let _label_ = %GetVarLabel(_PB_data_, &_var_);
@@ -336,6 +350,9 @@ quit;
 
 	%* Add the variable information;
 	data _PB_means_;
+		%if %quote(&by) ~= %then %do;
+		format &by;
+		%end;
 		length var $32 label $500;	%* Use 500 as label length to be kind of safe that we do not truncate any labels;
 		set _PB_means_;
 		var = "&_var_";
@@ -353,9 +370,10 @@ quit;
 		%* the proportion of data that is used at each local regression around an X point where X is the input vector.
 		%* For more info see: http://www.ats.ucla.edu/stat/sas/library/loesssugi.pdf;
 		%* THIS IS IMPORTANT BECAUSE OTHERWISE THE LOESS FIT OF THE PLOT MAY BE VERY DIFFERENT FROM THE LOESS FIT HERE;
+		&bystr;
 		model &target = &_var_ / select=aicc(global);
 		weight nobs;
-		output 	out=_PB_means_(keep=var label &_var_ nobs &target fit_loess fit_loess_low fit_loess_upp)
+		output 	out=_PB_means_(keep=&by var label &_var_ nobs &target fit_loess fit_loess_low fit_loess_upp)
 				predicted=fit_loess LCLM=fit_loess_low UCLM=fit_loess_upp;
 	run;
 	ods exclude none;
@@ -375,22 +393,30 @@ quit;
 		proc sgplot data=_PB_means_;
 			%*** BUBBLE or SCATTER;
 			%if &bubble %then %do;
-			bubble x=&_var_ y=&target size=nobs / datalabel=nobs;
+			bubble x=&_var_ y=&target size=nobs / %if %quote(&by) ~= %then %do; group=&by %end;
+												  datalabel=nobs;
 			%end;
 			%else %do;
-			scatter x=&_var_ y=&target / datalabel=nobs markerattrs=(symbol=CircleFilled);
+			scatter x=&_var_ y=&target / %if %quote(&by) ~= %then %do; group=&by %end;
+										 datalabel=nobs markerattrs=(symbol=CircleFilled);
 			%end;
 
 			%*** CATEGORICAL or CONTINUOUS;
 			%if &_vartype_ = C %then %do;
 			%* Linear interpolation for categorical variables;
-			series x=&_var_ y=&target / lineattrs=(color="red");
+			series x=&_var_ y=&target / %if %quote(&by) ~= %then %do; group=&by %end;
+										%else %do; lineattrs=(color="red") %end;		;
 			%end;
 			%else %do;
 			%* LOESS curve for continuous variables;
-			loess x=&_var_ y=&target  / weight=nobs 
-										lineattrs=(color=red) interpolation=cubic
-										CLM clmattrs=(clmfillattrs=(color="light grayish red")) clmtransparency=0.7;
+			loess x=&_var_ y=&target  / %if %quote(&by) ~= %then %do; group=&by %end;
+										%else %do;
+											lineattrs=(color="red")
+											CLM clmattrs=(clmfillattrs=(color="light grayish red")) clmtransparency=0.7
+										%end;
+										weight=nobs 
+										interpolation=cubic
+										;
 			%end;
 
 			%*** AXIS LIMITS;
@@ -412,6 +438,9 @@ quit;
 
 %if %quote(&out) ~= %then %do;
 	data &out;
+		%if %quote(&by) ~= %then %do;
+		format &by;
+		%end;
 		format var $32. label $&maxlengthlabel..;
 		format value BEST8.;	%* This format is to make sure that values are not shown as integer values when there are integer-valued analysis variables;
 		format nobs &target;
@@ -441,19 +470,19 @@ quit;
 
 	%*** Compute the correlation between the observed and predicted LOESS values;
 	proc sort data=_PB_out_;
-		by var value;
+		by &by var value;
 	run;
 	proc corr data=_PB_out_ out=_PB_corr_ noprint;
-		by var label;
+		by &by var label;
 		var &target;
 		with fit_loess;
 		%* Use the same weight as for the LOESS fit;
 		weight nobs;
 	run;
 	%* Transpose;
-	proc transpose data=_PB_corr_ out=_PB_corr_(keep=var label n corr);
+	proc transpose data=_PB_corr_ out=_PB_corr_(keep=&by var label n corr);
 		where _TYPE_ in ("N", "CORR");
-		by var label;
+		by &by var label;
 		id _TYPE_;
 		var &target;
 	run;
@@ -462,19 +491,22 @@ quit;
 	%* would be considered to be more predictive of the target variable;
 	%* The span of the target variable range is then measured as a percentage of its original range;
 	proc means data=_PB_out_ range noprint;
-		by var;
+		by &by var;
 		var &target;
 		output out=_PB_range_ range=range;
 	run;
 	data _PB_corr_;
+		%if %quote(&by) ~= %then %do;
+		format &by;
+		%end;
 		format var $32. label $&maxlengthlabel..;
 		format n corr corr_adj target_range;
 		format target_range_rel percent7.1;
 		%* Set the final length of the label variable;
 		length label $&maxlengthlabel;
 		merge 	_PB_corr_
-				_PB_range_(keep=var range rename=(range=target_range));
-		by var;
+				_PB_range_(keep=&by var range rename=(range=target_range));
+		by &by var;
 		target_range_rel = target_range / &_TARGET_RANGE_;
 		corr_adj = corr * target_range_rel;
 		label 	n = "Number of bins"
@@ -484,7 +516,7 @@ quit;
 				corr_adj = "Weighted correlation normalized by the spanned target range";
 	run;
 	proc sort data=_PB_corr_ out=&outcorr;
-		by descending corr_adj;
+		by &by descending corr_adj;
 	run;
 	%if &log %then %do;
 		%callmacro(getnobs, _PB_corr_ return=1, nobs nvars);
@@ -524,5 +556,5 @@ quit;
 %ExecTimeStop;
 %ResetSASOptions;
 
-%end;
+/*%end;*/
 %MEND PlotBinned;

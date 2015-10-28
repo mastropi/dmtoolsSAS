@@ -1,8 +1,8 @@
-/* MACRO %Categorize
-Version: 	1.10
+f/* MACRO %Categorize
+Version: 	1.11
 Author: 	Daniel Mastropietro
 Created: 	27-Feb-2003
-Modified: 	27-Aug-2015 (previous: 13-Aug-2015)
+Modified: 	28-Oct-2015 (previous: 27-Aug-2015)
 
 DESCRIPTION:
 Categorizes a set of variables in terms of one of the following specifications:
@@ -17,6 +17,7 @@ USAGE:
 %Categorize(
 	data, 			*** Input dataset.
 	var=_NUMERIC_,	*** Lista de variables numéricas a categorizar.
+	by=,			*** BY variables.
 	out=,			*** Output dataset con las variables categorizadas.
 	condition=,		*** Condición que deben cumplir los valores de CADA variable para ser
 					*** incluida en la categorización.
@@ -45,6 +46,9 @@ REQUIRED PARAMETERS:
 OPTIONAL PARAMETERS:
 - var:			Lista de las variables numéricas a categorizar, separadas por blancos.
 				default: _NUMERIC_ (es decir todas las variables numéricas)
+
+- by:			BY variables.
+				default: empty
 
 - out:			Output dataset conformado por las variables del input dataset
 				a las que se les agregan las variables categorizadas.
@@ -297,6 +301,7 @@ the default statistic to use is the MEAN.
 &rsubmit;
 %MACRO Categorize(	data,
 					var=_NUMERIC_,
+					by=,				/* STILL DOES NOT WORK CORRECTLY WHEN PARAMETER groupsize= IS GIVEN */
 					out=,
 
 					condition=,
@@ -321,6 +326,7 @@ the default statistic to use is the MEAN.
 	%put %nrstr(%Categorize%();
 	%put data , (REQUIRED) %quote(      *** Input dataset.);
 	%put var=_NUMERIC_ , %quote(        *** List of variables to categorize.);
+	%put by= , %quote(                  *** BY variables.);
 	%put out= , %quote(                 *** Output dataset with categorized vairables.);
 	%put condition= , %quote(           *** Condition that must be satisfied by the variable values);
 	%put %quote(                        *** to be included in the analysis.);
@@ -330,11 +336,11 @@ the default statistic to use is the MEAN.
 	%put varcat= , %quote(              *** List of integer-valued categorized variable names.);
 	%put varvalue= , %quote(            *** List of statistic-valued categorized variable names.);
 	%put suffix=_cat , %quote(          *** Suffix to use for the categorized variables.);
-	%put value= , %nrquote(               *** Statistic to use to compute the value of the categories);
-	%put %nrquote(                            %(ex: mean, median%));
-	%put both= , %nrquote(                *** Make 1 (both=0) or 2 (both=1) categorizations for each variable?);
-	%put %nrquote(                            %(2 categorizations means using both natural numbers and);
-	%put %nrquote(                            the values computed by the statistic specified in value=%));
+	%put value= , %nrquote(             *** Statistic to use to compute the value of the categories);
+	%put %nrquote(                          %(ex: mean, median%));
+	%put both= , %nrquote(              *** Make 1 (both=0) or 2 (both=1) categorizations for each variable?);
+	%put %nrquote(                          %(2 categorizations means using both natural numbers and);
+	%put %nrquote(                          the values computed by the statistic specified in value=%));
 	%put groupsize= , %quote(           *** Size of each category. This is EXACT except for the largest category.);
 	%put groups=10 , %quote(            *** Nro. of DESIRED groups to use in the categorization.);
 	%put percentiles= , %quote(         *** Percentiles to use in the categorization.);
@@ -370,6 +376,7 @@ the default statistic to use is the MEAN.
 	%put CATEGORIZE: Input parameters:;
 	%put CATEGORIZE: - Input dataset = %quote(&data);
 	%put CATEGORIZE: - var = %quote(          &var);
+	%put CATEGORIZE: - by = %quote(           &by);
 	%put CATEGORIZE: - out = %quote(          &out);
 	%put CATEGORIZE: - condition = %quote(    &condition);
 	%put CATEGORIZE: - alltogether = %quote(  &alltogether);
@@ -522,15 +529,24 @@ will be added to any of the analyzed variable to construct the name of the stati
 %* - this macro does not take long because it executes a PROC CONTENTS to get the variable order;
 %GetVarOrder(&data, var_order);
 
+%* Sort the dataset by the BY variables;
+%if %quote(&by) ~= %then %do;
+	proc sort data=&data out=_Categorize_data_;
+		by &by;
+	run;
+	%let data = _Categorize_data_;
+%end;
+
 %* Read in the dataset and split it into 2 parts: one with the variables
 %* to be categorized (_Categorized_data_) and the other with the other variables
 %* (_Categorize_data_rest_). 
 %* A temporary observation variable is created in order to put together these 2 parts
 %* at the end;
-data _Categorize_data_(keep=&var _categorize_obs_) _Categorize_data_rest_(drop=&var);
+data _Categorize_data_(keep=&by &var _categorize_obs_) _Categorize_data_rest_(drop=&var);
 	set &data end=lastobs;
 	_categorize_obs_ = _N_;
 run;
+
 %* Read the number of observations to be effectively used;
 %Callmacro(getnobs, _Categorize_data_ return=1, nobs);
 
@@ -549,6 +565,9 @@ run;
 	%let pctlname = %MakeListFromName(P ,length=&nro_percentiles, start=1, step=1, suffix=_);
 	%if %quote(&condition) = %then %do;
 		proc univariate data=_Categorize_data_ noprint;
+			%if %quote(&by) ~= %then %do;
+			by &by;
+			%end;
 			var &var;
 			output 	out=_Categorize_percentiles_ 
 					pctlpre=&pctlpre 
@@ -573,6 +592,9 @@ run;
 			%let pctlpre = _VAR&i._;		%* Note that only the i-th variable is analyzed here;
 			%*** DM-2012/06/20-END;
 			proc univariate data=_Categorize_data_ noprint;
+				%if %quote(&by) ~= %then %do;
+				by &by;
+				%end;
 				where &_var_ &condition;
 				var &_var_;
 				output 	out=_Categorize_percentiles_i_
@@ -608,15 +630,31 @@ run;
 
 	%* Categorizacion de las variables;
 	data _Categorize_data_;
+		%if %quote(&by) ~= %then %do;
+		format &by;
+		%end;
 		%* Maintain the order of the variables in the input dataset and put the new
 		%* variables towards the end;
 		format &var_order;
+
+		%* WHEN THERE ARE BY VARIABLES;
+		%if %quote(&by) ~= %then %do;
+		merge 	_Categorize_data_
+/*				_Categorize_data_rest_*/		/* DM-2015/10/28: This dataset was eliminated because the first two datasets need to be SET but the last one needs to be MERGEd, but this is not possible (o.w. there is repeat of BY variables) */
+				_Categorize_percentiles_;
+		by &by;
+		%end;
+
+		%* NO BY VARIABLES;
+		%else %do;
 		%* Below, the 2 sets put variables of the second dataset next to the variables of
 		%* the first dataset. Any repeated variables are overridden in the first dataset
 		%* by the variables in the second dataset;
 		set _Categorize_data_;
 		set _Categorize_data_rest_;
 		if _N_ = 1 then set _Categorize_percentiles_;
+		%end;
+
 		%do i = 1 %to &nro_vars;
 			%let _var_ = %scan(&var , &i , ' ');
 			%*** DM-2012/06/20-START: Following the change in the naming of the percentile variables done at
@@ -730,18 +768,23 @@ run;
 		%* Sort by current variable to create the group IDs;
 		proc sort data=_Categorize_data_;
 			%* DM-2012/06/17: When DESCENDING=1 add the keyword DESCENDING;
-			by %if &descending %then %do; DESCENDING %end; &_var_;
+			by &by %if &descending %then %do; DESCENDING %end; &_var_;
 		run;
 		data _Categorize_data_;
 			set _Categorize_data_;
 			/* DM-2015/08/13: BY statement was added because FIRST.&_var_ is used below. */
-			by %if &descending %then %do; DESCENDING %end; &_var_;
+			by &by %if &descending %then %do; DESCENDING %end; &_var_;
 			retain _VAR&i._CAT_;
 			retain _categorize_count_ 0;
 			%* If the first value is a missing value (which is the same as asking if the
 			%* variable has missing values --since the dataset is sorted by &_var_), then the
 			%* first categorized value is also missing; 
+			%if %quote(&by) ~= %then %do;
+			if %MakeList(&by, prefix=First., sep=or) then do;
+			%end;
+			%else %do;
 			if _N_ = 1 then do;
+			%end;
 				if &_var_ = . then
 					_VAR&i._CAT_ = .;
 				else
@@ -752,7 +795,12 @@ run;
 			we do _VAR&i._CAT_ + 1 and the result is missing when _VAR&i._CAT_ is missing.
 			The condition checks that the first group of variable values is equal to missing (_VAR&i._CAT_ = .)
 			and if that group ended in the previous record (first.&_var_). */
+			%if %quote(&by) ~= %then %do;
+			else if (%MakeList(&by &_var_, prefix=First., sep=or)) and _VAR&i._CAT_ = . then
+			%end;
+			%else %do;
 			else if first.&_var_ and _VAR&i._CAT_ = . then
+			%end;
 				_VAR&i._CAT_ = 1;
 			/* DM-2015/08/13: Included the case when parameter CONDITION is not empty, which specifies a
 			condition that should be satisfied by the input variables in order to be included in the
@@ -799,10 +847,10 @@ run;
 
 		%* Computation of the statistic-valued categories (given by the VALUE= parameter, which is typically equal to MEAN);
 		proc sort data=_Categorize_data_;
-			by _VAR&i._CAT_;
+			by &by _VAR&i._CAT_;
 		run;
 		proc means data=_Categorize_data_ &value noprint;
-			by _VAR&i._CAT_;
+			by &by _VAR&i._CAT_;
 			var &_var_;
 			output out=_Categorize_values_(drop=_TYPE_ _FREQ_)
 				/* Define the name of the output variable based on the values of parameters VARCAT=, VARVALUE= and BOTH */
@@ -828,7 +876,7 @@ run;
 											%else %if %quote(&_varvalue_) ~= %then %do; 								&_varvalue_ %end;
 											%else %do; /* &_varcat_ = (empty) and &_varvalue_ = (empty) or ~&both */ 	&_var_&suffixValue %end;)
 					_Categorize_values_;
-			by _VAR&i._CAT_;
+			by &by _VAR&i._CAT_;
 		run;
 		options dkricond=&dkricond;
 		%* DM-2015/05/21-END;
@@ -839,6 +887,9 @@ run;
 %* Note that _Categorize_data_rest_ need NOT be sorted because that dataset was
 %* not touched and thus keeps the original order given by _categorize_obs_;
 proc sort data=_Categorize_data_;
+	by _categorize_obs_;
+run;
+proc sort data=_Categorize_data_rest_;
 	by _categorize_obs_;
 run;
 %* Create output dataset or update input dataset (if OUT= is empty).

@@ -67,3 +67,7 @@ V.1.10: 2015/08/27 (DM)
 		- the SUFFIX= parameter is changed to empty when VALUE= is not empty and BOTH=0 (i.e. the user is interested in the statistic-valued categorized variable only, therefore there is no need to add any suffix to its name)
 		- A BOTH=0 value makes all the integer-valued categorized variable to be dropped from the output dataset, regardless the value of the VARCAT= parameter.
 	- The documentation of the macro was also enhnaced to emphasize that when the number of names in the VARCAT= parameter or the VARVALUE= parameter do NOT coincide with the number of variables passed in VAR=, then the SUFFIX parameter is used to construct the names of the categorized variables for non-matching varibales.
+
+V.1.11: 2015/10/28 (DM) --> a backup copy of the previous version was created in the BACKUP directory with the current date in its name.
+	- New parameter BY= to do BY processing.
+	- It was NOT tested thouroughly and it actually doesn't work correctly when GROUPSIZE= parameter is given (the categorical _CAT variable takes repeated values for the same BY group with different values of the aggregated _MEAN variable...)

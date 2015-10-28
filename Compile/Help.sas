@@ -44,8 +44,8 @@ LIFTCHART
 LORENZCURVE
 MEANS
 MERGE
-PHTESTPLOT
 PLOTBINNED
+PLOTSURVIVAL
 SORT
 STANDARDIZE
 TESTLOGISTICFIT
@@ -95,7 +95,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	GetVarOrder	%quote(         Get the order in which variables are stored in a dataset.);
 		%put 	GetVarType %quote(          Get the type of a variable (C(haracter) or N(umeric)) in a dataset.);
 		%put	Merge* %quote(              Merge 2 datasets without having them sorted by the by variables.);
-		%put	RenameVariables %quote(     Rename variables in a dataset based on another dataset of rename pairs.);
+		%put	RenameVars %quote(          Rename variables in a dataset based on another dataset of rename pairs.);
 		%put	SetVarOrder	%quote(         Set the order in which variables are stored in a dataset.);
 		%put	Standardize* %quote(        Center and standardize variables.);
 		%put	Sort* %quote(               User friendly PROC SORT. Several datasets can be sorted simultaneously.);
@@ -113,7 +113,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put 	Hadi* %quote(               Robustly detect multivariate oultiers using Hadi method.);
 		%put	LorenzCurve* %quote(        Plot the Lorenz Curve for a set of variables w.r.t. a non-negative target.);
 		%put	Mahalanobis	%quote(         Compute Mahalanobis distance of a set of variables.);
-		%put 	PHTestPlot* %quote(         Make plots of survival curves to visually check proportional hazards assumption.);
+		%put 	PlotSurvival* %quote(       Make plots of survival curves to visually check proportional hazards assumption.);
 		%put	Qqplot %quote(              Make Q-Q plots for a set of variables.);
 		%put;
 		%put GENERAL STATISTICS;
@@ -309,7 +309,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put P;
 		%put	PartialPlots %quote(        Make partial plots to graphically assess the linearity of variables in a;
 		%put 	%quote(                     linear regression.);
-		%put 	PHTestPlot* %quote(         Make plots of survival curves to visually check proportional hazards assumption.);
+		%put 	PlotSurvival* %quote(       Make plots of survival curves to visually check proportional hazards assumption.);
 		%put	PiecewiseTransf %quote(     Perform a linear piecewise transformation on continuous variables.); 
 		%put 	PlotBinned* %quote(         Make 2D scatter or bubble plots of a target variable vs. binned continuous variables.);
 		%put	PrintNameList %quote(       Print a list of names in one column in the output window.);
@@ -323,7 +323,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	Qqplot %quote(              Make Q-Q plots for a set of variables.);
 		%put;
 		%put R;
-		%put	RenameVariables %quote(     Rename variables in a dataset based on another dataset of rename pairs.);
+		%put	RenameVars %quote(          Rename variables in a dataset based on another dataset of rename pairs.);
 		%put	RemoveFromList %quote(      Remove a set of names from a given list.);
 		%put	RemoveRepeated %quote(      Remove repeated names from a given list.);
 		%put	Rep %quote(                 Generate a list of one value repeated a number of times.);
