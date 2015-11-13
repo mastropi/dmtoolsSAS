@@ -71,3 +71,9 @@ V.1.10: 2015/08/27 (DM)
 V.1.11: 2015/10/28 (DM) --> a backup copy of the previous version was created in the BACKUP directory with the current date in its name.
 	- New parameter BY= to do BY processing.
 	- It was NOT tested thouroughly and it actually doesn't work correctly when GROUPSIZE= parameter is given (the categorical _CAT variable takes repeated values for the same BY group with different values of the aggregated _MEAN variable...)
+
+V.1.12: 2015/10/28 (DM)
+	- Went one step further in the BY variable case by creating a unique INDEX in the _Categorize_percentiles_ dataset in order to be able to merge with the _Categorize_data_ and _Categorize_rest_ dataset in the same step. An index is needed because the first two datasets are SET and the _Categorize_percentiles_ dataset should be merged.
+	NOTE: I don't know if this fixes the possible errors that occur when GROUPSIZE= parameter is given (as stated in the previous entry). I did one test and it seemed to work correctly, but I cannot guarantee that. I need to do more checks.
+
+

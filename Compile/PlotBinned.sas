@@ -1,8 +1,8 @@
 /* MACRO %PlotBinned
-Version: 		1.06
+Version: 		1.07
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		28-Oct-2015 (previous: 01-Oct-2015)
+Modified: 		12-Nov-2015 (previous: 28-Oct-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -14,7 +14,7 @@ USAGE:
 	data , 						*** Input dataset.
 	target=, (REQUIRED) 		*** Target variable to plot in the Y axis.
 	var=_NUMERIC_,				*** List of input variables to analyze.
-	varclass=, 					*** List of categorical input variables among those listed in VAR.
+	class=, 					*** List of categorical input variables among those listed in VAR.
 	by=,						*** BY variables.
 	datavartype=,				*** Dataset containing the type or level of the variables listed in VAR.
 	valuesLetAlone=,			*** List of values taken by the analyzed variable to treat as separate bins.
@@ -43,7 +43,7 @@ OPTIONAL PARAMETERS:
 - var:				List of input variables to analyze.
 					default: _NUMERIC_
 
-- varclass:			List of categorical variables to analyze among those listed in VAR.
+- class:			List of categorical variables to analyze among those listed in VAR.
 					default: empty
 
 - by:				BY variables.
@@ -156,7 +156,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 		data,
 		target=,
 		var=_NUMERIC_,
-		varclass=,
+		class=,
 		by=,
 		datavartype=,
 		valuesLetAlone=,
@@ -183,7 +183,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put data , (REQUIRED) %quote(         *** Input dataset.);
 	%put target= , (REQUIRED) %quote(      *** Target variable to plot in the Y axis.);
 	%put var=_NUMERIC_, %quote(            *** List of input variables to analyze.);
-	%put varclass= , %quote(               *** List of categorical input variables among those listed in VAR.);
+	%put class= , %quote(                  *** List of categorical input variables among those listed in VAR.);
 	%put by= , %quote(                     *** BY variables.);
 	%put datavartype= , %quote(            *** Dataset containing the type or level of the variables listed in VAR.);
 	%put valuesLetAlone= ,	%quote(        *** List of values taken by the analyzed variable to treat as separate bins.);
@@ -208,11 +208,12 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%ShowMacroCall;
 %end;
 /* THE FOLLOWING CHECK DOES NOT WORK WHEN THE INPUT DATASET HAS DATA OPTIONS! as it says that parameter DATA was not passed... WHY?? */
-/*%else %if ~%CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&target), requiredParamNames=data target=, check=target varclass, macro=PLOTBINNED) %then %do;*/
+/*%else %if ~%CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&target), requiredParamNames=data target=, check=target class, macro=PLOTBINNED) %then %do;*/
 /*	%ShowMacroCall;*/
 /*%end;*/
 /*%else %do;*/
 /************************************* MACRO STARTS ******************************************/
+%local datetime;		%* Execution datetime in the form yyyymmddThhmmss to be used in the image PNG file name;
 %local bystr;
 %local i;
 %local nro_vars;
@@ -234,7 +235,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put PLOTBINNED: - Input dataset = %quote( &data);
 	%put PLOTBINNED: - target = %quote(        &target);
 	%put PLOTBINNED: - var = %quote(           &var);
-	%put PLOTBINNED: - varclass = %quote(      &varclass);
+	%put PLOTBINNED: - class = %quote(         &class);
 	%put PLOTBINNED: - by = %quote(            &by);
 	%put PLOTBINNED: - datavartype = %quote(   &datavartype);
 	%put PLOTBINNED: - valuesLetAlone = %quote(&valuesLetAlone);
@@ -278,19 +279,19 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 		set &datavartype;
 		where upcase(level) = "CATEGORICAL";
 	run;
-	%let varclass = %MakeListFromVar(_PB_vartypes_, var=var, log=0);
+	%let class = %MakeListFromVar(_PB_vartypes_, var=var, log=0);
 	%* Keep just the categorical variables that also appear in VAR;
 	%* NOTE that I cannot subset the dataset above to the variables appearing in VAR because
 	%* when using the %MakeListFromVar macro to generate the list of variable names to search for
 	%* SAS gives an error in the WHERE statement stating that it is flawed, that is completely NONSENSE!!
 	%* as the WHERE statement is perfectly well constructed!!;
-	%let varclass = %KeepInList(&varclass, &var, log=0);
+	%let class = %KeepInList(&class, &var, log=0);
 %end;
 
-%*** VARCLASS=;
+%*** CLASS=;
 %* Remove categorical variables from VAR;
-%if %quote(&varclass) ~= %then
-	%let var = %RemoveFromList(&var, &varclass, log=0);
+%if %quote(&class) ~= %then
+	%let var = %RemoveFromList(&var, &class, log=0);
 
 %*** VALUESLETALONE=;
 %let condition = ;
@@ -308,19 +309,19 @@ quit;
 %if %quote(&var) ~= %then %do;
 	%if &log %then
 		%put PLOTBINNED: Categorizing continuous variables...;
-	%Categorize(&data, by=&by, var=&var, condition=&condition, alltogether=&alltogether, groupsize=&groupsize, groups=&groups, both=0, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &varclass), log=0);
+	%Categorize(&data, by=&by, var=&var, condition=&condition, alltogether=&alltogether, groupsize=&groupsize, groups=&groups, both=0, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &class), log=0);
 	%if &log %then
 		%put;
 %end;
 %else %do;
-	data _PB_data_(keep=&by &target &varclass);
+	data _PB_data_(keep=&by &target &class);
 		set &data;
 	run;
 %end;
 
 %* Restate the list of variables to analyze to the original list of variables (i.e. including the categorical variables);
-%let vartype = %Rep(N, %GetNroElements(&var)) %Rep(C, %GetNroElements(&varclass));
-%let var = &var &varclass;
+%let vartype = %Rep(N, %GetNroElements(&var)) %Rep(C, %GetNroElements(&class));
+%let var = &var &class;
 %let nro_vars = %GetNroElements(&var);
 
 %if &xaxisorig or &yaxisorig %then %do;
@@ -330,6 +331,11 @@ quit;
 	%GetStat(_PB_data_, var=&var &target, stat=min, name=%MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MIN) _TARGET_MIN_, log=0);
 	%GetStat(_PB_data_, var=&var &target, stat=max, name=%MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MAX) _TARGET_MAX_, log=0);
 %end;
+
+%* Get execution datetime to name the PNG files containing the graphical output
+%* (otherwise they could be overwritten by future executions! for instance if we run the same process again, which would
+%* update the HTML output file!);
+%let datetime = %sysfunc(putn(%sysfunc(DATETIME()), B8601DT15.0));
 
 %*** Iterate on each input variable;
 %let maxlengthlabel = 0;
@@ -359,24 +365,35 @@ quit;
 		label = "%quote(&_label_)";
 	run;
 
-	%* Compute the fitted loess;
-	ods exclude all;	%* Avoid showing any output in any of the active outputs;
-	proc loess data=_PB_means_ plots=none;
-		%* NOTE: The options of the MODEL statement request to do a global search for the best smoothing parameter
-		%* on the default range (interval (0,1]). The AICC criterion is used instead of GCV because it is 
-		%* more modern and more robust. We could also use a variation of it AICC1, in order ot improve the
-		%* undersmoothing sometimes observed with AICC. For more info, see the SAS documentation.
-		%* Note that the default range is (0, 1] because the smoothing parameter in the LOESS context represents
-		%* the proportion of data that is used at each local regression around an X point where X is the input vector.
-		%* For more info see: http://www.ats.ucla.edu/stat/sas/library/loesssugi.pdf;
-		%* THIS IS IMPORTANT BECAUSE OTHERWISE THE LOESS FIT OF THE PLOT MAY BE VERY DIFFERENT FROM THE LOESS FIT HERE;
-		&bystr;
-		model &target = &_var_ / select=aicc(global);
-		weight nobs;
-		output 	out=_PB_means_(keep=&by var label &_var_ nobs &target fit_loess fit_loess_low fit_loess_upp)
-				predicted=fit_loess LCLM=fit_loess_low UCLM=fit_loess_upp;
-	run;
-	ods exclude none;
+	%* Compute the fitted loess (for continuous variables only, o.w. the fitted curve is the interpolation between the data values);
+	%if &_vartype_ = C %then %do;
+		data _PB_means_;
+			keep &by var label &_var_ nobs &target fit_loess fit_loess_low fit_loess_upp;
+			set _PB_means_;
+			fit_loess = &target;
+			fit_loess_low = .;
+			fit_loess_upp = .;
+		run;
+	%end;
+	%else %do;
+		ods exclude all;	%* Avoid showing any output in any of the active outputs;
+		proc loess data=_PB_means_ plots=none;
+			%* NOTE: The options of the MODEL statement request to do a global search for the best smoothing parameter
+			%* on the default range (interval (0,1]). The AICC criterion is used instead of GCV because it is 
+			%* more modern and more robust. We could also use a variation of it AICC1, in order ot improve the
+			%* undersmoothing sometimes observed with AICC. For more info, see the SAS documentation.
+			%* Note that the default range is (0, 1] because the smoothing parameter in the LOESS context represents
+			%* the proportion of data that is used at each local regression around an X point where X is the input vector.
+			%* For more info see: http://www.ats.ucla.edu/stat/sas/library/loesssugi.pdf;
+			%* THIS IS IMPORTANT BECAUSE OTHERWISE THE LOESS FIT OF THE PLOT MAY BE VERY DIFFERENT FROM THE LOESS FIT HERE;
+			&bystr;
+			model &target = &_var_ /* / select=aicc(global)*/;
+			weight nobs;
+			output 	out=_PB_means_(keep=&by var label &_var_ nobs &target fit_loess fit_loess_low fit_loess_upp)
+					predicted=fit_loess LCLM=fit_loess_low UCLM=fit_loess_upp;
+		run;
+		ods exclude none;
+	%end;
 	%* Append the plotted data to the output dataset;
 	proc append base=_PB_out_ data=_PB_means_(rename=(&_var_=value));
 	run;
@@ -388,7 +405,7 @@ quit;
 			%GetStat(_PB_means_, var=&target, stat=max, name=_TARGET_MAX_, log=0);
 		%end;
 		ods proclabel="%upcase(&_VAR_)";	%* This adds a title to each entry in an e.g. PDF file that helps in browsing;
-		ods graphics / imagename="&imagerootname-&target-&i-&_var_" reset=index;	%* This generates the image file with the name specified in the IMAGENAME= option;
+		ods graphics / imagename="&datetime-&imagerootname-&target-&i-&_var_" reset=index;	%* This generates the image file with the name specified in the IMAGENAME= option;
 		title "Bin plot of %upcase(&TARGET) vs. %upcase(&_VAR_)";
 		proc sgplot data=_PB_means_;
 			%*** BUBBLE or SCATTER;
@@ -441,12 +458,26 @@ quit;
 		%if %quote(&by) ~= %then %do;
 		format &by;
 		%end;
-		format var $32. label $&maxlengthlabel..;
+		format var $32.;
+
+		%* LABEL variable;
+		%if &maxlengthlabel > 0 %then %do;
+		%* Format and set the final length of the label variable (only when there is at least one variable with label!
+		%* Otherwise, we would set a length of 0 which gives an error);
+		format label $&maxlengthlabel..;
+		length label $&maxlengthlabel;
+		%* Set the final length of the label variable;
+		length label $&maxlengthlabel;
+		%end;
+		%else %do;
+		%* Drop the LABEL variable when there are no variables with labels;
+		drop label;
+		%end;
+
 		format value BEST8.;	%* This format is to make sure that values are not shown as integer values when there are integer-valued analysis variables;
 		format nobs &target;
 		format fit_loess_low fit_loess fit_loess_upp;
-		%* Set the final length of the label variable;
-		length label $&maxlengthlabel;
+
 		set _PB_out_;
 		label 	value = " "
 				nobs = " "
@@ -499,11 +530,22 @@ quit;
 		%if %quote(&by) ~= %then %do;
 		format &by;
 		%end;
-		format var $32. label $&maxlengthlabel..;
+		format var $32.;
+
+		%* LABEL variable;
+		%if &maxlengthlabel > 0 %then %do;
+		%* Format and set the final length of the label variable (only when there is at least one variable with label!
+		%* Otherwise, we would set a length of 0 which gives an error);
+		format label $&maxlengthlabel..;
+		length label $&maxlengthlabel;
+		%end;
+		%else %do;
+		%* Drop the LABEL variable when there are no variables with labels;
+		drop label;
+		%end;
+
 		format n corr corr_adj target_range;
 		format target_range_rel percent7.1;
-		%* Set the final length of the label variable;
-		length label $&maxlengthlabel;
 		merge 	_PB_corr_
 				_PB_range_(keep=&by var range rename=(range=target_range));
 		by &by var;

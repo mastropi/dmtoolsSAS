@@ -43,3 +43,8 @@ V.1.06: 2015/10/28 (DM) --> a backup copy of the previous version was created in
 	- New parameter BY= to do BY processing.
 	- The call to the %CheckInputParameters was disabled because it didn't work correctly when the DATA parameter receives data options (it happened with a WHERE condition in the data options where I got the message that not all input parameters (DATA, TARGET) were given).
 
+V.1.07: 2015/11/12 (DM)
+	- Fixed a few bugs:
+		- The graph was overwritten by new runs of the same plot. This was solved by using the time stamp (in the format yyyymmddThhmmss) as prefix to the name of the PNG file.
+		- No output datasets (OUT or OUTCORR) were generated when the analyzed variables had no labels (because the length of the LABEL variable was set to 0!)
+		- The macro failed when the LOESS fit did not work for categorical variables (because the smoothing parameter was selected as 0). Note that this was solved by treating categorical variables in a special case (i.e. by not running the LOESS, but the error can still happen if the smoothing parameter of continuous variables is chosen to be 0! --I think)

@@ -1,8 +1,8 @@
 f/* MACRO %Categorize
-Version: 	1.11
+Version: 	1.12
 Author: 	Daniel Mastropietro
 Created: 	27-Feb-2003
-Modified: 	28-Oct-2015 (previous: 27-Aug-2015)
+Modified: 	12-Nov-2015 (previous: 28-Oct-2015)
 
 DESCRIPTION:
 Categorizes a set of variables in terms of one of the following specifications:
@@ -301,7 +301,7 @@ the default statistic to use is the MEAN.
 &rsubmit;
 %MACRO Categorize(	data,
 					var=_NUMERIC_,
-					by=,				/* STILL DOES NOT WORK CORRECTLY WHEN PARAMETER groupsize= IS GIVEN */
+					by=,				/* STILL IT SEEMS IT DOES NOT ALWAYS WORK CORRECTLY WHEN PARAMETER groupsize= IS GIVEN */
 					out=,
 
 					condition=,
@@ -615,6 +615,15 @@ run;
 			%end;
 		%end;
 
+	%* Create an INDEX on the BY variables if there is BY processing;
+	%if %quote(&by) ~= %then %do;
+	proc sql;
+		create unique index %scan(&by, 1, ' ') on _Categorize_percentiles_ (&by);
+			%** Need to read the first BY variable above because when there is only one BY variable
+			%** the name of the index needs to be the same as the BY variable;
+	quit;
+	%end;
+
 	%*** DM-2012/06/20-START: Following the change in the naming of the percentile variables done at
 	%*** PROC UNIVARIATE above, here I adapt the macro variable definition containing their names;
 	%* Definition of the macro variables containing the list of names of the dataset columns
@@ -639,10 +648,11 @@ run;
 
 		%* WHEN THERE ARE BY VARIABLES;
 		%if %quote(&by) ~= %then %do;
-		merge 	_Categorize_data_
-/*				_Categorize_data_rest_*/		/* DM-2015/10/28: This dataset was eliminated because the first two datasets need to be SET but the last one needs to be MERGEd, but this is not possible (o.w. there is repeat of BY variables) */
-				_Categorize_percentiles_;
-		by &by;
+		set 	_Categorize_data_;
+		set		_Categorize_data_rest_;		/* DM-2015/10/28: This dataset was eliminated because the first two datasets need to be SET but the last one needs to be MERGEd, but this is not possible (o.w. there is repeat of BY variables) */
+		set 	_Categorize_percentiles_  key=&by / unique;
+/*		by &by;*/
+		if ~_IORC_ then _ERROR_ = 0;
 		%end;
 
 		%* NO BY VARIABLES;

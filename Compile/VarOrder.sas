@@ -13,7 +13,7 @@ USAGE:
 %VarOrder(data, case=, out=, log=1);
 
 REQUIRED PARAMETERS:
-- data:			Input dataset.
+- data:			Input dataset. Options are not accepted.
 
 OPTIONAL PARAMETERS:
 - case:			Defines whether the variables should be lowcased (=LOWCASE), upcased (=UPCASE)
