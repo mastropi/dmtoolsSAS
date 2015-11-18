@@ -2,7 +2,7 @@
 Version: 	1.07
 Author: 	Daniel Mastropietro
 Created: 	28-May-03
-Modified: 	13-Jul-2012 (previous: 28-Oct-2005)
+Modified: 	16-Nov-2015 (previous: 13-Jul-2012)
 SAS:		v9.3
 
 DESCRIPTION:
@@ -329,7 +329,7 @@ usados para realizar los gráficos mostrados por la macro.
 
 						log=1 ,
 						help=0)
-		/  store des="Tests the fit of a logistic regression using fitted and residual plots";
+		/ store des="Tests the fit of a logistic regression using fitted and residual plots";
 
 /* NOTA SOBRE LOS RESIDUOS DE PEARSON (21/7/03):
 En el libro de Dobson sobre GLM, pag. 127 dice que los residuos de Pearson estandarizados son
@@ -546,7 +546,7 @@ no representaria mayores inconvenientes y seria igualmente apropiado.
 		%put TESTLOGISTICFIT: Categorizing independent variables...;
 	%Categorize(_TestLogisticFit_data_(where=(&resp ~= . and &pred ~=.)) ,
 				out=_TestLogisticFit_cat_ ,
-				var=&var , value=mean , suffix= , percentiles=&percentiles , log=0);
+				var=&var , value=mean , varvalue=&var, suffix= , both=0, percentiles=&percentiles , log=0);
 
 	%* Statements for Annotate datasets;
 	%let annost1 =;
@@ -1065,7 +1065,7 @@ no representaria mayores inconvenientes y seria igualmente apropiado.
 			%put TESTLOGISTICFIT: created.;
 		%end;
 	%end;
-
+/*
 	proc datasets nolist;
 		delete 	_TestLogisticFit_cat_
 				_TestLogisticFit_data_
@@ -1073,6 +1073,7 @@ no representaria mayores inconvenientes y seria igualmente apropiado.
 				_TestLogisticFit_anno_logit_
 				_TestLogisticFit_anno_res_;
 	quit;
+*/
 %end;	%* %if ~&error;
 
 %if &log %then %do;

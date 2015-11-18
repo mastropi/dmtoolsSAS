@@ -67,7 +67,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%let weightst = weight &weight;
 /*------------------------------------*/
 
-%* Partial plot for the intercept (see example in "Influence Diagnostics" in SAS Manuals);
+%* Partial plot for the intercept (see example in "Influence Diagnostics" under the "Details" section of 
+%* the REG procedure in the SAS Manuals);
 data _PartialPlots_data_;
 	set &data;
 	_int_ = 1;

@@ -77,7 +77,7 @@ OPTIONAL PARAMETERS:
 
 - groups:		Number of groups to use for the categorization of numeric variables listed in VAR=.
 				Equal size groups are used.
-				Leave it empty if no categorization is wished.
+				Leave it empty if no categorization is wished. For instance, for categorical variables.
 				default: 10
 
 - value:		Statistic to show for each category of numeric variables, such as the mean.
@@ -228,6 +228,7 @@ by that value is infinite.
 %local TargetType;
 %local value0 value1;
 %local varlen;
+%local var_num;
 
 %SetSASOptions(notes=&notes);
 
@@ -257,9 +258,9 @@ by that value is infinite.
 %* Read input dataset and apply data set options;
 %* This is done here because below when the macro %FreqMult is invoked, a filter is used on the
 %* target variable in order to eliminate its missing occurrences, and this is done with a data option;
-data _iv_data_;
+data _iv_data_(keep=_iv_obs_ &target &var);
 	format _iv_obs_;
-	set &data(keep=&target &var);
+	set &data;
 	_iv_obs_ = _N_;
 run;
 
