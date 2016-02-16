@@ -1,8 +1,8 @@
 /* MACRO %Means
-Version: 1.14
-Author: Daniel Mastropietro
-Created: 01-Sep-00
-Modified: 22-Nov-2011 (previous: 31-Aug-06)
+Version: 	1.15	
+Author: 	Daniel Mastropietro
+Created: 	01-Sep-2000
+Modified: 	04-Feb-2016 (previous: 22-Nov-2011)
 
 DESCRIPTION:
 Runs PROC MEANS with the statements and options "usually" used. The supported statements are:
@@ -31,7 +31,7 @@ which are seldom useful.
 
 USAGE:
 %Means(
-	data,			*** Intput dataset
+	data,			*** Input dataset
 	out=, 			*** Output dataset
 	var=_NUMERIC_, *** Variables on which statistics are computed
 	format=,		*** PROC MEANS FORMAT statement
@@ -48,7 +48,8 @@ USAGE:
 	namevar=,		*** If transpose=1, name for the column with the variable names
 					*** in the output dataset
 	droptypefreq=1,	*** Drop the _TYPE_AND _FREQ_ variables from the output dataset?
-	noprint=1, 		*** Show or do not show results in output window
+	noprint=1, 		*** Show results in the output window?
+	nolabel=1,		*** Avoid labels on variables with the summary statistics?
 	notes=1,		*** Show SAS notes in the log?
 	log=1);			*** Show messages in the log?
 
@@ -165,6 +166,15 @@ OPTIONAL PARAMETERS:
 				default: depends on parameter 'out'. If 'out' is empty the results
 				are shown, otherwise they are not.
 
+- nolabel		Indicates whether not to use labels on the variables with the summary
+				statistics. The reason is that by default PROC MEANS transfers the
+				labels of the analyzed variables ot the summary statistic variables
+				and this may be a little cumbersome since we will not be able to
+				distinguish the summary statistics among them and from the original
+				variable.
+				Possible values: 0 => No, 1 => Yes.
+				default: 1
+
 - notes:		Indicates whether to show SAS notes in the log.
 				The notes are shown only for the PROC MEANS step.
 				Possible values: 0 => No, 1 => Yes.
@@ -255,8 +265,8 @@ Ex: Computing the distribution of a set of numeric variables.
 */
 &rsubmit;
 %MACRO Means(data, 	out=, var=_numeric_, format=, class=, by=, id=, stat=, stats=, name=, names=, 
-					prefix=, suffix=, weight=, noprint=1, options=, transpose=0, namevar=var, droptypefreq=1, notes=1, log=1, help=0)
-		/ store des="Executes a PROC MEANS";
+					prefix=, suffix=, weight=, noprint=1, nolabel=1, options=, transpose=0, namevar=var, droptypefreq=1, notes=1, log=1, help=0)
+		/ store des="Runs a PROC MEANS with added features such as transposing the output to increase readability";
 
 %* These variables are declared here because they are needed before the call to %CheckInputParameters;
 %local by_orig;
@@ -288,6 +298,7 @@ Ex: Computing the distribution of a set of numeric variables.
 	%put %quote(                        *** in the output dataset.);
 	%put droptypefreq=1 , %quote(       *** Drop the _TYPE_ and _FREQ_ variables?);
 	%put noprint=1 , %quote(            *** Show results in output window?);
+	%put nolabel=1 , %quote(            *** Avoid labels on variables with the summary statistics?);
 	%put notes=1 , %quote(              *** Show SAS notes in the log?);
 	%put log=1) %quote(                 *** Show messages in the log?);
 %MEND ShowMacroCall;
@@ -324,13 +335,20 @@ Ex: Computing the distribution of a set of numeric variables.
 %local nro_byvars nro_cols nro_vars nro_stats out_library out_name out_options;
 %local _prefix_ _stat_ _suffix_;
 %local data_name label varnames;
+%local label_option;
 %local notes_option;
 %local nobs nvars;	%*** Number of obs. and number of vars in output dataset;
 %* Statements for the MEANS procedure;
 %local byst classst formatst idst droptypefreqst noprintst outputst statst weightst;
 
+%* NOTE that there is no call to macro %SetSASOptions because we make a very specific
+%* use of the NOTES option here (unlike the %SetSASOptions macro which removes notes;
 %let notes_option = %sysfunc(getoption(notes));
+%let label_option = %sysfunc(getoption(label));
 options nonotes;
+%if &nolabel %then %do;
+	options nolabel;
+%end;
 
 %* Showing input parameters;
 %if &log %then %do;
@@ -586,6 +604,7 @@ proc datasets nolist;
 			_Means_contents_;
 quit;
 options &notes_option;
+options &label_option;
 
 %if &log %then %do;
 	%put;

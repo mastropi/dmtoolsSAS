@@ -2,7 +2,7 @@
 Version: 	3.01
 Author: 	Daniel Mastropietro
 Created: 	06-Jul-2005
-Modified: 	23-May-2015 (previous: 31-Jul-2012)
+Modified: 	15-Feb-2016 (previous: 23-May-2015)
 
 DESCRIPTION:
 This macro computes the Information Value (IV) provided by a set of input variables w.r.t.
@@ -366,7 +366,9 @@ run;
 	%if %quote(&value) = %then %do;
 		%* The categorized variable is made up of integer-valued categories. 
 		%* Use the same variable name for the categorized variable so that the process below is easier;
-		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, suffix=, log=0);
+%*		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, suffix=, log=0);
+		%* DM-2016/02/15: Refactored version of %Categorize (much simpler);
+		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, varcat=&var_num, log=0);
 	%end;
 	%else %do;
 		%* The categorized variable is made up of categories equal to the statistic specified in VALUE=.

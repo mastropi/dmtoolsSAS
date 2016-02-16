@@ -5,9 +5,9 @@ Created: 1-Mar-01
 Modified: 6-Jul-05
 
 DESCRIPTION:
-This macro generates a list of (unquoted) names from a single (unquoted) name
-used as the root for all the names. For example, it can generate the list
-'x1 x2 x3' from name 'x'.
+This macro generates a list of (unquoted) numbered names from a single (unquoted) name
+used as root.
+For example, it can generate the list 'x1 x2 x3' from name 'x'.
 
 USAGE:
 %MakeListFromName(
@@ -25,18 +25,18 @@ REQUIRED PARAMETERS:
 - name:			Name (unquoted) to be used as the root for all generated names.
 				(Leave blank if a list of numbers is desired. See example 3).
 
-Not all of the following parameters are required. Exactly three of them should have a value,
-and parameter START must be always be present.
+NOTE: Not all of the following parameters are required. Exactly three of them should have a value,
+and parameter START must always be present.
 - length:		Number of names to be generated in the list.
 				If no value is passed, it is computed as
 				floor('start' - 'stop') + 1.
 
-- start:		Starting index. It can be any real number.
+- start:		Starting label value. It can be any real number.
 				default: 1
 
-- stop:			Stopping index. It can be any real number.
+- stop:			Stopping label value. It can be any real number.
 
-- step:			Step to use for the numbers indexing the elements in the list.
+- step:			Step to use for the numbers labeling the elements in the list.
 				It can be any real number.
 				(e.g. if step=2, name=x, length=3 the list will be x1 x3 x5)
 

@@ -9,6 +9,9 @@ This macro parses a list of variables in a dataset by converting the keywords
 _ALL_, _NUMERIC_, _CHAR_, hyphen strings (such as in x1-x7, id--name), and colon references
 to variables (as in id:) into a regular list of variables.
 
+Note that if just the list of all variables is wished use %GetVarOrder which runs
+much faster.
+
 USAGE:
 %GetVarList(data, var=_ALL_, check=1, log=1);
 
@@ -32,14 +35,21 @@ OPTIONAL PARAMETERS:
 				Possible values: 0 => No, 1 => Yes
 				default: 1
 
+RETURNED VALUES:
+A blank-separated list with the variable names in the input dataset matching the keywords.
+
 NOTES:
 1.- If the last variable in a double hyphen string is found before the first variable, a WARNING
 is issued and the returned list for that string is empty.
+
 2.- The addition of parameter CHECK= was essentially due to the call that is performed to %GetVarList
 from macro %CheckInputParameters, where the message of existence or non-existence of variables is
 performed there (i.e. when calling %GetVarList from %CheckInputParameters, I don't want the macro
 %GetVarList to check for existence of the variables in the dataset because I want this task to be
 done by %CheckInputParameters, so that the appropriate messages are issued by this macro).
+
+3.- If just the list of all variables in the dataset is wished, use rather %GetVarOrder which
+runs much faster.
 
 OTHER MACROS AND MODULES USED:
 - %ExistVar

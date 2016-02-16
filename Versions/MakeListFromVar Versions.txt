@@ -12,3 +12,6 @@ V.1.03: 2012/09/24 (DM)
 	- RE-ESTABLISHED the use of the COMPBL function that was removed on 2012/06/06 (above) because its absence caused problems when the list of names is very long (~ more than 20 or 30 names!). In fact, for some unknown and very strange behaviour, the name values tend to be preceded by very strange characters (always, i.e. regardless of whether the COMPBL function is used or not, such as for example: A_CUSTOMER V_FIELD_SURFACE).
 	This of course will remove multiple blank spaces in a particular value read from the dataset variable, but I don't know how else to solve the problem (it seems the above described strange behaviour is a BUG). Therefore, if the variable value is "This is    a test" it will be stored as "This is a test".
 
+V.1.04: 2016/02/04 (DM)
+	- Added the capability of reading variables with blank values so that the same number of elements are stored in the output list for each variable read, regardless of whether the variable has empty cases or not.
+	Note that in this case we should use a non-blank character to separate the values stored on different records, and also enclose the output with %quote() in order to preserve any empty value found at the first or last record of the dataset being read.

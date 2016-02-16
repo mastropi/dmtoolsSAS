@@ -1,0 +1,7 @@
+%Puts Versions
+--------------
+Created: 16-Feb-2016
+
+
+V.1.01: 2016/02/05 (DM)
+	- Fixed an error happening when the element to print is empty or a blank space.

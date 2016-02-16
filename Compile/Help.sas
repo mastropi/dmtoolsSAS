@@ -173,6 +173,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put -------------------;
 		%put 	All %quote(                 Establish a condition that ALL variables in a list must satisfy.);
 		%put 	Any	%quote(                 Establish a condition that AT LEAST ONE variable in a list must satisfy.);
+		%put	CheckVarNames %quote(       Check variable names in terms of complying with a maximum allowed length.);
 		%put	CompareLists %quote(        Compare two lists of names, and creates 3 datasets containing the list);
 		%put	%quote(                     of the names found in both lists, of the names found in one list and not);
 		%put	%quote(                     in the other, and viceversa.);
@@ -181,6 +182,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	%quote(                     list that are present in a dataset.);
 		%put	FindInList %quote(          Find a set of names in a list and returns their word position.);
 		%put	FindMatch %quote(           Find the names in a list that contain a given keyword.);
+		%put	FixVarNames %quote(         Fix variable names by truncating them on the right to a maximum allowed length.);
 		%put	GetNroElements %quote(      Get the nro. of elements in a list.);
 		%put 	InsertInList %quote(        Insert a name in a list at a given position.);
 		%put	MakeList %quote(            Make a list by adding a prefix and suffix to each name in a given list.);
@@ -212,6 +214,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%*%put	CheckRequiredParameters	;
 		%put	CheckRepeated %quote(       Check the existence of observations with repeated key values in a dataset);
 		%put 	%quote(                     and creates an output dataset containing those observations.);
+		%put	CheckVarNames %quote(       Check variable names in terms of complying with a maximum allowed length.);
 		%put 	Colors %quote(              Create list of 10 color names to be used for graph symbols and lines.);
 		%put	CompareLists %quote(        Compare two lists of names, and creates 3 datasets containing the list);
 		%put	%quote(                     of the names found in both lists, of the names found in one list and not);
@@ -254,6 +257,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put F;
 		%put	FindInList %quote(          Find a set of names in a list and returns their word position.);
 		%put	FindMatch %quote(           Find the names in a list that contain a given keyword.);
+		%put	FixVarNames %quote(         Fix variable names by truncating them on the right to a maximum allowed length.);
 		%put	FreqMult* %quote(           Compute and store the frequencies of a list of variables in an output);
 		%put 	%quote(                     dataset.);
 		%put;

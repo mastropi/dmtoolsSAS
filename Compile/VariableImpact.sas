@@ -2,7 +2,7 @@
 Version: 	1.04
 Author: 	Daniel Mastropietro
 Created: 	30-Sep-2004
-Modified: 	23-May-2015 (previous: 17-Aug-2006)
+Modified: 	15-Feb-2016 (previous: 23-May-2015)
 
 DESCRIPTION:
 This macro makes plots of a binary target variable vs. individual predictor variables
@@ -374,7 +374,11 @@ quit;
 %if &log %then
 	%put VARIABLEIMPACT: Categorizing independent variables...;
 %if %quote(&condition) = %then %do;
-	%Categorize(_VariableImpact_data_, var=&var, value=, suffix=_,
+	%* DM-2016/02/15: Changed call from %Categorize to %CategorizePercentiles which holdds the
+	%* original version of the %Categorize macro before its refactoring to a much simpler version
+	%* that uses PROC RANK (and which therefore does not accept a given set of percentile values
+	%* on which the groups should be computed);
+	%CategorizePercentiles(_VariableImpact_data_, var=&var, value=, suffix=_,
 				groups=&groups, groupsize=&groupsize, percentiles=&percentiles, log=0);
 	%** Note that the suffix used for the categorized variables is kept as short as possible
 	%** in order to diminish the problems with long variable names. In any case, the macro
@@ -384,11 +388,11 @@ quit;
 %else
 	%do i = 1 %to &nro_vars;
 		%let vari = %scan(&var, &i, ' ');
-		%Categorize(_VariableImpact_data_(where=(&vari &condition)), var=&vari, value=,
+		%CategorizePercentiles(_VariableImpact_data_(where=(&vari &condition)), var=&vari, value=,
 					suffix=_, groups=&groups, groupsize=&groupsize, percentiles=&percentiles,
 					out=_VariableImpact_cat_i_(keep=_vi_obs_ &vari._), log=0);
-		* Merging with _VariableImpact_data_, so that the observations that do not satisfy
-		* the CONDITION get a missing value into the categorized variable;
+		%* Merging with _VariableImpact_data_, so that the observations that do not satisfy
+		%* the CONDITION get a missing value into the categorized variable;
 		data _VariableImpact_data_;
 			merge _VariableImpact_data_ _VariableImpact_cat_i_;
 			by _vi_obs_;

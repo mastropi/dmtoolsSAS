@@ -5,7 +5,7 @@ Created: 10-Mar-01
 Modified: 15-Jan-03
 
 DESCRIPTION:
-This macro returns the order in which the variables appear in a dataset. 
+This macro returns the order in which the variables appear in a dataset.
 
 USAGE:
 %GetVarOrder(data , _order_);
@@ -30,13 +30,17 @@ before calling the macro, such as: '%let varlist=;'. See examples below.
 2.- Do not use '_list_' as the name for the macro variable to store the list.
 This will cause an error in the program.
 
+3.- This macro is much faster than running %GetVarList with no keywords to
+search for.
+
 OTHER MACROS USED IN THIS MACRO:
 - %SetSASOptions
 - %ResetSASOptions
 
 SEE ALSO:
 - %GetVarNames
-- %GetVarList
+- %GetVarList (to search variables with SAS keywords, but it is slower than
+this macro to simply retrieve the list of all variables in the dataset)
 
 EXAMPLES:
 Assuming the dataset A has the variables x1, x2, x3 and they are stored in the

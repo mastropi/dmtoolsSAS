@@ -1,7 +1,23 @@
-/* GRAFICO DE FITTED Y RESIDUALS VS. VARIABLES REGRESORAS (tomado del workshop 1 de regresion lineal) */
-/* 'data' es el dataset con las predicciones creado con el output statement del PROC REG */
-/* 'var' es la lista de variables del modelo: respuesta + variables regresoras */
-/* Agosto 2003 */
+/* MACRO %FittedPlots
+Version: 	1.00
+Author: 	Daniel Mastropietro
+Created: 	Aug-2003
+Modified: 	15-Feb-2016 (previous: Aug-2003)
+
+DESCRIPTION:
+Plots fitted values and residuals vs. each predictor variable in a linear regression model.
+
+USAGE:
+%FittedPlots(
+	data, 			*** Input dataset with predictions created by PROC REG
+	var,			*** Target + model variables
+	pred=,			*** Variable containing the values predicted or fitted by the model
+	res=,			*** Variable containing the residual of the model fit
+	groups=)		*** If wished, number of groups in which model variables are categorized
+
+NOTES:
+The macro requires SAS/GRAPH.
+*/
 &rsubmit;
 %MACRO FittedPlots(data , var , pred=pred , res=res, groups=) 
 	/ store des="Plots fitted values and residuals vs. predictor variables in a linear regression";
@@ -17,7 +33,9 @@
 
 %* Check if the user wants a grouped plot;
 %if %quote(&groups) ~= %then %do;
-	%Categorize(&data, var=&var, groups=&groups, both=0, value=mean, varvalue=&var, out=_FittedPlots_cat_(keep=&resp &pred &res &var));
+%*	%Categorize(&data, var=&var, groups=&groups, both=0, value=mean, varvalue=&var, out=_FittedPlots_cat_(keep=&resp &pred &res &var));
+	%* DM-2016/02/15: Refactored version of %Categorize (much simpler);
+	%Categorize(&data, var=&var, groups=&groups, value=mean, varvalue=&var, out=_FittedPlots_cat_(keep=&resp &pred &res &var));
 %end;
 
 %do i = 1 %to &nro_vars;

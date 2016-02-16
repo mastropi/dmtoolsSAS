@@ -1,0 +1,81 @@
+%CategorizePercentiles Versions: Descripcion de las diferentes versiones
+------------------------------------------------------------------------
+Creado: 28/5/03
+
+
+
+V.1.01: 28/5/03 (DM)
+	- Correccion del error que ocurria cuando el parametro suffix era vacio: la variable original que se categoriza era sobreescrita y esto resultaba en una incorrecta categorizacion.
+
+V.1.02: ?? (missed)
+
+V.1.03: 4/10/04 (DM)
+	- Se agrego' la opcion groupsize= que permite establecer el tamanho (en numeros) de cada grupo de la categorizacion. Esta opcion tiene prevalencia sobre las opciones groups= y percentiles= en el sentido de que si se pasa, estas ultimas se ignoran.
+
+V.1.04: 21/10/04 (DM)
+	- Se cambio' TOTALMENTE la filosofia de la macro, con el fin de que tarde menos. De esta manera tambien se obtuvo un codigo mas directo y facil de leer. Los cambios realizados mas importantes son:
+		- Se lee el dataset al principio y se lo separa en 2 partes, una con las variables a categorizar y otra con el resto de las variables. Esto es para agilizar los calculos que se hagan con las variables de interes, como por ejemplo los sorts.
+		- Se agrega siempre una variable auxiliar con el numero de observacion para despues poder unir estas dos partes.
+		- El output dataset esta' conserva el orden de las observaciones en el input dataset.
+		- Se elimino' el uso de las macros %Means y %Merge porque tardaban mucho ya que ordenaban por las by variables (es decir las variables categorizadas) y luego volvian a ordenar por el numero de observacion, para luego repetir el mismo sort por las by variables y volver a deshacerlo. Se remplazo' la llamada a dichas macros por los PROC correspondientes.
+
+V.1.05: 19/11/04 (DM)
+	- Se agrego' el tratamiento de missing values de las variables a categorizar. La forma de tratarlos es generar una categoria distinta (antes los missing values caian dentro de la categoria menor) a la que se le asigna el valor 0. Esto hace que si una variable tiene missing values, el numero de categorias generadas sera un numero mayor que el que se generaria si la variable no tuviera missing values.
+	- Se aclararon los diferentes resultados que se obtienen entre pasar el parametro groupsize= (que define el tamanho de los grupos de la variable categorizada) y pasar los parametros groups= o percentiles=. A saber, con el primer parametro groupsize= se define el tamanho EXACTO deseado para cada grupo, mientras que los parametros groups= o percentiles= permiten (indirectamente) definir el tamanho DESEADO para cada grupo (el tamanho deseado puede no ser igual al exacto en caso de que la variable tenga valores repetidos, pues a igual valor siempre le corresponde una misma categoria).
+	- Se corrigio' el error de que cuando VAR=_NUMERIC_ la variable temporal con el numero de observacion no era encontrada porque era dropeada en el drop=&var option del _Categorize_data_rest_ por ser una variable numerica! Esto se corrigio' pasando el %GetVarList que parsea el parametro var= antes de la creacion de los datasets _Categorize_data_ y _Categorize_data_rest_.
+
+V.1.06: 2012/06/17 (DM)
+	(NOTE: BEFORE THESE CHANGES, I MADE A COPY INTO Backup\Categorize-20120617-v200506Jun08-BeforeAddingParameterDescending.sas)
+	- Added the following new parameters:
+		- DESCENDING --> it indicates whether the percentile values should be applied to the DESCENDING values of the variables to be categorized. This has an impact in case the percentile values are not ALL equally spaced between 0% and 100% (such as in 10%, 20%, ..., 100%) but instead may be different (such as in 6%, 12%, ..., 96%, 100%, where we see that the step size of the first categorized group is 6% while that of the last categorized group is 4%). In the second case, the DESCENDING parameter specifies whether the first 6% group should be taken from the smallest values of the original variables (DESCENDING=0) or from the largest values of the original variables (DESCENDING=1). Both cases will give different results unless the percentile values are equally spaced in the interval [0%, 100%].
+		The result of using the DESCENDING=1 option is equivalent to using the DESCENDING=0 option on a new variable Y that is constructed from the original variable to categorize X as Y = max(X) - X. In particular, this implies that the categorized group containing the LARGEST values of X is assigned the group value 1 (as is the case for the group containing the SMALLEST values of the analyzed variable when DESCENDING=0).
+		Default value is DESCENDING=0.
+		- VARCAT --> optionally gives the names to use for the categorized variables. This is done in order to allow names of the input variables specified in the VAR parameter to have 32 characters and create an output dataset containing both the input variables and the categorized variables.
+		Note that the number of names listed in VARCAT= need NOT be the same as the number of names given in VAR=. If the number of smaller, the value of SUFFIX will be used to name the variables listed in VAR= that do not have a pair in VARCAT=.
+		Note also that if the number of names listed in VAR= and in VARCAT= match, the value of SUFFIX is set to empty, so that any statistic specified in VALUE= will be used as suffix to the new variables containing such statistics for each category. This avoids confusion that might be generated by using the SUFFIX value *also* in the suffix of such variables when the SUFFIX value is NOT used to name the integer-valued categorized variables.
+	- Replaced the categorized value of a MISSING value from 0 to missing. This is done for 2 reasons:
+		- To make the programming easier after the inclusion of the DESCENDING parameter
+		- To make the result logic the same as PROC RANK which can do the same type of categorization when the percentile values are equally spaced.
+		****** IMPORTANT NOTE: I don't know if this will affect adversely the result of other macros calling %Categorize????? ******
+	- Changed the names used for the categorized variables during the categorization process from &_VAR_&SUFFIX to an internally generated name, _VAR&i._CAT_, so that there is no problem when any input variable name contains 32 characters. Note that the addition of the new parameter VARCAT still allows the output dataset to contain both the input variables and the categorized variables even when the input variable name contains 32 characters.
+	The rename to the final names chosen by the user is done at the end of the process.
+	- Changed the default value of parameter BOTH= to 1. This is done because in many cases we would like to have both an integer-valued category (for ease of use and manipulation) and the mean value of the categorized variables in each category.
+	- Added a check to guarantee that the names used for the new categorized variables will not exceed 32 characters. If such situation is detected, the macro stops executing.
+	- Modified the way the statistic-valued categorized variables are named in the output dataset, meaning: their names are ALWAYS formed the same way --i.e. adding the _&VALUE suffix to either the <var>_&SUFFIX or to the categorized variable name specified in VARCAT=--, regardless of whether BOTH or only one categorized variable is requested in the output dataset. Originally, when only one categorized variable was requested in the output dataset and the VALUE= parameter was no empty, the statistic-valued categorized variable was named WITHOUT using the _&VALUE as suffix, but just naming it as <var>_&SUFFIX. I changed this because I found that this original naming convention does NOT tell which statistic was used to compute the variable...
+
+V.1.07: 2015/05/21 (DM)
+	(NOTE: The changes were done on the sasx64 server at Pronto. The macro was updated locally by copying and pasting the code from the server to my computer!
+	All changes are indicated in the macro by comments starting with DM-2015/05/21)
+	- Made sure that the categorized variables created by the macro storing a requested statistic value (e.g. the mean) are correctly overridden in case they already exist in the input dataset. This could be a common situation if the user is trying out different categorizations (e.g. groups=5, groups=10, etc.)
+	- I also make sure to drop the categorized variables created by the macro (e.g. the _CAT variables) before renaming the internal variables created by the macro to the names used in the output dataset.
+
+V.1.08: 2015/05/23 (DM)
+	(NOTE: The changes were done on the sasx64 server at Pronto. The macro was updated locally by copying and pasting the code from the server to my computer!
+	All changes are indicated in the macro by comments starting with DM-2015/05/23-START.
+	A backup was created as backup\Categorize-v1.07-BeforeAddingParameterVarvalueAndRefurbishingSuffixHandling.sas)
+	- Added new parameter VARVALUE= to specify the names of the statistic-valued categorized variables. This 
+	- Refurbished the part where the VARCAT= and the newly VARVALUE= parameters are parsed when creating the categorized output variables and made it much simpler to understand! --and also less bug prone.
+
+V.1.09: 2015/08/13 (DM)
+	- Fixed bug happening when a value is passed in GROUPSIZE and the analyzed variable has missing values. Before the fix, the categorization generated only 1 group in the categorized variable! The changes performed are indicated with a DM-2015/08/13 comment.
+	- Changed the processing when the GROUPSIZE parameter is not empty so that the CONDITION parameter is also used in that case. Until now it was ignored.
+
+V.1.10: 2015/08/27 (DM)
+	- Fixed bug where the statistic-valued categorized variable was not created with the name specified by the VARVALUE= parameter, but still a suffix was addded to it, making the process break when the input variable name was too long.
+	- Taking the opportunity for this bug fix, I also cleaned up the logic behind naming the statistic-valued categorized variable as follows:
+		- the treatment done to the VARVALUE= parameter is now equivalent to the treatement of the VARCAT= parameter.
+		- the SUFFIX= parameter is changed to empty when VALUE= is not empty and BOTH=0 (i.e. the user is interested in the statistic-valued categorized variable only, therefore there is no need to add any suffix to its name)
+		- A BOTH=0 value makes all the integer-valued categorized variable to be dropped from the output dataset, regardless the value of the VARCAT= parameter.
+	- The documentation of the macro was also enhnaced to emphasize that when the number of names in the VARCAT= parameter or the VARVALUE= parameter do NOT coincide with the number of variables passed in VAR=, then the SUFFIX parameter is used to construct the names of the categorized variables for non-matching varibales.
+
+V.1.11: 2015/10/28 (DM) --> a backup copy of the previous version was created in the BACKUP directory with the current date in its name.
+	- New parameter BY= to do BY processing.
+	- It was NOT tested thouroughly and it actually doesn't work correctly when GROUPSIZE= parameter is given (the categorical _CAT variable takes repeated values for the same BY group with different values of the aggregated _MEAN variable...)
+
+V.1.12: 2015/10/28 (DM)
+	- Went one step further in the BY variable case by creating a unique INDEX in the _Categorize_percentiles_ dataset in order to be able to merge with the _Categorize_data_ and _Categorize_rest_ dataset in the same step. An index is needed because the first two datasets are SET and the _Categorize_percentiles_ dataset should be merged.
+	NOTE: I don't know if this fixes the possible errors that occur when GROUPSIZE= parameter is given (as stated in the previous entry). I did one test and it seemed to work correctly, but I cannot guarantee that. I need to do more checks.
+
+*******************************************************************
+2016/02/15: Macro renamed from %Categorize to %CategorizePercentiles due to the newly created macro %Categorize from scratch as the macro had become a little monster... This implied changing the labels shown in the log from CATEGORIZE to CATEGORIZEPERCENTILES and the temporary datasets from _Categorize_* to _cp_*.
+*******************************************************************

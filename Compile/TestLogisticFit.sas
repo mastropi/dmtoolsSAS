@@ -2,7 +2,7 @@
 Version: 	1.07
 Author: 	Daniel Mastropietro
 Created: 	28-May-03
-Modified: 	16-Nov-2015 (previous: 13-Jul-2012)
+Modified: 	15-Feb-2016 (previous: 16-Nov-2015)
 SAS:		v9.3
 
 DESCRIPTION:
@@ -544,7 +544,11 @@ no representaria mayores inconvenientes y seria igualmente apropiado.
 		%* las observaciones que entraron en la regresion;
 	%if &log %then
 		%put TESTLOGISTICFIT: Categorizing independent variables...;
-	%Categorize(_TestLogisticFit_data_(where=(&resp ~= . and &pred ~=.)) ,
+	%* DM-2016/02/15: Changed call from %Categorize to %CategorizePercentiles which holdds the
+	%* original version of the %Categorize macro before its refactoring to a much simpler version
+	%* that uses PROC RANK (and which therefore does not accept a given set of percentile values
+	%* on which the groups should be computed);
+	%CategorizePercentiles(_TestLogisticFit_data_(where=(&resp ~= . and &pred ~=.)) ,
 				out=_TestLogisticFit_cat_ ,
 				var=&var , value=mean , varvalue=&var, suffix= , both=0, percentiles=&percentiles , log=0);
 

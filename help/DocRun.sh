@@ -6,7 +6,7 @@
 # The script also generates an index HTML file in the execution directory whose name is given by the --index option.
 # Can run the script in test mode by specifying --test.
 #
-# SEE ALSO: DocExtract.awk which is called by this program to extact the documentation from each file in the source directory.
+# SEE ALSO: DocExtract.awk which is called by this program to extract the documentation from each file in the source directory.
 #
 # EXAMPLE:
 # bash DocRun.sh -s ../Compile -o "DMMacros Documentation" --index="DMMacros Documentation.html" --test

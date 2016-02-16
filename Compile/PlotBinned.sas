@@ -1,8 +1,8 @@
 /* MACRO %PlotBinned
-Version: 		1.07
+Version: 		1.08
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		12-Nov-2015 (previous: 28-Oct-2015)
+Modified: 		15-Feb-2016 (previous: 12-Nov-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -18,7 +18,7 @@ USAGE:
 	by=,						*** BY variables.
 	datavartype=,				*** Dataset containing the type or level of the variables listed in VAR.
 	valuesLetAlone=,			*** List of values taken by the analyzed variable to treat as separate bins.
-	alltogether=0,				*** Whether the let-alone values should be put into the same bin.
+	alltogether=0,				*** Whether the let-alone values should be put into the same bin (ONLY 0 is accepted)
 	groupsize=,					*** Nro. of cases each group should contain when categorizing continuous variables.
 	groups=20,					*** Nro. of groups to use in the categorization of continuous variables.
 	value=mean,					*** Name of the statistic for both the input and target variable in each bin.
@@ -64,10 +64,12 @@ OPTIONAL PARAMETERS:
 
 - alltogether		Whether the let-alone values listed in VALUESLETALONE= should be put into the same bin.
 					Possible values: 0 => No (put each value into a separate bin)
-								 	 1 => Yes (put all let-alone values into the same bin. In this case
-											the representative value of the bin will be based on the
-											statistic specified in VALUE= weighted by the number of
-											cases in each value to let alone)
+								(--- NO LONGER VALID ---)
+									 1 => Yes (put all let-alone values into the same bin. In this case
+										  the representative value of the bin will be based on the
+										  statistic specified in VALUE= weighted by the number of
+										  cases in each value to let alone
+								(--- NO LONGER VALID ---)
 					default: 0
 
 - groupsize:		Number of cases each group or bin should contain.
@@ -309,7 +311,9 @@ quit;
 %if %quote(&var) ~= %then %do;
 	%if &log %then
 		%put PLOTBINNED: Categorizing continuous variables...;
-	%Categorize(&data, by=&by, var=&var, condition=&condition, alltogether=&alltogether, groupsize=&groupsize, groups=&groups, both=0, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &class), log=0);
+%*	%Categorize(&data, by=&by, var=&var, condition=&condition, alltogether=&alltogether, groupsize=&groupsize, groups=&groups, both=0, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &class), log=0);
+	%* DM-2016/02/15: Refactored version of %Categorize (much simpler);
+	%Categorize(&data, by=&by, var=&var, condition=&condition, groupsize=&groupsize, groups=&groups, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &class), log=0);
 	%if &log %then
 		%put;
 %end;

@@ -1,8 +1,8 @@
 /* MACRO %MakeListFromVar
-Version: 1.03
-Author: Daniel Mastropietro
-Created: 20-Oct-04
-Modified: 08-Oct-2012
+Version: 	1.04
+Author: 	Daniel Mastropietro
+Created: 	20-Oct-2004
+Modified: 	04-Feb-2016 (previous: 08-Oct-2012)
 
 DESCRIPTION:
 This macro returns a macro variable containing the values of a variable in a dataset.
@@ -44,6 +44,12 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 EXAMPLES:
 1.- %let values = %MakeListFromVar(test, var=x);
 Stores in macro variable 'values' the values of variable X in dataset TEST.
+
+2.- %let valuesBlanksAllowed = %quote(%MakeListFromVar(test, var=x, sep=|));
+Stores in macro variable 'valuesBlanksAllowed' the values of variable X in dataset TEST
+where values for different records are separated with '|'.
+Note the use of macro %quote() enclosing the %MakeListFromVar call so that a blank
+value at the first or last record will be preserved as a blank value.
 */
 &rsubmit;
 %MACRO MakeListFromVar(data, var=, sep=%quote( ), strip=1, log=1)
@@ -60,6 +66,7 @@ opened).
 %local fun varnum vartype;
 %local cols concatenate firstobs lastobs;
 %local value;	%* DM-2012/09/24: Macro variable VALUE added to store the current value read from the dataset variable (to avoid repeating the same calling function in several places);
+%local firstvalue lastvalue;	%* DM-2016/02/05: First and last values in the list to check if they are blanks (which should be considered a valid value, especially when the separator is non-blank; 
 %local list;
 
 %* If SEP= is blank, redefine it as the blank space using function %quote;
@@ -94,7 +101,9 @@ opened).
 			%let rc = %sysfunc(fetchobs(&dsid, &i));
 			%let value = %sysfunc(&fun(&dsid, &varnum));
 			%if &i = 1 %then %do;
-				%if &strip %then
+				%let firstvalue = &value;
+				%if &strip and %quote(&value) ~= %then
+					%* Note that the strip() function does not accept a blank as input parameter;
 					%let list = %sysfunc(strip( &value ));
 				%else
 					%let list = &value;
@@ -109,8 +118,9 @@ opened).
 				%let list = %sysfunc(compbl( %quote(&list &sep &value) ));
 					%** NOTE: Function COMPBL is used to avoid leaving more spaces than necessary
 					%** between the names and/or between the separator and the names;
-				%if &strip %then
-			   		%let list = %sysfunc(strip( &list ));
+				%if &strip and %quote(&value) ~= %then
+			   		%* Note that the strip() function does not accept a blank as input parameter;
+					%let list = %sysfunc(strip( &list ));
 				/* DM-2012/09/24: The statements below are replaced with the above IF &STRIP statement because
 					it generated errors when the list of variables is too long as explained above.
 					Note that this was only fixed on 10-Oct-2012.
@@ -125,6 +135,20 @@ opened).
 	%* Close dataset;
 	%let rc = %sysfunc(close(&dsid));
 %end;
+
+%* (DM-2016/02/05) Check if the first and last values are empty, in which case we add a blank space at the beginning or end 
+%* of the returned list. This happens only for character variables when there is no value in the record, as missing numeric
+%* values would return dot (.);
+%* Reason: We still want empty records to contribute to the output list. In fact, if we are using %MakeListFromVar to read
+%* records from different variables in a dataset, we would like to have the same number of values read for each variable;
+%let lastvalue = &value;
+%if %quote(&firstvalue) = %then
+	%* Add a blank space at the end to indicate that the last value was blank;
+	%let list = %quote( &list);
+%if %quote(&lastvalue) = %then
+	%* Add a blank space at the end to indicate that the last value was blank;
+	%let list = %quote(&list );
+
 %if &log %then %do;
 	%put List of names returned:;
 	%puts(%quote(&list), sep=%quote(&sep))

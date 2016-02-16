@@ -2,7 +2,7 @@
 Version: 		1.02
 Author: 		Daniel Mastropietro
 Created: 		29-Jul-2015
-Modified: 		05-Oct-2015 (previous: 02-Oct-2015)
+Modified: 		15-Feb-2016 (previous: 05-Oct-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -259,7 +259,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %if &nro_varnum > 0 %then %do;
 	%put PLOTSURVIVAL: Categorizing continuous variables...;
 	%put;
-	%Categorize(&data, var=&varnum, groups=&groups, both=0, value=mean, varvalue=&varnum, out=_PH_data_(keep=&target &censor &varnum), log=0);
+%*	%Categorize(&data, var=&varnum, groups=&groups, both=0, value=mean, varvalue=&varnum, out=_PH_data_(keep=&target &censor &varnum), log=0);
+	%* DM-2016/02/15: Refactored version of %Categorize (much simpler);
+	%Categorize(&data, var=&varnum, groups=&groups, value=mean, varvalue=&varnum, out=_PH_data_(keep=&target &censor &varnum), log=0);
 %end;
 
 %do i = 1 %to &nro_varnum;
