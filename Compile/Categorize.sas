@@ -115,7 +115,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %if &help %then %do;
 	%ShowMacroCall;
 %end;
-%else %if ~%CheckInputParameters(data=&data , var=&var, otherRequired=&by, requiredParamNames=data var= by=, macro=CATEGORIZE) %then %do;
+%else %if ~%CheckInputParameters(data=&data, var=&var, check=by, macro=CATEGORIZE) %then %do;
 	%ShowMacroCall;
 %end;
 %else %do;
@@ -126,6 +126,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %* Local variables;
 %local data_name;
+%local dkricond;
 %local error;
 %local i;
 %local nobs;
@@ -326,6 +327,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 			format=&format,
 			log=0);
 %end;
+%* Names of the statistic-valued categorized variables;
+%* This is needed below either for their rename into the user-specified names or to drop them because they were not requested in the output;
+%let valvar = %MakeListFromName(_value, start=1, stop=&nro_vars, step=1);
 
 %*** Rename variables as indicated by the VARCAT= and VARVALUE= parameters;
 %* Keep just the statistic-valued variable if both VARCAT= and VARVALUE= are empty by adding
@@ -340,37 +344,35 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%CreateInteractions(&rankvar, with=&varcat, join=%quote(=), allinteractions=0, macrovar=_renamecat, log=0);
 %end;
 
-%* Create the RENAME statement;
-%* Note that either &varcat or &varvalue are set, so RENAMEST is always non empty;
+%* Create the RENAME statement to use as part of the data options when creating the output dataset;
+%* Note that either &varcat or &varvalue are set, so RENAMEST is always non-empty;
 %* Note also that &varvalue is set above if both VARCAT and VARVALUE are empty;
 %if %quote(&varvalue) ~= %then %do;
-	%* Variables containing the statistic value for each group;
-	%let valvar = %MakeListFromName(_value, start=1, stop=&nro_vars, step=1);
 	%CreateInteractions(&valvar, with=&varvalue, join=%quote(=), allinteractions=0, macrovar=_renameval, log=0);
 %end;
-%let renamest = rename &_renamecat &_renameval;
-
-%*** Rename variables;
-proc datasets nolist;
-	modify _dat;
-	&renamest;
-quit;
+%let renamest = rename=(&_renamecat &_renameval);
 
 %*** Create output dataset;
 %* Sort the dataset by the original order;
 proc sort data=_dat;
 	by _obs_;
 run;
+
+%* Since blow I am dropping variables that may not exist, I set the drop, keep, rename warning option to NOWARN;
+%let dkricond = %sysfunc(getoption(dkricond));
+options dkricond=nowarn;
 data &out;
 	%if &addvars %then %do;
 		%* Merge back with the input dataset if the output variables have been requested to be added to the input dataset;
+		%* Note that _dat_rest is already sorted by _OBS_ from the beginning;
 		format &var_order;
-		merge _dat_rest _dat;	%* Note that _dat_rest is already sorted by _OBS_ from the beginning;
+		merge 	_dat_rest(drop=&varcat &varvalue) 
+				_dat(drop=&varcat &varvalue &renamest);
 		by _obs_;
 	%end;
 	%else %do;
 		%* Otherwise, keep just the analyzed variables and new created variables in the output dataset;
-		set _dat;
+		set _dat(drop=&varcat &varvalue &renamest);
 	%end;
 	%if %quote(&varcat) ~= %then %do;
 		%* Increase the RANK variables by 1 because they range from 0 to (groups-1) and I do not like it;
@@ -404,6 +406,10 @@ data &out;
 			drop _i;
 		%end;
 	%end;
+	%else %do;
+		%* Drop the temporary statistic-valued categorized variables;
+		drop &valvar;
+	%end;
 	%if &addvars or (~&addvars and %quote(&id) ~=) %then %do;
 		%* Only drop the _OBS_ variable if the variables created by this process are added to the
 		%* input dataset or, when not added, the user did not give any variable to use as ID.
@@ -412,11 +418,11 @@ data &out;
 		drop _obs_;
 	%end;
 run;
-
+options dkricond=&dkricond;
 
 %*** Clean up;
 %* Delete temporary datasets;
-proc dataset nolist;
+proc datasets nolist;
 	delete 	_dat
 			_dat_means
 			_dat_rank

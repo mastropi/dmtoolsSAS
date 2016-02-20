@@ -80,7 +80,7 @@ it appears in the list where the search is performed and in the list of names th
 */
 &rsubmit;
 %MACRO FindInList(list, names, sep=%quote( ), match=ALL, sorted=0, out=, log=1)
-		/ store des="Retuns the positions of the names found in a list";
+		/ des="Retuns the positions of the names found in a list";
 %local i;
 %local count counti counts;	%* COUNT is the number of names listed in NAMES found in the list;
 							%* COUNTI is the number of times each name is found in the list;
@@ -243,8 +243,8 @@ the parameter list. Its value is set from the value of SEP, above.
 			%let namej_ch2 = %quote( );	%* It is neccessary to define the value of &name_ch2 as
 										%* a blank space to avoid an error in the rank function below;
 		%if &sorted and
-			%sysfunc(rank(&namej_ch1)) > %sysfunc(rank(&name_ch1)) or
-			(%sysfunc(rank(&namej_ch1)) = %sysfunc(rank(&name_ch1)) and %sysfunc(rank(&namej_ch2)) > %sysfunc(rank(&name_ch2))) %then
+			(%sysfunc(rank(&namej_ch1)) > %sysfunc(rank(&name_ch1)) or
+			 %sysfunc(rank(&namej_ch1)) = %sysfunc(rank(&name_ch1)) and %sysfunc(rank(&namej_ch2)) > %sysfunc(rank(&name_ch2))) %then
 			%let j = &nro_namesInList;
 		%else %if %upcase(&namej) = %upcase(&name) %then %do;
 			%let counti = %eval(&counti + 1);

@@ -42,7 +42,7 @@ USAGE:
 	value=, 					*** Statistic to show for each category of numeric variables.
 	format=,					*** Format to use for each analysis variable.
 	smooth=1,					*** Whether to smooth the WOE calculation in order to avoid missing values.
-	out=_InformationTable_		*** Table showing the distribution of the target variable.
+	out=_InformationTable_,		*** Table showing the distribution of the target variable.
 								*** for each value of the analysis variables.
 	outiv=_InformationValue_,	*** Output dataset containing the Information Value for each variable.
 	notes=1,					*** Show SAS notes in the log?

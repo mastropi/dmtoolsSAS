@@ -26,6 +26,12 @@ REQUIRED PARAMETERS:
 									or a failure ('F').
 
 OPTIONAL PARAMETERS:
+- library:			Library name to add to the name of the dataset to be used for each test
+					as read from the DATA column in the test harness dataset passed in parameter DATA.
+					If the dataset name is fully qualified with a library name in the test
+					harness dataset then this parameter is ignored.
+					default: WORK
+
 - testcases:		Blank-separated list of test IDs to run.
 					The test IDs are those given in column CASE of input dataset DATA.
 					default: all test IDs given in column CASE of input dataset DATA
@@ -37,7 +43,7 @@ OPTIONAL PARAMETERS:
 					default: number of cases to test as per parameter TESTCASES
 */
 &rsubmit;
-%MACRO RunTestHarness(macro, data, testcases=, testfrom=, testto=) / store des="Runs a set of tests on a specified macro";
+%MACRO RunTestHarness(macro, data, library=WORK, testcases=, testfrom=, testto=) / store des="Runs a set of tests on a specified macro";
 
 %local c;					%* Test case index;
 %local i;
@@ -127,10 +133,10 @@ run;
 	%put The following &nro_tests test cases will be run: &testcaseList;
 	%do c = 1 %to &nro_tests;
 		%* Get the test case number corresponding to test case c in the testcaseList
-		%* (e.g. if testcasList = 3|7|2|1 then testcase for c = 2 is 7);
+		%* (e.g. if testcasList = 3 7 2 1 then testcase for c = 2 is 7);
 		%let testcase = %scan(&testcaseList, &c, ' ');
 		%* Get the test index in the test case list stored in CASELIST (as this indexes the parameter set to use!)
-		%* (e.g. if caseList = 1|2|3|5|7|4 and testcaseList = 3|7|2|1 then testcaseIdx for testcase = 7 is 5,
+		%* (e.g. if caseList = 1 2 3 5 7 4 and testcaseList = 3 7 2 1 then testcaseIdx for testcase = 7 is 5,
 		%* i.e. the position of test ID 7 in caseList);
 		%let caseIdx = %FindInList(%quote(&caseList), &testcase, sep=%quote(&sep), log=0);
 
@@ -158,6 +164,14 @@ run;
 /*			%else %if &paramname = condition and %quote(&paramvalue) ~= %then*/
 /*				%* Enclose the parameter value in %QUOTE when it accepts more complicated values such as an expression;*/
 /*				%let paramvalue = %nrstr(%quote)(&paramvalue);*/
+
+			%* Add the library name passed in parameter LIBRARY to the dataset name used for testing when paramname=DATA;
+			%if %upcase(&paramname) = DATA and %quote(&paramvalue) ~= and %quote(&library) ~= %then %do;
+				%if %scan(&paramvalue, 2, '.') = %then
+					%let paramvalue = &library..&paramvalue;
+			%end;
+
+			%* Create the param=value string to pass to the signature of the macro whenever paramname is different from CASE;
 			%if %upcase(&paramname) ~= CASE and %substr(&paramname, 1, 1) ~= _ %then %do;
 				%if %quote(&signature) = %then
 					%let signature = &paramname=&paramvalue;

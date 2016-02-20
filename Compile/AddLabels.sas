@@ -12,7 +12,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %ResetSASOptions
 - %SetSASOptions
 */
-
+&rsubmit;
 %MACRO AddLabels(data, datalabel, label=label, var=var, log=1) / store des="Adds labels to variables listed in a summary dataset";
 %local fLabels;
 %local order;
