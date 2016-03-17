@@ -22,3 +22,6 @@ V.1.02: 14/2/05 (DM)
 		Sin embargo, no programe' la busqueda rapida en estos casos porque requiere de un proceso mas delicado al asignar el valor a la macro variable FirstPartOfList, ya que es necesario buscar la posicion de ocurrencia del separador antes y despues de la posicion del nombre encontrado en la lista.
 
 		El uso de SORTED=1 acelera el proceso de busqueda porque los nombres listados en NAMES son buscados en LIST hasta que las dos primeras letras del nombre de LIST con el que se compara vengan en el orden alfabetico despues que las dos primeras letras del nombre que se esta' buscando, ya que al estar la lista ordenada, es imposible que el nombre buscado este' en lo que quede de la lista.
+
+V.1.03: 2016/03/16 (DM)
+	- Fixed bug in the FAST process (recall there are two ways of carrying out the process, FAST when the separator is blank and SLOW otherwise) where I was incorrectly comparing &posi with the number of names in the list instead of comparing it with the length of the list minus the length of the name searched for. Recall in fact that &posi gives the *character* position of the name in the list, NOT the *name* position in the list.

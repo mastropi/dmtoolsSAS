@@ -85,7 +85,7 @@ echo "<p></p>" >> "$INDEX"
 
 # Process the SAS macros and create HTML help files
 let i=0
-for FILE in "$SOURCEDIR"/*
+for FILE in "$SOURCEDIR"/*.sas
 do
 	let i+=1
 

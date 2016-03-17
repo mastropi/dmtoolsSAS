@@ -1,12 +1,15 @@
 /* MACRO %RunTestHarness
-Version:	1.0
+Version:	1.01
 Author:		Daniel Mastropietro
 Created:	12-Feb-2016
-Modified:	12-Feb-2016
+Modified:	17-Mar-2016 (previous: 12-Feb-2016)
 
 DESCRIPTION:
 Runs a set of tests on a given macro. The macro parameter values for each test are read
 from a SAS dataset containing one column per parameter to set.
+
+Optionally the result of running the macro is compared to the expected result given in
+the input dataset.
 
 REQUIRED PARAMETERS:
 - macro:			Macro name to test (w.o. %)
@@ -41,25 +44,51 @@ OPTIONAL PARAMETERS:
 
 - testto:			Last test number to run out of the TESTCASES list.
 					default: number of cases to test as per parameter TESTCASES
+
+- checkresult:		Whether the result of the macro should be compared and checked with
+					the expected result for the test given in column _EXPECT.
+					This only works when the macro returns a value, o.w. set it to 0.
+					Possible values: 0 => No, 1 => Yes
+					default: 0
+
+OTHER MACROS AND MODULES USED IN THIS MACRO:
+- %DeleteTrackingMacroVars
+- %ExectTimeStart
+- %ExecTimeStop
+- %FindInList
+- %GetNroElements
+- %MakeList
+- %MakeListFromVar
+- %Rep
+- %ResetSASOptions
+- %SelectNames
+- %SetSASOptions
 */
 &rsubmit;
-%MACRO RunTestHarness(macro, data, library=WORK, testcases=, testfrom=, testto=) / store des="Runs a set of tests on a specified macro";
+%MACRO RunTestHarness(macro, data, library=WORK, testcases=, testfrom=, testto=, checkresult=0) / store des="Runs a set of tests on a specified macro";
 
 %local c;					%* Test case index;
 %local i;
 %local colname;
+%local expect;				%* Expected result (used when checkresult=1);
+%local expectedResult;		%* Expected result in terms of Success or Failure;
+%local fail;				%* Counter for number of failed tests;
 %local macrovars;			%* MACROVARS contains the macro variable names that stores the list of values for each parameter of the macro, although it includes the test case number which is not a parameter;
 %local nro_macrovars;
 %local nro_tests;
+%local nspaces;				%* Spaces to leave between the markers of pass or fail test when showing the tests summary;
 %local paramname;			%* Parameter name;
 %local paramvalue;
+%local pass;				%* Counter for number of passed tests;
+%local result;				%* Result of the macro run (i.e. value returned by the macro if any);
 %local signature;			%* Macro signature to pass to the macro call;
 %local sep;
+%local status;				%* List containing the status of each test run (. => OK, X => wrong result, F => test expected to fail);
 %local testcaseList;		%* Test case numbers to run;
 %local testcase;			%* Test case number to run among the test cases numbers read from the dataset with the test parameters;
-%local descriptionFlag;
-%local expectFlag;
-%local resultFlag;
+%local descriptionFlag;		%* Indicates whether a Desription column is present in dataset DATA;
+%local expectFlag;			%* Indicates whether an Expect column is present in dataset DATA;
+%local resultFlag;			%* Indicates whether a Result column is present in dataset DATA;
 
 %SetSASOptions;
 %ExecTimeStart(maxlevel=2);
@@ -131,6 +160,10 @@ run;
 	%*** Go over the selected cases, prepare the maco signature of the test and run the test;
 	%let nro_tests = %GetNroElements(&testcaseList);
 	%put The following &nro_tests test cases will be run: &testcaseList;
+	%* Initialize variables;
+	%let pass = 0;
+	%let fail = 0;
+	%let status = ;
 	%do c = 1 %to &nro_tests;
 		%* Get the test case number corresponding to test case c in the testcaseList
 		%* (e.g. if testcasList = 3 7 2 1 then testcase for c = 2 is 7);
@@ -145,10 +178,15 @@ run;
 		%* Show test description and expectations if existing;
 		%if &descriptionFlag %then
 			%put Description: %scan(%quote(&_descriptionList), &caseIdx, %quote(&sep));
-		%if &expectFlag %then
-			%put Expects: %scan(%quote(&_expectList), &caseIdx, %quote(&sep));
-		%if &resultFlag %then
-			%put Expected result: %scan(%quote(&_resultList), &caseIdx, %quote(&sep));
+		%if &expectFlag %then %do;
+			%let expect =  %scan(%quote(&_expectList), &caseIdx, %quote(&sep));
+			%put Expects: &expect;
+		%end;
+		%if &resultFlag %then %do;
+			%* Success or Failure test?;
+			%let expectedResult = %scan(%quote(&_resultList), &caseIdx, %quote(&sep));
+			%put Expected result: &expectedResult;
+		%end;
 
 		%let signature = ;
 		%do i = 1 %to &nro_macrovars;
@@ -182,8 +220,44 @@ run;
 
 		%* Run the test;
 		%put &signature;
-		%&macro(&signature);
+		%if ~&checkresult %then %do;
+			%&macro(&signature);
+		%end;
+		%else %do;
+			%let result = %&macro(&signature);
+			%let nspaces = %Rep(%quote( ), %length(%eval(&pass + &fail)));
+			%if %upcase(&expectedResult) = F %then
+				%let status = &status&nspaces.F;
+			%else %do;
+				%if &result = &expect %then %do;
+					%let status = &status&nspaces..;
+					%let pass = %eval(&pass + 1);
+					%put RUNTESTHARNESS: Test result OK;
+				%end;
+				%else %do;
+					%let status = &status&nspaces.X;
+					%let fail = %eval(&fail + 1);
+					%put RUNTESTHARNESS: WARNING - Result not as expected;
+					%put RUNTESTHARNESS: Result: &result;
+				%end;
+			%end;
+		%end;
 	%end;
+%end;
+
+%* SUM UP;
+%if &checkresult %then %do;
+	%put;
+	%put *********************************************************;
+	%put SUMMARY OF TESTS EXECUTION:;
+	%put Test IDs run: &testcaseList;
+	%put Test status: &status;
+	%put (. => OK, X => wrong result, F => test expected to fail);
+	%put # run: &nro_tests;
+	%put # non-failed tests: %eval(&pass + &fail);
+	%put # passed: &pass;
+	%put # failed: &fail;
+	%put *********************************************************;
 %end;
 
 proc datasets nolist;

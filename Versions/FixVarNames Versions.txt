@@ -1,0 +1,7 @@
+%FixVarNames Versions
+---------------------
+Created: 17-Mar-2016
+
+
+V.1.01: 2016/03/17 (DM)
+	- Added the functionality to resolve name conflicts resulting from the shortening of the input names. The conflict resolution is done by replacing the end of the shortened name with an appropriate number.

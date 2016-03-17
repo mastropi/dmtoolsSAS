@@ -36,3 +36,7 @@ The folder contains:
 - CreateCompileMacrosCode.sas: SAS code that generates another SAS code to compile the macros listed in folder 'source' to the desired location.
 - IMLLabModelos.sas7bcat: SAS catalog containing the compiled IML code (compiled under platform Windows 7, 64-bit, SAS 9.3_M2).
 - sasmacr.sas7bcat: SAS catalog containing the compiled SAS macros (compiled under platform Windows 7, 64-bit, SAS 9.3_M2).
+
+Ejemplos folder
+---------------
+Ejemplos de uso de las macros que se acumularon con el tiempo. Ej: proyecto SAS EG con analisis exploratorios con datos de Pronto, Uruguay (creado en Feb-2016).

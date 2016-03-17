@@ -1,0 +1,40 @@
+%PiecewiseTransf Versions: Description of the different versions
+----------------------------------------------------------------
+Created: 10-Mar-2016
+Author: Daniel Mastropietro
+
+
+V.1.00: 2005/09/22 (DM)
+	- First version whose signature is as follows:
+	%PiecewiseTransf(
+		data,			*** Input dataset. Data options are accepted.
+		var=,			*** Blank-separated list of variables to transform.
+		cuts=,			*** Either a blank-separated list of cut values or a dataset with one row per variable.
+		prefix=I,		*** Prefix to use for the indicator variables of each piece.
+		join=_X_,		*** Midfix to use to create the variable names for the linear part.
+		fill=0,			*** Fill value or statistic to replace missing values of each analyzed variable.
+		out=,			*** Output dataset containing the piecewise linear variables.
+		log=1);			*** Whether to show messages in the log.
+
+V.1.01: 2016/03/10 (DM)
+	- Added new parameter INCLUDERIGHT=1 that indicates whether the right limit of each interval is included or not when defining each linear piece.
+	- Removed parameter JOIN which was replaced by parameter SUFFIX, since I now implement a more reasonable naming scheme, which does not think of the piecewise variables as interaction variables between the original variable and the indicator variable created for each piece.
+	- Added new parameter PREFIXDUMMY=I_ which sets the prefix to use for the dummy or indicator variables. The PREFIX=PW_ parameter is just used for the piecewise variables.
+	- The variable names are now of the form:
+		<prefixdummy><var><suffix><piece-nro> for the indicator variables
+		<prefix><var><suffix><piece-nro> for the piecewise variables
+	- Added capacity for fixing variable names and make the generated variables compliant with the 32-characters max length requested by SAS. This is done via the %FixVarNames macro which was also updated.
+	- The macro signature is currently as follows:
+	%PiecewiseTransf(
+		data,			*** Input dataset. Data options are accepted.
+		var=,			*** Blank-separated list of variables to transform when CUTS= is a list of cut values.
+		cuts=,			*** Either a blank-separated list of cut values or a dataset with one row per variable.
+		includeright=1,	*** Whether to include the right limit of each interval when defining each piece
+		prefixdummy=I_,	*** Prefix to use for the indicator or dummy variables of each piece.
+		prefix=pw_,		*** Prefix to use for the piecewise variables.
+		suffix=_,		*** Suffix to use before the piece number added at the end of the new variable's name.
+		fill=mean,		*** Fill value or statistic to replace missing values of each analyzed variable.
+		varfix=1,		*** Whether to fix the variable names for max 32-character length compliance.
+		varfixremove=,	*** One or more consecutive characters to remove from the variable name when fixing their name, if needed.
+		out=,			*** Output dataset containing the indicator and piecewise linear variables. Data options are allowed.
+		log=1);			*** Whether to show messages in the log.

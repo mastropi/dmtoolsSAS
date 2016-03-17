@@ -1,8 +1,8 @@
 /* MACRO %FindInList
-Version: 1.02
-Author: Daniel Mastropietro
-Created: 20-Oct-04
-Modified: 15-Feb-05
+Version: 	1.03
+Author: 	Daniel Mastropietro
+Created: 	20-Oct-2004
+Modified: 	16-Mar-2016 (previous: 15-Feb-2005)
 
 DESCRIPTION:
 Finds names in a list as whole words and returns their name position.
@@ -80,7 +80,7 @@ it appears in the list where the search is performed and in the list of names th
 */
 &rsubmit;
 %MACRO FindInList(list, names, sep=%quote( ), match=ALL, sorted=0, out=, log=1)
-		/ des="Retuns the positions of the names found in a list";
+		/ store des="Retuns the positions of the names found in a list";
 %local i;
 %local count counti counts;	%* COUNT is the number of names listed in NAMES found in the list;
 							%* COUNTI is the number of times each name is found in the list;
@@ -145,7 +145,6 @@ the parameter list. Its value is set from the value of SEP, above.
 	%let namesFound = ;	%* List of names found in the list;
 	%let namesFoundPos =;	%* Vector of the position of the names found in NAMES;
 	%do i = 1 %to &nro_names;
-		%let nro_namesInList = %GetNroElements(%quote(&list));
 		%let counti = 0;
 		%let posi_prev = 0;
 		%let _list_ = %quote(&list);
@@ -172,7 +171,7 @@ the parameter list. Its value is set from the value of SEP, above.
 				%* Keep the list of names coming after the position where &name was found, so
 				%* that the search for &name in the following loop is conducted only on the
 				%* remaining part of &list;
-				%if &posi < &nro_namesInList %then
+				%if &posi < %length(&_list_) - %length(&name) %then
 					%* If it is not the last element in the list;
 					%let _list_ = %substr(%quote(&_list_), %eval(&posi + %length(&name) + 1));
 				%else
