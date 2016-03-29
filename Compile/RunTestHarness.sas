@@ -1,8 +1,8 @@
 /* MACRO %RunTestHarness
-Version:	1.01
+Version:	1.02
 Author:		Daniel Mastropietro
 Created:	12-Feb-2016
-Modified:	17-Mar-2016 (previous: 12-Feb-2016)
+Modified:	20-Mar-2016 (previous: 17-Mar-2016)
 
 DESCRIPTION:
 Runs a set of tests on a given macro. The macro parameter values for each test are read
@@ -29,12 +29,6 @@ REQUIRED PARAMETERS:
 									or a failure ('F').
 
 OPTIONAL PARAMETERS:
-- library:			Library name to add to the name of the dataset to be used for each test
-					as read from the DATA column in the test harness dataset passed in parameter DATA.
-					If the dataset name is fully qualified with a library name in the test
-					harness dataset then this parameter is ignored.
-					default: WORK
-
 - testcases:		Blank-separated list of test IDs to run.
 					The test IDs are those given in column CASE of input dataset DATA.
 					default: all test IDs given in column CASE of input dataset DATA
@@ -51,11 +45,36 @@ OPTIONAL PARAMETERS:
 					Possible values: 0 => No, 1 => Yes
 					default: 0
 
+- checkoutput:		Blank-separated list of output datasets to check with reference results.
+					default: (empty)
+
+- library:			Library name to add to the name of the dataset to be used for each test
+					as read from the DATA column in the test harness dataset passed in parameter DATA.
+					If the dataset name is fully qualified with a library name in the test
+					harness dataset then this parameter is ignored.
+					This library is defined as a temporary library mapped to the DATADIR= directory
+					when this parameter is given.
+					default: WORK
+
+- datadir:			Unquoted directory name where the input datasets whose name is read from
+					the test harness dataset which are used to run the macro are located.
+					If the dataset name is fully qualified with a library name in the test
+					harness dataset then this parameter is ignored.
+					default: (empty)
+
+- resultsdir:		Unquoted directory name where the results datasets are located.
+					These datasets are the datasets against which the output datasets generated
+					by the macro and listed in CHECKOUTPUT= should be compared.
+					There names should be the same as the name of the output datasets generated
+					by the macro.
+					default: (empty)
+
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %DeleteTrackingMacroVars
 - %ExectTimeStart
 - %ExecTimeStop
 - %FindInList
+- %FindMatch
 - %GetNroElements
 - %MakeList
 - %MakeListFromVar
@@ -65,7 +84,17 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %SetSASOptions
 */
 &rsubmit;
-%MACRO RunTestHarness(macro, data, library=WORK, testcases=, testfrom=, testto=, checkresult=0) / store des="Runs a set of tests on a specified macro";
+%MACRO RunTestHarness(
+		macro,
+		data,
+		testcases=,
+		testfrom=,
+		testto=,
+		checkresult=0,
+		checkoutput=,
+		library=WORK,
+		datadir=,
+		resultsdir=) / store des="Runs a set of tests on a specified macro";
 
 %local c;					%* Test case index;
 %local i;
@@ -77,6 +106,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %local nro_macrovars;
 %local nro_tests;
 %local nspaces;				%* Spaces to leave between the markers of pass or fail test when showing the tests summary;
+%local outdata;				%* Stores the output dataset to check with a pre-specified result stored in the RESULTSDIR= directory;
+%local outnamevalue;		%* Name-value pair defining the output parameter and its value to check;
+%local nro_output;			%* Nro. of output datasets to check;
 %local paramname;			%* Parameter name;
 %local paramvalue;
 %local pass;				%* Counter for number of passed tests;
@@ -92,6 +124,15 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %SetSASOptions;
 %ExecTimeStart(maxlevel=2);
+
+%* Map the datadir and resultsdir libraries;
+%if %quote(&datadir) ~= %then %do;
+	libname _data "&datadir";
+	%let library = _data;
+%end;
+%if %quote(&resultsdir) ~= %then %do;
+	libname _results "&resultsdir";
+%end;
 
 %* Read the columns in the input dataset into macro variable MACROVARS so that we can construct the macro signature from them;
 proc contents data=&data out=_rth_pc noprint;
@@ -175,6 +216,7 @@ run;
 
 		%put;
 		%put *************************** Test # &c of &nro_tests. Test ID: &testcase ****************************;
+		title "Test ID: &testcase";
 		%* Show test description and expectations if existing;
 		%if &descriptionFlag %then
 			%put Description: %scan(%quote(&_descriptionList), &caseIdx, %quote(&sep));
@@ -221,9 +263,27 @@ run;
 		%* Run the test;
 		%put &signature;
 		%if ~&checkresult %then %do;
+			%********** THE MACRO IS RUN *******;
 			%&macro(&signature);
+
+			%* Check the output datasets listed in parameter CHECKOUTPUT=;
+			%let nro_output = %GetNroElements(&checkoutput);
+			%do i = 1 %to &nro_output;
+				%let outdata = %scan(&checkoutput, &i, ' ');
+				%* Look for the &OUTDATA keyword in the macro signature;
+				%* First remove the commas from the SIGNATURE because o.w. the %INDEX function used inside %FindMatch
+				%* gives error!;
+				%let signature = %sysfunc(transtrn(%quote(&signature), %quote(,), ));
+				%let outnamevalue = %FindMatch(%quote(&signature), key=&outdata=, log=0);
+				%if %quote(&outnamevalue) ~= %then %do;
+					%let outdata = %scan(&outnamevalue, 2, '=');
+					proc compare base=_results.&outdata compare=&outdata;
+					run;
+				%end;
+			%end;
 		%end;
 		%else %do;
+			%****** THE MACRO IS RUN *******;
 			%let result = %&macro(&signature);
 			%let nspaces = %Rep(%quote( ), %length(%eval(&pass + &fail)));
 			%if %upcase(&expectedResult) = F %then
@@ -258,6 +318,17 @@ run;
 	%put # passed: &pass;
 	%put # failed: &fail;
 	%put *********************************************************;
+%end;
+
+%* Remove the title;
+title;
+
+%* Remove the library mappings;
+%if %quote(&datadir) ~= %then %do;
+libname _data;
+%end;
+%if %quote(&resultsdir) ~= %then %do;
+libname _results;
 %end;
 
 proc datasets nolist;

@@ -544,13 +544,13 @@ no representaria mayores inconvenientes y seria igualmente apropiado.
 		%* las observaciones que entraron en la regresion;
 	%if &log %then
 		%put TESTLOGISTICFIT: Categorizing independent variables...;
-	%* DM-2016/02/15: Changed call from %Categorize to %CategorizePercentiles which holdds the
+	%* DM-2016/02/15: Changed call from %Categorize to %CategorizePercentiles which holds the
 	%* original version of the %Categorize macro before its refactoring to a much simpler version
 	%* that uses PROC RANK (and which therefore does not accept a given set of percentile values
 	%* on which the groups should be computed);
 	%CategorizePercentiles(_TestLogisticFit_data_(where=(&resp ~= . and &pred ~=.)) ,
 				out=_TestLogisticFit_cat_ ,
-				var=&var , value=mean , varvalue=&var, suffix= , both=0, percentiles=&percentiles , log=0);
+				var=&var, value=mean, varvalue=&var, suffix=, both=0, percentiles=&percentiles, log=0);
 
 	%* Statements for Annotate datasets;
 	%let annost1 =;

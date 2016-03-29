@@ -9,6 +9,9 @@ Finds a keyword in a blank-separated list of names and returns the names contain
 The macro function %INDEX is used to search for the keyword in each name in the list.
 The search for the keyword is NOT case sensitive.
 
+A comma is not allowed as part of the LIST= nor KEY= values as %INDEX interprets it as
+separator of input parameters...
+
 USAGE:
 %FindMatch(list, key=, pos=, posNot=, not=, notPos=, log=1);
 

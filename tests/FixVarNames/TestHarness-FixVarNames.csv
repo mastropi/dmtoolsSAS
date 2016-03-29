@@ -1,0 +1,5 @@
+case,var,max,space,replace,replacement,_description,_expect,_result
+1,Testa test tes1 tes2 testb longname,10,0,,,Dummy case,Testa test tes1 tes2 testb longname,S
+2,Testa test tes1 tes2 testb longname,4,0,,,Basic case,Tes3 test tes1 tes2 tes4 long,S
+3,Testa test tes1 tes2 testb longname,4,2,,,Extreme case,T1 t2 t3 t4 te lo,S
+4,Testa test tes1 tes2 testb longname,4,3,,,Extreme failure case,T t t t t l,S

@@ -28,7 +28,7 @@ USAGE:
 	overlay=0,			*** Overlay the Evaluation Charts on the same plot?
 	best=1,				*** Show the Best Lift/Gains Curve?
 	pointlabels=0,		*** Use pointlabels showing quantile size?
-	points=1,			*** Show points indicating plotting points?
+	points=0,			*** Show points indicating plotting points?
 	legend=1,			*** Show legend?
 	bands=0,			*** Show confidence bands for the Gains Chart?
 	confidence=0.95		*** Confidence level for the Gains confidence bands.
@@ -61,7 +61,7 @@ See that macro for more information.
 					overlay=0,
 					best=,
 					pointlabels=0,
-					points=1,
+					points=0,
 					legend=1,
 					bands=0,
 					confidence=0.95,

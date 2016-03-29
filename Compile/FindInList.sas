@@ -227,9 +227,11 @@ the parameter list. Its value is set from the value of SEP, above.
 	%let name_ch1 = %substr(%quote(%upcase(&name)), 1, 1);
 	%if %length(&name) > 1 %then
 		%let name_ch2 = %substr(%quote(%upcase(&name)), 2, 1);
+		%if %quote(&name_ch2) = %then
+			%let name_ch2 = %quote( );	%* If the second character is a blank space explicitly set it to that, o.w. the RANK function below gives error;
 	%else
 		%let name_ch2 = %quote( );	%* It is neccessary to define the value of &name_ch2 as
-									%* a blank space to avoid an error in the rank function below;
+									%* a blank space to avoid an error in the rank function below that it did not receive enough input arguments;
 	%* Search for &name in &list;
 	%let j = 0;
 	%do %while (&j < &nro_namesInList);
@@ -238,9 +240,12 @@ the parameter list. Its value is set from the value of SEP, above.
 		%let namej_ch1 = %substr(%quote(%upcase(&namej)), 1, 1);
 		%if %length(&namej) > 1 %then
 			%let namej_ch2 = %substr(%quote(%upcase(&namej)), 2, 1);
+			%if %quote(&namej_ch2) = %then
+				%let namej_ch2 = %quote( );	%* If the second character is a blank space explicitly set it to that, o.w. the RANK function below gives error;
 		%else
 			%let namej_ch2 = %quote( );	%* It is neccessary to define the value of &name_ch2 as
-										%* a blank space to avoid an error in the rank function below;
+										%* a blank space to avoid an error in the rank function below that it did not receive enough input arguments;
+
 		%if &sorted and
 			(%sysfunc(rank(&namej_ch1)) > %sysfunc(rank(&name_ch1)) or
 			 %sysfunc(rank(&namej_ch1)) = %sysfunc(rank(&name_ch1)) and %sysfunc(rank(&namej_ch2)) > %sysfunc(rank(&name_ch2))) %then

@@ -305,7 +305,8 @@ the usual name constructed by adding the statistic keyword as suffix: LONGVARNAM
 the default statistic to use is the MEAN.
 */
 &rsubmit;
-%MACRO Categorize(	data,
+%MACRO CategorizePercentiles(
+					data,
 					var=_NUMERIC_,
 					by=,				/* STILL IT SEEMS IT DOES NOT ALWAYS WORK CORRECTLY WHEN PARAMETER groupsize= IS GIVEN */
 					out=,

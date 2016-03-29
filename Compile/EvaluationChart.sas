@@ -1,8 +1,8 @@
 /* MACRO %EvaluationChart
-Version: 		3.02
+Version: 		3.03
 Author: 		Daniel Mastropietro
 Created: 		24-Sep-2004
-Modified: 		03-Aug-2015 (Previous: 06-Jul-2012)
+Modified: 		19-Mar-2016 (previous: 03-Aug-2015)
 SAS Version:	9.3
 
 DESCRIPTION:
@@ -102,12 +102,13 @@ OPTIONAL PARAMETERS:
 				- the model used to generate the scoring model is NOT a Decision Tree.
 				(i.e. MODEL ~= DT and MODEL ~= TREE). For DTs the score values are grouped
 				by the leaves of the tree.
-				However, even if the scoring model is a DT, the step given for the score
-				values is used to generate the 'Best Curve', which reflects the
-				best possible performance of a model with the data used to create the
-				scoring model.
+				However, even if the scoring model is a DT, the number of groups specified
+				in this parameter is used to generate the 'Best Curve' in that case, which
+				reflects the best possible performance of a model with the data used to create
+				the scoring model.
 				- parameter 'percentiles' is empty.
-				default: 5 (i.e. 5%)
+				Leave all GROUPS=, STEP=, PERCENTILES= empty if no grouping is wished.
+				default: empty
 
 - groups:		Nro. of groups to use for the scoring variable to make the evaluation chart.
 				This number defines the step (in %) used for each point in the evaluation chart,
@@ -118,14 +119,18 @@ OPTIONAL PARAMETERS:
 				(i.e. MODEL ~= DT and MODEL ~= TREE). For DTs the groups used to generate
 				the evaluation chart are given by the leaves of the tree.
 				However, even if the scoring model is a DT, the number of groups specified
-				in this parameter is used to generate the 'Best Curve', which reflects the
-				best possible performance of a model with the data used to create the
-				scoring model.
+				in this parameter is used to generate the 'Best Curve' in that case, which
+				reflects the best possible performance of a model with the data used to create
+				the scoring model.
 				- parameter 'step' and 'percentiles' are both empty.
+				Leave all GROUPS=, STEP=, PERCENTILES= empty if no grouping is wished.
+				default: empty
 
 - percentiles:	List of percentiles of the scoring variable to use in the evaluation chart.
 				If empty, the number of groups passed in 'groups' is used.
 				This parameter overrides any value passed in parameter 'groups'.
+				Leave all GROUPS=, STEP=, PERCENTILES= empty if no grouping is wished.
+				default: empty
 
 - chart:		Type of evaluation chart to be made.
 				Possible values:
@@ -159,7 +164,7 @@ OPTIONAL PARAMETERS:
 
 - points:		Show points indicating plotting points in the graph?
 				Possible values: 0 => No, 1 => Yes.
-				default: 1
+				default: 0
 
 - legend:		Show legend in graph?
 				Possible values: 0 => No, 1 => Yes.
@@ -214,6 +219,8 @@ OPTIONAL PARAMETERS:
 
 - outstat:		Output dataset with the KS Statistic and Gini Index. It has the following columns:
 				- model: 				Name of the dataset, BY group or model being evaluated.
+				- TotalN:				Total number of cases used for the computation of the measures.
+				- EventRate:			Event Rate
 				- type:					Type of model (specified in the MODEL parameter).
 				- KSLower: 				Lower end of the confidence interval for KS.
 				- KS: 					Kolmogorov-Smirnov statistic.
@@ -266,6 +273,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %CheckInputParameters
 - %Colors
 - %CreateInteractions
+- %ExecTimeStart
+- %ExecTimeStop
 - %GetDataOptions
 - %Getnobs
 - %GetNroElements
@@ -283,7 +292,7 @@ SEE ALSO:
 - %LiftChart (which calls %EvaluationChart with parameter CHART=LIFT)
 
 EXAMPLES:
-1.- %EvaluationChart(scoredData, target=DQ, score=p, pointlabels=1);
+1.- %EvaluationChart(scoredData, target=DQ, score=p, pointlabels=1, groups=20);
 This creates a lift chart for the target variable DQ using the score stored in variable P
 in dataset SCOREDDATA. The event of interest used in the scoring model is DQ=1
 (since the default for parameter 'event' is 1).
@@ -314,13 +323,13 @@ number of observations in each tree leaf.
 						step=,
 						groups=, 
 						percentiles=, 
-						chart=lift,
 
+						chart=lift,
 						plot=1,
 						overlay=0,
 						best=,
 						pointlabels=0,
-						points=1,
+						points=0,
 						legend=1,
 						bands=0,
 						bandtype=SIMUL,
@@ -407,24 +416,26 @@ number of observations in each tree leaf.
 /* Local variables declaration (some other variables are declared above because they are
 used above) */
 %local i;
-%local byi bylist datai data_name out_name outstat_name n nobs;
+%local byi bylist datai data_name out_name outstat_name n nbygroups nobs;
 %local nro_quantiles;
 %local colors lifti GainsEventi GainsNonEventi modeli;
 %local colorLifti colorLiftBest colorEventi colorNonEventi colorEventBandi colorNonEventBandi colorEventBest colorNonEventBest;
-%local vartype;		%* Type of target variable (Character or Numeric);
-%local vartype1;	%* Type of target variable in the first dataset listed (only used to check consitency among target variable types);
-%local varlen;		%* DM-2012/06/06: Added a macro variable to contain the target variable length (needed to define the _BINARY informat);
+%local vartype;			%* Type of target variable (Character or Numeric);
+%local vartype1;		%* Type of target variable in the first dataset listed (only used to check consitency among target variable types);
+%local varleaftype;		%* Type of LEAF variable (used when model=DT);
+%local varlen;			%* DM-2012/06/06: Added a macro variable to contain the target variable length (needed to define the _BINARY informat);
 %local LiftList GainsEventList GainsNonEvenList;
 %local GainsEventLowerList GainsEventUpperList;
 %local GainsNonEventLowerList GainsNonEventUpperList;
 %local LiftLowerList LiftUpperList;
-%local simul;		%* Flag indicating whether the simultaneous (or the pointwise) confidence interval was requested by the user in parameter BANDTYPE;
+%local simul;			%* Flag indicating whether the simultaneous (or the pointwise) confidence interval was requested by the user in parameter BANDTYPE;
 
 %*** DM-2012/06/05-START: New local variables used for the extension to multilevel target variables;
 %local DT;				%* Flag indicating whether the percentiles used for the Evaluation Chart are those
 						%* defined by a DISCRETE score variable, typically coming from a Decision Tree model
-						%* This flag depends on the MODEL parameter;
+						%* This flag depends on the MODEL parameter and is set to true when MODEL=DT;
 %local leafi;			%* Value of macro variable LEAF for each analyzed dataset or BY variable;
+%local nogroups;		%* Flag indicating whether we should not group the score at all and construct the charts on the actual CDF on the raw score values (without grouping);
 %local bFoundEvent;		%* Flag indicating whether the event value is found among the target values;
 %local targetFormat;	%* Name used for the format of the target variable that makes it look binary (event / non-event);
 %local missingValue;	%* Missing value depending on the type of the target variable (char (C) or numeric (N));
@@ -441,6 +452,7 @@ used above) */
 %*** DM-2012/06/05-END;
 
 %SetSASOptions;
+%ExecTimeStart;
 
 %* Showing input parameters;
 %if &log %then %do;
@@ -627,9 +639,14 @@ used above) */
 		%* Define an INFORMAT in order to assign one actual value to the target variable when the event of interest is multilevel;
 		%* Note that the value assigned is the largest among all the values representing the event;
 		invalue &targetInformat(default=&varlen)
+		%if %quote(&eventLargest) ~= %then %do;		%* &eventLargest may be empty if none of the events given in EVENT= is taken by the target variable;
 				'1'				= &eventLargest
+		%end;
 				&missingValue 	= &missingValue
-				'0'				= &nonEventLargest;
+		%if %quote(&nonEventLargest) ~= %then %do;	%* &nonEventLargest may be empty if the target variable takes only the values given in the EVENT= parameter;
+				'0'				= &nonEventLargest
+		%end;
+		;
 	run;
 	%* Map the LIBRARY format (which is part of the FMTSEARCH search path for formats) to the &LIBFORMAT library so that
 	%* the above format definitions are found;
@@ -681,10 +698,10 @@ used above) */
 		proc freq data=&_data_ noprint;
 			tables %MakeList(&by, sep=*) / list out=_EC_freq_by_;
 		run;
-		%Callmacro(getnobs, _EC_freq_by_ return=1, n);
+		%Callmacro(getnobs, _EC_freq_by_ return=1, nbygroups);
 		%* List of by variables names and values (e.g. BY1=value1 BY2=value2);
 		%let bylist = ;
-		%do i = 1 %to &n;
+		%do i = 1 %to &nbygroups;
 			data _EC_data&i;
 				merge &_data_ _EC_freq_by_(in=in2 firstobs=&i obs=&i);
 				by &by;
@@ -707,7 +724,7 @@ used above) */
 		%symdel _byvaluesi_; quit;
 		%* Pretend that the list of datasets passed in DATA= is the list of datasets just created
 		%* from the original input dataset for each value of the by variables;
-		%let _data_ = %MakeListFromName(_EC_data, start=1, step=1, stop=&n);
+		%let _data_ = %MakeListFromName(_EC_data, start=1, step=1, stop=&nbygroups);
 		%*** NOTE THAT THE MACRO VARIABLE nro_data IS UPDATED HERE TO REFLECT THE USE OF BY VARIABLES!!;
 		%*** That is, the use of BY variables is reduced to the case when several datasets are passed.
 		%*** Each BY variable combination value is associated to a different dataset whose evaluation chart is plotted;
@@ -716,13 +733,15 @@ used above) */
 %end;
 
 %*** STEP=, GROUPS= and PERCENTILES=;
+%let nogroups = 0;
 %if %quote(&percentiles) = %then %do;
 	%if &step ~= %then
 		%let percentiles = %MakeListFromName( , start=&step , stop=100, step=&step);
 	%else %if &groups ~= %then
 		%let percentiles = %MakeListFromName( , length=&groups , start=%sysevalf(100/&groups), step=%sysevalf(100/&groups));
 	%else
-		%let percentiles = %MakeListFromName( , length=10 , start=10 , step=10);
+		%let nogroups = 1;
+%*		%let percentiles = %MakeListFromName( , length=10 , start=10 , step=10);
 %end;
 %* DM-2012/06/17: Add the 100 percentile in case it is not automatically included as one of the values
 %* This happens when the STEP value is not an integer sub-multiple of 100 (e.g. STEP = 6, which will create the following
@@ -794,6 +813,11 @@ quit;
 	%* Number of valid observations by target value. This is necessary to compute the quantiles
 	%* of the Kolmogorov Test Statistic used to compute the condifence band, as done below;
 	proc means data=&datai n noprint;
+		%* DM-2016/03/19: Added the WHERE condition on non-missingnness of analyzed variables to avoid analyzing cases where all
+		%* records are missing for the analysis variables.
+		%* This happenned at NAT for instance when a particular BY group has all its target variable set to missing because the BY group is
+		%* not intended to be included in any analysis of performance but still we want to score that BY group;
+		where not missing(&target) and not missing(&score);
 		%* DM-2012/06/05-START: Replaced the BY statement with the CLASS statement as I am now using a FORMAT statement 
 		%* for the target variable in order to accept also MULTILEVEL variables;
 		class &target;
@@ -802,758 +826,700 @@ quit;
 		var &score;
 		output out=_EC_n_(drop=_TYPE_ _FREQ_) n=n;
 	run;
-	%* NOTE: The Kolmogorov bands coincide with the HW (Hall & Wellner) confidence bands (computed below by PROC LIFETEST)
-	%* for non-censored data;
-	data _EC_KolmogorovBandWidths_;
-		keep confidence &target n width;
-		format confidence percent7.1;
-		set _EC_n_;
-		%* DM-2012/06/05-START: Added the following where condition because of the replacement of the BY statement with the CLASS statement above;
-		where not missing(&target);
-		%* DM-2012/06/05-END;
-		confidence = 0.80; width = 1.07 / sqrt(n); output;
-		confidence = 0.90; width = 1.22 / sqrt(n); output;
-		confidence = 0.95; width = 1.36 / sqrt(n); output;
-		confidence = 0.98; width = 1.52 / sqrt(n); output;
-		confidence = 0.99; width = 1.63 / sqrt(n); output;
-	run;
-
-	%* Model type;
-	%if %quote(&model) ~= %then %do;
-		%if %GetNroElements(&model) = 1 %then
-			%let modeli = &model;
-		%else %do;
-			%let modeli = %scan(&model, &i, ' ');
-			%* If the list in &model has more than one element, but does not have as many
-			%* elements as number of datasets listed in &data, &modeli will be empty for some
-			%* dataset, and therefore the default  value of &model is used for those cases;
-			%if %quote(&modeli) = %then
-				%let modeli = LR;
-		%end;
-	%end;
-	%else
-		%let modeli = LR;
-
-	%*** Standardize the value of &modeli so that it is not necessary to ask for all possible
-	%*** values of the same type of model (e.g. DT or TREE). This also takes care of an invalid
-	%*** value passed in parameter MODEL=, in which case the model is assumed to be LR;
-	%if %upcase(&modeli) = DT or %upcase(&modeli) = TREE %then
-		%let modeli = DT;
-	%else
-		%let modeli = LR;
-
-	%* Define the macro variable DT and LEAF, for the current model.
-	%* The variable DT is defined in order to make it easier to treat distinguish between the
-	%* two cases of MODELi (DT or LR).
-	%* On the other hand, the most important thing about the LEAF variable is that LEAFi is set
-	%* to empty when the current model is NOT a DT, since below I do a KEEP
-	%* of variable &LEAFi that variable usually does not exist in the input dataset when the model
-	%* is not a DT;
-	%if %upcase(&modeli) = DT %then %do;
-		%let DT = 1;
-		%let leafi = &leaf;
-	%end;
+	%* DM-2016/0319: Check if there are any data on which to compute the chart;
+	%* Note that it already happenned that a particular BY group has no valid data because
+	%* it is not intended to be included in the analysis (e.g. control group, which is nor training data nor validation data;
+	%Callmacro(getnobs, _EC_n_ return=1, n);
+	%if &n = 0 %then
+		%put EVALUATIONCHART: No valid observations found for BY group &i. Analysis skipped for this group.;
 	%else %do;
-		%let DT = 0;
-		%let leafi = ;
-	%end;
+		%* NOTE: The Kolmogorov bands coincide with the HW (Hall & Wellner) confidence bands (computed below by PROC LIFETEST)
+		%* for non-censored data;
+		data _EC_KolmogorovBandWidths_;
+			keep confidence &target n width;
+			format confidence percent7.1;
+			set _EC_n_;
+			%* DM-2012/06/05-START: Added the following where condition because of the replacement of the BY statement with the CLASS statement above;
+			where not missing(&target);
+			%* DM-2012/06/05-END;
+			confidence = 0.80; width = 1.07 / sqrt(n); output;
+			confidence = 0.90; width = 1.22 / sqrt(n); output;
+			confidence = 0.95; width = 1.36 / sqrt(n); output;
+			confidence = 0.98; width = 1.52 / sqrt(n); output;
+			confidence = 0.99; width = 1.63 / sqrt(n); output;
+		run;
 
-	%* Eliminate missing values of &score in input dataset and
-	%* sort in descending order of &score;
-	proc sort data=&datai(where=(not missing(&target) and &score~=.)) out=_EC_data_(keep=&target &score &leafi);
-		by descending &score &leafi;
-	run;
-
-	/*----------------- Compute Lift/Gains chart with Confidence Bands ----------------------*/
-	%*** The basic idea is to compute the ranks of the score variables (since the Gains and Lift values
-	%*** are based on the QUANTILES of the score --and not on the score itself) over ALL the data and then
-	%*** compute the CDF by target group (event/non-event), which give the Event Gains and the Non-Event Gains.
-	%*** Finally the Lift curve is simply the EventGains / quantile;
-
-	%* Compute score rank on ALL the data (regardless of TARGET value);
-	%* Note the use of the FRACTION option so that we get directly the quantile values as ranking output.
-	%* If we wanted to get a rank based on the observation position (based on the sorting given by the score variable)
-	%* it is better to use TIES=HIGH, so that the maximum rank value is the number of observations in the dataset when
-	%* ties are present --note that TIES=MEAN is the default value and this does NOT result in the maximum
-	%* rank value to be the number of observations in the dataset when ties are present);
-	proc rank data=_EC_data_ out=_EC_data_rank_ descending fraction;
-		var &score;
-		ranks quantile;
-	run;
-
-	%*----------------- Cumulative Hits, Cumulative N and Best Curves ------------------------;
-	%*** Use the score ranks to compute CumHits and CumN.
-	%*** This is needed to compute the Best Curves and is also useful for the user to know;
-
-	%* First create a variable that is binary in order to sort by that variable since we want
-	%* to compute the CumHits and CumN values separately for the Event and Non-Event group.
-	%* Note that PROC SORT does NOT accept any FORMAT statement (which o.w. would avoid the need
-	%* to create this temporary _TARGET_ variable);
-	data _EC_data_rank_;
-		set _EC_data_rank_;
-		_TARGET_ = put(&target, &targetFormat..);	%* _TARGET_ is a character variable;
-	run;
-	proc sort data=_EC_data_rank_ out=_EC_data_rank_cum_;
-		by _TARGET_ quantile;
-	run;
-
-	%*------ Counts by TARGET and OVERALL ------;
-	proc freq data=_EC_data_rank_cum_ noprint;
-		tables _TARGET_ / out=_EC_hits_total_ OUTCUM;
-	run;
-	%* Merge the Total Hits and the Total N;
-	data _EC_data_rank_cum_;
-		merge 	_EC_data_rank_cum_
-				_EC_hits_total_(keep=_TARGET_ COUNT PERCENT rename=(COUNT=TotalHits));
-		by _TARGET_;
-		if _N_ = 1 then set _EC_hits_total_(where=(_TARGET_copy='1') keep=_TARGET_ CUM_FREQ CUM_PCT rename=(_TARGET_=_TARGET_copy CUM_FREQ=TotalN));
-		call symput ('EventRate', compress(put(PERCENT, best12.)));
-		drop _TARGET_copy CUM_PCT;
-	run;
-
-	%*----- Counts by QUANTILE (for DT model case only) -----; 
-	%* In the DT case, compute the number of obs by quantile (n);
-	%if &DT %then %do;
-	proc means data=_EC_data_rank_ noprint;
-		by quantile;
-		var quantile;
-		output out=_EC_n_quantile_ n=n;
-	run;
-	proc datasets nolist;
-		modify _EC_n_quantile_;
-		index create quantile / unique;
-	run;
-	%end;
-	%*----- Counts by QUANTILE -----; 
-
-	%*----- CumHits, CumN and Best Curves for the quantiles identified by PROC LIFETEST below ------;
-	data _EC_data_rank_cum_;
-		keep &target _TARGET_ &leafi &score quantile %if &DT %then %do; hits n %end; CumHits TotalHits TotalN;
-		format &target;
-		format _TARGET_ &leafi &score quantile %if &DT %then %do; hits n %end; CumHits TotalHits TotalN;
-		set _EC_data_rank_cum_;
-		by _TARGET_ quantile;		%* _TARGET_ is used for the FIRST. flag and QUANTILE is used for the LAST. flag;
-		retain CumHits;
-		format quantile;
-		%if &DT %then %do;
-		%* Read n from _EC_n_quantile_ and compute variable hits (as these variables do NOT come from the _FREQ_ variables
-		%* created by the PROC MEANS below. Their values only make sense for the non-DT case;
-		retain hits n;
-		if first.quantile then do;
-			%* Read the number of obs by quantile (n) from the _EC_n_quantile_ dataset;
-			set _EC_n_quantile_(keep=quantile n) key=quantile;
-			hits = 0;
-		end;
-		%end;
-		if FIRST._TARGET_ then do;
-			%*** Add a record with QUANTILE = 0 at the first observation of the current _TARGET_ group so that
-			%*** the merge with _EC_data_surv_ below can be done seamlessly as the _EC_data_surv_ already
-			%*** contains a record with QUANTILE = 0 for each _TARGET_ group;
-			%* Store the current values of QUANTILE and &SCORE (which are used below to recover their original values at the first observation);
-			quantile_current = quantile;
-			_score_current = &score;
-			%if &DT %then %do;
-			n_current = n;
-			n = 0;
+		%* Model type;
+		%if %quote(&model) ~= %then %do;
+			%if %GetNroElements(&model) = 1 %then
+				%let modeli = &model;
+			%else %do;
+				%let modeli = %scan(&model, &i, ' ');
+				%* If the list in &model has more than one element, but does not have as many
+				%* elements as number of datasets listed in &data, &modeli will be empty for some
+				%* dataset, and therefore the default  value of &model is used for those cases;
+				%if %quote(&modeli) = %then
+					%let modeli = LR;
 			%end;
-			%* Update the value of QUANTILE to represent the case QUANTILE = 0;
-			quantile = 0;
-			CumHits = 0;
-%*			Gains = 0;		%* The Gains is computed based on the CDF estimated by PROC LIFETEST below;
-			&score = .;
-			output;
-			* Go back to the values of QUANTILE, &SCORE and n (in case of DT model) at the first record in the input dataset; 
-			quantile = quantile_current;
-			&score = _score_current;
-			%if &DT %then %do;
-			n = n_current;
-			%end;
-		end;
-		%* Process the current record in the input dataset;
-		%if &DT %then %do;
-		hits + 1;
 		%end;
-		CumHits + 1;
-%*		Gains = CumHits / TotalHits;		%* The Gains is computed based on the CDF estimated by PROC LIFETEST below;
-		%* Only OUTPUT the last occurrence of the (possibly repeated --in case of a DT model--) current value of QUANTILE;
-		%* Note that for non-DT models, the LAST.QUANTILE condition will most likely be ALWAYS TRUE
-		%* as the probability values will most likely be all different (unless only categorical variables are used as predictors
-		%* in the non-DT model --where non-DT model usually means a Logistic Regression model);
-		if LAST.quantile then
-			output;
-	run;
-	%*----------------- Cumulative Hits, Cumulative N and Best Curves ------------------------;
+		%else
+			%let modeli = LR;
 
+		%*** Standardize the value of &modeli so that it is not necessary to ask for all possible
+		%*** values of the same type of model (e.g. DT or TREE). This also takes care of an invalid
+		%*** value passed in parameter MODEL=, in which case the model is assumed to be LR;
+		%if %upcase(&modeli) = DT or %upcase(&modeli) = TREE %then
+			%let modeli = DT;
+		%else
+			%let modeli = LR;
 
-	%*---------------- PROC LIFETEST to compute CDF and Confidence Bands ---------------------;
-	%* Compute SURVIVAL FUNCTION using PROC LIFETEST by TARGET value (Event/Non-Event), and its CONFIDENCE BANDS;
-	%* NOTES:
-	%* - The default method applied to estimate the survival function is Kaplan-Meier (explicitly specified here,
-	%* in case future versions change the default).
-	%* - The confidence intervals/bounds are estimated using the transformation of the survival function specified
-	%* by parameter CONFTYPE, which defaults to LOGLOG (= log(-log(x)), explicitly specified here,
-	%* in case future versions change the default)
-	%* - The confidence intervals/bounds that can be output to the OUTSURV= dataset are of 3 types:
-	%*		- SDF_LCL / SDF_UCL variables 	=> contain the POINTWISE confidence intervals
-	%*		- EP_LCL  / EP_UCL variables	=> contain the Equal-Precision confidence BANDS (which are proportional to the pointwise confidence intervals)
-	%*		- HW_LCL  / HW_UCL variables	=> contain the Hall-Wellner confidence BANDS (which are NOT proportional to the pointwise confidence intervals, but reduce to the Kolmogorov bands for uncensored data)
-	%		CONFBAND=ALL indicates that both the EP and HW confidence bands should be output to the OUTSURV= dataset besides
-	%*		the pointwise confidence intervals;
-	proc lifetest data=_EC_data_rank_
-					outsurv=_EC_data_surv_
-					method=KM
-					alpha=%sysevalf(1-&confidence)
-					conftype=LOGLOG			/* This is the default transformation applied to S(t) to compute the confidence bands */
-					confband=ALL			/* This requests the pointwise confidence bands, the Equal Precision (EP) confidence bands and the Hall and Wellmer (HW) confidence bands */
-					noprint plots=none;
-		strata &target _TARGET_;
-		format &target &targetFormat..;
-		time quantile;
-	run;
-
-	%*------ Use Conovers method to compute Confidence Bands instead ------;
-	/* This section was NOT updated after the changes done in Jun-2012! (because it was not used)
-		I left it for reference on what the Conover method is based upon.
-	data _EC_Chart_i_;
-		merge _EC_Chart_i_(in=in1) _EC_KolmogorovBandWidths_(where=(confidence=&confidence));
-		by &target;
-		retain widthEvent widthNonEvent;
-		if in1 then
-			widthEvent = width;
-		else do;
-			widthNonEvent = width;
-			delete;
-		end;
-		GainsEventLower = max(0, GainsEvent - widthEvent);
-		GainsEventUpper = min(1, GainsEvent + widthEvent);
-		GainsNonEventLower = max(0, GainsNonEvent - widthNonEvent);
-		GainsNonEventUpper = min(1, GainsNonEvent + widthNonEvent);
-		drop width widthEvent widthNonEvent;
-	run;
-	*/
-	%*------ Use Conovers method to compute Confidence Bands instead ------;
-	%*---------------- PROC LIFETEST to compute CDF and Confidence Bands ---------------------;
-
-
-	%*----------- Compute CumHits, Gains, hits, etc. and add them to _EC_data_surv_ ----------;
-	data _EC_data_surv_;
-		format &target;
-		format _TARGET_ &score;
-		format quantile percent7.1;
-		format cdf_lcl cdf cdf_ucl %if &DT %then %do; hits n %end; CumHits TotalHits TotalN;
-		merge 	_EC_data_surv_
-				_EC_data_rank_cum_;
-		by _TARGET_ quantile;
-		%*** Missing values of SDF_LCL and SDF_UCL are replaced with 0 when SURVIVAL = 0 because PROC LIFETEST above
-		%*** --as seen by the output generated in the output window (i.e. without the NOPRINT option used above)--
-		%*** sets the standard error to MISSING (and therefore also the confidence intervals SDF_LCL and SDF_UCL)
-		%*** when SURVIVAL = 0 (I do not understand why...).
-		%*** Recall that SURVIVAL = 0 at the observation containing the largest QUANTILE value for each value of
-		%*** the _TARGET_ variable (which here should also be the last observation within each target group, as the
-		%*** observations are already sorted by _TARGET_ and QUANTILE in the output dataset (_EC_DATA_SURV_)
-		%*** generated by PROC LIFETEST;
-		if survival in (0, 1) then do;
-			sdf_lcl = survival;
-			sdf_ucl = survival;
-			ep_lcl = survival;
-			ep_ucl = survival;
-			hw_lcl = survival;
-			hw_ucl = survival;
-		end;
-		%*** DM-2012/06/15-END;
-		cdf = 1 - survival;
-		%* Decide whether to compute the simultaneous confidence band ot the pointwise confidence interval;
-		%if &SIMUL %then %do;
-		%* Equal Precision (EP) simultaneous confidence band --> this band is proportional to the pointwise confidence interval;
-		%* From Nair paper (1984) referenced in PROC LIFETEST, the band is only valid for finite x and such that a <= F(x) <= b,
-		%* where a is typically 0.05 or 0.1 and b is typically 0.95. F(x) is the CDF of x. This means that this band is NOT
-		%* valid towards the end values of the interval where the CDF function has a value (where F(x) = 0 and 1 respectively);
-		cdf_lcl = 1 - ep_ucl;
-		cdf_ucl = 1 - ep_lcl;
-		%* Hall & Wellmer (HW) simultaneous confidence band --> it is equal to the Kolmogorov confidence band for uncensored data
-		%* which is our case here! (I think this is a good property and this is a good reason for choosing this approach).
-		%* However, I saw some cases where one of the bounds was very off w.r.t. the EP bound (e.g. upper bound of S(t) ~= 0.01
-		%* was set to 0.9 (too high!) and lower bound to ~ 1E-229 (almost 0, which sounds ok for a S(t) value of 0.01, so close to 0);
-		%* Note that the delta to apply for the Kolmogorov confidence bands are calculated above
-		%* in the _EC_KolmogorovBandWidths_ dataset and are taken from Conovers book on nonparametric statistics;
-		%* As in the EP case, this band is valid for 0 <= x <= T < Inf such that F(T) > 0, where F(x) is the CDF of x;
-%*		cdf_lcl = 1 - hw_ucl;
-%*		cdf_ucl = 1 - hw_lcl;
+		%* Define the macro variable DT and LEAF, for the current model.
+		%* The variable DT is defined in order to make it easier to treat distinguish between the
+		%* two cases of MODELi (DT or LR).
+		%* On the other hand, the most important thing about the LEAF variable is that LEAFi is set
+		%* to empty when the current model is NOT a DT, since below I do a KEEP
+		%* of variable &LEAFi that variable usually does not exist in the input dataset when the model
+		%* is not a DT;
+		%if %upcase(&modeli) = DT %then %do;
+			%let DT = 1;
+			%let leafi = &leaf;
+			%let varleaftype = %GetVarType(&datai, &leaf);
 		%end;
 		%else %do;
-		%* Pointwise confidence interval (valid only to give a confidence for the S(t) of a single observation);
-		cdf_lcl = 1 - sdf_ucl;
-		cdf_ucl = 1 - sdf_lcl;
+			%let DT = 0;
+			%let leafi = ;
 		%end;
-	run;
 
-	%*** For non-DT models categorize the QUANTILE values using the specified percentile values
-	%*** and compute #hits (hits) and #obs (n) within each percentile group.
-	%*** Note that either hits or n (or both) is used in the Evaluation Chart when POINTLABELS=1
-	%*** to show their values at each plotting point;
-	%if ~&DT %then %do;
-		%* Create the dataset containing the definition of the _quantCat FORMAT and INFORMAT.
-		%* The _quantCat FORMAT is used to map the hits, Gains and related quantities to the
-		%* quantile groups defined by the percentile values.
-		%* The _quantCat INFORMAT is used to go back from the formatted value representing the
-		%* quantile group to the single number defining the end of the quantile group
-		%* (which is derived from the specified percentile values --e.g. if P3 is the formatted
-		%* value representing the quantile group that includes quantile values from 0.2 to 0.3
-		%* then 0.3 is the unformatted numeric value representing such quantile group, which
-		%* is obtained by applying the _quantCat INFORMAT to the formatted P3 value).
-		%* NOTE that the unformatted quantile values are needed for the horizontal axis of the
-		%* evaluation chart representing the percentiles;
-		data _ec_formats_ctrl_		(keep=fmtname type start end label sexcl eexcl hlo quantile)
-			 _ec_target_quantiles_	(keep=_TARGET_ quantile);	%* _EC_TARGET_QUANTILES_ simply has the list of specified quantile values by _TARGET_ value;
-			keep fmtname type start end label sexcl eexcl hlo _TARGET_ quantile;	%* HLO is used for the OTHER group;
-			format fmtname type start end label sexcl eexcl hlo _TARGET_ quantile;
-			array percentiles{*} P0-P&nro_quantiles (0 &percentiles);
-			retain fmtname '_quantCat' type 'N';	%* TYPE = N => Numeric FORMAT;
-			retain start end label;
-			retain sexcl 'N' eexcl 'N';	%* Variables containing the EXCLUSION flag of the start and end values;
-			retain quantile;			%* QUANTILE is a NUMERIC variable that stores the numeric quantile value of the corresponding start-end-label set;
-			length start end label $20;	%* START, END and LABEL have the same length as they are interchanged when defining
-										%* the INFORMAT. This length is determined by the maximum possible values to store in
-										%* START, END and LABEL which is given by the number of decimals preserved by the
-										%* ROUND function applied to the percentile values below;
-			start = '0';
-			end = '0';
-			label = 'P0';
-			_TARGET_ = '0';
-			quantile = 0;
-			%* Long way of labeling the formatted values, i.e. showing directly the specified percentile values;
-			%*label = '0-' || compress(put(round(end,1E-5), 9.7));	%* The value 9.7 of the second parameter of PUT() is given by the longest possible case: 1.00000, since the percentile value is rounded to the 3rd decimal;
-			output _ec_formats_ctrl_ _ec_target_quantiles_;
-			_TARGET_ = '1';
-			output _ec_target_quantiles_;
-			%* Informat definition;
-			type = 'I';					%* TYPE = I => Numeric INFORMAT. This implies that the value of LABEL must be a character-valued NUMBER (e.g. 1.3 enclosed in quotes), since LABEL is of type character!;
-			start = label;				%* START and END still contian the range of values to be converted to the value specified in LABEL;
-			label = end;				%* This is the value I want the input value to be converted to (note that it is a character-valued number --since variable LABEL is character!);
-			end = start;				%* The difference with the format definition is that the START and END values are the formatted
-										%* values and the value of LABEL is the unformatted value or the value that I want the formatted
-										%* value to be converted to.;
-			output _ec_formats_ctrl_;
-			do i = 1 to dim(percentiles)-1;
-				%* Format definition;
-				type = 'N';
-				start = put(percentiles(i)/100, best12.);
-				end = put(percentiles(i+1)/100, best12.);
-				label = 'P'||compress(put(i,best12.));	%* best12. is the format for the numeric value i;
+		%* Eliminate missing values of &score in the input dataset and sort by descending &score;
+		proc sort data=&datai(where=(not missing(&target) and &score~=.)) out=_EC_data_(keep=&target &score &leafi);
+			by descending &score &leafi;
+		run;
+
+		/*----------------- Compute Lift/Gains chart with Confidence Bands ----------------------*/
+		%*** The basic idea is to compute the ranks of the score variables (since the Gains and Lift values
+		%*** are based on the QUANTILES of the score --and not on the score itself) over ALL the data and then
+		%*** compute the CDF by target group (event/non-event), which give the Event Gains and the Non-Event Gains.
+		%*** Finally the Lift curve is simply the EventGains / quantile;
+
+		%* Compute score rank on ALL the data (regardless of TARGET value);
+		%* Note the use of the FRACTION option so that we get directly the quantile values as ranking output.
+		%* If we wanted to get a rank based on the observation position (based on the sorting given by the score variable)
+		%* it is better to use TIES=HIGH, so that the maximum rank value is the number of observations in the dataset when
+		%* ties are present --note that TIES=MEAN is the default value and this does NOT result in the maximum
+		%* rank value to be the number of observations in the dataset when ties are present);
+		proc rank data=_EC_data_ out=_EC_data_rank_ descending fraction;
+			var &score;
+			ranks quantile;
+		run;
+
+		%* Create a copy of the target variable (_TARGET_) that is binary in order to sort by that variable since we want
+		%* to compute the CumHits and CumN values separately for the Event and Non-Event group.
+		%* Note that PROC SORT does NOT accept any FORMAT statement (which o.w. would avoid the need
+		%* to create this temporary _TARGET_ variable);
+		data _EC_data_rank_;
+			set _EC_data_rank_;
+			_TARGET_ = put(&target, &targetFormat..);	%* _TARGET_ is a character variable;
+		run;
+		proc sort data=_EC_data_rank_ out=_EC_data_rank_cum_;
+			by _TARGET_ quantile;
+		run;
+
+		%* Compute hits and CumHits;
+		data _EC_data_rank_cum_;
+			keep &target _TARGET_ &leafi &score quantile hits CumHits;
+			format &target;
+			format _TARGET_ &leafi &score quantile hits CumHits;
+			set _EC_data_rank_cum_;
+			by _TARGET_ quantile;		%* _TARGET_ is used for the FIRST. flag and QUANTILE is used for the LAST. flag;
+			retain CumHits;
+			retain hits;
+			if first.quantile then
+				hits = 0;
+			if FIRST._TARGET_ then do;
+				%*** Add a record with QUANTILE = 0 at the first observation of the current _TARGET_ group so that
+				%*** the merge with _EC_data_surv_ below can be done seamlessly as the _EC_data_surv_ already
+				%*** contains a record with QUANTILE = 0 for each _TARGET_ group;
+				%* Store the current values of QUANTILE and &SCORE (which are used below to recover their original values at the first observation);
+				quantile_current = quantile;
+				_score_current = &score;
+				%* Update the value of QUANTILE to represent the case QUANTILE = 0 and output the record;
+				quantile = 0;
+				CumHits = 0;
+				&score = .;
+				%if &DT %then %do;
+					%if %upcase(&varleaftype) = C %then %do;
+				&leafi = '';
+					%end;
+					%else %do;
+				&leafi = .;
+					%end;
+				%end;
+				output;
+				* Go back to the values of QUANTILE, &SCORE and n at the first record in the input dataset; 
+				quantile = quantile_current;
+				&score = _score_current;
+			end;
+			%* Process the current record in the input dataset;
+			hits + 1;
+			CumHits + 1;
+			%* Only OUTPUT the last occurrence of the (possibly repeated) current value of QUANTILE;
+			%* Note that for any model we can have repeated values of quantile! Thus the OUTPUT _EC_data_rank_cum_ dataset
+			%* may have less number of records than the INPUT _EC_data_rank_cum_ dataset after this data step is complete;
+			if LAST.quantile then
+				output;
+		run;
+
+		%*---------------- PROC LIFETEST to compute CDF and Confidence Bands ---------------------;
+		%* Compute SURVIVAL FUNCTION using PROC LIFETEST by TARGET value (Event/Non-Event), and its CONFIDENCE BANDS;
+		%* NOTES:
+		%* - The default method applied to estimate the survival function is Kaplan-Meier (explicitly specified here,
+		%* in case future versions change the default).
+		%* - The confidence intervals/bounds are estimated using the transformation of the survival function specified
+		%* by parameter CONFTYPE, which defaults to LOGLOG (= log(-log(x)), explicitly specified here,
+		%* in case future versions change the default)
+		%* - The confidence intervals/bounds that can be output to the OUTSURV= dataset are of 3 types:
+		%*		- SDF_LCL / SDF_UCL variables 	=> contain the POINTWISE confidence intervals
+		%*		- EP_LCL  / EP_UCL variables	=> contain the Equal-Precision confidence BANDS (which are proportional to the pointwise confidence intervals)
+		%*		- HW_LCL  / HW_UCL variables	=> contain the Hall-Wellner confidence BANDS (which are NOT proportional to the pointwise confidence intervals, but reduce to the Kolmogorov bands for uncensored data)
+		%		CONFBAND=ALL indicates that both the EP and HW confidence bands should be output to the OUTSURV= dataset besides
+		%*		the pointwise confidence intervals;
+		proc lifetest 	data=_EC_data_rank_
+						outsurv=_EC_data_surv_
+						method=KM
+						alpha=%sysevalf(1-&confidence)
+						conftype=LOGLOG			/* This is the default transformation applied to S(t) to compute the confidence bands */
+						confband=ALL			/* This requests the pointwise confidence bands, the Equal Precision (EP) confidence bands and the Hall and Wellmer (HW) confidence bands */
+						noprint plots=none;
+			strata &target _TARGET_;
+			format &target &targetFormat..;
+			time quantile;
+		run;
+
+		%*------ Use Conovers method to compute Confidence Bands instead ------;
+		/* This section was NOT updated after the changes done in Jun-2012! (because it was not used)
+			I left it for reference on what the Conover method is based upon.
+		data _EC_Chart_i_;
+			merge _EC_Chart_i_(in=in1) _EC_KolmogorovBandWidths_(where=(confidence=&confidence));
+			by &target;
+			retain widthEvent widthNonEvent;
+			if in1 then
+				widthEvent = width;
+			else do;
+				widthNonEvent = width;
+				delete;
+			end;
+			GainsEventLower = max(0, GainsEvent - widthEvent);
+			GainsEventUpper = min(1, GainsEvent + widthEvent);
+			GainsNonEventLower = max(0, GainsNonEvent - widthNonEvent);
+			GainsNonEventUpper = min(1, GainsNonEvent + widthNonEvent);
+			drop width widthEvent widthNonEvent;
+		run;
+		*/
+		%*------ Use Conovers method to compute Confidence Bands instead ------;
+		%*---------------- PROC LIFETEST to compute CDF and Confidence Bands ---------------------;
+
+
+		%*----------- Compute CumHits, Gains, hits, etc. and add them to _EC_data_surv_ ----------;
+		%* Compute CDF and its confidence bands;
+		data _EC_data_surv_;
+			format &target;
+			format _TARGET_ &score;
+			format quantile;
+			format cdf_lcl cdf cdf_ucl hits CumHits;
+			merge 	_EC_data_surv_
+					_EC_data_rank_cum_;
+			by _TARGET_ quantile;
+			%*** Missing values of SDF_LCL and SDF_UCL are replaced with 0 when SURVIVAL = 0 because PROC LIFETEST above
+			%*** --as seen by the output generated in the output window (i.e. without the NOPRINT option used above)--
+			%*** sets the standard error to MISSING (and therefore also the confidence intervals SDF_LCL and SDF_UCL)
+			%*** when SURVIVAL = 0 (I do not understand why...).
+			%*** Recall that SURVIVAL = 0 at the observation containing the largest QUANTILE value for each value of
+			%*** the _TARGET_ variable (which here should also be the last observation within each target group, as the
+			%*** observations are already sorted by _TARGET_ and QUANTILE in the output dataset (_EC_DATA_SURV_)
+			%*** generated by PROC LIFETEST;
+			if survival in (0, 1) then do;
+				sdf_lcl = survival;
+				sdf_ucl = survival;
+				ep_lcl = survival;
+				ep_ucl = survival;
+				hw_lcl = survival;
+				hw_ucl = survival;
+			end;
+			%*** DM-2012/06/15-END;
+			cdf = 1 - survival;
+			%* Decide whether to compute the simultaneous confidence band ot the pointwise confidence interval;
+			%if &SIMUL %then %do;
+			%* Equal Precision (EP) simultaneous confidence band --> this band is proportional to the pointwise confidence interval;
+			%* From Nair paper (1984) referenced in PROC LIFETEST, the band is only valid for finite x and such that a <= F(x) <= b,
+			%* where a is typically 0.05 or 0.1 and b is typically 0.95. F(x) is the CDF of x. This means that this band is NOT
+			%* valid towards the end values of the interval where the CDF function has a value (where F(x) = 0 and 1 respectively);
+			cdf_lcl = 1 - ep_ucl;
+			cdf_ucl = 1 - ep_lcl;
+			%* Hall & Wellmer (HW) simultaneous confidence band --> it is equal to the Kolmogorov confidence band for uncensored data
+			%* which is our case here! (I think this is a good property and this is a good reason for choosing this approach).
+			%* However, I saw some cases where one of the bounds was very off w.r.t. the EP bound (e.g. upper bound of S(t) ~= 0.01
+			%* was set to 0.9 (too high!) and lower bound to ~ 1E-229 (almost 0, which sounds ok for a S(t) value of 0.01, so close to 0);
+			%* Note that the delta to apply for the Kolmogorov confidence bands are calculated above
+			%* in the _EC_KolmogorovBandWidths_ dataset and are taken from Conovers book on nonparametric statistics;
+			%* As in the EP case, this band is valid for 0 <= x <= T < Inf such that F(T) > 0, where F(x) is the CDF of x;
+	%*		cdf_lcl = 1 - hw_ucl;
+	%*		cdf_ucl = 1 - hw_lcl;
+			%end;
+			%else %do;
+			%* Pointwise confidence interval (valid only to give a confidence for the S(t) of a single observation);
+			cdf_lcl = 1 - sdf_ucl;
+			cdf_ucl = 1 - sdf_lcl;
+			%end;
+		run;
+
+		%*** For non-DT models and for charts based on grouped score variable,
+		%*** categorize the QUANTILE values using the specified percentile values;
+		%if ~&DT and ~&nogroups %then %do;
+			%* Create the dataset containing the definition of the _quantCat FORMAT and INFORMAT.
+			%* The _quantCat FORMAT is used to map the hits, Gains and related quantities to the
+			%* quantile groups defined by the percentile values.
+			%* The _quantCat INFORMAT is used to go back from the formatted value representing the
+			%* quantile group to the single number defining the end of the quantile group
+			%* (which is derived from the specified percentile values --e.g. if P3 is the formatted
+			%* value representing the quantile group that includes quantile values from 0.2 to 0.3
+			%* then 0.3 is the unformatted numeric value representing such quantile group, which
+			%* is obtained by applying the _quantCat INFORMAT to the formatted P3 value).
+			%* NOTE that the unformatted quantile values are needed for the horizontal axis of the
+			%* evaluation chart representing the percentiles;
+			data _ec_formats_ctrl_		(keep=fmtname type start end label sexcl eexcl hlo quantile)
+				 _ec_target_quantiles_	(keep=_TARGET_ quantile);	%* _EC_TARGET_QUANTILES_ simply has the list of specified quantile values by _TARGET_ value;
+				keep fmtname type start end label sexcl eexcl hlo _TARGET_ quantile;	%* HLO is used for the OTHER group;
+				format fmtname type start end label sexcl eexcl hlo _TARGET_ quantile;
+				array percentiles{*} P0-P&nro_quantiles (0 &percentiles);
+				retain fmtname '_quantCat' type 'N';	%* TYPE = N => Numeric FORMAT;
+				retain start end label;
+				retain sexcl 'N' eexcl 'N';	%* Variables containing the EXCLUSION flag of the start and end values;
+				retain quantile;			%* QUANTILE is a NUMERIC variable that stores the numeric quantile value of the corresponding start-end-label set;
+				length start end label $20;	%* START, END and LABEL have the same length as they are interchanged when defining
+											%* the INFORMAT. This length is determined by the maximum possible values to store in
+											%* START, END and LABEL which is given by the number of decimals preserved by the
+											%* ROUND function applied to the percentile values below;
+				start = '0';
+				end = '0';
+				label = 'P0';
 				_TARGET_ = '0';
-				quantile = percentiles(i+1)/100;
+				quantile = 0;
+				%* Long way of labeling the formatted values, i.e. showing directly the specified percentile values;
+				%*label = '0-' || compress(put(round(end,1E-5), 9.7));	%* The value 9.7 of the second parameter of PUT() is given by the longest possible case: 1.00000, since the percentile value is rounded to the 3rd decimal;
 				output _ec_formats_ctrl_ _ec_target_quantiles_;
 				_TARGET_ = '1';
 				output _ec_target_quantiles_;
 				%* Informat definition;
-				type = 'I';
-				start = label;
-				label = end;
-				end = start;
+				type = 'I';					%* TYPE = I => Numeric INFORMAT. This implies that the value of LABEL must be a character-valued NUMBER (e.g. 1.3 enclosed in quotes), since LABEL is of type character!;
+				start = label;				%* START and END still contian the range of values to be converted to the value specified in LABEL;
+				label = end;				%* This is the value I want the input value to be converted to (note that it is a character-valued number --since variable LABEL is character!);
+				end = start;				%* The difference with the format definition is that the START and END values are the formatted
+											%* values and the value of LABEL is the unformatted value or the value that I want the formatted
+											%* value to be converted to.;
 				output _ec_formats_ctrl_;
-			end;
-			* Last observation for OTHER;
-			type = 'N';
-			start = ' ';
-			end = ' ';
-			hlo = 'O';
-			label = ' ';		%* A character missing value is represented by a blank space (see the documentation, section Language Reference Concepts -> SAS System Concepts -> Missing Values);
-			quantile = .;
-			output _ec_formats_ctrl_;
-			%* Informat definition;
-			type = 'I';
-			output _ec_formats_ctrl_;
-		run;
-		proc sort data=_ec_formats_ctrl_;
-			by fmtname type quantile;
-		run;
-		proc format cntlin=_ec_formats_ctrl_;
-		run;
-	%end;
-	%else %do;
-	%* Create the list of quantile values by TARGET that I need for the SQL JOINS below;
-	proc sort data=_EC_data_surv_(keep=quantile) out=_EC_target_quantiles_ nodupkey;
-		by quantile;
-	run;
-	%* Add the 2 values of _TARGET_ for each quantile;
-	data _EC_target_quantiles_;
-		format _TARGET_ quantile;
-		set _EC_target_quantiles_;
-		_TARGET_ = '0'; output;
-		_TARGET_ = '1'; output;
-	run;
-	%end;
-	%*** Compute values by quantized QUANTILE (note that QUANTILE is assumed to be already discrete for DT models);
-	proc means data=_EC_data_surv_ noprint;
-		%if ~&DT %then %do;
-		format quantile _quantCat.;
+				do i = 1 to dim(percentiles)-1;
+					%* Format definition;
+					type = 'N';
+					start = put(percentiles(i)/100, best12.);
+					end = put(percentiles(i+1)/100, best12.);
+					label = 'P'||compress(put(i,best12.));	%* best12. is the format for the numeric value i;
+					_TARGET_ = '0';
+					quantile = percentiles(i+1)/100;
+					output _ec_formats_ctrl_ _ec_target_quantiles_;
+					_TARGET_ = '1';
+					output _ec_target_quantiles_;
+					%* Informat definition;
+					type = 'I';
+					start = label;
+					label = end;
+					end = start;
+					output _ec_formats_ctrl_;
+				end;
+				* Last observation for OTHER;
+				type = 'N';
+				start = ' ';
+				end = ' ';
+				hlo = 'O';
+				label = ' ';		%* A character missing value is represented by a blank space (see the documentation, section Language Reference Concepts -> SAS System Concepts -> Missing Values);
+				quantile = .;
+				output _ec_formats_ctrl_;
+				%* Informat definition;
+				type = 'I';
+				output _ec_formats_ctrl_;
+			run;
+			proc sort data=_ec_formats_ctrl_;
+				by fmtname type quantile;
+			run;
+			proc format cntlin=_ec_formats_ctrl_;
+			run;
 		%end;
-%*		where quantile ~= 0;		%* Remove the 0 quantile because it was NOT originally on the dataset and these records will incorrectly contribute to the calculation of _FREQ_ and the average of &score;
-		class _TARGET_ quantile;
-		var &score %if &DT %then %do; hits n %end; CumHits cdf cdf_lcl cdf_ucl;
-		output 	out=_EC_hits_(keep=_TARGET_ quantile _FREQ_ _TYPE_ &score %if &DT %then %do; hits n TotalHits TotalN %end; CumHits cdf cdf_lcl cdf_ucl)
-				mean=&score
-				max=_SCORE_MAX %if &DT %then %do; hits 		n 		%end; CumHits cdf cdf_lcl cdf_ucl
-				sum=_SCORE_SUM %if &DT %then %do; TotalHits TotalN 	%end;
-				;
-	run;
-	%*** For non-DT models, convert the QUANTILE value (wich falls anywhere within the quantile group) to the representative
-	%*** number used for the quantile group, which is given by the QUANTILE column in the _EC_FORMATS_CTRL_ dataset that defines
-	%*** the _quantCat format;
-	%if ~&DT %then %do;
-	data _EC_hits_;
-		format _TARGET_ quantileEnd;
-		set _EC_hits_;
-		%* Quantile value corresponding to the end value of the quantile group range;
-		quantileEnd = input(put(quantile, _quantCat.), _quantCat.);	%* The first _quantCat is the FORMAT, the second _quantCat is the INFORMAT;
-		drop quantile;
-		rename quantileEnd = quantile;
-	run;
-	%end;
-	%*** Put this information together in order to have records for each combination of &SCORE and QUANTILE;
-	proc sql;
-		%* The structure below is so complicated because PROC SQL does not accept the (+) notation for a joining variable (as in t1.id(+));
-		%* Therefore we need to use a UNION clause and a LEFT OUTER JOIN clause for the T1 and T3 tables;
-		%* The suffix _ALL means ALLTOGETHER, i.e. all the information in _EC_hits_ for the different BY variable combination levels
-		%* (_TYPE_ = 0, 1, 2 and 3) is put together;
-		create table _EC_hits_all_ as
-		select
-			 qt13._TARGET_
-			,qt13.quantile	format=percent7.1
-			,qt13.hits
-			,qt13.n
-			%if &DT %then %do;
-			,t2.TotalHits
-			,t0.TotalN
+		%else %do;
+			%* Create the list of quantile values by TARGET that I need for the SQL JOINS below;
+			proc sort data=_EC_data_surv_(keep=quantile) out=_EC_target_quantiles_ nodupkey;
+				by quantile;
+			run;
+			%* Add the 2 values of _TARGET_ for each quantile;
+			data _EC_target_quantiles_;
+				format _TARGET_ quantile;
+				set _EC_target_quantiles_;
+				_TARGET_ = '0'; output;
+				_TARGET_ = '1'; output;
+			run;
+		%end;
+
+		%*** Compute values by all combinations of _TARGET_ and QUANTILE and at all hierarchical levels (i.e. those given by the CLASS statement in PROC MEANS);
+		proc means data=_EC_data_surv_ noprint;
+			%if ~&DT and ~&nogroups %then %do;
+			format quantile _quantCat.;
 			%end;
-			%else %do;
-			,t2._FREQ_-1	as TotalHits				/* The -1 substraction is done to elimiante the artificial count of the QUANTILE=0 case, which was added artificially above */
-			,t0._FREQ_-2 	as TotalN					/* The -2 substraction is done to elimiante the artificial count of the QUANTILE=0 case, which was added artificially above */
-			%end;
-			,qt13.&score	label="Average Score"
-			/* Compute the Event and Non-Event Best Curves. In both cases, note that 100/&EventRate is the slope of the best line */
-			,(case qt13._TARGET_ 	when '0' 	then max(0, 100/(100-&EventRate)*(qt13.quantile-&EventRate/100))
-									when '1'	then min(qt13.quantile*100/&EventRate, 1)
-									else	 	.
-			end) as BestGains format=percent7.1
-			,qt13.CumHits
-			,qt13.cdf
-			,qt13.cdf_lcl
-			,qt13.cdf_ucl
-		from /* t0: Statistics for ALL _TARGET_ values and ALL QUANTILE values: nobs=1 */
-			_EC_hits_(where=(_TYPE_=0)) as t0,
-			(select
-				 qt1._TARGET_
-				,qt1.quantile
-				,qt1.n
-				%if &DT %then %do;
-				,t3.hits
-				%end;
-				%else %do;
-				/* For the computation of HITS for non-DT models we need to remove the count that has been artificially done for QUANTILE = 0 */
-				,(case 	when missing(t3._FREQ_) or qt1.quantile = 0 then 0 else t3._FREQ_ end) as hits
-				%end;
-				/* The following variables may be missing when some of the quantiles are present in the T3 table
-				meaning that there are no occurrences of the corresponding _TARGET_ variable at those quantiles. */
-				,t3.&score
+	%*		where quantile ~= 0;		%* Remove the 0 quantile because it was NOT originally on the dataset and these records will incorrectly contribute to the calculation of _FREQ_ and the average of &score;
+			class _TARGET_ quantile;
+			var &score hits CumHits cdf cdf_lcl cdf_ucl;
+			output 	out=_EC_hits_(keep=_TARGET_ quantile _TYPE_ &score hits CumHits cdf cdf_lcl cdf_ucl)
+					mean=&score
+					max=_SCORE_MAX _HITS_MAX CumHits cdf cdf_lcl cdf_ucl
+					sum=_SCORE_SUM hits
+					;
+		run;
+
+		%*** For non-DT models and grouped charts, convert the QUANTILE value (wich falls anywhere within the quantile group) to the representative
+		%*** number used for the quantile group, which is given by the QUANTILE column in the _EC_FORMATS_CTRL_ dataset that defines
+		%*** the _quantCat format;
+		%if ~&DT and ~&nogroups %then %do;
+		data _EC_hits_;
+			format _TARGET_ quantileEnd;
+			set _EC_hits_;
+			%* Quantile value corresponding to the end value of the quantile group range;
+			quantileEnd = input(put(quantile, _quantCat.), _quantCat.);	%* The first _quantCat is the FORMAT, the second _quantCat is the INFORMAT;
+			drop quantile;
+			rename quantileEnd = quantile;
+		run;
+		%end;
+
+		%*** Put this information together in order to have records for each combination of &SCORE and QUANTILE;
+		%*** THIS IS THE MOST IMPORTANT PART OF THE PROCESS;
+		proc sql;
+			create table _EC_hits_all_ as
+			select
+				 q._TARGET_
+				,q.quantile format=percent7.1	/* NOTE: We should NOT set the format for QUANTILE before aggregating the values with PROC MEANS, because that may derive in a truncation of the possible quantile values as a format like percent7.1 would make values 1.53% and 1.54% look the same! */
+				,t3.&score						/* NOTE: There may be missing of this variable for a particular _TARGET_ because not all scores may occur for both target groups, especially when no gruoping of the score variable is requested. */
+				,t0.hits as TotalN
+				,t2.CumHits as TotalHits
+				,(case when missing(t1.hits) then 0 else t1.hits end) as n
+				,(case when missing(t3.hits) then 0 else t3.hits end) as hits
 				,t3.CumHits
+				/* Compute the Event and Non-Event Best Curves. In both cases, note that 1/<corresponding-event-rate> is
+				the slope of the best line.
+				Note also that for the Non-Event best curve, to accumulation of non events starts at the other end of the ranking,
+				that is why we use (q.quantile-1) instead of just q.quantile.
+				Note: the formula for the event best curve is easy. The formula for the non-event best curve comes from the following
+				equality defining a straight line:
+					(y - 1) / (x - 1) = (0 - 1) / (er - 1)
+				where er is the EVENT rate.
+				Therefore we obtain:
+					y = 1 - (1 - x) * 1 / ner
+				where ner = is the NON-EVENT rate and 0 < x < 1.
+
+				Note that despite defining the best curve correctly like this, it may not show as straight line in the graph
+				when the event rates are not part of the plotting points. But that is ok.
+				*/
+				,(case q._TARGET_ 	when '0' 	then max(0, 1 - (1 - q.quantile)*1/(t2.CumHits/t0.hits))
+									when '1'	then min(q.quantile*1/(t2.CumHits/t0.hits), 1)
+									else 		.
+				end) as BestGains format=percent7.1
 				,t3.cdf
 				,t3.cdf_lcl
 				,t3.cdf_ucl
-			from
-				(select
-				 	 q._TARGET_
-					,q.quantile	
-					,(case when missing(t1.n) then 0 else t1.n end) as n
-				from _EC_target_quantiles_ as q
-				LEFT OUTER JOIN
-					/* t1: Statistics for ALL _TARGET_ values by QUANTILE:  nobs<=&nro_quantiles */
-					(select
-						 quantile
-						/* NOTE that the value of n is common for both target values (as it is coming from the entries with _TYPE_ = 1 in _EC_hits_) */
-						%if &DT %then %do;
-						,n
-						%end;
-						%else %do;
-						/* Remove the fictitious counting at QUANTILE=0 */
-						,(case when quantile = 0 then 0 else _FREQ_ end) as n
-						%end;
-					from _EC_hits_(where=(_TYPE_=1))
-				   	) as t1
-			  	ON q.quantile = t1.quantile
-				) as qt1
-			/* t3: Statistics by _TARGET_ values and QUANTILE values:  nobs<=&nro_quantiles */
-			LEFT OUTER JOIN _EC_hits_(where=(_TYPE_=3)) as t3
-			ON  qt1._TARGET_ = t3._TARGET_
-			and qt1.quantile = t3.quantile
-			) as qt13,
+			from 
+			/* t0: Overall statistics: nobs = 1 */
+			(select hits from _EC_hits_(where=(_TYPE_=0))) as t0,
+			_EC_target_quantiles_ as q
+			LEFT OUTER JOIN
+			/* t1: Statistics for ALL _TARGET_ values by QUANTILE: nobs<=&nro_quantiles */
+			_EC_hits_(where=(_TYPE_=1)) as t1
+		  	ON q.quantile = t1.quantile
+			LEFT OUTER JOIN
 			/* t2: Statistics by _TARGET_ values for ALL QUANTILE values: nobs=2 (=number of _TARGET_ values (0/1)) */
 			_EC_hits_(where=(_TYPE_=2)) as t2
-		where qt13._TARGET_ = t2._TARGET_
-		order by _TARGET_, quantile
-		;
-		%** NOTE that there is a message indicating that a CARTESIAN product is performed and this is due to the
-		%** absence on any condition on the T0 table. But this is correct because the T0 tables has only 1 observation
-		%** and we want to attach this observation to ALL records of the output table;
-	quit;
-	%* Fill in missing values because of (possible) non-existing quantiles for some of the target groups;
-	%* For all variables whose missing values are filled in, the filled-in value is equal to the previous
-	%* value taken by the variable, since all variables to fill in are cumulative quantities (e.g. CDF, CumHits, etc.);
-	data _EC_hits_all_;
-		keep   _TARGET_ &score quantile hits n CumHits CumN TotalHits TotalN BestGains cdf cdf_lcl cdf_ucl;
-		format _TARGET_ &score quantile hits n CumHits CumN TotalHits TotalN BestGains cdf cdf_lcl cdf_ucl;
-		set _EC_hits_all_;
-		by _TARGET_ quantile;
-		array current{*} 	CumHits 		cdf 		cdf_lcl 		cdf_ucl;
-		array prev{*} 		CumHits_prev 	cdf_prev 	cdf_lcl_prev 	cdf_ucl_prev;
-		retain 				CumHits_prev 	cdf_prev 	cdf_lcl_prev 	cdf_ucl_prev;
-		%* Add the variable CumN = Cumulative value of n (where n = number of obs in each quantile);
-		retain CumN;
-		if first._TARGET_ then
-			CumN = 0;
-		CumN + n;
-		do i = 1 to dim(prev);
+			ON q._TARGET_ = t2._TARGET_
+			/* t3: Statistics by _TARGET_ and QUANTILE values: nobs<=&nro_quantiles */
+			LEFT OUTER JOIN _EC_hits_(where=(_TYPE_=3)) as t3
+			ON  q._TARGET_ = t3._TARGET_
+			and q.quantile = t3.quantile
+			order by _TARGET_, quantile
+			;
+		quit;
+		%* Fill in missing values because of (possible) non-existing quantiles for some of the target groups;
+		%* For all variables whose missing values are filled in, the filled-in value is equal to the previous
+		%* value taken by the variable, since all variables to fill in are cumulative quantities (e.g. CDF, CumHits, etc.);
+		data _EC_hits_all_;
+			keep   _TARGET_ &score quantile hits n CumHits CumN TotalHits TotalN BestGains cdf cdf_lcl cdf_ucl;
+			format _TARGET_ &score quantile hits n CumHits CumN TotalHits TotalN BestGains cdf cdf_lcl cdf_ucl;
+			set _EC_hits_all_;
+			by _TARGET_ quantile;
+			array current{*} 	CumHits 		cdf 		cdf_lcl 		cdf_ucl;
+			array prev{*} 		CumHits_prev 	cdf_prev 	cdf_lcl_prev 	cdf_ucl_prev;
+			retain 				CumHits_prev 	cdf_prev 	cdf_lcl_prev 	cdf_ucl_prev;
+			%* Add the variable CumN = Cumulative value of n (where n = number of obs in each quantile);
+			retain CumN;
 			if first._TARGET_ then
-				prev(i) = .;
-			if current(i) = . then do;
-				%* Set the current value to 0 if the previouus one is missing. Otherwise set it to the previous value;
-				%* Recall that we are replacing the missing values of CUUMULATIVE variables (CumHits and CDF) so such
-				%* replacement makes sense;
-				if prev(i) = . then
-					current(i) = 0;
-				else
-					current(i) = prev(i);
+				CumN = 0;
+			CumN + n;
+			do i = 1 to dim(prev);
+				if first._TARGET_ then
+					prev(i) = .;
+				if current(i) = . then do;
+					%* Set the current value to 0 if the previouus one is missing. Otherwise set it to the previous value;
+					%* Recall that we are replacing the missing values of CUMULATIVE variables (CumHits and CDF) so such
+					%* replacement makes sense;
+					if prev(i) = . then
+						current(i) = 0;
+					else
+						current(i) = prev(i);
+				end;
 			end;
-		end;
-		%* Update the value of the PREV variables with the CURRENT values;
-		do i = 1 to dim(prev);
-			prev(i) = current(i);
-		end;
-	run;
-	%*----------- Compute CumHits, Gains, hits, etc. and add them to _EC_data_surv_ ----------;
+			%* Update the value of the PREV variables with the CURRENT values;
+			do i = 1 to dim(prev);
+				prev(i) = current(i);
+			end;
+		run;
+		%*----------- Compute CumHits, Gains, hits, etc. and add them to _EC_data_surv_ ----------;
 
 
-	%*----------------- Separate the Event and Non-Event Gains into 2 datasets ---------------;
-	%*** Separate the Event Gains and Non-Event Gains into 2 different datasets so that the KS and Gini Index
-	%*** can be computed below;
-	%* Note that _EC_data_surv_ already has the 0% quantile (in fact the survival function always
-	%* starts at 0). Note also that it has the 100% quantile because the distribution computed
-	%* by LIFETEST is done on the variable quantile which attains the value of 100%;
-	data _EC_GainsEvent_	(keep=&target _TARGET_ &score quantile quantile_id BestGainsEvent GainsEvent GainsEventLower GainsEventUpper hits n CumHits CumN TotalHits TotalN)
-		 _EC_GainsNonEvent_	(keep=&target _TARGET_ &score quantile quantile_id BestGainsNonEvent GainsNonEvent GainsNonEventLower GainsNonEventUpper hits n CumHits CumN TotalHits TotalN);
-		format &target _TARGET_ &score quantile quantile_id BestGainsEvent GainsEvent GainsEventLower GainsEventUpper hits n CumHits CumN TotalHits TotalN;
-		set _EC_hits_all_(keep=_TARGET_ &score quantile BestGains cdf_lcl cdf cdf_ucl hits n CumHits CumN TotalHits TotalN);
-		by _TARGET_;
-		retain quantile_id;
-		%* Re-compute the original target variable (using the _BINARY) format;
-		&target = input(_TARGET_, &targetFormat..);
-		format &target;
-		format BestGainsEvent BestGainsNonEvent percent7.1;
-		format GainsEvent GainsEventLower GainsEventUpper percent7.1;
-		format GainsNonEvent GainsNonEventLower GainsNonEventUpper percent7.1;
-		if first._TARGET_ then
-			quantile_id = 0;	%* NOTE-2012/06/25: QUANTILE_ID is set to 0 for the first observation of the current
-								%* _TARGET_ group just to be able to apply the formula below that computes the new value
-								%* of QUANTILE_ID for each observation as QUANTILE_ID+1.
-								%* Clearly in order for this computation to work
-								%* QUANTILE_ID already needs to have a value assigned and this value is set to 0
-								%* for the first observation of the current _TARGET_ group;
-		%* Create separate variables for the Gains curve for each target value;
-		if _TARGET_ = '1' then do;
-			quantile_id = quantile_id + 1;
-			BestGainsEvent = BestGains;
-			GainsEvent = cdf;
-			GainsEventLower = cdf_lcl;
-			GainsEventUpper = cdf_ucl;
-			output _EC_GainsEvent_;
-		end;
-		else if _TARGET_ = '0' then do;
-			quantile_id = quantile_id + 1;
-			BestGainsNonEvent = BestGains;
-			GainsNonEvent = cdf;
-			GainsNonEventLower = cdf_lcl;
-			GainsNonEventUpper = cdf_ucl;
-			output _EC_GainsNonEvent_;
-		end;
-	run;
-	%*----------------- Separate the Event and Non-Event Gains into 2 datasets ---------------;
-	/*----------------- Compute Lift/Gains chart with Confidence Bands ----------------------*/
+		%*----------------- Separate the Event and Non-Event Gains into 2 datasets ---------------;
+		%*** Separate the Event Gains and Non-Event Gains into 2 different datasets so that the KS and Gini Index
+		%*** can be computed below;
+		%* Note that _EC_data_surv_ already has the 0% quantile (in fact the survival function always
+		%* starts at 0). Note also that it has the 100% quantile because the distribution computed
+		%* by LIFETEST is done on the variable quantile which attains the value of 100%;
+		data _EC_GainsEvent_	(keep=&target _TARGET_ &score quantile quantile_id BestGainsEvent GainsEvent GainsEventLower GainsEventUpper hits n CumHits CumN TotalHits TotalN)
+			 _EC_GainsNonEvent_	(keep=&target _TARGET_ &score quantile quantile_id BestGainsNonEvent GainsNonEvent GainsNonEventLower GainsNonEventUpper hits n CumHits CumN TotalHits TotalN);
+			format &target _TARGET_ &score quantile quantile_id BestGainsEvent GainsEvent GainsEventLower GainsEventUpper hits n CumHits CumN TotalHits TotalN;
+			set _EC_hits_all_(keep=_TARGET_ &score quantile BestGains cdf_lcl cdf cdf_ucl hits n CumHits CumN TotalHits TotalN);
+			by _TARGET_;
+			retain quantile_id;
+			%* Re-compute the original target variable (using the _BINARY) format;
+			&target = input(_TARGET_, &targetFormat..);
+			format &target;
+			format BestGainsEvent BestGainsNonEvent percent7.1;
+			format GainsEvent GainsEventLower GainsEventUpper percent7.1;
+			format GainsNonEvent GainsNonEventLower GainsNonEventUpper percent7.1;
+			if first._TARGET_ then
+				quantile_id = 0;	%* NOTE-2012/06/25: QUANTILE_ID is set to 0 for the first observation of the current
+									%* _TARGET_ group just to be able to apply the formula below that computes the new value
+									%* of QUANTILE_ID for each observation as QUANTILE_ID+1.
+									%* Clearly in order for this computation to work
+									%* QUANTILE_ID already needs to have a value assigned and this value is set to 0
+									%* for the first observation of the current _TARGET_ group;
+			%* Create separate variables for the Gains curve for each target value;
+			if _TARGET_ = '1' then do;
+				quantile_id = quantile_id + 1;
+				BestGainsEvent = BestGains;
+				GainsEvent = cdf;
+				GainsEventLower = cdf_lcl;
+				GainsEventUpper = cdf_ucl;
+				output _EC_GainsEvent_;
+			end;
+			else if _TARGET_ = '0' then do;
+				quantile_id = quantile_id + 1;
+				BestGainsNonEvent = BestGains;
+				GainsNonEvent = cdf;
+				GainsNonEventLower = cdf_lcl;
+				GainsNonEventUpper = cdf_ucl;
+				output _EC_GainsNonEvent_;
+			end;
+		run;
+		%*----------------- Separate the Event and Non-Event Gains into 2 datasets ---------------;
+		/*----------------- Compute Lift/Gains chart with Confidence Bands ----------------------*/
 
 
-	/*-------------- Compute KS and Gini Index and prepare dataset for Plotting -------------*/
-	%*** Generate the dataset containing the data for plotting (_EC_Chart_i_ and the dataset with the KS and Gini information);
-	data 	_EC_Chart_i_ (drop=KS_max 	KSLower_max KSUpper_max
-							   Gini   	GiniLower  	GiniUpper
-							   rank		rankLower	rankUpper)
-			_EC_KSGini_i_(keep=model type
-							   KS_max 	KSLower_max KSUpper_max
-							   Gini   	GiniLower  	GiniUpper
-							   rank		rankLower	rankUpper
-						  rename=(KS_max=KS 		KSLower_max=KSLower 		KSUpper_max=KSUpper
-								  rank=QuantileAtKS rankLower=QuantileAtKSLower rankUpper=QuantileAtKSUpper));
-		length model $100 type $2;	%* TYPE is type of model (LR or DT);
-		merge 	_EC_GainsEvent_(in=in1 
-								keep=&target _TARGET_ &score quantile quantile_id BestGainsEvent GainsEvent GainsEventLower GainsEventUpper hits n CumHits CumN TotalHits TotalN)
-								end=lastobs
-				_EC_GainsNonEvent_(	in=in2
-									keep=quantile_id BestGainsNonEvent GainsNonEvent GainsNonEventLower GainsNonEventUpper);
-									%** From the Non-Event dataset I only keep the information related to the Non-Event
-									%** as for the other variables, we want the information to come from the Event dataset
-									%** (e.g. target value representing the event, #hits, etc.);
-		by quantile_id;
+		/*-------------- Compute KS and Gini Index and prepare dataset for Plotting -------------*/
+		%*** Generate the dataset containing the data for plotting (_EC_Chart_i_ and the dataset with the KS and Gini information);
+		data 	_EC_Chart_i_ (drop=KS_max 	KSLower_max KSUpper_max
+								   Gini   	GiniLower  	GiniUpper
+								   rank		rankLower	rankUpper
+									_score)
+				_EC_KSGini_i_(keep=model type TotalN EventRate
+								   KS_max 	KSLower_max KSUpper_max
+								   Gini   	GiniLower  	GiniUpper
+								   rank		rankLower	rankUpper
+							  rename=(KS_max=KS 		KSLower_max=KSLower 		KSUpper_max=KSUpper
+									  rank=QuantileAtKS rankLower=QuantileAtKSLower rankUpper=QuantileAtKSUpper));
+			format model type TotalN EventRate;
+			length model $100 type $2;	%* TYPE is type of model (LR or DT);
+			merge 	_EC_GainsEvent_(in=in1 
+									keep=&target _TARGET_ &score quantile quantile_id BestGainsEvent GainsEvent GainsEventLower GainsEventUpper hits n CumHits CumN TotalHits TotalN)
+									end=lastobs
+					_EC_GainsNonEvent_(	in=in2
+										keep=&score quantile_id BestGainsNonEvent GainsNonEvent GainsNonEventLower GainsNonEventUpper
+										rename=(&score=_score));
+										%** From the Non-Event dataset I only keep the information related to the Non-Event
+										%** as for the other variables, we want the information to come from the Event dataset
+										%** (e.g. target value representing the event, #hits, etc.), except for &SCORE which may
+										%** have values in one dataset but not in the other, as not all score values have to
+										%** occur for each event. This is specially true when there is very few observations;
+			by quantile_id;
 
-		%*** FORMAT variables;
-		format Naive percent7.1;
-		format BestLift Lift LiftLower LiftUpper 10.3;
-		format 	KSLower 	KS 		KSUpper 		/* These variables measure the distance between the CDF functions for each target group */
-				KSLower_max KS_max 	KSUpper_max		/* These variables store the actual KS values, i.e. the LARGEST distance between the CDFs */
-				rankLower	rank	rankUpper
-				GiniLower 	Gini 	GiniUpper		 percent7.1;
+			%* Set the value of the &SCORE variable so that no missing values remain;
+			if &score = . then
+				&score = _score;	%* _SCORE comes from _EC_GainsNonEvent_;
 
-		%*** RETAIN variables;
-		%if &nro_data = 1 %then %do;		%* NOTE that &NRO_DATA is 1 ONLY when one dataset is passed AND no BY variables are specified;
-		retain model %upcase("&data_name");
-		%end;
-		%else %do;
-			%* Store the by variables combinations in variable MODEL when there are BY variables,
-			%* because the dataset names are temporary names that do not mean anything to the user;
-			%if %quote(&by) ~= %then %do;
-			retain model %upcase("&data_name (%scan(%quote(&bylist), &i, ','))");
+			%*** FORMAT variables;
+			format EventRate Naive percent7.1;
+			format BestLift Lift LiftLower LiftUpper 10.3;
+			format 	KSLower 	KS 		KSUpper 		/* These variables measure the distance between the CDF functions for each target group */
+					KSLower_max KS_max 	KSUpper_max		/* These variables store the actual KS values, i.e. the LARGEST distance between the CDFs */
+					rankLower	rank	rankUpper
+					GiniLower 	Gini 	GiniUpper		 percent7.1;
+
+			%*** RETAIN variables;
+			%if &nro_data = 1 %then %do;		%* NOTE that &NRO_DATA is 1 ONLY when one dataset is passed AND no BY variables are specified;
+			retain model %upcase("&data_name");
 			%end;
 			%else %do;
-			retain model %upcase("&datai");
+				%* Store the by variables combinations in variable MODEL when there are BY variables,
+				%* because the dataset names are temporary names that do not mean anything to the user;
+				%if %quote(&by) ~= %then %do;
+				retain model %upcase("&data_name (%scan(%quote(&bylist), &i, ','))");
+				%end;
+				%else %do;
+				retain model %upcase("&datai");
+				%end;
 			%end;
-		%end;
-		retain type "&modeli";
-		retain idModel &i;			%* idModel is used below for constructing the final dataset _EC_Chart_ needed to generate the plot;
-		retain KS_max 0;
-		retain KSLower_max 0;
-		retain KSUpper_max 0;
-		retain rank;
-		retain rankLower;
-		retain rankUpper;
-		retain AUC2 0;	%* AUC2 is twice AUC, so that Gini = AUC2 - 1;
-		retain AUC2Lower 0;
-		retain AUC2Upper 0;
-		%* Retain Gini so that it has a value when it is output to the dataset _EC_KSGini_i_
-		%* (after the IF LASTOBS statement at the end of the data step). Note that it is not necessary
-		%* to retain KS, KSLower and KSUpper because these are generated by renaming the variables
-		%* KS_max, KSLower_max and KSUpper_max above, and these _MAX variables are retained);
-		retain Gini GiniLower GiniUpper;
-		%* Only update the KS and Gini indexes if the record came from all 3 datasets listed above
-		%* (_EC_Chart_i_, _EC_GainsEvent_ and _EC_GainsNonEvent_). This may not happen when the score variable
-		%* (usually p) does not have sufficient different values so as to generate the requested number of
-		%* quantiles. In this case, the dataset _EC_Chart_i has fewer records than _EC_GainsEvent_ and _EC_GainsNonEvent_;
+			retain type "&modeli";
+			retain idModel &i;			%* idModel is used below for constructing the final dataset _EC_Chart_ needed to generate the plot;
+			retain KS_max 0;
+			retain KSLower_max 0;
+			retain KSUpper_max 0;
+			retain rank;
+			retain rankLower;
+			retain rankUpper;
+			retain AUC2 0;	%* AUC2 is twice AUC, so that Gini = AUC2 - 1;
+			retain AUC2Lower 0;
+			retain AUC2Upper 0;
+			%* Retain Gini so that it has a value when it is output to the dataset _EC_KSGini_i_
+			%* (after the IF LASTOBS statement at the end of the data step). Note that it is not necessary
+			%* to retain KS, KSLower and KSUpper because these are generated by renaming the variables
+			%* KS_max, KSLower_max and KSUpper_max above, and these _MAX variables are retained);
+			retain Gini GiniLower GiniUpper;
+			%* Only update the KS and Gini indexes if the record came from all 3 datasets listed above
+			%* (_EC_Chart_i_, _EC_GainsEvent_ and _EC_GainsNonEvent_). This may not happen when the score variable
+			%* (usually p) does not have sufficient different values so as to generate the requested number of
+			%* quantiles. In this case, the dataset _EC_Chart_i has fewer records than _EC_GainsEvent_ and _EC_GainsNonEvent_;
 
-		if in1 and in2 then do;
-			%*** DM-2012/06/15-START: Bound the values of the Lower and Upper Gains Curves by the Best Curves
-			%*** as the model Gains curves cannot fall outside the area defined by the Best Event Gains curve and
-			%*** the Best Non-Event Gains curve;
-			GainsEventUpper = min(GainsEventUpper, BestGainsEvent);		%* BestGainsEvent is upper bound for GainsEventUpper;
-			GainsEventLower = max(BestGainsNonEvent, GainsEventLower);	%* BestGainsNonEvent is lower bound for GainsEventLower (very unlikely to be out of bounds);
-			GainsNonEventUpper = min(GainsNonEventUpper, BestGainsEvent);		%* BestGainsEvent is ALSO the upper bound for GainsNonEventUpper (very unlikely to be out of bounds);
-			GainsNonEventLower = max(BestGainsNonEvent, GainsNonEventLower);	%* BestGainsNonEvent is ALSO the lower bound for GainsNONEventLower;
-			%*** DM-2012/06/15-END;
+			if in1 and in2 then do;
+				%*** DM-2012/06/15-START: Bound the values of the Lower and Upper Gains Curves by the Best Curves
+				%*** as the model Gains curves cannot fall outside the area defined by the Best Event Gains curve and
+				%*** the Best Non-Event Gains curve;
+				GainsEventUpper = min(GainsEventUpper, BestGainsEvent);		%* BestGainsEvent is upper bound for GainsEventUpper;
+				GainsEventLower = max(BestGainsNonEvent, GainsEventLower);	%* BestGainsNonEvent is lower bound for GainsEventLower (very unlikely to be out of bounds);
+				GainsNonEventUpper = min(GainsNonEventUpper, BestGainsEvent);		%* BestGainsEvent is ALSO the upper bound for GainsNonEventUpper (very unlikely to be out of bounds);
+				GainsNonEventLower = max(BestGainsNonEvent, GainsNonEventLower);	%* BestGainsNonEvent is ALSO the lower bound for GainsNONEventLower;
+				%*** DM-2012/06/15-END;
 
-			%*** Naive and Lift values;
-			Naive = quantile;
-			%* Compute the Lift (which is SIMPLY = Event Gains / quantile as Lift = Model Event Gains / Naive Gains and Naive Gains = Quantile);
-			if quantile = 0 then do;
-				BestLift = .;
-				Lift = .;
-				LiftLower = .;
-				LiftUpper = .;
-			end;
-			else do;
-				BestLift = BestGainsEvent / quantile;
-				Lift = GainsEvent / quantile;
-				LiftLower = GainsEventLower / quantile;
-				LiftUpper = GainsEventUpper / quantile;
-			end;
+				%*** Naive and Lift values;
+				Naive = quantile;
+				%* Compute the Lift (which is SIMPLY = Event Gains / quantile as Lift = Model Event Gains / Naive Gains and Naive Gains = Quantile);
+				if quantile = 0 then do;
+					BestLift = .;
+					Lift = .;
+					LiftLower = .;
+					LiftUpper = .;
+				end;
+				else do;
+					BestLift = BestGainsEvent / quantile;
+					Lift = GainsEvent / quantile;
+					LiftLower = GainsEventLower / quantile;
+					LiftUpper = GainsEventUpper / quantile;
+				end;
 
-			%************************************* KS ********************************************;
-			KS = abs(GainsEvent - GainsNonEvent);
-			%* Check which curve is above, whether that of the Event or that of the NonEvent,
-			%* in order to compute KSLower and KSUpper;
-			if GainsEvent > GainsNonEvent then do;
-				KSLower = GainsEventLower - GainsNonEventUpper;
-				KSUpper = GainsEventUpper - GainsNonEventLower;
+				%************************************* KS ********************************************;
+				KS = abs(GainsEvent - GainsNonEvent);
+				%* Check which curve is above, whether that of the Event or that of the NonEvent,
+				%* in order to compute KSLower and KSUpper;
+				if GainsEvent > GainsNonEvent then do;
+					KSLower = GainsEventLower - GainsNonEventUpper;
+					KSUpper = GainsEventUpper - GainsNonEventLower;
+				end;
+				else do;
+					KSLower = GainsNonEventLower - GainsEventUpper;
+					KSUpper = GainsNonEventUpper - GainsEventLower;
+				end;
+				%* Rank of KS, KSLower and KSUpper;
+				if KS > KS_max then do;
+					rank = quantile;
+					KS_max = KS;					
+				end;
+				%* Note below the inversion of rankLower and rankUpper w.r.t. KSLower and
+				%* KSUpper, that is rankLower corresponds to KSUpper and rankUpper corresponds
+				%* to KSLower. This is because the largest rank occurs for the worst curves
+				%* which are given by the curves GainsEventLower and GainsNonEventUpper, in case
+				%* the Event Gains is larger than the Non-Event Gains, and the worst KS corresponds
+				%* to KSLower;
+				if KSLower > KSLower_max then do;
+					rankUpper = quantile;
+					KSLower_max = KSLower;
+				end;
+				if KSUpper > KSUpper_max then do;
+					rankLower = quantile;
+					KSUpper_max = KSUpper;
+				end;
+				%***************************** AUC (Area Under the ROC Curve) ************************;
+				GainsEventLag = lag(GainsEvent);
+				GainsNonEventLag = lag(GainsNonEvent);
+				GainsEventLowerLag = lag(GainsEventLower);
+				GainsNonEventLowerLag = lag(GainsNonEventLower);
+				GainsEventUpperLag = lag(GainsEventUpper);
+				GainsNonEventUpperLag = lag(GainsNonEventUpper);
+				if _N_ > 1 then do;
+					%* DM-2012/06/15: The Area Under the Curve (AUC) is the area under the ROC curve, which is the curve
+					%* that is obtained by doing the following graph:
+					%*		Sensitivity (= Event Gains Curve) vs. (1 - Specificity) (= Non-Event Gains Curve)
+					%* Since the values of Sensitivity and (1 - Specificity) are collected for the same values of the
+					%* score quantile, we can use directly those values to compute AUC.
+					%* So the current contribution of the AUC is given by (Y(i)+Y(i-1))*(X(i)-X(i-1))/2, and
+					%* therefore the contribution to AUC2 (= 2*AUC) is given by: (Y(i)+Y(i-1))*(X(i)-X(i-1)),
+					%* where Y = GainsEvent and X = GainsNonEvent;
+					AUC2 = AUC2 + (GainsEvent + GainsEventLag)*(GainsNonEvent - GainsNonEventLag);
+					%* AUC Lower and Upper bounds:
+					%* Assuming that the bounds of the Event Gains and Non-Event Gains are related as follows:
+					%* 	- LOWER Bound EventGains <--> UPPER Bound NonEventGains
+					%* 	- UPPER Bound EventGains <--> LOWER Bound NonEventGains
+					%* (i.e. when the EventGains takes it lower value, the NonEventGains takes its upper value and viceversa
+					%* --which makes sense because the first situation corresponds to a less discriminating model and the second
+					%* situation corresponds to a more discriminating model), we can easily compute the AUC2Lower and AUC2Upper
+					%* by combining the Lower and Upper bounds of the Event and Non-Event Gains on the AUC2 formula, as follows; 
+					AUC2Lower = AUC2Lower + (GainsEventLower + GainsEventLowerLag)*(GainsNonEventUpper - GainsNonEventUpperLag);
+					AUC2Upper = AUC2Upper + (GainsEventUpper + GainsEventUpperLag)*(GainsNonEventLower - GainsNonEventLowerLag);
+				end;
+				Gini = AUC2 - 1;			%* The value of Gini at the last observation is the Gini Index;
+				GiniLower = AUC2Lower - 1;
+				GiniUpper = AUC2Upper - 1;
+				drop 	quantile_id
+						GainsEventLag 		GainsNonEventLag
+						GainsEventLowerLag 	GainsNonEventLowerLag
+						GainsEventUpperLag 	GainsNonEventUpperLag
+						KS 		KSLower 	KSUpper
+						AUC2 	AUC2Lower 	AUC2Upper;
+				output _EC_Chart_i_;
 			end;
-			else do;
-				KSLower = GainsNonEventLower - GainsEventUpper;
-				KSUpper = GainsNonEventUpper - GainsEventLower;
+			%* This IF LASTOBS1 and LASTOBS2 statement MUST be outside the IF IN1 AND IN2 condition because the condition
+			%* is only true at the very last record;
+			if lastobs then do;
+				EventRate = TotalHits / TotalN;
+				output _EC_KSGini_i_;
 			end;
-			%* Rank of KS, KSLower and KSUpper;
-			if KS > KS_max then do;
-				rank = quantile;
-				KS_max = KS;					
-			end;
-			%* Note below the inversion of rankLower and rankUpper w.r.t. KSLower and
-			%* KSUpper, that is rankLower corresponds to KSUpper and rankUpper corresponds
-			%* to KSLower. This is because the largest rank occurs for the worst curves
-			%* which are given by the curves GainsEventLower and GainsNonEventUpper, in case
-			%* the Event Gains is larger than the Non-Event Gains, and the worst KS corresponds
-			%* to KSLower;
-			if KSLower > KSLower_max then do;
-				rankUpper = quantile;
-				KSLower_max = KSLower;
-			end;
-			if KSUpper > KSUpper_max then do;
-				rankLower = quantile;
-				KSUpper_max = KSUpper;
-			end;
-			%***************************** AUC (Area Under the ROC Curve) ************************;
-			GainsEventLag = lag(GainsEvent);
-			GainsNonEventLag = lag(GainsNonEvent);
-			GainsEventLowerLag = lag(GainsEventLower);
-			GainsNonEventLowerLag = lag(GainsNonEventLower);
-			GainsEventUpperLag = lag(GainsEventUpper);
-			GainsNonEventUpperLag = lag(GainsNonEventUpper);
-			if _N_ > 1 then do;
-				%* DM-2012/06/15: The Area Under the Curve (AUC) is the area under the ROC curve, which is the curve
-				%* that is obtained by doing the following graph:
-				%*		Sensitivity (= Event Gains Curve) vs. (1 - Specificity) (= Non-Event Gains Curve)
-				%* Since the values of Sensitivity and (1 - Specificity) are collected for the same values of the
-				%* score quantile, we can use directly those values to compute AUC.
-				%* So the current contribution of the AUC is given by (Y(i)+Y(i-1))*(X(i)-X(i-1))/2, and
-				%* therefore the contribution to AUC2 (= 2*AUC) is given by: (Y(i)+Y(i-1))*(X(i)-X(i-1)),
-				%* where Y = GainsEvent and X = GainsNonEvent;
-				AUC2 = AUC2 + (GainsEvent + GainsEventLag)*(GainsNonEvent - GainsNonEventLag);
-				%* AUC Lower and Upper bounds:
-				%* Assuming that the bounds of the Event Gains and Non-Event Gains are related as follows:
-				%* 	- LOWER Bound EventGains <--> UPPER Bound NonEventGains
-				%* 	- UPPER Bound EventGains <--> LOWER Bound NonEventGains
-				%* (i.e. when the EventGains takes it lower value, the NonEventGains takes its upper value and viceversa
-				%* --which makes sense because the first situation corresponds to a less discriminating model and the second
-				%* situation corresponds to a more discriminating model), we can easily compute the AUC2Lower and AUC2Upper
-				%* by combining the Lower and Upper bounds of the Event and Non-Event Gains on the AUC2 formula, as follows; 
-				AUC2Lower = AUC2Lower + (GainsEventLower + GainsEventLowerLag)*(GainsNonEventUpper - GainsNonEventUpperLag);
-				AUC2Upper = AUC2Upper + (GainsEventUpper + GainsEventUpperLag)*(GainsNonEventLower - GainsNonEventLowerLag);
-			end;
-			Gini = AUC2 - 1;			%* The value of Gini at the last observation is the Gini Index;
-			GiniLower = AUC2Lower - 1;
-			GiniUpper = AUC2Upper - 1;
-			drop 	quantile_id
-					GainsEventLag 		GainsNonEventLag
-					GainsEventLowerLag 	GainsNonEventLowerLag
-					GainsEventUpperLag 	GainsNonEventUpperLag
-					KS 		KSLower 	KSUpper
-					AUC2 	AUC2Lower 	AUC2Upper;
-			output _EC_Chart_i_;
-		end;
-		%* This IF LASTOBS1 and LASTOBS2 statement MUST be outside the IF IN1 AND IN2 condition because the condition
-		%* is only true at the very last record;
-		if lastobs then
-			output _EC_KSGini_i_;
-	run;
-	/*-------------- Compute KS and Gini Index and prepare dataset for Plotting -------------*/
+		run;
+		/*-------------- Compute KS and Gini Index and prepare dataset for Plotting -------------*/
 
-	%* Append current chart data to dataset containing all the charts;
-	proc append base=_EC_Chart_ data=_EC_Chart_i_ FORCE;
-	run;
-	%* Append current KS and Gini values to dataset containing all the KS and Ginis;
-	proc append base=_EC_KSGini_ data=_EC_KSGini_i_ FORCE;
-	run;
+		%* Append current chart data to dataset containing all the charts;
+		proc append base=_EC_Chart_ data=_EC_Chart_i_ FORCE;
+		run;
+		%* Append current KS and Gini values to dataset containing all the KS and Ginis;
+		proc append base=_EC_KSGini_ data=_EC_KSGini_i_ FORCE;
+		run;
+	%end;
 %end;
 
 %if &print %then %do;
@@ -1633,11 +1599,11 @@ quit;
 				Lift				= "Lift curve w.r.t. naive or random selection"
 				GainsEvent			= "Event Gains (&target=%nrbquote(&eventList))"
 				GainsNonEvent		= "Non-Event Gains (&target=%nrbquote(&nonEventList))"
-				hits				= "Nro. of hits in quantile"
+				hits				= "Nro. of event hits in quantile"
 				n 	 				= "Nro. of obs in quantile"
-				CumHits				= "Cumulative nro. of hits"
+				CumHits				= "Cumulative nro. of event hits"
 				CumN				= "Cumulative nro. of obs"
-				TotalHits 			= "Total nro. of hits"
+				TotalHits 			= "Total nro. of event hits"
 				TotalN 				= "Total nro. of obs";
 		label 	LiftLower			= "Lower Lift value based on the %sysevalf(&confidence*100)% &bandtype confidence interval (&target=%nrbquote(&eventList))"
 				LiftUpper			= "Upper Lift value based on the %sysevalf(&confidence*100)% &bandtype confidence interval (&target=%nrbquote(&eventList))"
@@ -1657,9 +1623,10 @@ quit;
 	%let outstat_name = %scan(&outstat, 1, '(');
 	data &outstat;
 		set _EC_KSGini_;
-		%*** DM-2012/06/15-START: Added labels to the KS, Gini, etc. variables for better understanding;
 		label 	model				= "Model Name"
 				type				= "Model Type (LR, DT)"
+				TotalN				= "Total number of obs"
+				EventRate			= "Event Rate"
 				KSLower				= "Lower KS value based on the %sysevalf(&confidence*100)% confidence bands of the Gains Curves"
 				KS					= "KS value"
 				KSUpper				= "Upper KS value based on the %sysevalf(&confidence*100)% confidence bands of the Gains Curves"
@@ -1670,7 +1637,6 @@ quit;
 				Gini				= "Gini Index"
 				GiniUpper			= "Upper Gini Index value based on the %sysevalf(&confidence*100)% confidence bands of the Gains Curves"
 				;
-		%*** DM-2012/06/15-END;
 	run;
 	%if &log %then %do;
 		%put;
@@ -2010,22 +1976,20 @@ proc datasets nolist;
 			_EC_GainsNonEvent_
 			_EC_hits_
 			_EC_hits_all_
-			_EC_hits_total_
 			_EC_KolmogorovBandWidths_
 			_EC_KSGini_
 			_EC_KSGini_i_
 			_EC_n_
-			_EC_n_quantile_
 			_EC_target_quantiles_
 			%if %quote(&by) ~= %then
-				%do i = 1 %to &n;
+				%do i = 1 %to &nbygroups;
 					_EC_data&i
 				%end;;
 quit;
 
 %* Delete definition of temporary formats;
 proc catalog catalog=formats;
-	%if ~&DT %then %do;
+	%if ~&DT and ~&nogroups %then %do;
 	delete _quantCat(entrytype=format) _quantCat(entrytype=infmt);
 	%end;
 	%if %upcase(&libformat) = WORK %then %do;
@@ -2046,6 +2010,7 @@ quit;
 %end;
 
 %end; 	%* if ~&error (second IF);
+%ExecTimeStop;
 %ResetSASOptions;
 %end;	%* if ~&error (first IF);
 %end;	%* if &help;
