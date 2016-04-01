@@ -1,7 +1,8 @@
 /* MACRO %DetectOutliersHadi
-Author: Daniel Mastropietro
-Created: 4-Oct-04
-Modified: 4-Oct-04
+Version:	1.00
+Author: 	Daniel Mastropietro
+Created: 	04-Oct-2004
+Modified: 	31-Mar-2016 (previous: 04-Oct-2004) (simply changed the user of %SetVarOrder after this macro was changed with a new parameter DATASTEP=0 that does NOT run a data step)
 
 DESCRIPTION:
 This macro detects univariate outliers with the Hadi method.
@@ -159,11 +160,11 @@ run;
 %* of the variables analyzed and drop variables created in %Hadi that are not informative
 %* because they have the same names for all the varibles analyzed;
 data &_out_name_;
+	format %SetVarOrder(&_out_name_, _ALPHA_ _ALPHA_ADJ_, after, &nameOutlier);
 	set &_out_name_;
 	&nameOutlier = %any(&_outliers_, =, 1);
 	drop _DetectOutliers_obs_;
 run;
-%SetVarOrder(&_out_name_, _ALPHA_ _ALPHA_ADJ_, after, &nameOutlier);
 
 %* Show message in log indicating new dataset created and new variables added to it;
 %if &log %then %do;

@@ -2,7 +2,7 @@
 Version: 	1.03
 Author: 	Daniel Mastropietro
 Created: 	20-Oct-2004
-Modified: 	16-Mar-2016 (previous: 15-Feb-2005)
+Modified: 	31-Mar-2016 (previous: 16-Mar-2016)
 
 DESCRIPTION:
 Finds names in a list as whole words and returns their name position.
@@ -199,7 +199,7 @@ the parameter list. Its value is set from the value of SEP, above.
 		%* to choose the elements in the list when creating the output dataset does not
 		%* work properly, because the %scan function does not recognize an element as such
 		%* if there are two separators stick together;
-		%if &match ~= 1 and &nro_names > 1 %then
+		%if &nro_names > 1 %then
 			%let pos = %str(&pos; );
 	%end;
 	%goto FINAL;
@@ -285,7 +285,7 @@ the parameter list. Its value is set from the value of SEP, above.
 	%* to choose the elements in the list when creating the output dataset does not
 	%* work properly, because the %scan function does not recognize an element as such
 	%* if there are two separators stick together;
-	%if &match ~= 1 and &nro_names > 1 %then
+	%if &nro_names > 1 %then
 		%let pos = %str(&pos; );
 %end;
 /*------------------------------------------- SLOW ------------------------------------------*/
@@ -310,7 +310,7 @@ the parameter list. Its value is set from the value of SEP, above.
 
 %if %quote(&out) ~= %then %do;
 	%* Determine the length to be used for variable POS in the output dataset;
-	%if &match ~= 1 and &nro_names > 1 %then %do;
+	%if &nro_names > 1 %then %do;
 		%let maxlength = 0;
 		%do i = 1 %to &nro_names;
 			%let length = %length(%scan(%quote(&names), &i, ';'));
@@ -331,7 +331,7 @@ the parameter list. Its value is set from the value of SEP, above.
 	options nonotes;
 	data &out;
 		length name $32;
-		%if &match ~= 1 and &nro_names > 1 %then %do;
+		%if &nro_names > 1 %then %do;
 		length pos $&maxlength;
 		%end;
 		%do i = 1 %to &nro_names;
@@ -339,7 +339,7 @@ the parameter list. Its value is set from the value of SEP, above.
 			%* Remove any space at the beginning;
 			if substr(name,1, 1) = " " then
 				name = substr(name, 2);
-			%if &match ~= 1 and &nro_names > 1 %then %do;
+			%if &nro_names > 1 %then %do;
 			%* Remove any space at the beginning;
 			pos = compbl("%scan(&pos, &i, ';')");
 			if substr(pos, 1, 1) = " " then

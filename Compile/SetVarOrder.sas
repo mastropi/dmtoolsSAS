@@ -1,15 +1,15 @@
 /* MACRO %SetVarOrder
-Version: 1.00
-Author: Daniel Mastropietro
-Created: 13-Aug-04
-Modified: 13-Aug-04
+Version: 	1.01
+Author: 	Daniel Mastropietro
+Created: 	13-Aug-2004
+Modified: 	29-Mar-2016 (previous: 13-Aug-2004)
 
 DESCRIPTION:
 Sets the order of some variables in a dataset, so that the whole list
 of variables need not be specified.
 
 USAGE:
-%SetVarOrder(data, vars, pos, var);
+%SetVarOrder(data, vars, pos, var, datastep=0);
 
 REQUIRED PARAMETERS:
 - data:			Dataset where the order of the variables wants to be set.
@@ -21,6 +21,10 @@ REQUIRED PARAMETERS:
 
 - var:			Variable that defines the relative position of the variables listed
 				in 'vars'.
+
+- datastep:		Whether to run a data step to set the new order of variables.
+				Possible values: 0 => No, 1 => Yes
+				default: 0
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %GetVarNames
@@ -39,12 +43,17 @@ wants to appear before a given variable in a dataset.
 It becomes particularly useful when the dataset has hundreds of variables.
 */
 &rsubmit;
-%MACRO SetVarOrder(data, vars, pos, var) / store des="Orders variables in a dataset relative to other variables";
+%MACRO SetVarOrder(data, vars, pos, var, datastep=0) / store des="Orders variables in a dataset relative to other variables";
 %local order;
 %let order = %GetVarNames(&data);
 %let order = %InsertInList(&order, &vars, &pos, &var);
-data &data;
-	format &order;
-	set &data;
-run;
+%if &datastep %then %do;
+	data &data;
+		format &order;
+		set &data;
+	run;
+%end;
+%else %do;
+&order
+%end;
 %MEND SetVarOrder;

@@ -1,8 +1,8 @@
 /* MACRO %PiecewiseTransf
-Version: 	1.01
+Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	23-Nov-2004
-Modified: 	10-Mar-2016 (previous: 22-Sep-05)
+Modified: 	31-Mar-2016 (previous: 10-Mar-2016)
 
 DESCRIPTION:
 This macro makes linear piecewise transformations to a set of variables from specified cut values.
@@ -20,6 +20,7 @@ USAGE:
 	varfixremove=,	*** One or more consecutive characters to be removed from each variable before fixing their names.
 	fill=mean,		*** Fill value or statistic to replace missing values of each analyzed variable.
 	out=,			*** Output dataset containing the indicator and piecewise linear variables. Data options are allowed.
+	outformat=,		*** Output dataset containing format definitions corresponding to the piecewise transformations.
 	log=1);			*** Whether to show messages in the log.
 
 REQUIRED PARAMETERS:
@@ -31,21 +32,28 @@ REQUIRED PARAMETERS:
 				- In case it is a list of values, parameter VAR= needs to be passed, and it
 				is assumed that the list contains the cut values to use for each and all the
 				variables listed in VAR=.
-				- In case it is the name of a dataset, parameter VAR= MUST be empty, and
-				the dataset must contain EXACTLY the following columns:
-					- Column 1 (character): containing the names of the variables to be transformed.
+				- In case it is the name of a dataset, parameter VAR= can be empty (but it can also
+				contain a list of variables to transform from those listed in the CUTS dataset.
+				The CUTS dataset must contain at least the following columns (although some of them
+				are optional):
+					- Column 1 (character): names of the variables to be transformed, one per row.
+					- Column 2 (character) (optional): name of the formats to be generated for each
+					variable in Column 1 in case the OUTFORMAT= dataset is not-empty.
 					- Rest of the columns (numeric): one column for each cut value to be used for 
 					the transformation of each variable. The number of cuts used for each variable
 					is given by the number of non-missing columns.
 				  The number of cut values need NOT be the same for all the variables. For each
 				  variables, cut values are read until a missing value is found.
 				NOTES:
-				- When making the piecewise transformation, the cut values are included into the
-				left piece of the transformation.
-				- The cut values need NOT be listed in ascending order.
+				- When making the piecewise transformation, the cut values are either included into or
+				excluded from the left piece of the transformation depending on parameter INCLUDERIGHT=.
+				- The cut values need NOT be listed in ascending order, UNLESS the OUTFORMAT= dataset
+				is requested.
+				- If multiple records exist in the CUTS dataset for the same variable name, the cut
+				values are read from the last record found for the variable.
 
 OPTIONAL PARAMETERS:
-- includeright	Flag indicating whether to include the right limit of each interval when defining
+- includeright:	Flag indicating whether to include the right limit of each interval when defining
 				each piece.
 				Possible values: 0 => No, 1 => Yes
 				default: 1
@@ -94,6 +102,36 @@ OPTIONAL PARAMETERS:
 
 - out:			Output dataset containing the transformed variables. Data options are allowed.
 				The names of the transformed variables follow the rule described under parameter PREFIX.
+				If no output dataset is given, the piecewise variables are created in the input dataset.
+				default: (empty)
+
+- ouformat:		Output dataset containing the formats that could be applied to each piecewise variable
+				to generate a bin for each piece.
+				This dataset can be used as CNTLIN dataset in the PROC FORMAT statement.
+				The following variables are included in the OUTFORMAT dataset:
+				- var: analyzed variable name .
+				- fmtname: format name.
+				- type:type of format (equal to "N" which means "numeric").
+				- start: left end value of the piece interval (length 20).
+				- end: right end value of the piece interval (length 20).
+				- sexcl: flag Y/N indicating whether the start value is included/excluded in the piece interval.
+				- eexcl: flag Y/N indicating whether the end value is included/excluded in the piece interval.
+				- label: label to use for the piece interval (length 200).
+
+				The format name in the FMTNAME variable is either read from the second column of the
+				input CUTS dataset if that column is character or is made up by this macro with the following
+				name format:
+					PW_<nnnn><S>
+				where:
+				- <nnnn> is the variable number when the analyzed variables given in VAR= and/or
+				included in the CUTS dataset are sorted alphabetically.
+				- <S> is a single-character suffix which is either "R" when the right-end value is included
+				in the piece interval or "L" when the left-end value is included in the piece interval.
+
+				IMPORTANT: It is assumed that the number of digits including decimal point in the
+				start and end values of each piece is not larger than 20 when those numbers are expressed
+				in BEST8. format.
+				default: (empty)
 
 - log:			Show messages in the log?
 				Possible values: 0 => No, 1 => Yes
@@ -107,13 +145,16 @@ _pwlist_: 		contains the list of all the piecewise variables created in the outp
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Callmacro
 - %CheckInputParameters
-- %MakeListFromVar
+- %ExecTimeStart
+- %ExecTimeStop
 - %ExistVar
+- %FindInList
 - %Getnobs
 - %GetNroElements
 - %GetStat
 - %GetVarList
 - %IsNumber
+- %MakeListFromVar
 - %ResetSASOptions
 - %SetSASOptions
 
@@ -123,7 +164,7 @@ This reads the information regarding the piecewise linear transformation from th
 CUTSDATASET, which for example would be of the following form:
 var		V1		V2		V3
 x1		0.3		0.7		8
-x2		10		2		.
+x2		2		10		.
 zz		0.7		.		.
 
 NOTE: The cut values need not be sorted in ascending order for each variable.
@@ -133,6 +174,13 @@ proc reg data=test_transf;
 	model y = &var &_dummylist_ &_pwlist_;
 run;
 quit;
+
+2.- %PiecewiseTransf(test, cuts=cutsDataSet, includeright=0, out=test_transf, outformat=test_transf_formats);
+This has the following differences w.r.t. example 1:
+- the cut values are included as left-end values of each piece interval.
+- an output dataset called TEST_TRANSF_FORMATS is created with the format information to be used in the CNTLIN=
+option of a PROC FORMAT statemenet in order to generate the formats that map the different pieces used in the 
+piecewise variables into different intervals.
 */
 &rsubmit;
 %MACRO PiecewiseTransf(
@@ -150,6 +198,7 @@ quit;
 		fill=mean,
 
 		out=,
+		outformat=,
 		log=1,
 		help=0) / store des="Piecewise transformation of continuous variables with specified cuts";
 
@@ -167,6 +216,7 @@ quit;
 	%put varfix= , %quote(         *** Whether to fix variable names to comply to 32-max character length in created variables.);
 	%put varfixremove= , %quote(   *** One or more consecutive characters to be removed from each variable before fixing their names.);
 	%put out= , %quote(            *** Output dataset.);
+	%put outformat= , %quote(      *** Output dataset with the formats for the piecewise variables.);
 	%put log=1) %quote(            *** Show messages in the log?);
 %MEND ShowMacroCall;
 
@@ -182,15 +232,27 @@ quit;
 /************************************* MACRO STARTS ******************************************/
 /* Local variables declaration */
 %local data_name freqvari nobs nro_vars out_name vari vartype;
-%local i j nro_cutvalues varnames;
+%local i j jstart nro_cutvalues;
+%local varcuts;			%* Names of the variables containing the cut values in the CUTS dataset;
 %local error;
 %local dsid rc;
-%local cutvalue;	%* Value of one single cut read from the &cuts dataset;
-%local cutvaluej;	%* Value of j-th cut for a variable;
-%local cutvaluejm1; %* Value of (j-1)-th cut for a variable (used to generate CONTINUOUS piecewise variables as done by NAT Consultores);
-%local operator;	%* Operator to use to compare the variable value with the cut value (either <= or <);
+%local cutsAreNumbers;	%* Flag indicating whether the CUTS= parameter is a set of numbers (1) or a dataset (0);
+%local cutvalue;		%* Value of one single cut read from the &cuts dataset;
+%local cutvaluej;		%* Value of j-th cut for a variable;
+%local cutvaluejm1; 	%* Value of (j-1)-th cut for a variable (used to generate CONTINUOUS piecewise variables as done by NAT Consultores);
+%local operator;		%* Operator to use to compare the variable value with the cut value (either <= or <);
 %local fillFirstChar fillStat;
 %local todrop todelete;
+%* Variables used when reading the CUTS dataset;
+%local analvars;		%* List of analysis variables as the intersection of the variables present in the CUTS dataset and the variables listed in VAR= (when non-empty);
+%local found;			%* Flag indicating whether something was found during a loop;
+%local ncol;			%* Number of columns in the CUTS dataset;
+%local existsFormatCol;	%* Flag indicating whether there is a column in the CUTS dataset containing the format names to be used in the OUTFORMAT= dataset;
+%local row;				%* Row number read from the CUTS dataset;
+%local stop;			%* Flag indicating whether a loop should be stopped;
+%local varfmtname;		%* Name of the column in the CUTS dataset containing the format names;
+%local formatnames;		%* List of format names to be used in the OUTFORMATS= dataset;
+%local _var_;			%* Temporary variable containing the variable name just read from the CUTS dataset;
 %* Variables needed for variable name fixing for compliance with 32 characters max length in created variables;
 %local nro_cutvalues_max;			%* This defines part of the space needed;
 %local prefixspace suffixspace;		%* Spaces needed for the prefixes to add (they are two different for two different set of variables) and for the suffixes;
@@ -198,6 +260,7 @@ quit;
 
 %* Set options and get current options settings;
 %SetSASOptions;
+%ExecTimeStart;
 
 %* Show input parameters;
 %if &log %then %do;
@@ -216,6 +279,7 @@ quit;
 	%put PIECEWISETRANSF: - varfixremove = %quote( &varfixremove);
 	%put PIECEWISETRANSF: - fill = %quote(         &fill);
 	%put PIECEWISETRANSF: - out = %quote(          &out);
+	%put PIECEWISETRANSF: - outformat = %quote(    &outformat);
 	%put PIECEWISETRANSF: - log = %quote(          &log);
 	%put;
 %end;
@@ -226,69 +290,127 @@ quit;
 %*** DATA=;
 %let data_name = %scan(&data, 1, '(');
 
-%*** VAR= & CUTS=;
+%*** VAR=;
 %if %quote(&var) ~= %then %do;
 	%let var = %GetVarList(&data, var=&var, log=0);
 	%let nro_vars = %GetNroElements(&var);
-	%* Read the cut values directly from parameter CUTS=;
+%end;
+
+%*** CUTS=;
+%let cutsAreNumbers = 0;
+%* Read the cut values directly from parameter CUTS= if they look like numbers, o.w. read them from a dataset;
+%if &nro_vars > 0 and %IsNumber(&cuts, multiple=1) %then %do;
+	%let cutsAreNumbers = 1;
 	%do i = 1 %to &nro_vars;
 		%local cutvalues&i;
 		%let cutvalues&i = &cuts;
 	%end;
 %end;
 %else %if %quote(&cuts) ~= %then %do;
-	%** In case parameter VAR= is empty, it is assumed that parameter CUTS= contains the name of a
-	%** dataset with the information regarding the variables to transform and the piecewise
-	%** transformation to be performed on each variable;
+	%** If CUTS is not a set of numbers it should contain the name of a dataset with the information regarding
+	%** the variables to transform and the cut values to be used for their piecewise transformation;
+	%* Use any data options included with the CUTS dataset;
+	data _PT_cuts_;
+		set &cuts;
+	run;
 	%* Open dataset;
-	%let dsid = %sysfunc(open(&cuts));
+	%let dsid = %sysfunc(open(_PT_cuts_));
 	%if &dsid = 0 %then %do;
 		%put PIECEWISETRANSF: ERROR - Dataset %upcase(&cuts) does not exist.;
 		%let error = 1;
 	%end;
 	%else %do;
-		%* Check if the first column contains a character variable;
-		%let vartype = %sysfunc(vartype(&dsid, 1));
-		%if %upcase(&vartype) ~= C %then %do;
-			%put PIECEWISETRANSF: ERROR - The first variable in dataset %upcase(&cuts) must contain the names of;
-			%put PIECEWISETRANSF: the variables to transform.;
+		%* Compute the number of columns in the dataset;
+		%let ncol = %sysfunc(attrn(&dsid, NVARS));
+		%if &ncol <= 1 %then %do;
+			%put PIECEWISETRANSF: ERROR - Dataset %upcase(&cuts) must have at least 2 columns (&ncol found).;
 			%let error = 1;
 		%end;
 		%else %do;
-			%* Read maximum number of cut values for all variables to be transformed;
-			%let nro_cutvalues = %eval(%sysfunc(attrn(&dsid, nvar)) - 1);
-			%if &nro_cutvalues = 0 %then %do;
-				%put PIECEWISETRANSF: ERROR - No cut values are present in dataset %upcase(&cuts).;
+			%* Check if the first column contains a character variable which should contain variable names;
+			%let vartype = %sysfunc(vartype(&dsid, 1));
+			%if %upcase(&vartype) ~= C %then %do;
+				%put PIECEWISETRANSF: ERROR - The first variable in dataset %upcase(&cuts) must contain the names of;
+				%put PIECEWISETRANSF: the variables to transform.;
 				%let error = 1;
 			%end;
 			%else %do;
-				%* Check if the columns after the first column contain numeric variables;
-				%do j = 2 %to %eval(&nro_cutvalues+1);	%* The cut values are stored from column 2 to &nro_cutvalues+1;
-					%let vartype = %sysfunc(vartype(&dsid, &j));
-					%if %upcase(&vartype) ~= N %then %do;
-						%put PIECEWISETRANSF: ERROR - Column &j in dataset %upcase(&cuts) is not numeric.;
-						%let error = 1;
+				%* If parameter OUTFORMAT is not empty, check if the second column is character so that it
+				%* contains the format name;
+				%let existsFormatCol = 0;
+				%let jstart = 2;
+				%if %quote(&outformat) ~= %then %do;
+					%let varfmtname = ;
+					%let vartype = %sysfunc(vartype(&dsid, 2));
+					%if %upcase(&vartype) = C %then %do;
+						%let existsFormatCol = 1;
+						%* Store the name of the variable containing the format name;
+						%let varfmtname = %sysfunc(varname(&dsid, 2));
+						%let jstart = 3;
 					%end;
 				%end;
-				%if ~&error %then %do;
+
+				%* Look for the first numeric column where it is assumed that the cut values start;
+				%let j = &jstart;
+				%let found = 0;
+				%let stop = 0;
+				%let jstop = ;	%* column number at which to stop reading the cut values (should be set to empty at the beginning);
+				%do %while(&j <= &ncol and ~&stop);
+					%let vartype = %sysfunc(vartype(&dsid, &j));
+					%if %upcase(&vartype) = N and ~&found %then %do;
+						%let jstart = &j;	%* column number at which to start reading the cut values;
+						%let found = 1;
+					%end;
+					%else %if %upcase(&vartype) = C and &found %then %do;
+						%let jstop = %eval(&j - 1);	%* the column number at which to stop reading the cut values should be the previous column since the current column is of character type);
+						%let stop = 1;
+					%end;
+					%let j = %eval(&j + 1);
+				%end;
+				%if ~&found %then %do;
+					%put PIECEWISETRANSF: ERROR - No numeric variables were found in dataset %upcase(&cuts) containing the cut values.;
+					%let error = 1;
+				%end;
+				%else %do;
+					%* Check whether &jstop is empty. In that case, set it to &ncol because it means that no character variable was
+					%* found after the set of numeric columns and therefore we should read all the cut values from &jstart to &ncol;
+					%if &jstop = %then
+						%let jstop = &ncol;
+
+					%* Read the variable names containing the cutvalues (this is used when creating the OUTFORMAT= dataset);
+					%let varcuts = ;
+					%do j = &jstart %to &jstop;
+						%let varcuts = &varcuts %sysfunc(varname(&dsid, &j));
+					%end;
+
+					%* Read maximum number of cut values for all variables to be transformed;
+					%let nro_cutvalues = %eval(&jstop - &jstart + 1);
 					%* Read the variable names and the cut values;
 					%let rc = %sysfunc(fetch(&dsid));
-					%* Initialize counter of number of variables to transform;
-					%let i = 0;
-					%* Initialize variable list;
-					%let var = ;
+					%* Row counter in the CUTS dataset;
+					%let row = 0;
+					%* Initialize analysis variable list and its counter;
+					%let analvars = ;		%* List of analysis variables (intersection between the variables read from the CUTS dataset and the variables passed in VAR= (if non-empty);
+					%let formatnames = ;	%* List of format names when the OUTFORMAT= dataset is not empty;
+					%let i = 0;				%* Counter of variables to analyze;
 					%do %while(&rc = 0);
 						%* Increase variable count;
-						%let i = %eval(&i + 1);
-						%* Update variable list;
-						%let var = &var %sysfunc(getvarc(&dsid, 1));
-						%* Read the cut values;
-						%local cutvalues&i;
-						%let cutvalues&i = ;
-						%do j = 2 %to %eval(&nro_cutvalues+1);	%* The cut values are stored from column 2 to &nro_cutvalues+1;
-							%let cutvalue = %sysfunc(getvarn(&dsid, &j));
-							%if %sysevalf(&cutvalue ~= .) %then
-							   	%let cutvalues&i = &&&cutvalues&i &cutvalue;
+						%let row = %eval(&row + 1);
+						%let _var_ = %sysfunc(getvarc(&dsid, 1));
+						%* Add &_var_ to the analysis variable list only when VAR= is empty or when the variable is found in the list given in VAR=;
+						%if %quote(&var) = or %FindInList(&var, &_var_, match=1, log=0) > 0 %then %do;
+							%let i = %eval(&i + 1);
+							%let analvars = &analvars &_var_;
+							%if &existsFormatCol %then
+								%let formatnames = &formatnames %sysfunc(getvarc(&dsid, 2));
+							%* Read the cut values for the analysis variable;
+							%local cutvalues&i;
+							%let cutvalues&i = ;
+							%do j = &jstart %to &jstop;
+								%let cutvalue = %sysfunc(getvarn(&dsid, &j));
+								%if %sysevalf(&cutvalue ~= .) %then
+								   	%let cutvalues&i = &&&cutvalues&i &cutvalue;
+							%end;
 						%end;
 						%* Read next observation;
 						%let rc = %sysfunc(fetch(&dsid));
@@ -297,22 +419,34 @@ quit;
 					%* Store number of variables to transform;
 					%let nro_vars = &i;
 					%* Check existence of variables to transform in input dataset;
-					%if ~%ExistVar(&data, &var, macrovar=varNotFound, log=0) %then %do;
+					%if ~%ExistVar(&data, &analvars, macrovar=varNotFound, log=0) %then %do;
 						%put PIECEWISETRANSF: ERROR - Variables %upcase(&varNotFound) were not found in input dataset %upcase(&data_name).;
 						%let error = 1;
 					%end;
 					%symdel varNotFound;	%*** Delete global macro variable created by %ExistVar;
-					quit;		%*** To avoid problems with %symdel;
+					quit;					%*** To avoid problems with %symdel;
 				%end;
 			%end;
 		%end;
 		%* Close dataset &cuts;
 		%let rc = %sysfunc(close(&dsid));
+
+		%* Check which variables listed in VAR= were not found in the CUTS dataset to inform the user;
+		%if %quote(&var) ~= %then %do;
+			%FindInList(&analvars, &var, match=1, out=_PT_match_, log=0);
+			data _PT_match_;
+				set _PT_match_;
+				where missing(pos);
+			run;
+			%let varNotFound = %MakeListFromVar(_PT_match_, var=name, log=0);
+			%if %quote(&varNotFound) ~= %then %do;
+				%put PIECEWISETRANSF: WARNING - The following variables were not found in the CUTS dataset and they will not be transformed:;
+				%puts(&varNotFound);
+			%end;
+		%end;
+		%* Update the value of the &var macro variable (containing the list of analysis variables) to those read from the CUTS dataset;
+		%let var = &analvars;
 	%end;
-%end;
-%else %do;
-	%put PIECEWISETRANSF: ERROR - Either parameter VAR= or CUTS= needs to be specified.;
-	%let error = 1;
 %end;
 
 %*** INCLUDERIGHT=;
@@ -381,14 +515,15 @@ data &out_name;
 		%let vari = %scan(&var, &i, ' ');
 		%let varfixi = %scan(&varfix, &i, ' ');
 
+		%* Number of cuts for current variable &vari;
+		%let nro_cutvalues = %GetNroElements(&&cutvalues&i);
+
 		%* Length of dummy variables set to 3 to save space, since the only possible values are 0 or 1;
 		length &prefixdummy&varfixi 3;
 		%do k = 1 %to %eval(&nro_cutvalues+1);
 		length &prefixdummy&varfixi&suffix&k 3;
 		%end;
 
-		%* Number of cuts for current variable &vari;
-		%let nro_cutvalues = %GetNroElements(&&cutvalues&i);
 		if &vari = . then do;
 			%* Variable that flags at least a missing value in variable &vari;
 			%* Replace the missing value with a non-missing value;
@@ -473,7 +608,9 @@ run;
 %end;
 
 data &out;
+	%if %quote(&todrop) ~= %then %do;
 	drop &todrop;
+	%end;
 	set &out_name;
 	%* Global macro variable containing:
 	%* - the list of ALL dummy variables created
@@ -581,6 +718,119 @@ record making the nme of the variable build up with &I and &J... So I quit!
 	%end;
 run;
 
+%if %quote(&outformat) ~= %then %do;
+	%if &cutsAreNumbers %then %do;
+		%* Create CUTS dataset in order to create the formats dataset as a transposition;
+		data _PT_cuts_;
+			keep var cut1-cut&nro_cutvalues;
+			format var cut1-cut&nro_cutvalues;
+			array avars(*) $ var1-var&nro_vars ("%MakeList(&var, sep=%quote(" "))");
+			array acuts(*) cut1-cut&nro_cutvalues (&cutvalues);
+			retain cut1-cut&nro_cutvalues;
+			do i = 1 to dim(avars);
+				var = avars(i);
+				output;
+			end;
+		run;
+		%* Name of the CUTS dataset to use from now on;
+		%let cuts = _PT_cuts_;
+		%* Name of the variables with the cut values to use from now on;
+		%let varcuts = %MakeListFromName(cut, start=1, stop=&nro_cutvalues, step=1, log=0);
+	%end;
+
+	%* Sort the CUTS dataset by variable;
+	proc sort data=&cuts out=_PT_cuts_;
+		by var;
+	run;
+
+	%* Transpose dataset to create the CNTLIN dataset to use as input to PROC FORMAT;
+	%* NOTE: This assumes that the cut values for each variable are sorted in ascending order!;
+	data _PT_cuts_t;
+		keep var fmtname cut;
+		length fmtname $8;
+		%* Rename the variable name containing the format names to FMTNAME if the column with the format names are given in the CUTS dataset;
+		set _PT_cuts_(%if %quote(&varfmtname) ~= %then %do; rename=(&varfmtname=fmtname) %end;);
+		%if %quote(&varfmtname) = %then %do;
+		retain count 1;
+		%if &includeright %then %do;
+		retain suffix "R";
+		%end;
+		%else %do;
+		retain suffix "L";
+		%end;
+		%* Create the variable FMTNAME since it was not provided by the user in the CUTS dataset;
+		fmtname = cats("PW_", put(count, z4.), suffix);	%* The length of the format names must be 8 and cannot end in a number;
+		count + 1;
+		%end;
+		array acuts(*) &varcuts;
+		do i = 1 to dim(acuts);
+			cut = acuts(i);
+			output;
+		end;
+	run;
+
+	%* Create the OUTFORMAT= dataset;
+	data &outformat;
+		keep var fmtname type start end sexcl eexcl label;
+		format var fmtname type start end sexcl eexcl label;
+		length var $32 fmtname $8 type $1 start $20 end $20 sexcl $1 eexcl $1 label $200;
+		set _PT_cuts_t;
+		where cut ~= .;		%* Remove the missing of CUT coming from variables with number of cuts less than the maximum;
+		by var;
+		retain type "N";	%* N = Numeric variables;
+		retain start;
+		retain count;
+		%* Convert the START and END values to string (they should be string because of the LOW and HIGH values;
+		start = compress(put(lag(cut), best8.));
+		end = compress(put(cut, best8.));
+		%* Define open and close parentheses depending on the INCLUDERIGHT= parameter;
+		%if &includeright %then %do;
+		openparen = "(";
+		closeparen = "]";
+		sexcl = "Y";
+		eexcl = "N";
+		%end;
+		%else %do;
+		openparen = "[";
+		closeparen = ")";
+		sexcl = "N";
+		eexcl = "Y";
+		%end;
+		if first.var then do;
+			%* Update the values of the first case;
+			count = 0;
+			start = "LOW";
+			openparen = "[";
+			sexcl = "N";
+		end;
+		%* Number the labels so that they can be sorted correctly in alphabetical order;
+		count + 1;
+		label = cat(put(count, z3.), " - ", openparen, compress(start), ", ", compress(end), closeparen);
+		output;
+		if last.var then do;
+			count + 1;
+			%* Define the open parenthesis depending on the INCLUDERIGHT= parameter;
+			%* This is important here in case there is only one cut for the variable and if that is the case
+			%* this last record will have the settings of the first record (defined in block FIRST.VAR above)
+			%* and we do not want that;
+			%if &includeright %then %do;
+			openparen = "(";
+			sexcl = "Y";
+			%end;
+			%else %do;
+			openparen = "[";
+			sexcl = "N";
+			%end;
+			start = end;
+			end = "HIGH";
+			closeparen = "]";
+			eexcl = "N";
+			label = cat(put(count, z3.), " - ", openparen, compress(start), ", ", compress(end), closeparen);
+			output;
+		end;
+	run;
+%end;
+
 %* Show the list of dummy and piecewise variables created in the output dataset;
 %if &log %then %do;
 	%put;
@@ -603,7 +853,9 @@ run;
 
 proc datasets nolist;
 	delete 	_PT_cuts_
-			_PT_freq_;
+			_PT_cuts_t
+			_PT_freq_
+			_PT_match_;
 quit;
 %end; %* %if ~&error;
 
@@ -613,6 +865,7 @@ quit;
 	%put;
 %end;
 
+%ExecTimeStop;
 %ResetSASOptions;
 %end; %* %if ~%CheckInputParameters;
 %MEND PiecewiseTransf;
