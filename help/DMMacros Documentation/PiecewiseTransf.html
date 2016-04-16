@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%PiecewiseTransf</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %PiecewiseTransf</h1>
+<pre>Version:                      1.02                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      23-Nov-2004                                                                               </pre>
+<pre>Modified:                     15-Apr-2016 (previous: 31-Mar-2016)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro makes linear piecewise transformations to a set of variables from specified cut values.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>It optionally creates an output dataset containing formats that allow analyzing the input variables                                                                                          </pre>
+<pre>as categorical variables where each piece defines a category.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%PiecewiseTransf(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. Data options are accepted. */                              </pre>
+<pre>          var=,                         /* Blank-separated list of variables to transform when CUTS= is a list of cut values. */                              </pre>
+<pre>          cuts=,                        /* Either a blank-separated list of cut values or a dataset with one row per variable. */                              </pre>
+<pre>          includeright=1,               /* Whether to include the right limit of each interval when defining each piece */                              </pre>
+<pre>          prefixdummy=I_,               /* Prefix to use for the indicator or dummy variables of each piece. */                              </pre>
+<pre>          prefix=pw_,                   /* Prefix to use for the piecewise variables. */                              </pre>
+<pre>          suffix=_,                     /* Suffix to use before the piece number added at the end of the new variable's name. */                              </pre>
+<pre>          varfix=1,                     /* Whether to fix variable names to comply to 32-max character length in created variables. */                              </pre>
+<pre>          varfixremove=,                /* One or more consecutive characters to be removed from each variable before fixing their names. */                              </pre>
+<pre>          fill=mean,                    /* Fill value or statistic to replace missing values of each analyzed variable. */                              </pre>
+<pre>          out=,                         /* Output dataset containing the indicator and piecewise linear variables. Data options are allowed. */                              </pre>
+<pre>          outformat=,                   /* Output dataset containing format definitions corresponding to the piecewise transformations. */                              </pre>
+<pre>          log=1);                       /* Whether to show messages in the log. */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in any data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- cuts:                       This parameter defines the cut values to use in the piecewise transformation                                                            </pre>
+<pre>                              for each variable.                                                                        </pre>
+<pre>                              It can be a list of values or a dataset containing this information.                                                            </pre>
+<pre>                              - In case it is a list of values, parameter VAR= needs to be passed, and it                                                            </pre>
+<pre>                              is assumed that the list contains the cut values to use for each and all the                                                            </pre>
+<pre>                              variables listed in VAR=.                                                                 </pre>
+<pre>                              - In case it is the name of a dataset, parameter VAR= can be empty (but it can also                                                            </pre>
+<pre>                              contain a list of variables to transform from those listed in the CUTS dataset.                                                            </pre>
+<pre>                              The CUTS dataset must contain at least the following columns (although some of them                                                            </pre>
+<pre>                              are optional):                                                                            </pre>
+<pre>                              - Column 1 (character): names of the variables to be transformed, one per row.                                                            </pre>
+<pre>                              - Column 2 (character) (optional): name of the formats to be generated for each                                                            </pre>
+<pre>                              variable in Column 1 in case the OUTFORMAT= dataset is not-empty.                                                            </pre>
+<pre>                              - Rest of the columns (numeric): one column for each cut value to be used for                                                             </pre>
+<pre>                              the transformation of each variable. The number of cuts used for each variable                                                            </pre>
+<pre>                              is given by the number of non-missing columns.                                                            </pre>
+					The number of cut values need NOT be the same for all the variables. For each
+<pre>                              The number of cut values need NOT be the same for all the variables. For each                                                            </pre>
+					variables, cut values are read until a missing value is found.
+<pre>                              variables, cut values are read until a missing value is found.                                                            </pre>
+<pre>                              NOTES:                                                                                    </pre>
+<pre>                              - When making the piecewise transformation, the cut values are either included into or                                                            </pre>
+<pre>                              excluded from the left piece of the transformation depending on parameter INCLUDERIGHT=.                                                            </pre>
+<pre>                              - The cut values need NOT be listed in ascending order, UNLESS the OUTFORMAT= dataset                                                            </pre>
+<pre>                              is requested.                                                                             </pre>
+<pre>                              - If multiple records exist in the CUTS dataset for the same variable name, the cut                                                            </pre>
+<pre>                              values are read from the last record found for the variable.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- includeright:               Flag indicating whether to include the right limit of each interval when defining                                                            </pre>
+<pre>                              each piece.                                                                               </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        Blank-separated list of variables to be transformed.                                                            </pre>
+<pre>                              If empty, the list of variables is read from the dataset passed in parameter                                                            </pre>
+<pre>                              'cuts'.                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- prefixdummy:                Prefix to use for the dummy variables indicating each piece of the                                                            </pre>
+<pre>                              piecewise linear transformation and for the dummy variables indicating a missing                                                            </pre>
+<pre>                              value of the variable (if the variable has missing values).                                                            </pre>
+<pre>                              The dummy variables are named <prefix>_<var-name>_<n>, where n is the piece                                                            </pre>
+<pre>                              being indicated and var-name is the name of the variable being transformed.                                                            </pre>
+<pre>                              In turn, the missing dummy variables are called <prefix>_<var-name>.                                                            </pre>
+<pre>                              Ex: if prefix=I, the variable being transformed is z, and there are 2 cut values,                                                            </pre>
+<pre>                              then 3 dummy variables are created: I_z_1, I2_z, I_z_1.                                                            </pre>
+<pre>                              In addition, if variable z has missing values, the following dummy variable is                                                            </pre>
+<pre>                              created: I_z.                                                                             </pre>
+<pre>                              default: I_                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- prefix:                     Prefix to use for the piecewise variables.                                                            </pre>
+<pre>                              default: pw_                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Suffix to add before the piece number added at the end of the transformed piecewise                                                            </pre>
+<pre>                              variables.                                                                                </pre>
+<pre>                              Ex: if prefix=pw_ and suffix=_, the variable being transformed is z, and there are                                                            </pre>
+<pre>                              2 cut values, then at most the following piecewise variables are created:                                                            </pre>
+<pre>                              I_z_2, I_z_3, pw_z_1, pw_z_2, pw_z_3.                                                            </pre>
+<pre>                              Note that I_z_1 is not created, unless z has missing values (o.w. I_z_1 is always equal to 1)                                                            </pre>
+<pre>                              default: _                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varfix:                     Whether to perform variable name fixing before attempting to create the new variable                                                            </pre>
+<pre>                              names to make sure that their names have at most 32 characters.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varfixremove:               One or more consecutive characters to be removed from each variable before fixing their names.                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- fill:                       Value or statistic keyword to use to replace the missing values of the variables.                                                            </pre>
+<pre>                              If fill= is a numeric value, this value is used to replace the missing values                                                            </pre>
+<pre>                              of all the variables. If fill= is a statistic keyword, that statistic is                                                            </pre>
+<pre>                              computed for each variable and the value obtained is used to replace the                                                            </pre>
+<pre>                              missing values of the variable (ex: MEAN).                                                            </pre>
+<pre>                              default: mean                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the transformed variables. Data options are allowed.                                                            </pre>
+<pre>                              The names of the transformed variables follow the rule described under parameter PREFIX.                                                            </pre>
+<pre>                              If no output dataset is given, the piecewise variables are created in the input dataset.                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- ouformat:                   Output dataset containing the formats that could be applied to each input variable                                                            </pre>
+<pre>                              in order to regard each piece of the generated piecewise transformation as different a category.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              This dataset can be used as CNTLIN dataset in the PROC FORMAT statement.                                                            </pre>
+<pre>                              The following variables are included in the OUTFORMAT dataset:                                                            </pre>
+<pre>                              - var: analyzed variable name.                                                            </pre>
+<pre>                              - fmtname: format name.                                                                   </pre>
+<pre>                              - type:type of format (equal to "N" which means "numeric").                                                            </pre>
+<pre>                              - start: left end value of the piece interval (length 20).                                                            </pre>
+<pre>                              - end: right end value of the piece interval (length 20).                                                            </pre>
+<pre>                              - sexcl: flag Y/N indicating whether the start value is included/excluded in the piece interval.                                                            </pre>
+<pre>                              - eexcl: flag Y/N indicating whether the end value is included/excluded in the piece interval.                                                            </pre>
+<pre>                              - label: label to use for the piece interval (length 200).                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              The format name in the FMTNAME variable is either read from the second column of the                                                            </pre>
+<pre>                              input CUTS dataset if that column is character or is made up by this macro with the following                                                            </pre>
+<pre>                              name form:                                                                                </pre>
+<pre>                              <prefix><nnnn><S>                                                                         </pre>
+<pre>                              where:                                                                                    </pre>
+<pre>                              - <prefix> is the first 3 characters of parameter PREFIX.                                                            </pre>
+<pre>                              - <nnnn> is a 4-digit identifier of the format which corresponds to the number of the                                                            </pre>
+<pre>                              analyzed variables given in VAR= and/or included in the CUTS dataset when they are sorted                                                            </pre>
+<pre>                              alphabetically.                                                                           </pre>
+<pre>                              - <S> is a single-character suffix which is either R when the right-end value is included                                                            </pre>
+<pre>                              in the piece interval or L when the left-end value is included in the piece interval.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              IMPORTANT: It is assumed that the number of digits including decimal point in the                                                            </pre>
+<pre>                              start and end values of each piece is not larger than 20 when those numbers are expressed                                                            </pre>
+<pre>                              in BEST8. format.                                                                         </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- The following global macro variables are created:                                                                                          </pre>
+<pre>_dummylist_:                  contains the list of all the dummy variables created in the output dataset.                                                            </pre>
+<pre>_pwlist_:                     contains the list of all the piecewise variables created in the output dataset.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %CreateFormatsFromCuts                                                                                                </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %ExistVar                                                                                                             </pre>
+<pre>- %FindInList                                                                                                           </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetStat                                                                                                              </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>- %IsNumber                                                                                                             </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %PiecewiseTransf(test, cuts=cutsDataSet, out=test_transf);                                                                                          </pre>
+<pre>This reads the information regarding the piecewise linear transformation from the dataset                                                                                          </pre>
+<pre>CUTSDATASET, which for example would be of the following form:                                                                                          </pre>
+<pre>var                           V1                            V2                            V3                            </pre>
+<pre>x1                            0.3                           0.7                           8                             </pre>
+<pre>x2                            2                             10                            .                             </pre>
+<pre>zz                            0.7                           .                             .                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>NOTE: The cut values need not be sorted in ascending order for each variable.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>A model including the transformed variables could then be:                                                                                          </pre>
+<pre>proc reg data=test_transf;                                                                                              </pre>
+<pre>                              model y = &var &_dummylist_ &_pwlist_;                                                            </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>quit;                                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %PiecewiseTransf(test, cuts=cutsDataSet, includeright=0, out=test_transf, outformat=test_transf_formats);                                                                                          </pre>
+<pre>This has the following differences w.r.t. example 1:                                                                                          </pre>
+<pre>- the cut values are included as left-end values of each piece interval.                                                                                          </pre>
+<pre>- an output dataset called TEST_TRANSF_FORMATS is created with the format information to be used in the CNTLIN=                                                                                          </pre>
+<pre>option of a PROC FORMAT statemenet in order to generate the formats that map the different pieces used in the                                                                                           </pre>
+<pre>piecewise variables into different intervals.                                                                                          </pre>
+<body>
+</html>

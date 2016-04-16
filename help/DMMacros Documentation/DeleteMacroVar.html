@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%DeleteMacroVar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %DeleteMacroVar</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 10-Jan-03                                                                                                      </pre>
+<pre>Modified: 17-Jul-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Deletes GLOBAL macro variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%DeleteMacroVar(vars);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- vars:   Unquoted blank-separated list of macro variables to delete.                                                            </pre>
+<pre>          Use the keyword _ALL_ to delete all global macro variables.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>- This macro is intended to be used in regular SAS language, i.e. not called                                                                                          </pre>
+<pre>from within other modules. This is because the macro runs a data step. So                                                                                          </pre>
+<pre>for example, if it is called from within IML, IML will terminate, since SAS                                                                                          </pre>
+<pre>needs to run a data step;                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                          </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>- %DeleteMacroVar(var1 var2 x y);                                                                                          </pre>
+<body>
+</html>

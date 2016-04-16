@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>REQ */</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO REQ */</h1>
+<head>
+<title>PROC FREQ does not support ID statement nor CLASS statement! */</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO PROC FREQ does not support ID statement nor CLASS statement! */</h1>
+<pre>&rsubmit;                                                                                                               </pre>
+<pre>%MACRO freq(dat, vars, where=, by=, byvar=, list=1, noprint=, weight=, out=, options=)                                                                                          </pre>
+<pre>                              / store des="Executes a PROC FREQ";                                                            </pre>
+<pre>%local wherest byst listst noprintst weightst outst;                                                                                          </pre>
+<pre>%local _dat_;                                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<pre>%let _dat_ = &dat;                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>%let wherest =;                                                                                                         </pre>
+<pre>%if %quote(&where) ~= %then                                                                                             </pre>
+<pre>                              %let wherest = where &where;                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>%if %quote(&by) ~= %then                                                                                                </pre>
+<pre>                              %let byvar = &by;                                                                         </pre>
+<pre>%let byst =;                                                                                                            </pre>
+<pre>%if &byvar ~= %then %do;                                                                                                </pre>
+<pre>                              %let byst = by &byvar;                                                                    </pre>
+<pre>                              proc sort data=&_dat_ out=_dat_;                                                            </pre>
+<pre>                              &byst;                                                                                    </pre>
+<pre>                              run;                                                                                      </pre>
+<pre>                              %let _dat_ = _dat_;                                                                       </pre>
+<pre>%end;                                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>%let listst =;                                                                                                          </pre>
+<pre>%if &list %then                                                                                                         </pre>
+<pre>                              %let listst = list;                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>%let noprintst =;                                                                                                       </pre>
+<pre>%if &noprint ~= %then                                                                                                   </pre>
+<pre>                              %if &noprint %then                                                                        </pre>
+<pre>                              %let noprintst = noprint;                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>%let weightst = ;                                                                                                       </pre>
+<pre>%if %quote(&weight) ~= %then                                                                                            </pre>
+<pre>                              %let weightst = weight &weight;                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>%let outst =;                                                                                                           </pre>
+<pre>%if %quote(&out) ~= %then %do;                                                                                          </pre>
+<pre>                              %let outst = %quote(out=&out);                                                            </pre>
+<pre>                              %if &noprint = %then                                                                      </pre>
+<pre>                              %let noprintst = noprint;                                                                 </pre>
+<pre>%end;                                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>proc freq data=&_dat_ &noprintst;                                                                                          </pre>
+<pre>                              &wherest;                                                                                 </pre>
+<pre>                              &byst;                                                                                    </pre>
+<pre>                              &weightst;                                                                                </pre>
+<pre>                              tables &vars / &listst &outst &options;                                                            </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>proc datasets nolist;                                                                                                   </pre>
+<pre>                              delete _dat_;                                                                             </pre>
+<pre>quit;                                                                                                                   </pre>
+<pre>%MEND freq;                                                                                                             </pre>
+<body>
+</html>

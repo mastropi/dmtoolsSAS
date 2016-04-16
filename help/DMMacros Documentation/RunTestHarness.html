@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%RunTestHarness</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %RunTestHarness</h1>
+<pre>Version:                      1.02                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      12-Feb-2016                                                                               </pre>
+<pre>Modified:                     20-Mar-2016 (previous: 17-Mar-2016)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Runs a set of tests on a given macro. The macro parameter values for each test are read                                                                                          </pre>
+<pre>from a SAS dataset containing one column per parameter to set.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Optionally the result of running the macro is compared to the expected result given in                                                                                          </pre>
+<pre>the input dataset.                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- macro:                      Macro name to test (w.o. %)                                                               </pre>
+<pre>                              Ex: Categorize                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- data:                       Dataset containing all possible test cases to run, with the parameter                                                            </pre>
+<pre>                              values to use for each test.                                                              </pre>
+<pre>                              This dataset should have a column called CASE with the test ID and                                                            </pre>
+<pre>                              one column for each parameter to set out of the parameters received by                                                            </pre>
+<pre>                              the macro to test.                                                                        </pre>
+<pre>                              IMPORTANT: The name of each column should coincide with the name of                                                            </pre>
+<pre>                              the macro parameter.                                                                      </pre>
+<pre>                              Optionally the dataset can have the following additional columns:                                                            </pre>
+<pre>                              _DESCRIPTION:                 Describes what the test case tests.                              </pre>
+<pre>                              _EXPECT:                      Describes what to expect as a result of the test.                              </pre>
+<pre>                              _RESULT:                      Indicates whether the test should be a successful ('S')                              </pre>
+<pre>                              or a failure ('F').                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- testcases:                  Blank-separated list of test IDs to run.                                                            </pre>
+<pre>                              The test IDs are those given in column CASE of input dataset DATA.                                                            </pre>
+<pre>                              default: all test IDs given in column CASE of input dataset DATA                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- testfrom:                   First test number to run out of the TESTCASES list.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- testto:                     Last test number to run out of the TESTCASES list.                                                            </pre>
+<pre>                              default: number of cases to test as per parameter TESTCASES                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- checkresult:                Whether the result of the macro should be compared and checked with                                                            </pre>
+<pre>                              the expected result for the test given in column _EXPECT.                                                            </pre>
+<pre>                              This only works when the macro returns a value, o.w. set it to 0.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- checkoutput:                Blank-separated list of output datasets to check with reference results.                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- library:                    Library name to add to the name of the dataset to be used for each test                                                            </pre>
+<pre>                              as read from the DATA column in the test harness dataset passed in parameter DATA.                                                            </pre>
+<pre>                              If the dataset name is fully qualified with a library name in the test                                                            </pre>
+<pre>                              harness dataset then this parameter is ignored.                                                            </pre>
+<pre>                              This library is defined as a temporary library mapped to the DATADIR= directory                                                            </pre>
+<pre>                              when this parameter is given.                                                             </pre>
+<pre>                              default: WORK                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- datadir:                    Unquoted directory name where the input datasets whose name is read from                                                            </pre>
+<pre>                              the test harness dataset which are used to run the macro are located.                                                            </pre>
+<pre>                              If the dataset name is fully qualified with a library name in the test                                                            </pre>
+<pre>                              harness dataset then this parameter is ignored.                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- resultsdir:                 Unquoted directory name where the results datasets are located.                                                            </pre>
+<pre>                              These datasets are the datasets against which the output datasets generated                                                            </pre>
+<pre>                              by the macro and listed in CHECKOUTPUT= should be compared.                                                            </pre>
+<pre>                              There names should be the same as the name of the output datasets generated                                                            </pre>
+<pre>                              by the macro.                                                                             </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %DeleteTrackingMacroVars                                                                                              </pre>
+<pre>- %ExectTimeStart                                                                                                       </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %FindInList                                                                                                           </pre>
+<pre>- %FindMatch                                                                                                            </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %Rep                                                                                                                  </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SelectNames                                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<body>
+</html>

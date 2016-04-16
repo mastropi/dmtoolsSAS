@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%ReadMacroVar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %ReadMacroVar</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Oct-04                                                                                                       </pre>
+<pre>Modified: 6-Mar-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro creates global macro variables from a dataset generated from the                                                                                          </pre>
+<pre>sashelp.vmacro table where the macro variables created in the SAS session are stored.                                                                                          </pre>
+<pre>The dataset contains the scope, the name and the content of each macro variable.                                                                                          </pre>
+<pre>The macro does not work properly when there are macro variables to be read that have                                                                                          </pre>
+<pre>too many elements, because the value of the macro variable is stored in different rows                                                                                          </pre>
+<pre>in the sashelp.vmacro table, and SAS gets confused with this.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>INPUT PARAMETERS:</h3>
+<pre>data: input dataset containing the macro variable names and values to be read (default=_vmacro_).                                                                                          </pre>
+<pre>var: list of macro variables to be read from &data. If empty, all macro variables found                                                                                          </pre>
+<pre>in &data are read.                                                                                                      </pre>
+<body>
+</html>

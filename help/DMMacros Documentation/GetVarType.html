@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetVarType --> Calls %GetVarAttrib with specific parameter values</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetVarType --> Calls %GetVarAttrib with specific parameter values</h1>
+<pre>Version:                      1.03                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      18-Nov-2004                                                                               </pre>
+<pre>Modified:                     24-May-2015 (added vartype as LOCAL variable!, previous: 07-Jun-2012)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Returns the type (character or numeric) of a given variable in a dataset.                                                                                          </pre>
+<pre>For more information see the macro %GetVarAttrib.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetVarType(data, var);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The returned value is either C or N, depending on whether variable 'var' in dataset 'data'                                                                                          </pre>
+<pre>is of type Character or Numeric, respectively.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>%let xtype = %GetVarType(test, x);                                                                                          </pre>
+<pre>Macro variable 'xtype' will have value C if x is character and N if variable x is numeric.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>This macro calls %GetVarAttrib with the third parameter FUN=vartype.                                                                                          </pre>
+<pre>See that macro for more information.                                                                                          </pre>
+<body>
+</html>

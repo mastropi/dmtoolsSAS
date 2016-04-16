@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CutMahalanobisChi</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CutMahalanobisChi</h1>
+<pre>Version: 1.06                                                                                                           </pre>
+<pre>Author: Santiago Laplagne - Daniel Mastropietro                                                                                          </pre>
+<pre>Created: 17-Dec-02                                                                                                      </pre>
+<pre>Modified: 28-Jul-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Poda un conjunto de datos multivariados, eliminando los elementos alejados                                                                                           </pre>
+<pre>según la distancia de Mahalanobis.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Calcula el centro del conjunto tomando el promedio de cada coordenada y la                                                                                           </pre>
+<pre>matriz de covarianza.                                                                                                   </pre>
+<pre>Con esos datos, llama a la macro %Mahalanobis para calcular las distancias                                                                                           </pre>
+<pre>al centro y elimina a todos los registros cuya distancia sea grande.                                                                                          </pre>
+<pre>Suponiendo que los datos tienen distribucion normal, se deduce que la                                                                                           </pre>
+<pre>distancia Mahalanobis tiene distribucion ChiCuadrado. La macro                                                                                          </pre>
+<pre>elimina todas las distancias mayores al cuantil pedido de la distribucion                                                                                          </pre>
+<pre>ChiCuadrado.                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CutMahalanobisChi(                                                                                          </pre>
+<pre>          data ,                         /* Input dataset */                                        </pre>
+<pre>          out= ,                         /* Output dataset */                                       </pre>
+<pre>          var=_numeric_ ,                /* Variables a transformar */                              </pre>
+<pre>          by= ,                          /* By variables */                                         </pre>
+<pre>          id= ,                          /* Nombre de la variable que identifica las obs. en los gráficos */                              </pre>
+<pre>          outAll= ,                      /* Output dataset con todas las observaciones */                              </pre>
+<pre>          center= ,                      /* Input dataset con el centroide para los cálculos, Mu */                              </pre>
+<pre>          cov= ,                         /* Input dataset con la matriz de covarianza para los cálculos, S */                              </pre>
+	nameOutlier=outlier, *** Nombre de la variable que define si es outlier	
+<pre>          nameOutlier=outlier, /* Nombre de la variable que define si es outlier */                                                         </pre>
+<pre>          nameDistance=mahalanobisDistance /* Nombre para las distancias de Mahalanobis */                                                            </pre>
+<pre>          alpha=0.05,                    /* Nivel deseado para decidir si es outlier */                              </pre>
+<pre>          adjust=1,                      /* Si se desea o no ajustar alpha por el nro. de obs. */                              </pre>
+<pre>          plot=0,                        /* Mostrar gráfico de outliers detectados? */                              </pre>
+<pre>          log=1);                        /* Mostrar mensajes en el Log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Input dataset con los datos a utilizar. Puede recibir                                                            </pre>
+<pre>          cualquier opción adicional como en cualquier opción                                                            </pre>
+<pre>          data= de SAS.                                                                             </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- out:    Output dataset. En este data set se guardan las observaciones                                                             </pre>
+<pre>          del                           input dataset que quedan después de la poda (eliminación                              </pre>
+<pre>          de outliers) y se agrega una columna con las distancias de                                                            </pre>
+<pre>          Mahalanobis.                                                                              </pre>
+<pre>          Las observaciones con valores missing en alguna de las variables                                                            </pre>
+<pre>          listadas en 'var' no se incluyen en este dataset porque se                                                            </pre>
+<pre>          desconoce si son o no outliers.                                                            </pre>
+<pre>          Si no se indica ningún dataset, el resultado es mostrado en                                                            </pre>
+<pre>          el Output Window.                                                                         </pre>
+<pre>                                                                                                    </pre>
+<pre>- var:    Lista de las variables a utilizar en la detección de outliers,                                                            </pre>
+<pre>          separadas por espacios.                                                                   </pre>
+<pre>          La distancia de Mahalanobis se calcula sobre estas variables.                                                            </pre>
+<pre>          default: _numeric_, es decir, todas las variables numéricas                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- by:     Lista de by variables. La detección de outliers se realiza                                                            </pre>
+<pre>          para cada combinación de los valores de las by variables.                                                            </pre>
+<pre>          Puede usarse este parámetro para indicar variables que definen                                                            </pre>
+<pre>          distintos segmentos.                                                                      </pre>
+<pre>          (No es necesario ordenar el input dataset por estas variables                                                            </pre>
+<pre>          porque la macro lo hace automáticamente.)                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- id:     Nombre de la variable usada como índice en el gráfico de las                                                            </pre>
+<pre>          distancias de Mahalanobis, en caso de que dicho gráfico sea                                                            </pre>
+<pre>          requerido con el parámetro plot=1.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- outAll: Output dataset donde se guardan todas las variables del dataset                                                            </pre>
+<pre>          original con una nueva columna que indica si la observacion es                                                            </pre>
+<pre>          o no considerada outlier. El nombre de dicha columna se                                                            </pre>
+<pre>          determina con el parámetro nameOutlier.                                                            </pre>
+<pre>          Si no se ingresa este parámetro, el dataset no se genera.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- center: Input dataset con el vector del centroide, Mu, a utilizar en                                                            </pre>
+<pre>          el cálculo de la distancia de Mahalanobis.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- cov:    Input dataset con la matriz de forma, S, a utilizar en                                                            </pre>
+<pre>          el cálculo de la distancia de Mahalanobis.                                                            </pre>
+<pre>          Si este parámetro no se pasa, la matriz S se calcula como                                                            </pre>
+<pre>          la matriz de covarianza de los datos.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- nameOutlier:Nombre de la columna con el indicador de outlier/no-outlier en                                                            </pre>
+<pre>          el dataset indicado por el parámetro 'outAll'.                                                            </pre>
+<pre>          Valores que toma la variable:                                                             </pre>
+<pre>          0 => No outlier                                                                           </pre>
+<pre>          1 => Outlier                                                                              </pre>
+<pre>          default: outlier                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>- nameDistance:Nombre de la columna con las distancias de Mahalanobis.                                                            </pre>
+<pre>          Esta columna se agrega a los output datasets indicados por                                                            </pre>
+<pre>          los parámetros 'out' y 'outAll'.                                                            </pre>
+<pre>          default: mahalanobisDistance                                                              </pre>
+<pre>                                                                                                    </pre>
+<pre>- alpha:  Parámetro que determina el cuantil de la distribución                                                             </pre>
+<pre>          ChiCuadrado a usar para fijar el corte entre outlier y no                                                            </pre>
+<pre>          outlier.                                                                                  </pre>
+<pre>          Si el valor del parámetro 'adjust' es 1 (default),                                                            </pre>
+<pre>          se ajusta este valor segun la transformacion                                                            </pre>
+<pre>          alpha_adj = 1 - (1 - alpha)^1/n, donde n es el número de                                                            </pre>
+<pre>          observaciones. De lo contrario alpha_adj = alpha.                                                            </pre>
+<pre>          Dado el valor de alpha ajustado, el corte a usar                                                            </pre>
+<pre>          para la distancia de mahalanobis para decidir si una observación                                                            </pre>
+<pre>          es o no outlier es el cuantil (1 - alpha_adj) de la distribución                                                            </pre>
+<pre>          ChiCuadrado con p grados de libertad, donde p es elnúmero de                                                   </pre>
+<pre>          variables listadas en el parámetro 'var'.                                                            </pre>
+<pre>          El ajuste que aquí se hace es un ajuste para tener en cuenta el                                                            </pre>
+<pre>          número de tests que se hacen sobre el mismo conjunto de datos,                                                            </pre>
+<pre>          y es válido si dichos tests son independientes (suposicion razonable                                                            </pre>
+<pre>          si los datos provienen de una muestra aleatoria).                                                            </pre>
+<pre>          Mientras más chico sea alpha, menos observaciones serán eliminadas.                                                            </pre>
+<pre>          default: 0.05                                                                             </pre>
+<pre>                                                                                                    </pre>
+<pre>- adjust: Indica si se desea ajustar el nivel alpha por el nro. de                                                            </pre>
+<pre>          observaciones, para disminuir las chances de detectar un                                                            </pre>
+<pre>          outlier simplemente por casualidad.                                                            </pre>
+<pre>          El ajuste efectuado supone independencia entre las observaciones                                                            </pre>
+<pre>          lo cual es cierto si los datos provienen de una muestra                                                            </pre>
+<pre>          aleatoria.                                                                                </pre>
+<pre>          Valores posibles: 0 => No ajustar, 1 => Ajustar.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- plot:   Indica si se desea ver los puntos detectados como outliers,                                                            </pre>
+<pre>          en scatter plots de a pares de las variables utilizadas en la                                                            </pre>
+<pre>          detección (para esto se utiliza la macro %Scatter).                                                            </pre>
+<pre>          Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>          default: 0                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Indica si se desea que la macro imprima comentarios en el log.                                                            </pre>
+<pre>          Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- --- Supuestos sobre la distribución de la que provienen los datos ---                                                                                          </pre>
+<pre>Este algoritmo supone que los datos provienen de una distribución normal                                                                                          </pre>
+<pre>multivariada. Si esta condición no se cumple, el algoritmo funciona de                                                                                          </pre>
+<pre>todas formas, pero los resultados pueden no ser apropiados. En ese caso                                                                                          </pre>
+<pre>se recomienda hacer alguna transformación previa de los datos antes de                                                                                          </pre>
+<pre>llamar a esta función. Por ejemplo, puede transformarse cada variable de                                                                                          </pre>
+<pre>interés utilizando la macro %Boxcox.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- --- Tratamiento de valores missing ---                                                                                          </pre>
+<pre>Las observaciones que presentan valor missing en al menos una de las variables listadas                                                                                          </pre>
+<pre>en el parámetro 'var', sobre las que se basa la detección de outliers, no son clasificadas                                                                                          </pre>
+<pre>como outlier/no-outlier: tanto la distancia de Mahalanobis como la variable que contiene la                                                                                          </pre>
+<pre>clasificación en outlier/no-outlier (cuyo nombre es el indicado en 'nameOutlier') toman                                                                                          </pre>
+<pre>valor missing en dicho caso.                                                                                          </pre>
+<pre>Estas observaciones no aparecen en el dataset indicado en el parámetro 'out' que es el                                                                                          </pre>
+<pre>que contiene las observaciones que NO son detectadas como outlier.                                                                                           </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                          </pre>
+<pre>- %DefineSymbols                                                                                          </pre>
+<pre>- %Drop                                                                                             </pre>
+<pre>- %ExistOption                                                                                          </pre>
+<pre>- %Getnobs                                                                                          </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %GetStat                                                                                          </pre>
+<pre>- %GetVarList                                                                                          </pre>
+<pre>- %GetVarOrder                                                                                          </pre>
+<pre>- %Mahalanobis                                                                                          </pre>
+<pre>- %CreateGroupVar                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %Scatter                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Boxcox                                                                                           </pre>
+<pre>- %Mahalanobis                                                                                          </pre>
+<pre>- %GraphXY                                                                                          </pre>
+<pre>- %Scatter                                                                                          </pre>
+<body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetVarOrder</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetVarOrder</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 10-Mar-01                                                                                                      </pre>
+<pre>Modified: 15-Jan-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro returns the order in which the variables appear in a dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetVarOrder(data , _order_);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- _data_: Input dataset. It can contain additional options as in any                                                            </pre>
+<pre>          data= option in SAS (such as keep=, where=, etc.).                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- _order_:Name of the macro variable to store the order of the                                                            </pre>
+<pre>          variables in '_data_'. It can be any name, EXCEPT                                                            </pre>
+<pre>          _order_, _i_, _nro_vars_, __order__.                                                            </pre>
+<pre>          IMPORTANT: This variable needs to exist prior to                                                            </pre>
+<pre>          calling the macro. This can be done with a %let                                                            </pre>
+<pre>          statement before calling the macro, such as:                                                            </pre>
+<pre>          '%let order=;'.                                                                           </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- The macro variable whose name is specified in parameter '_order_'                                                                                          </pre>
+<pre>must exist prior to calling the macro. This can be done with a %let statement                                                                                          </pre>
+<pre>before calling the macro, such as: '%let varlist=;'. See examples below.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- Do not use '_list_' as the name for the macro variable to store the list.                                                                                          </pre>
+<pre>This will cause an error in the program.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- This macro is much faster than running %GetVarList with no keywords to                                                                                          </pre>
+<pre>search for.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS USED IN THIS MACRO:</h3>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GetVarNames                                                                                          </pre>
+<pre>- %GetVarList (to search variables with SAS keywords, but it is slower than                                                                                          </pre>
+<pre>this macro to simply retrieve the list of all variables in the dataset)                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>Assuming the dataset A has the variables x1, x2, x3 and they are stored in the                                                                                          </pre>
+<pre>second, first and third column of the dataset, then if we do:                                                                                          </pre>
+<pre>%let varOrder =;                                                                                          </pre>
+<pre>%GetVarOrder(data , varOrder);                                                                                          </pre>
+<pre>we will get a macro variable named 'varOrder' whose value is:                                                                                          </pre>
+<pre>x2 x1 x3.                                                                                           </pre>
+<body>
+</html>

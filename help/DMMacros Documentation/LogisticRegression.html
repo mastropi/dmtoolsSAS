@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%LogisticRegression</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %LogisticRegression</h1>
+<pre>Version: 1.03                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 14-Oct-04                                                                                                      </pre>
+<pre>Modified: 03-Nov-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro performs a logistic regression iteratively and removes influential observations                                                                                          </pre>
+<pre>by the Cook's distance criterion at each iteration. A flag is created indicating the                                                                                          </pre>
+<pre>observations that were detected as influential.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data                                                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- target                                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var                                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- class=,                                                                                                               </pre>
+<pre>- format=,                    (no hace falta pasar la palabra FORMAT, simplemente los formatos)                                                            </pre>
+<pre>- event=1,                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- selection=backward,                                                                                                   </pre>
+<pre>- options                                                                                                               </pre>
+<pre>- nameInfluent=influent,                                                                                                </pre>
+<pre>- ThrPValue=0.05,                                                                                                       </pre>
+<pre>- ThrPValueLarge=0.5,                                                                                                   </pre>
+<pre>- cook=1,                                                                                                               </pre>
+<pre>- ThrCook=1,                                                                                                            </pre>
+<pre>- dfbetas=0,                                                                                                            </pre>
+<pre>- ThrDFBetas=1,                                                                                                         </pre>
+<pre>- iterDFBetas=1,                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out                                                                                                                   </pre>
+<pre>                              default: _LR_predicted_                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outparams                                                                                                             </pre>
+<pre>                              default: _LR_params_                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outest:                     OUTEST dataset.                                                                           </pre>
+<pre>                              default: _LR_test_                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar=_varfinal_                                                                                                   </pre>
+<pre>- print=1                                                                                                               </pre>
+<pre>- printhist=0                                                                                                           </pre>
+<pre>- plot=0                                                                                                                </pre>
+<pre>- log=1                                                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CallMacro                                                                                                            </pre>
+<pre>- %CreateVarFromList                                                                                                    </pre>
+<pre>- %Dfbetas                                                                                                              </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetVarNames                                                                                                          </pre>
+<pre>- %InsertInList                                                                                                         </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %ReplaceChar                                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<body>
+</html>

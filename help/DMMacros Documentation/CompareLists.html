@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CompareLists</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CompareLists</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 9-Nov-04                                                                                                       </pre>
+<pre>Modified: 21-Jan-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro compares 2 list of names (LIST1 and LIST2), and gives as result:                                                                                          </pre>
+<pre>- The names present in both lists.                                                                                          </pre>
+<pre>- The names in list1 NOT present in list2.                                                                                          </pre>
+<pre>- The names in list2 NOT present in list1.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>By default, these names are stored in three different global macro variables and in three                                                                                          </pre>
+<pre>different datasets called (both macro variables and datasets):                                                                                          </pre>
+<pre>_INTERSECTION_, _LIST1NOTLIST2_, _LIST2NOTLIST1_.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Before the comparison is performed, any repeated names are removed from the lists.                                                                                          </pre>
+<pre>The comparison is NOT case sensitive.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CompareLists(                                                                                          </pre>
+<pre>          list1,                        /* First list of names. */                                  </pre>
+<pre>          list2,                        /* Second list of names. */                                 </pre>
+<pre>          sep=%quote( )                 /* Separator used to separate the names in the lists. */                              </pre>
+<pre>          norepeated=0                  /* All the names in each list are unique (i.e. not repeated)? */                              </pre>
+<pre>          sort=0,                       /* Show matching and non-matching names in alphabetical order? */                              </pre>
+<pre>          output=1,                     /* Create output datasets with matching and non-matching names? */                              </pre>
+<pre>          print=1,                      /* Show the list of matching and non-matching names in the output? */                              </pre>
+<pre>          log=0);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- list1:                      First blank-separated list of names to compare.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- list2:                      Second blank-separated list of names to compare.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- sep:                        Separator used to separate the names in the lists.                                                            </pre>
+<pre>                              The search for 'sep' in the lists in order to determine the names                                                            </pre>
+<pre>                              present in the list is NOT case sensitive.                                                            </pre>
+<pre>                              default: %quote( ) (i.e. the blank space)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- norepeated:                 Whether the lists may have repeated names so that they are repeated                                                            </pre>
+<pre>                              occurrences are eliminated prior to the comparison between the lists.                                                            </pre>
+<pre>                              Possible values: 0 => There may be repeated names                                                            </pre>
+<pre>                               1 => There are no repeated names                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sort:                       Whether to sort alphabetically the lists containing the matching and                                                            </pre>
+<pre>                              non-matching names.                                                                       </pre>
+<pre>                              Possible values: 0 => Do not sort, 1 => Sort alphabetically.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- output:                     Whether to create output datasets containing the lists of matching and                                                            </pre>
+<pre>                              non-matching names.                                                                       </pre>
+<pre>                              If output=1, the following datasets are created, with one variable named NAME:                                                            </pre>
+<pre>                              - _INTERSECTION_:             List of names present in both lists.                              </pre>
+<pre>                              - _LIST1NOTLIST2_:            List of names present in the first list and not in the second list.                              </pre>
+<pre>                              - _LIST2NOTLIST1_:            List of names present in the second list and not in the first list.                              </pre>
+<pre>                              Possible values: 0 => Do not create output datasets, 1 => Create output datasets.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- print:                      Whether to show the list of matching and non-matching names in the output.                                                            </pre>
+<pre>                              Possible values: 0 => Do not show, 1 => Show.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Whether to show messages in the log.                                                            </pre>
+<pre>                              Possible values: 0 => Do not show messages, 1 => Show messages.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>None                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %FindInList                                                                                                           </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %PrintNameList                                                                                                        </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %RemoveRepeated                                                                                                       </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %CompareLists(x y z T u V, yy t u aa bb, norepeated=1);                                                                                          </pre>
+<pre>Creates the following datasets:                                                                                          </pre>
+<pre>- _INTERSECTION_: with 3 observations and variable NAME containing the values 'T', 'u'.                                                                                          </pre>
+<pre>- _LIST1NOTLIST2_: with 4 observations and variable NAME containing the values 'x', 'y' 'z', 'v'.                                                                                          </pre>
+<pre>- _LIST2NOTLIST1_: witht 2 observations and variable NAME containing the values 'aa', 'bb'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The above lists of names is also shown in the output window.                                                                                          </pre>
+<pre>Since there are no repeated names in each list the option NOREPEATED=1 is used so that the                                                                                          </pre>
+<pre>process is faster.                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %CompareLists(x y z T u V, yy t u aa bb aa, sort=0, output=0);                                                                                          </pre>
+<pre>The same as above with the difference that the names are sorted alphabetically. In addition,                                                                                          </pre>
+<pre>parameter NOREPEATED is set to its default (= 0) because there are repeated names in the                                                                                          </pre>
+<pre>second list.                                                                                                            </pre>
+<body>
+</html>

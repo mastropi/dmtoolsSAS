@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%FindMatch</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %FindMatch</h1>
+<pre>Version: 1.02                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 20-Oct-04                                                                                                      </pre>
+<pre>Modified: 3-Oct-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Finds a keyword in a blank-separated list of names and returns the names containing it.                                                                                          </pre>
+<pre>The macro function %INDEX is used to search for the keyword in each name in the list.                                                                                          </pre>
+<pre>The search for the keyword is NOT case sensitive.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>A comma is not allowed as part of the LIST= nor KEY= values as %INDEX interprets it as                                                                                          </pre>
+<pre>separator of input parameters...                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%FindMatch(list, key=, pos=, posNot=, not=, notPos=, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- list:                       Blank-separated list where a keyword is searched for.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- key:                        Keyword to be searched for in 'list'.                                                            </pre>
+<pre>                              The search is NOT case sensitive.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- pos:                        Position in a name at which the keyword should occur in order to be                                                            </pre>
+<pre>                              considered a match.                                                                       </pre>
+<pre>                              A non-numeric possible value is END, which states that the keyword should                                                            </pre>
+<pre>                              be found at the end of the variable name for a match to be valid.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- posNot:                     Position at which the keyword 'key' should NOT be present in order for                                                            </pre>
+<pre>                              a name containing the key to be considered a match.                                                            </pre>
+<pre>                              A non-numeric possible value is END, which states that the keyword should                                                            </pre>
+<pre>                              NOT be found at the end of the variable name for a match to be valid.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- not:                        Keyword that should NOT appear in a name to be considered a match.                                                            </pre>
+<pre>                              The keyword should not contain any spaces.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- notPos:                     Position at which the 'not' keyword should appear so that only when this is the                                                            </pre>
+<pre>                              case the match with 'key' is disregarded.                                                            </pre>
+<pre>                              A non-numeric possible value is END, which states that the keyword NOT should                                                            </pre>
+<pre>                              be found at the end of the variable name for a match to be excluded.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Whether to show the list of selected variables in the log.                                                            </pre>
+<pre>                              Possible values are: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The list of names present in 'list' containing the keyword 'key'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>If no parameters are passed the original list is returned.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %FindInList                                                                                                           </pre>
+<pre>- %InsertInList                                                                                                         </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %RemoveRepeated                                                                                                       </pre>
+<pre>- %SelectName                                                                                                           </pre>
+<pre>- %SelectVar                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let match = %FindMatch(name1 name2 a_xx_b c_XX_d, key=_xx_);                                                                                          </pre>
+<pre>Stores the list                                                                                                         </pre>
+<pre>a_xx_b c_XX_d                                                                                                           </pre>
+<pre>in macro variable 'match'.                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let match = %FindMatch(name1 name2 a_xx_b c_XX_d, not=_d);                                                                                          </pre>
+<pre>Stores the list                                                                                                         </pre>
+<pre>name1 name2 a_xx_b                                                                                                      </pre>
+<pre>in macro variable 'match'.                                                                                              </pre>
+<body>
+</html>

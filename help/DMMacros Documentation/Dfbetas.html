@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Dfbetas</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Dfbetas</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 5-Aug-03                                                                                                       </pre>
+<pre>Modified: 13-Mar-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Esta macro marca como influyentes aquellas observaciones que tienen                                                                                          </pre>
+<pre>un alto DFBETA en alguno de los parámetros de un modelo de regresión                                                                                          </pre>
+<pre>(ya sea regresión lineal o no lineal).                                                                                          </pre>
+<pre>Recuérdese que el DFBETA se define para cada parámetro de la regresión                                                                                          </pre>
+<pre>y para cada observación interviniente en la modelización, según la siguiente                                                                                          </pre>
+<pre>expresión:                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+				Beta_j - Beta_j(i)
+<pre>                              Beta_j - Beta_j(i)                                                                        </pre>
+<pre>                              DFBETA_j(i) = ------------------                                                            </pre>
+					s(i)*sqrt((X'X)_jj)
+<pre>                              s(i)*sqrt((X'X)_jj)                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>donde,                                                                                                                  </pre>
+<pre>Beta_j:                                                     es el parámetro j de la regresión estimado con todas las observaciones.                              </pre>
+<pre>Beta_j(i):                    es el parámetro j de la regresión estimado cuando se elimina de la                                                            </pre>
+<pre>regresión la observación i.                                                                                             </pre>
+<pre>s(i):                         es la estimación del desvío estándar del error, sin tener en cuenta                                                            </pre>
+<pre>la observación i.                                                                                                       </pre>
+<pre>(X'X)_jj:                     es el elemento diagonal jj de la matrix (X'X)^-1, donde X es la matriz                                                            </pre>
+<pre>de diseño del modelo de regresión.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>El DFBETA_j(i) mide la variación que produce sobre la estimación del parámetro                                                                                          </pre>
+<pre>Beta_j la eliminación de la observación i de la regresión, relativa al error estándar                                                                                          </pre>
+<pre>de Beta_j.                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>Para usar esta macro, el procedimiento que efectúa la regresión debe brindar la                                                                                          </pre>
+<pre>posibilidad de generar un dataset con los DFBETAS de la regresión.                                                                                          </pre>
+<pre>Tanto PROC REG como PROC LOGISTIC tienen esta opción.                                                                                          </pre>
+<pre>- En PROC REG, debe usarse la ODS table 'OutputStatistics' y la opción                                                                                          </pre>
+<pre>INFLUENCE del MODEL statement. También es conveniente usar el statement                                                                                          </pre>
+<pre>ODS LISTING EXCLUDE OutputStatistics antes de la creación de la tabla                                                                                          </pre>
+<pre>OutputStatistics, para evitar ver los valores de los DFBETAS en el output.                                                                                          </pre>
+<pre>- En PROC LOGISTIC, el dataset puede generarse de dos maneras:                                                                                          </pre>
+<pre>                              - Con la ODS table 'Influence' y la opción INFLUENCE del MODEL statement.                                                            </pre>
+<pre>                              - Con la opción DFBETAS= del OUTPUT statement.                                                            </pre>
+<pre>Ver ejemplos abajo.                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>Las observaciones influyentes son marcadas por medio de una nueva variable                                                                                          </pre>
+<pre>(cuyo nombre por default es 'influent') que vale 1 si la observacion es                                                                                          </pre>
+<pre>influyente, y 0 en caso contrario.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Si se desea, la macro también hace gráficos de los DFBETAS para cada parámetro                                                                                          </pre>
+<pre>de la regresión, mostrando con otro color las observaciones detectadas como                                                                                          </pre>
+<pre>influyentes.                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>----------- Metodología usada para la detección de influyentes ----------------                                                                                          </pre>
+<pre>El método seguido para detectar influyentes tiene un cierto carácter iterativo,                                                                                          </pre>
+<pre>a saber:                                                                                                                </pre>
+<pre>1.- Se comienza detectando como influyentes aquellas observaciones que tienen                                                                                          </pre>
+<pre>|DFBETA| > THR para algún parámetro de la regresión. THR es el umbral inicial (y máximo),                                                                                          </pre>
+<pre>que típicamente (y por default) es = 1. (Este valor del umbral implica que la variación                                                                                          </pre>
+<pre>producida por la eliminación una observación en un parámetro de la regresión es                                                                                          </pre>
+<pre>mayor que el error estándar del parámetro, generando así un cambio apreciable.)                                                                                          </pre>
+<pre>2.- Se repite el paso 1, con la diferencia de que el umbral, en lugar de ser THR,                                                                                          </pre>
+<pre>pasa a ser THR/2. Son marcadas como influyentes TODAS las observaciones que cumplen                                                                                          </pre>
+<pre>con las siguientes condiciones:                                                                                          </pre>
+<pre>                              - Tienen |DFBETA| > THR/2 para algún parámetro.                                                            </pre>
+<pre>                              - El DFBETA de dicho parámetro tiene el mismo signo (positivo o negativo)                                                            </pre>
+<pre>                              para todas las observaciones.                                                             </pre>
+<pre>                              - El número de observaciones que cumplen con estas dos condiciones                                                            </pre>
+<pre>                              PARA UN MISMO PARÁMETRO multiplicado por el umbral (THR/2) es mayor que THR.                                                            </pre>
+<pre>                              En este conteo no entran las observaciones ya marcadas como influyentes en                                                            </pre>
+<pre>                              la iteración anterior.                                                                    </pre>
+<pre>                              (Esto implica que debe haber al menos 2 observaciones con |DFBETA| > THR/2                                                            </pre>
+<pre>                              entre las observaciones aún no marcadas como influyentes, que tengan                                                            </pre>
+<pre>                              el mismo signo de DFBETA y que el DFBETA corresponda al mismo parámetro                                                            </pre>
+<pre>                              para todas las observaciones.)                                                            </pre>
+<pre>La lógica detrás de este razonamiento es la siguiente: se eliminan de la                                                                                          </pre>
+<pre>regresión observaciones cuyo DFBETA para un mismo parámetro es mayor que el                                                                                          </pre>
+<pre>umbral, en número tal que, en conjunto, el efecto sobre la estimación de dicho                                                                                          </pre>
+<pre>parámetro al eliminar todas las observaciones es equivalente a tener una sola                                                                                          </pre>
+<pre>observación con |DFBETA| > THR (el umbral inicial, típicamente 1).                                                                                          </pre>
+<pre>3.- Se repite el proceso disminuyendo el umbral al valor THR/3, luego THR/4, etc.,                                                                                          </pre>
+<pre>hasta alcanzar el valor indicado en el parámetro 'iter'. Por default el                                                                                          </pre>
+<pre>parámetro 'iter' es igual a 2 (o sea se llega a considerar como minimo umbral                                                                                          </pre>
+<pre>el valor THR/2).                                                                                                        </pre>
+<pre>------------------------------------------------------------------------------                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Dfbetas(                                                                                           </pre>
+<pre>          _data_ ,                      /* Input dataset containing the DFBETA values for the variables to analyze */                              </pre>
+<pre>          var= ,                        /* List of variables whose DFBETAS are analyzed */                              </pre>
+<pre>          dfbetas= ,                    /* Names of the variables in the input dataset containing the DFBETAS */                              </pre>
+<pre>          out= ,                        /* Output dataset with all input observations where influential observations are flagged */                              </pre>
+<pre>          thr=1 ,                       /* Initial (and maximum) threshold to use for the DFBETAS */                              </pre>
+<pre>          iter=2 ,                      /* Maximum number of iterations for the identification of influential observations */                              </pre>
+<pre>          nameInfluent=influent ,       /* Name of variable in output dataset to store a flag of influential observations */                              </pre>
+<pre>          nameIntercept= ,              /* Name of the variable containing the Intercept parameter in the input dataset */                              </pre>
+<pre>          obs= ,                        /* Name of variable in input dataset containing the observation ID to use in plot labels */                              </pre>
+<pre>          prefix=dfb_ ,                 /* Prefix to add to the variables listed in VAR to build the name of the DFBETA variables */                              </pre>
+<pre>          suffix= ,                     /* Suffix to add to the variables listed in VAR to build the name of the DFBETA variables */                              </pre>
+<pre>          macrovar=,                    /* Macro variable where the names of the variables containing the DFBETAS are stored */                              </pre>
+<pre>          plot=0 ,                      /* Generate plot of influential observations? */                              </pre>
+<pre>          print=0,                      /* Show list of influential observations in the output window? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- _data_:                     Input dataset en donde están guardados los DFBETAS de cada                                                            </pre>
+<pre>                              observación para cada una de las variables listadas en 'var'.                                                            </pre>
+<pre>                              Típicamente este dataset es el que se obtiene como salida                                                            </pre>
+<pre>                              de un procedimiento de regresión lineal o logística, al                                                            </pre>
+<pre>                              pedir las medidas de influencia sobre cada parámetro (DFBETA).                                                            </pre>
+<pre>                              En PROC REG el dataset se obtiene con la ODS table OuputStatistics                                                            </pre>
+<pre>                              y la opción INFLUENCE del MODEL statement.                                                            </pre>
+<pre>                              En PROC LOGISTIC el dataset se obtiene de dos maneras: con el                                                            </pre>
+<pre>                              OUTPUT statement y la opción DFBETAS=, o con la ODS table Influence                                                            </pre>
+<pre>                              y la opción INFLUENCE del MODEL statement.                                                            </pre>
+<pre>                              Este parámetro puede recibir cualquier opción adicional como en                                                            </pre>
+<pre>                              cualquier opción data= de SAS.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Lista de variables cuyos DFBETAS se encuentran calculados en                                                            </pre>
+<pre>                              '_data_'. No hace falta indicar el Intercept. Se supone que                                                            </pre>
+<pre>                              el parámetro correspondiente al intercept está asociado al                                                            </pre>
+<pre>                              nombre 'Intercept'. De no ser así, su nombre puede indicarse                                                            </pre>
+<pre>                              en el parámetro 'nameIntercept'.                                                            </pre>
+<pre>                              Si el parámetro es vacío, la macro detecta observaciones que sean                                                            </pre>
+<pre>                              influyentes en el Intercept solamente.                                                             </pre>
+<pre>                              NOTA: La lista de variables debe coincidir con la lista de                                                            </pre>
+<pre>                              parámetros estimados, con lo que deben incluirse en esta lista                                                            </pre>
+<pre>                              los parámetros correspondientes a interacciones entre variables                                                            </pre>
+<pre>                              (ver ejemplos abajo).                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset. Puede tener cualquier opción adicional como en                                                            </pre>
+<pre>                              cualquier opción data= de SAS.                                                            </pre>
+<pre>                              Este dataset tiene las mismas variables que el input dataset                                                            </pre>
+<pre>                              más las siguientes nuevas variables:                                                            </pre>
+<pre>                              - Una variable que indica si la observación es detectada como                                                            </pre>
+				influyente.	El nombre de esta variable es el especificado por el
+<pre>                              influyente.                   El nombre de esta variable es el especificado por el                              </pre>
+<pre>                              parámetro 'nameInfluent'.                                                                 </pre>
+<pre>                              - _THRESHOLD_: Valor de corte para los DFBETAS (en valor absoluto)                                                            </pre>
+<pre>                              por encima del cual una observacion es considerada influyente.                                                            </pre>
+<pre>                              - _MAX_DFBETA_: Valor correspondiente al |DFBETA| máximo, con su                                                            </pre>
+<pre>                              signo.                                                                                    </pre>
+<pre>                              - _NRO_LARGE_DFBETAS_: Número de DFBETAS que superaron el umbral                                                            </pre>
+<pre>                              dado por _THRESHOLD_.                                                                     </pre>
+<pre>                              - _LARGEST_DFBETA_: Nombre de la variable que presenta el |DFBETA|                                                            </pre>
+<pre>                              más grande para cada observación.                                                            </pre>
+<pre>                              - _THRESHOLD0_: Valor de corte usado inicialmente para los DFBETAS.                                                            </pre>
+<pre>                              Corresponde al valor del parámetro 'thr'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              Si el parámetro 'out' es vacío, estas variables son agregadas al                                                            </pre>
+<pre>                              input dataset.                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- dfbetas:                    Lista de las variables que contienen los dfbetas. Cuando se pasa este                                                            </pre>
+<pre>                              parámetro, se ignoran las variables pasadas en VAR, el parámetro PREFIX                                                            </pre>
+<pre>                              y el parámetro SUFFIX, que se usan en caso contrario para determinar el                                                            </pre>
+<pre>                              nombre de las variables con los DFBETAS. También se ignora el parámetro                                                            </pre>
+<pre>                              nameIntercept, ya que el DFBETA del Intercept se supone que también es                                                            </pre>
+<pre>                              pasado en el parámetro DFBETAS.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- thr:                        Valor a usar inicialmente como umbral para considerar un |DFBETA|                                                            </pre>
+<pre>                              grande.                                                                                   </pre>
+<pre>                              default: 1, es decir se consideran grande un |DFBETA| > 1                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- iter:                       Número de iteraciones a realizar en la búsqueda de observaciones                                                            </pre>
+<pre>                              influyentes. La explicación de cómo interviene este parámetro                                                            </pre>
+<pre>                              en la detección de influyentes se encuentra arriba en el punto                                                            </pre>
+<pre>                              DESCRIPTION.                                                                              </pre>
+<pre>                              default: 2                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- nameInfluent:               Nombre a usar para la variable que marca las observaciones                                                            </pre>
+<pre>                              influyentes desde el punto de vista de los DFBETAS.                                                            </pre>
+<pre>                              Valores que toma la variable:                                                             </pre>
+<pre>                              0 => No influyente                                                                        </pre>
+<pre>                              1 => Influyente                                                                           </pre>
+<pre>                              default: influent                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<pre>- nameIntercept:Nombre utilizado para indicar el parámetro correspondiente al                                                                                          </pre>
+<pre>                              Intercept.                                                                                </pre>
+<pre>                              default: Intercept                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>- obs:                        Nombre de la variable que corresponde al número de observación.                                                            </pre>
+<pre>                              Si no se pasa ningún valor, la macro genera una variable temporaria                                                            </pre>
+<pre>                              con el número de observación para hacer los gráficos. Esta variable                                                            </pre>
+<pre>                              se llama _dfbetas_obs_.                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- prefix:                     Prefijo que tienen los nombres de todas las variables donde se                                                            </pre>
+<pre>                              guardan los DFBETAS en el input dataset '_data_'.                                                            </pre>
+<pre>                              default: dfb_ (este es el prefijo usado por PROC REG)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Sufijo que tienen los nombres de todas las variables donde se                                                            </pre>
+<pre>                              guardan los DFBETAS en el input dataset '_data_'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plot:                       Indica si se desea ver los gráficos generados por la macro.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- print:                      Indica si se desea ver las salidas generadas por la macro en                                                            </pre>
+<pre>                              el output window.                                                                         </pre>
+<pre>                              En caso afirmativo se muestran las observaciones detectadas como                                                            </pre>
+<pre>                              influyentes según el criterio de los DFBETAS.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Indica si se desea ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar:                   Nombre de la macro variable donde se devuelven los nombres de                                                             </pre>
+<pre>                              las variables del input dataset '_data_' con los valores de los                                                            </pre>
+<pre>                              DFBETAS.                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Any                                                                                                                  </pre>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %Drop                                                                                                                 </pre>
+<pre>- %ExistData                                                                                                            </pre>
+<pre>- %ExistVar                                                                                                             </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %GraphXY                                                                                                              </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>- %PrintDataDoesNotExist                                                                                                </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>- %SymmetricAxis                                                                                                        </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %CreateInteractions (para armar la lista de variables a pasar en var=)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- Detección de influyentes en regresión lineal:                                                                                          </pre>
+<pre>*** Creacion de la variable de interaccion entre z1 y z2 (z1_X_z2) en el dataset TEST;                                                                                          </pre>
+<pre>%CreateInteractions(test , z1 , z2 , join=_X_);                                                                                          </pre>
+<pre>proc reg data=test;                                                                                                     </pre>
+<pre>                              model y = z1 z2 z1_X_z2 / influence;* Pide las medidas de influencia;                              </pre>
+<pre>ods listing exclude OutputStatistics;* Elimina del output las medidas de influencia;                                                            </pre>
+<pre>ods output OutputStatistics=influence;* Genera el dataset con los DFBETAS;                                                            </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>ods listing;                  * Resetea la opcion mostrar todas las salidas generadas en el output;                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>*** Deteccion de influyentes (a partir del dataset INFLUENCE);                                                                                          </pre>
+<pre>%Dfbetas(influence , var=z1 z2 z1_X_z2 , macrovar=dfbetas);                                                                                          </pre>
+<pre>** En la macro variable &dfbetas se genera la lista de DFBETAS. En este caso                                                                                          </pre>
+<pre>** la lista es: 'dfb_z1 dfb_z2 dfb_z1_X_z2'.                                                                                          </pre>
+<pre>******************************************************************************                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- Detección de influyentes en regresión logística usando la opción DFBETAS=                                                                                          </pre>
+<pre>del OUTPUT statement:                                                                                                   </pre>
+<pre>*** Creacion de la variable de interaccion entre z1 y z2 (z1_X_z2) en el dataset TEST;                                                                                          </pre>
+<pre>%CreateInteractions(test , z1 , z2 , join=_X_);                                                                                          </pre>
+<pre>proc logistic data=test;                                                                                                </pre>
+<pre>                              model y = z1 z2 z1_X_z2;                                                                  </pre>
+<pre>                              output out=dfbetas dfbetas=_ALL_;* Genera el dataset con los DFBETAS;                              </pre>
+<pre>                              ** Las variables con los DFBETAS se llaman DFBETA_z1, DFBETA_z2, etc;                                                            </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>*** Deteccion de influyentes (a partir del dataset DFBETAS);                                                                                          </pre>
+<pre>%Dfbetas(dfbetas , var=z1 z2 z1_X_z2 , macrovar=dfbetas);                                                                                          </pre>
+<pre>** En la macro variable &dfbetas se genera la lista de DFBETAS. En este caso                                                                                          </pre>
+<pre>** la lista es: 'dfb_z1 dfb_z2 dfb_z1_X_z2'.                                                                                          </pre>
+<pre>******************************************************************************                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- Detección de influyentes en regresión logística usando ODS tables:                                                                                          </pre>
+<pre>*** Creacion de la variable de interaccion entre z1 y z2 (z1_X_z2) en el dataset TEST;                                                                                          </pre>
+<pre>%CreateInteractions(test , z1 , z2 , join=_X_);                                                                                          </pre>
+<pre>proc logistic data=test;                                                                                                </pre>
+<pre>                              model y = z1 z2 z1_X_z2 / influence;* Pide las medidas de influencia;                              </pre>
+<pre>ods listing exclude Influence;* Elimina del output las medidas de influencia;                                                            </pre>
+<pre>ods output Influence=influence;* Genera el dataset con los DFBETAS;                                                            </pre>
+<pre>                              ** Las variables con los DFBETAS se llaman z1Dfbeta, z2Dfbeta, etc;                                                            </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>ods listing;                  * Resetea la opcion mostrar todas las salidas generadas en el output;                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>*** Deteccion de influyentes (a partir del dataset INFLUENCE);                                                                                          </pre>
+<pre>* Notar que prefix= es vacio y suffix=Dfbeta, porque esta es la forma en que                                                                                          </pre>
+<pre>* las variables con los DFBETAS estan nombradas en el dataset INFLUENCE;                                                                                          </pre>
+<pre>%Dfbetas(influence , var=z1 z2 z1_X_z2 , prefix= , suffix=Dfbeta , macrovar=dfbetas);                                                                                          </pre>
+<pre>** En la macro variable &dfbetas se genera la lista de DFBETAS. En este caso                                                                                          </pre>
+<pre>** la lista es: 'Dfbeta_z1 Dfbeta_z2 Dfbeta_z1_X_z2'.                                                                                          </pre>
+<pre>******************************************************************************                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>REFERENCES:</h3>
+<pre>- SAS On-line Manual: PROC REG (Details -> Influence Diagnostics) y PROC LOGISTIC                                                                                          </pre>
+<pre>(Details -> Regression Diagnostics).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- Hocking, "Methods and Applications of Linear Models" (1996).                                                                                          </pre>
+<body>
+</html>

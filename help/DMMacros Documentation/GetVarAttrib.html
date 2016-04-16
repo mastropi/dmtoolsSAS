@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetVarAttrib</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetVarAttrib</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      07-Jun-2012                                                                               </pre>
+<pre>Modified:                     07-Jun-2012                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Returns the requested attribute from of a given variable in a dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetVarAttrib(data, var, fun);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset where the variable of interest exists.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        Variable whose type wants to be retrieved.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- fun:                        SAS file I/O function to be used to retrieve the requested attribute                                                            </pre>
+<pre>                              Examples are: vartype, varlen, varlabel, varnum, etc.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The value of the attribute associated with the specified I/O function for the given variable                                                                                          </pre>
+<pre>in the specified dataset.                                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GetVarType                                                                                                           </pre>
+<pre>- %GetVarNames                                                                                                          </pre>
+<pre>- %GetVarOrder                                                                                                          </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>%let xlen = %GetVarAttrib(test, x, fun=varlen);                                                                                          </pre>
+<pre>Macro variable 'xlen' contains the length of variable X in dataset TEST.                                                                                          </pre>
+<body>
+</html>

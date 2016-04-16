@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%SetVarOrder</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %SetVarOrder</h1>
+<pre>Version:                      1.01                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      13-Aug-2004                                                                               </pre>
+<pre>Modified:                     29-Mar-2016 (previous: 13-Aug-2004)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Sets the order of some variables in a dataset, so that the whole list                                                                                          </pre>
+<pre>of variables need not be specified.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%SetVarOrder(data, vars, pos, var, datastep=0);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Dataset where the order of the variables wants to be set.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- vars:                       Blank-separated list of variables to move to another position.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- pos:                        The relative position (after/before) where the variables listed in                                                            </pre>
+<pre>                              'vars' are placed with respect to the var listed in 'var'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        Variable that defines the relative position of the variables listed                                                            </pre>
+<pre>                              in 'vars'.                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- datastep:                   Whether to run a data step to set the new order of variables.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetVarNames                                                                                                          </pre>
+<pre>- %InsertInList                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %SetVarOrder(test, x y, after, z);                                                                                          </pre>
+<pre>This places variables X and Y in dataset TEST after variable z.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %SetVarOrder(test, x, before, z);                                                                                          </pre>
+<pre>This places variable X in dataset TEST before variable Z.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>This macro avoids one having to use a FORMAT statement and list ALL the variables that one                                                                                          </pre>
+<pre>wants to appear before a given variable in a dataset.                                                                                          </pre>
+<pre>It becomes particularly useful when the dataset has hundreds of variables.                                                                                          </pre>
+<body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GraphXY</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GraphXY</h1>
+<pre>Version: 1.02                                                                                                           </pre>
+<pre>Author: Santiago Laplagne - Daniel Mastropietro                                                                                          </pre>
+<pre>Created: 17-Dec-02                                                                                                      </pre>
+<pre>Modified: 5-Aug-03                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Realiza un scatter plot de dos variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%graphXY( data, varX, varY, file=,                                                                  </pre>
+<pre>          title="Scatter plot of 'varY' vs. 'varX'",                                                            </pre>
+<pre>          height = 0.8 , options=);                                                                 </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Input dataset con los datos a utilizar. Puede recibir                                                            </pre>
+<pre>          cualquier opción adicional como en cualquier opción data=                                                            </pre>
+<pre>          de SAS.                                                                                   </pre>
+<pre>                                                                                                    </pre>
+<pre>- varX:   Nombre de la variable 'x' para graficar los puntos de                                                            </pre>
+<pre>          coordenadas                   (x, y).                                                     </pre>
+<pre>                                                                                                    </pre>
+<pre>- varY:   Nombre de la variable 'y' para graficar los puntos de                                                             </pre>
+<pre>          coordenadas (x, y).                                                                       </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- strata: Nombre de la variable que define los estratos o grupos.                                                            </pre>
+<pre>          Para cada valor distinto en esta columna se usa un color                                                            </pre>
+<pre>          distinto en el gráfico.                                                                   </pre>
+<pre>          Si los estratos están definidos por más de una variable                                                            </pre>
+<pre>          puede usarse la macro %CreateGroupVar para generar una                                                            </pre>
+<pre>          única variable indicadora de los estratos a partir de                                                            </pre>
+<pre>          una lista de variables.                                                                   </pre>
+<pre>                                                                                                    </pre>
+<pre>- file:   Nombre del archivo donde guardar el gráfico en formato JPG.                                                            </pre>
+<pre>          Debe indicarse entre comillas la ubicación y el nombre del                                                            </pre>
+<pre>          archivo a utilizar.                                                                       </pre>
+<pre>          En caso de pasar este parámetro, no se muestra ningún                                                            </pre>
+<pre>          gráfico en pantalla.                                                                      </pre>
+<pre>                                                                                                    </pre>
+<pre>- title:  Título del gráfico (puede ser entre comillas o no).                                                            </pre>
+<pre>          Se modifica el valor del primer nivel del titulo (title1).                                                            </pre>
+<pre>          default: "Scatter plot of 'varY' vs 'varX'"                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- height: Tamaño de los símbolos a utilizar en el gráfico.                                                            </pre>
+<pre>          default: 0.8                                                                              </pre>
+<pre>                                                                                                    </pre>
+<pre>- options:Opciones para el grafico. Puede ser cualquier opcion                                                            </pre>
+<pre>          valida dentro de las opciones del plot statement del                                                            </pre>
+<pre>          proc gplot.                                                                               </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Exist                                                                                            </pre>
+<pre>- %DefineSymbols                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>- GraphXY(data , x , y , file="C:\graficos\xy.jpg" , title="Titulo" ,                                                                                          </pre>
+			options=vref=0);
+<pre>          options=vref=0);                                                                          </pre>
+<body>
+</html>

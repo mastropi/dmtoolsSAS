@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%SetAxis</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %SetAxis</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 29-Sep-04                                                                                                      </pre>
+<pre>Modified: 29-Sep-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro returns the string to define an axis limits, as in a haxis= or vaxis=                                                                                          </pre>
+<pre>option or in an order=() option of an axis statement.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%SetAxis(min, max, nrodiv);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- min:                        Minimum number for the axis.                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- max:                        Maximum number for the axis.                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- nrodiv:                     Number of divisions to use in the axis (= #ticks - 1).                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>- The values passed in MIN= and MAX= are 'prettysized' with the macro %Pretty, so that                                                                                          </pre>
+<pre>"round" numbers are shown in the axis.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Pretty                                                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %SymmetricAxis                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.-                                                                                                                     </pre>
+<pre>axis1 order=(%SetAxis(0, 2.34, 10));                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.-                                                                                                                     </pre>
+<pre>%GetStat(test, var=y z, stat=min);                                                                                          </pre>
+<pre>%GetStat(test, var=y z, stat=max);                                                                                          </pre>
+<pre>%let min = %sysfunc(min(&y_min,&z_min));                                                                                          </pre>
+<pre>%let max = %sysfunc(max(&y_max,&z_max));                                                                                          </pre>
+<pre>proc gplot data=test;                                                                                                   </pre>
+<pre>                              plot y*x z*x / vaxis=%SetAxis(&min, &max, 10);                                                            </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>quit;                                                                                                                   </pre>
+<body>
+</html>

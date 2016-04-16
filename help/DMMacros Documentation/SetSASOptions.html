@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%SetSASOptions</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %SetSASOptions</h1>
+<pre>Sets a few of current SAS options after reading their current value, so that they can be reset by                                                                                          </pre>
+<pre>%ResetSASOptions.                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>Note that macro variables are defined here as global macro variables. The reason for doing this is                                                                                          </pre>
+<pre>to avoid having to change each macro that calls %SetSASOptions whenever a new option wants to be set.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Note also the use of the global macro variable &_Macro_Call_Level_. This macro variable contains the value                                                                                          </pre>
+<pre>of the call level at which the macro call to %SetSASOptions is performed. For example, if macro %A calls                                                                                          </pre>
+<pre>macro %B, and both macro %A and macro %B call %SetSASOptions, then &_Macro_Call_Level_ is set to 1,                                                                                          </pre>
+<pre>when %SetSASOptions is called from macro %A, whereas all subsequent calls to %SetSASOptions increase                                                                                          </pre>
+<pre>the value of &_Macro_Call_Level_ by 1. The options are only set at the first call to %SetSASOptions,                                                                                          </pre>
+<pre>otherwise the current settings would be overriden in subsequents calls to %SetSASOptions.                                                                                          </pre>
+<pre>The value of &_Macro_Call_Level_ is decreased by %ResetSASOptions, whenever this macro is being called, first                                                                                          </pre>
+<pre>by %B and then by %A. When %ResetSASOptions is called at the last level, macro variable _Macro_Call_Level_                                                                                          </pre>
+<pre>is deleted.                                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>%SetSASOptinos is used by different macros, for example for setting the value of the nonotes option, to                                                                                          </pre>
+<pre>avoid showing SAS messages in the log.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS USED IN THIS MACRO:</h3>
+<pre>- %ExistMacroVar                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>HISTORY:</h3>
+<pre>- 2015/09/02: Added VARLENCHK= parameter to set the VARLENCHK= option.                                                                                          </pre>
+<body>
+</html>

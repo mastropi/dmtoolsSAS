@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%KS</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %KS</h1>
+<pre>Version: 1.03                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 16-Nov-04                                                                                                      </pre>
+<pre>Modified: 24-Aug-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Computes KS for a scoring model with a dichotomous target variable, and the percentile                                                                                          </pre>
+<pre>of the score at which the KS occurs.                                                                                          </pre>
+<pre>Optionally, a plot of the cumulative distribution function of the score for each                                                                                          </pre>
+<pre>value of the target variable is made.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%KS(                                                                                                </pre>
+<pre>          data,                         /* Input dataset. */                                        </pre>
+<pre>          target=y,                     /* Dichotomous target variable. */                              </pre>
+<pre>          score=p,                      /* Score variable. */                                       </pre>
+<pre>          descending=1,                 /* Whether to rank sort the score in descending or ascending order. */                              </pre>
+<pre>          min=0,                        /* Minimum possible value of the score variable (for plotting purposes). */                              </pre>
+<pre>          max=1,                        /* Maximum possible value of the score variable (for plotting purposes). */                              </pre>
+<pre>          by=,                          /* By variables. */                                         </pre>
+<pre>          plot=0,                       /* Show CDF for both target events with KS? */                              </pre>
+<pre>          bands=1,                      /* Show the confidence bands for the CDFs?*/                            </pre>
+<pre>          confidence=0.95,/* Confidence level for the confidence bands for the CDFs. */                                                            </pre>
+<pre>          label=,                       /* List of the 2 labels to be used in the CDF plot for each level of */                              </pre>
+<pre>          /* the target variable, listed in the order given by the ordered levels. */                                                            </pre>
+<pre>          color=,                       /* List of the 2 colors to be used in the CDF plot for each level of */                              </pre>
+<pre>          /* the target variable, listed in the order set by the ordered levels. */                                                            </pre>
+<pre>          points=1,                     /* Show points indicating plotting points? */                              </pre>
+<pre>          out=,                         /* Output dataset with the data necessary to make the CDF plots. */                              </pre>
+<pre>          outks=,                       /* Output dataset with the KS value. */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset containing the score obtained in the scoring model.                                                            </pre>
+<pre>                              Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- target:                     Target variable used in the model.                                                            </pre>
+<pre>                              default: y                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- score:                      Variable containing the score generated by the scoring model.                                                            </pre>
+<pre>                              It is assumed that the score variable only takes NON-NEGATIVS values.                                                            </pre>
+<pre>                              Typically a probability.                                                                  </pre>
+<pre>                              default: p                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- descending:                 Whether to compute the percentiles of the score variable in ascending or                                                            </pre>
+<pre>                              desceding sequence. This parameter switches the position of the gains curve                                                            </pre>
+<pre>                              for the events with respect to the naive line.                                                            </pre>
+<pre>                              Possible values: 0 => Ascending, 1 => Descending                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- min:                        Minimum possible value of the score.                                                            </pre>
+<pre>                              This is used for plotting purposes, so that the score CDFs shown start                                                            </pre>
+<pre>                              at this value.                                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- max:                        Maximum possible value of the score.                                                            </pre>
+<pre>                              This is used for plotting purposes, so that the score CDFs shown reach                                                            </pre>
+<pre>                              this value.                                                                               </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         List of by variables by which the analysis is performed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plot:                       Show the plot of the score CDFs by each value of the target variable?                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- bands:                      Whether to show the confidence bands for the CDFs.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- confidence:                 Confidence level for the CDF confidence bands. That is,                                                             </pre>
+<pre>                              a (&confidence)*100% confidence band is shown for each plotted CDF.                                                            </pre>
+<pre>                              Possible values are: 0.80, 0.90, 0.95, 0.98 and 0.99.                                                            </pre>
+<pre>                              default: 0.95 (i.e. 95% confidence bands are shown)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- label:                      Unquoted list of the 2 labels to use in the legend indicating to what value of                                                            </pre>
+<pre>                              the target variable each CDF corresponds. The labels should be listed in the                                                            </pre>
+<pre>                              order of the ordered values of the target variable. For example, if the values                                                            </pre>
+<pre>                              of the target variables are 0 and 1, the first label corresponds to the value 0.                                                            </pre>
+<pre>                              By default, the label is of the form                                                            </pre>
+<pre>                              <score-variable>=<level> (ex: DQ90=0, DQ90=1)                                                            </pre>
+<pre>                              Ex: label=Good Bad                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>- color:                      Same as option 'label' but this option specifies the colors to use for each CDF.                                                            </pre>
+<pre>                              default: blue red                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<pre>- points:                     Show points indicating plotting points in the graph?                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset with the data necessary to make the CDF plots.                                                            </pre>
+<pre>                              It contains the following columns:                                                            </pre>
+<pre>                              - <target>: Value taken by the target variable.                                                            </pre>
+<pre>                              - <score>: Score variable.                                                                </pre>
+<pre>                              - CDF: Cumulative Distribution Function of the score.                                                            </pre>
+<pre>                              - CDFLower<confidence*100>: Lower end of the CDF confidence band.                                                            </pre>
+<pre>                              - CDFUpper<confidence*100>: Upper end of the CDF confidence band.                                                            </pre>
+<pre>                              - rank: Score rank (from higer to lower values).                                                            </pre>
+<pre>                              - RankCDF: Cumulative Distribution Function of the score rank.                                                            </pre>
+<pre>                              - RankCDFLower<confidence*100>: Lower end of the Rank CDF confidence band.                                                            </pre>
+<pre>                              - RankCDFUpper<confidence*100>: Upper end of the Rank CDF confidence band.                                                            </pre>
+<pre>                              Note: <zzz> indicates the value of parameter ZZZ passed to the macro.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outks:                      Output dataset containing the following variables:                                                            </pre>
+<pre>                              - KS                                                                                      </pre>
+<pre>                              - Rank: Rank of the score variable at which the KS occurs.                                                            </pre>
+<pre>                              - <score-variable>: Value of the score variable at which the KS occurs.                                                            </pre>
+<pre>                              If this parameter is passed, nothing is shown in the output window.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- Confidence bands for the CDFs are included in the plot if requested.                                                                                          </pre>
+<pre>2.- When confidence bands are requested, the analysis variable is assumed to be non-negative                                                                                          </pre>
+<pre>because the LIFETEST procedure is used to compute the confidence bands.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %CreateGroupVar                                                                                                       </pre>
+<pre>- %CreateInteractions                                                                                                   </pre>
+<pre>- %DefineSymbols                                                                                                        </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetAxis                                                                                                              </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %KS(scoredData, target=dq90, score=p, plot=1, confidence=0.90, label=Good Bad, color=green red);                                                                                          </pre>
+<pre>This computes the KS for the scored model whose score is stored in variable P of dataset                                                                                          </pre>
+<pre>SCOREDDATA. The target variable for the model is DQ90.                                                                                          </pre>
+<pre>Plot of the score CDFs for each value of the target variable are shown together with 90%                                                                                          </pre>
+<pre>confidence bands.                                                                                                       </pre>
+<pre>The label for the smallest target value is 'Good' and for the largest target value                                                                                          </pre>
+<pre>is 'Bad', and the colors are 'green' and 'red' respectively.                                                                                          </pre>
+<body>
+</html>

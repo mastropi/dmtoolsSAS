@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title> ExistVar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO  ExistVar</h1>
+<pre>Version: 1.05                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 12-May-01                                                                                                      </pre>
+<pre>Modified: 28-Dec-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Determines if all variables in a list exist in a dataset and optionally stores the list of                                                                                          </pre>
+<pre>variables not found in a global macro variable.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%ExistVar(                                                                                          </pre>
+<pre>          data,                         /* Input dataset where the variables are searched for. */                              </pre>
+<pre>          var,                          /* List of variables to search in the input dataset. */                              </pre>
+<pre>          macrovar=,                    /* Name of global macro variable with list of variables not found. */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Name of the dataset where the variables are searched for.                                                            </pre>
+<pre>                              Data option can be specified as in any data= SAS option, but THEY ARE IGNORED.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        Blank-separated list of variables to search in 'data'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- macrovar:                   Name of the global macro variable where the list of the variables not found                                                            </pre>
+<pre>                              in the dataset is stored.                                                                 </pre>
+<pre>                              NOTE: The name passed CANNOT be the name of any other parameter in the macro                                                            </pre>
+<pre>                              and it should not contain two underscores in its name.                                                            </pre>
+<pre>                              Also, its value CANNOT be EXIST.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => Do not show, 1 => Show.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The macro returns 1 if ALL variables in 'var' exist, 0 otherwise.                                                                                          </pre>
+<pre>Also, if either the dataset does not exist, or the list of variables passed                                                                                          </pre>
+<pre>is empty, the macro returns 0.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Exist                                                                                                                </pre>
+<pre>- %ExistMacroVar                                                                                                        </pre>
+<pre>- %ExistOption                                                                                                          </pre>
+<body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%DetectOutliersMAD</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %DetectOutliersMAD</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Feb-05                                                                                                       </pre>
+<pre>Modified: 7-Nov-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro detects univariate outliers using the MAD method.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%DetectOutliersMAD(                                                                                          </pre>
+<pre>          data,                                                                                     </pre>
+<pre>          var=_NUMERIC_,                                                                            </pre>
+<pre>          condition=,                   /* Condition to be satisfied by each analysis variable in order to be considered */                              </pre>
+<pre>          /* in the outlier detection. The keyword BETWEEN can be used as in BETWEEN 0 AND 2. */                                                            </pre>
+<pre>          multiplier=9,                                                                             </pre>
+<pre>          nameOutlier=outlier,                                                                      </pre>
+<pre>          prefix=o_,                                                                                </pre>
+<pre>          out=,                                                                                     </pre>
+<pre>          outmad=,                      /* NOTE: The variables are listed in alphabetical order not in the order */                              </pre>
+<pre>          /* they were passed to the macro in parameter VAR. */                                                            </pre>
+<pre>          macrovar=,                    /* Name of macro variable where the list of variables indicating the outliers */                              </pre>
+<pre>          /* for each analysis variable is stored. */                                                            </pre>
+<pre>          log=1);                                                                                   </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                          </pre>
+<pre>- %Getnobs                                                                                          </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %GetVarList                                                                                          </pre>
+<pre>- %GetVarOrder                                                                                          </pre>
+<pre>- %MakeList                                                                                          </pre>
+<pre>- %MakeListFromVar                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>%let var = ALL_SDO_SUM CC_ANT_MAX_HIST CC_PMI_SDO_DIV;                                                                                          </pre>
+<pre>%DetectOutliersMAD(temp, var=&var, condition=>0, out=temp2, macrovar=list_outliers);                                                                                          </pre>
+<pre>%DetectOutliersMAD(temp, var=&var, condition=not between -1 and 0, out=temp2, macrovar=list_outliers);                                                                                          </pre>
+<body>
+</html>

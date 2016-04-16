@@ -1069,7 +1069,7 @@ no representaria mayores inconvenientes y seria igualmente apropiado.
 			%put TESTLOGISTICFIT: created.;
 		%end;
 	%end;
-/*
+
 	proc datasets nolist;
 		delete 	_TestLogisticFit_cat_
 				_TestLogisticFit_data_
@@ -1077,7 +1077,7 @@ no representaria mayores inconvenientes y seria igualmente apropiado.
 				_TestLogisticFit_anno_logit_
 				_TestLogisticFit_anno_res_;
 	quit;
-*/
+
 %end;	%* %if ~&error;
 
 %if &log %then %do;

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%EvalExp</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %EvalExp</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 29-Sep-04                                                                                                      </pre>
+<pre>Modified: 29-Sep-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro evaluates (or resolves) an expression by calling the function COMPBL at the                                                                                          </pre>
+<pre>macro level (via %sysfunc). That is, it simply does the following:                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>%sysfunc(compbl(&exp));                                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>where &exp is the expression to evaluate.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>This macro was created because there is no macro function to force the evaluation of an                                                                                          </pre>
+<pre>expression at the macro level when the expression is not an mathematical operation.                                                                                          </pre>
+<pre>(For the evaluation of such expressions there exist %eval and %sysevalf.)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%EvalExp(exp);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Compute                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.-                                                                                                 </pre>
+<pre>%let list = %nrstr(&x1, &x2);                                                                                          </pre>
+<pre>%let mean = %sysfunc(mean(%EvalExp(&list)));                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>(Using                                                                                              </pre>
+<pre>%let mean = %sysfunc(mean(&list));                                                                                          </pre>
+<pre>DOES NOT WORK(!!!) because the expression contained in &list is not resolved                                                                                          </pre>
+<pre>prior to the execution of MEAN, and the function MEAN requires numeric arguments.)                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>APPLICATIONS:</h3>
+<pre>It is useful to evaluate an expression or the result of a macro call prior to the evaluation                                                                                          </pre>
+<pre>of another function.                                                                                          </pre>
+<pre>Ex:                                                                                                 </pre>
+<pre>%let max = %sysfunc(max(%EvalExp(%MakeList(x1 x2 x3, prefix=&, sep=%quote(,)))));                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>This computes the maximum among the macro variables &x1, &x2 and &x3.                                                                                          </pre>
+<pre>If %EvalExp is not used, the execution of function MAX gives the following error:                                                                                          </pre>
+<pre>"ERROR: The function MAX referenced by the %SYSFUNC or %QSYSFUNC macro function has too few                                                                                          </pre>
+	arguments."
+<pre>          arguments."                                                                               </pre>
+<pre>and this is because the result of the call to %MakeList is not resolved prior to the                                                                                          </pre>
+<pre>call to function MAX.                                                                                          </pre>
+<body>
+</html>

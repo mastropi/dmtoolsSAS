@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetVarNames</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetVarNames</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 15-Jul-03                                                                                                      </pre>
+<pre>Modified: 23-Sep-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Devuelve en una macro variable la lista de variables de un cierto                                                                                          </pre>
+<pre>tipo (numéricas, caracter o todas) presentes en un dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetVarNames(data , var=_ALL_);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Dataset de interés.                                                                       </pre>
+<pre>                              Puede recibir cualquier opción adicional como en cualquier                                                            </pre>
+<pre>                              opción data= de SAS. Sin embargo, las opciones keep= y drop=                                                            </pre>
+<pre>                              son ignoradas al obtener la lista de variables del dataset.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Tipo de variables que se quiere leer.                                                            </pre>
+<pre>                              Valores posibles son: _ALL_, _NUMERIC_, _CHAR_,                                                            </pre>
+<pre>                              para indicar respectivamente todas las variables, sólo las                                                            </pre>
+				variables	numéricas, o sólo las variables caracter.
+<pre>                              variables                     numéricas, o sólo las variables caracter.                              </pre>
+<pre>                              No es case sensitive.                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>Lista separadas por blancos con los nombres de las variables presentes en el                                                                                          </pre>
+<pre>dataset 'data'.                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>- Puede ser de utilidad usar esta macro cuando es de interés conocer las                                                                                          </pre>
+<pre>variables que originalmente están presentes en un dataset A.                                                                                          </pre>
+<pre>Por ejemplo, si en el transcurso de un proceso, más variables son agregadas                                                                                          </pre>
+<pre>al dataset A y luego se desea recuperar sus variables originales, bastaría                                                                                          </pre>
+<pre>con tener la lista de variables presentes en A antes de comenzar el proceso,                                                                                          </pre>
+<pre>y luego usar el comando u opción KEEP con dicha lista de variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Para ejemplificar, considerése el siguiente caso.                                                                                          </pre>
+<pre>Se tiene el dataset A con las variables x1 x2 z1 z2,                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>*** En una macro variable se guarda la lista de variables presentes en A;                                                                                          </pre>
+<pre>%let var_orig = %GetVarNames(A);                                                                                          </pre>
+<pre>%put &var_orig;               *** &var_orig vale 'x1 x2 z1 z2';                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre><... procesos que agregan nuevas variables al dataset A ...>                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>*** Recuperacion de las variables originalmente presentes en A;                                                                                          </pre>
+<pre>data A;                                                                                                                 </pre>
+<pre>                              set A(keep=&var_orig);                                                                    </pre>
+<pre>run;                                                                                                                    </pre>
+<body>
+</html>

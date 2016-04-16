@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Oversampling</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Oversampling</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 18-Aug-05                                                                                                      </pre>
+<pre>Modified: 18-Aug-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro partitions the input dataset into two samples (TRAINING and VALIDATION)                                                                                          </pre>
+<pre>performing oversample on a target dichotomous variable with specified rates on each sample.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%MACRO Oversampling(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. */                                        </pre>
+<pre>          target=,                      /* Target variable on which the oversampling is performed. */                              </pre>
+<pre>          rates=,                       /* Sampling rates for each value of the target variable in */                              </pre>
+<pre>          /* TRAINING and VALIDATION. */                                                            </pre>
+<pre>          seed=12345,                   /* Sample seed.               */                            </pre>
+<pre>          out=,                         /* Output dataset. */                                       </pre>
+<pre>          format=,                      /* Variables and formats to be used in the output dataset format statement. */                              </pre>
+<pre>          namesample=SAMPLE,            /* Name for the variable that will contain the sample allocation info. */                              </pre>
+<pre>          values=TRAIN VALID,           /* Values to be used for the sample allocation in variable NAMESAMPLE. */                              </pre>
+<pre>          log=1);                       /* Shows messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset where the sample partition is performed.                                                             </pre>
+<pre>                              Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- target:                     Name of the target variable on which the oversample is performed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- rates                       Blank-separated list of the rare event rates desired in each sample.                                                            </pre>
+<pre>                              The first value is the Rare Event Rate for the TRAINING sample and                                                            </pre>
+<pre>                              the second value is the Rare Event Rate for the VALIDATION smaple.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- seed:                       Sample seed.                                                                              </pre>
+<pre>                              default: 12345                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset with the same data as the input dataset plus an                                                            </pre>
+<pre>                              additional variable indicating the sample allocation of each observation.                                                            </pre>
+<pre>                              If no dataset is passed, the allocation variable is added at the beginning                                                            </pre>
+<pre>                              of the input dataset.                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>- format:                     Contents of the FORMAT statement to use when creating the output dataset.                                                            </pre>
+<pre>                              Ex: FORMAT=obs pcnt percent7.1                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- namesample:                 Name to be used for the variable containing the sample allocation.                                                            </pre>
+<pre>                              The values that identify each sample are specified in parameter VALUES.                                                            </pre>
+<pre>                              By default, the values are TRAIN and VALID respectively for the TRAINING                                                            </pre>
+<pre>                              and VALIDATION samples.                                                                   </pre>
+<pre>                              default: SAMPLE                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<pre>- values:                     Blank-separated values to be used for variable NAMESAMPLE= to identify each                                                            </pre>
+<pre>                              sample (TRAINING and VALIDATION).                                                            </pre>
+<pre>                              default: TRAIN VALID                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<body>
+</html>

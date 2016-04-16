@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CreateVarFromList</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CreateVarFromList</h1>
+<pre>Version: 1.02                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 3-Dec-04                                                                                                       </pre>
+<pre>Modified: 17-Jan-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro creates a dataset with one column containing the names in a list.                                                                                          </pre>
+<pre>Optionally the dataset is transposed so that there is only one observation with all                                                                                          </pre>
+<pre>the values passed in the list.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CreateVarFromList(                                                                                          </pre>
+<pre>          list,                         /* List of names */                                         </pre>
+<pre>          out=,                         /* Output dataset with the list of names in one column */                              </pre>
+<pre>          sep=%quote( )                 /* Separator used to separate the names in the list. */                              </pre>
+<pre>          type=char,                    /* Type of variable to create in output dataset. */                              </pre>
+<pre>          sort=0,                       /* Should the list of names be sorted alphabetically? */                              </pre>
+<pre>          transpose=0                   /* Transpose output dataset to have only one observation with all the names? */                              </pre>
+<pre>          title=,                       /* Title to show when printing the list of names in the output window. */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>This macro calls %PrintNameList. See the help of that macro for additional information.                                                                                          </pre>
+<body>
+</html>

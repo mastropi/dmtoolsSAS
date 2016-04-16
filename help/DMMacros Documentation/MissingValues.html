@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%MissingValues</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %MissingValues</h1>
+<pre>Version: 1.02                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 28-Dec-04                                                                                                      </pre>
+<pre>Modified: 7-Aug-06                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro computes the number of missing values of a set of numeric variables and character                                                                                          </pre>
+<pre>variables, and generates an output dataset with the number and percentage of missing values                                                                                          </pre>
+<pre>for each analysis variable.                                                                                             </pre>
+<pre>Optionally, it can compute the number and percentage of observations that have a given value                                                                                          </pre>
+<pre>(such as 0). This value can be numeric or character.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%MissingValues(data, by=, var=_ALL_, value=, out=, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in any data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- by:                         Blank-separated list of variables by which the analysis is done.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        List of variables for which missing values are searched.                                                            </pre>
+<pre>                              default: _ALL_                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- value:                      Value of interest. The count and percentage of observations having this value                                                            </pre>
+<pre>                              is computed. This can be a numeric value or a character value. The numbers are                                                            </pre>
+<pre>                              computed for the variables of the same type (either numeric or character).                                                             </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the variables in the input dataset that have at least                                                            </pre>
+<pre>                              one missing value.                                                                        </pre>
+<pre>                              Data options can be specified as in any data= SAS option.                                                            </pre>
+<pre>                              The output dataset contains the following 4 columns:                                                            </pre>
+<pre>                              - var:                        Variable name with missing values.                              </pre>
+<pre>                              - type:                       Variable type: C or N                                       </pre>
+<pre>                              - n:                          Total number of observations in the dataset                              </pre>
+<pre>                              - nmiss:                      Number of missing values.                                   </pre>
+<pre>                              - pcntmiss:                   Percentage of missing values.                               </pre>
+<pre>                              When parameter VALUE is not blank, the following additional columns are created                                                            </pre>
+<pre>                              in the output dataset:                                                                    </pre>
+<pre>                              - n<value>:                   Number of obs with their value equal to VALUE.                              </pre>
+<pre>                              - pcnt<value>:                Percentage of obs with their value equal to VALUE.                              </pre>
+<pre>                              default: _mv_missing_                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>It is assumed that the variables VAR, TYPE, COUNT, N and PERCENT do NOT exist in the input dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>- %GetVarType                                                                                                           </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %MissingValues(test, var=_NUMERIC_, out=missing);                                                                                          </pre>
+<pre>Generates dataset MISSING with the number and percentage of missing values for the numeric                                                                                          </pre>
+<pre>variables present in the dataset TEST. The information is stored in variables NMISS and PCNTMISS.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %MissingValues(test, var=x y z w, value=0, out=missing0);                                                                                          </pre>
+<pre>Generates dataset MISSING0 with:                                                                                          </pre>
+<pre>- number and percentage of missing values for variables X Y Z and W.                                                                                          </pre>
+<pre>- number and percentage of zeros for variables X Y Z and W.                                                                                          </pre>
+<pre>The information is stored, respectively, in variables NMISS, PCNTMISS, N0 and PCNT0.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %MissingValues(test, var=a b c d, value="A", out=missingA);                                                                                          </pre>
+<pre>Generates dataset MISSINGA with:                                                                                          </pre>
+<pre>- number and percentage of missing values for variables A B C and D.                                                                                          </pre>
+<pre>- number and percentage of values equal to "A" for variables A B C and D.                                                                                          </pre>
+<pre>The information is stored, respectively, in variables NMISS, PCNTMISS, NA and PCNTA.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %MissingValues(test, by=group subgroup, var=x y z w, value=-1, out=MissingByGroup);                                                                                          </pre>
+<pre>Generates dataset MISSINGBYGROUP with the following information by each combination of the by                                                                                          </pre>
+<pre>variables GROUP and SUBGROUP.                                                                                           </pre>
+<pre>- number and percentage of missing values for variables X Y Z and W.                                                                                          </pre>
+<pre>- number and percentage of values equal to -1 for variables X Y Z and W.                                                                                          </pre>
+<pre>The information is stored, respectively, in variables NMISS, PCNTMISS, NM1 and PCNTM1.                                                                                          </pre>
+<body>
+</html>

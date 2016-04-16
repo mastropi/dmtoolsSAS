@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title> InsertInList</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO  InsertInList</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 4-Aug-04                                                                                                       </pre>
+<pre>Modified: 4-Aug-04                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Inserts a name in a blank-separated list of names, either before or after                                                                                          </pre>
+<pre>a given keyword.                                                                                                        </pre>
+<pre>The keyword can be a list of names and it is always searched for its full                                                                                          </pre>
+<pre>appearance (function INDEXW is used from SAS language).                                                                                          </pre>
+<pre>The search for the keyword is NOT case sensitive.                                                                                          </pre>
+<pre>If one of the names to be inserted is already present in the list, its                                                                                          </pre>
+<pre>position is changed as requested.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%InsertInList(list, name, pos, key);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- list:                       Blank-separated list where a name wants to be inserted.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- name:                       List of names to be inserted.                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- pos:                        The relative position (after/before) where 'name' should be                                                            </pre>
+<pre>                              inserted with respect to 'key'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- key:                        Keyword to be searched for in 'list' that determines the position                                                            </pre>
+<pre>                              where 'name' is inserted.                                                                 </pre>
+<pre>                              It is usually a single name, but a list of names is also accepted.                                                            </pre>
+<pre>                              In this case, the list of keywords is searched for as a whole,                                                            </pre>
+<pre>                              as opposed to searching each name in the list.                                                            </pre>
+<pre>                              The search is NOT case sensitive.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The original list with the name 'name' inserted before/after (according to 'pos')                                                                                          </pre>
+<pre>the name 'key'.                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>If more than one occurrence of the keyword 'key' exist in 'list', the insertion point                                                                                          </pre>
+<pre>is taken to be that of the first occurrence.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetVarNames                                                                                                          </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %InsertInList(pp qq rr, ss, after, qq);                                                                                          </pre>
+<pre>Returns the list 'pp qq ss rr'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %InsertInList(pp qq rr, ss, before, pp);                                                                                          </pre>
+<pre>Returns the list 'ss pp qq rr'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %InsertInList(pp qq rr, ss, before, NonExistentName);                                                                                          </pre>
+<pre>Returns the list unchanged, since the name 'NonExistentName' is not in the list.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %InsertInList(pp qq rr, ss, before, s);                                                                                          </pre>
+<pre>Returns the list unchanged, since the name 's' is not in the list.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>5.- Change the position of a name in the list:                                                                                          </pre>
+<pre>%InsertInList(pp qq rr, rr, before, qq);                                                                                          </pre>
+<pre>Returns the list 'pp rr qq'.                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>6.- Insert multiple names:                                                                                              </pre>
+<pre>%InsertInList(pp qq rr, ss tt, after, qq);                                                                                          </pre>
+<pre>Returns the list 'pp qq ss tt rr'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>7.- Keyword as a list of names:                                                                                          </pre>
+<pre>%InsertInList(pp qq rr, ss tt, after, qq rr);                                                                                          </pre>
+<pre>Returns the list 'pp qq rr ss tt'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>8.- Problematic insertions:                                                                                             </pre>
+<pre>%InsertInList(pp qq rr, rr, before, RR);                                                                                          </pre>
+<pre>Returns the list unchanged, since rr is both in the list of names to be inserted                                                                                          </pre>
+<pre>and in the keyword.                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>%InsertInList(pp qq rr, ss, before, qq r);                                                                                          </pre>
+<pre>Returns the list unchanged, since the key 'qq r' is not in the list.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>This macro is useful to make it easier to specify the order of a new variable                                                                                          </pre>
+<pre>created in a dataset with a FORMAT statement, without having to list all the                                                                                          </pre>
+<pre>variables coming before the new variable.                                                                                          </pre>
+<pre>Ex:                                                                                                                     </pre>
+<pre>%let var = %GetVarNames(A);   * Reads the variable names present in A;                                                            </pre>
+<pre>%let format = %InsertInList(&var, newvar, after, somevar);                                                                                          </pre>
+<pre>data A;                                                                                                                 </pre>
+<pre>                              format &format;                                                                           </pre>
+<pre>                              set A;                                                                                    </pre>
+<pre>run;                                                                                                                    </pre>
+<body>
+</html>

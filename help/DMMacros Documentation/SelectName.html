@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%SelectName</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %SelectName</h1>
+<pre>Version:                      1.02                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      20-Oct-2004                                                                               </pre>
+<pre>Modified:                     12-Feb-2016 (previous: 16-Jan-2005)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Selects names from a list, by specifying the starting and ending position.                                                                                          </pre>
+<pre>It can also be used to change the separator of the names in the list as the                                                                                          </pre>
+<pre>input separator may be different form the output separator.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%SelectName(list, first, last, sep=%quote( ), outsep=);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- list:                       Blank-separated list from where the names are selected.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- first:                      Position of the first name to select in 'list'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- last:                       Position of the last name to select in 'list'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sep:                        Separator used for the names in 'list'.                                                            </pre>
+<pre>                              default: %quote( ) (i.e. the blank space)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outsep:                     Separator to use for the names in the output list.                                                            </pre>
+<pre>                              default: same as 'sep'                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The list of names present in 'list' from position 'first' to position 'last'                                                                                          </pre>
+<pre>(ends included) separated by separator 'outsep'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>The search for the separator SEP in the list of names is CASE SENSITIVE.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %FindInList                                                                                                           </pre>
+<pre>- %FindMatch                                                                                                            </pre>
+<pre>- %InsertInList                                                                                                         </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %RemoveRepeated                                                                                                       </pre>
+<pre>- %SelectVar                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let subset = %SelectName(x1 x2 x3 x4 x5 z1 z2, 3, 6);                                                                                          </pre>
+<pre>Stores the list                                                                                                         </pre>
+<pre>x3 x4 x5 z1                                                                                                             </pre>
+<pre>in macro variable 'subset'.                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let subset = %SelectName(%quote(x1,x2,x3,x4,z1), 2, 4, sep=%quote(,));                                                                                          </pre>
+<pre>Stores the list                                                                                                         </pre>
+<pre>x2 , x3 , x4                                                                                                            </pre>
+<pre>in macro variable 'subset'.                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- Change the separator of the list from comma to blank space                                                                                          </pre>
+<pre>%let subset = %SelectName(%quote(x1,x2,x3,x4,z1), 2, 4, sep=%quote(,), outsep=%quote( ));                                                                                          </pre>
+<pre>Stores the list                                                                                                         </pre>
+<pre>x2 x3 x4                                                                                                                </pre>
+<pre>in macro variable 'subset'.                                                                                             </pre>
+<body>
+</html>

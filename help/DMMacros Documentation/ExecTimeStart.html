@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html>
+<pre>%* MACRO %ExectTimeStop;                                                                                                </pre>
+<pre>%* Created: 01-Sep-2015;                                                                                                </pre>
+<pre>%* Author: Daniel Mastropietro;                                                                                          </pre>
+<pre>%* Start measuring the execution time;                                                                                          </pre>
+<pre>%* Ref: http://www.sascommunity.org/wiki/Tips:Program_run_time;                                                                                          </pre>
+<pre>%* SEE ALSO:                                                                                                            </pre>
+<pre>%* - %ExecTimeStop                                                                                                      </pre>
+<pre>%* - %SetSASOptions                                                                                                     </pre>
+<pre>%* - %ResetSASOptions;                                                                                                  </pre>
+<pre>&rsubmit;                                                                                                               </pre>
+<pre>%MACRO ExecTimeStart(maxlevel=1) / store des="Starts the clock to measure execution time of a macro";                                                                                          </pre>
+<pre>%* Store the maximum macro level for which execution time should be reported;                                                                                          </pre>
+<pre>%if ~%ExistMacroVar(_Macro_Call_Level_Report_Max_) %then %do;                                                                                          </pre>
+<pre>                              %global _Macro_Call_Level_Report_Max_;                                                            </pre>
+<pre>                              %let _Macro_Call_Level_Report_Max_ = &maxlevel;                                                            </pre>
+<pre>%end;                                                                                                                   </pre>
+<pre>%* Mesure the execution time for the outer-most macro being executed;                                                                                          </pre>
+<pre>%* The macro variable _Macro_Call_Level_ is handled by %SetSASOptions and %ResetSASOptions;                                                                                          </pre>
+<pre>%if %ExistMacroVar(_Macro_Call_Level_) %then                                                                                          </pre>
+<pre>                              %if &_Macro_Call_Level_ <= &_Macro_Call_Level_Report_Max_ %then %do;                                                            </pre>
+<pre>                              %global _datetime_start_&_Macro_Call_Level_;                                                            </pre>
+<pre>                              %let _datetime_start_&_Macro_Call_Level_ = %sysfunc(DATETIME());                                                            </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>%MEND ExecTimeStart;                                                                                                    </pre>
+<body>
+</html>

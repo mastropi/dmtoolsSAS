@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+<pre>%* MACRO %ODSOutputOpen;                                                                                                </pre>
+<pre>%* Created: 01-Sep-2015;                                                                                                </pre>
+<pre>%* Author: Daniel Mastropietro;                                                                                          </pre>
+<pre>%* Open an ODS output file for writing;                                                                                          </pre>
+<pre>%* SEE ALSO: %ODSOutputClose;                                                                                           </pre>
+<pre>&rsubmit;                                                                                                               </pre>
+<pre>%MACRO ODSOutputOpen(odspath, odsfile, odsfiletype=pdf, macro=, log=0) / store des="Opens an ODS output file for writing";                                                                                          </pre>
+<pre>%if %quote(&odsfile) ~= %then %do;                                                                                          </pre>
+<pre>                              %if %upcase(%quote(&odsfiletype)) = HTML and %quote(&odspath) ~= %then %do;                                                            </pre>
+<pre>                              %* This distinction of HTML output is necessary because this is the only format that accepts the PATH= option...;                                                            </pre>
+<pre>                              %* (the reason being that the HTML output stores graphs in separate files (e.g. PNG files that are linked to the HTML output);                                                            </pre>
+<pre>                              ods &odsfiletype path=&odspath file=&odsfile style=statistical;                                                            </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>                              %else %do;                                                                                </pre>
+<pre>                              ods &odsfiletype file=&odsfile style=statistical;                                                            </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              %if &log %then %do;                                                                       </pre>
+<pre>                              %if %quote(&macro) ~= %then                                                               </pre>
+<pre>                              %put %upcase(&macro): %upcase(&odsfiletype) file %quote(&odsfile) opened for output by ODS.;                                                            </pre>
+<pre>                              %else                                                                                     </pre>
+<pre>                              %put %upcase(&odsfiletype) file %quote(&odsfile) opened for output by ODS.;                                                            </pre>
+<pre>                              %put;                                                                                     </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>%end;                                                                                                                   </pre>
+<pre>%MEND ODSOutputOpen;                                                                                                    </pre>
+<body>
+</html>

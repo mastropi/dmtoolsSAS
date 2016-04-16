@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%RemoveFromList</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %RemoveFromList</h1>
+<pre>Version: 1.05                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 23-Jun-03                                                                                                      </pre>
+<pre>Modified: 9-Aug-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro removes a list of specified names from a given source list.                                                                                          </pre>
+<pre>By default, all occurrences of the names in the source list are removed,                                                                                          </pre>
+<pre>but an option (allOccurrences) can be set to remove only the first occurrence.                                                                                          </pre>
+<pre>The search for names in the source list is NOT case sensitive.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%RemoveFromList(namesList, names, sep=%quote( ), allOccurrences=1, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- namesList:List of names where the names to remove are searched.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- names:  List of names to be removed from 'namesList'.                                                            </pre>
+<pre>          NO repeated names are allowed in this list.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- sep:    Separator used to separate the names in 'namesList'.                                                            </pre>
+<pre>          The search for 'sep' in 'namesList' and in 'list' in order to determine                                                            </pre>
+<pre>          the names present in each list is CASE SENSITIVE.                                                            </pre>
+<pre>          See NOTES below for comments on particular cases.                                                            </pre>
+<pre>          default: %quote( ) (i.e. the blank space)                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- allOccurrences:Specifies whether all occurrences of 'names' in 'namesList'                                                            </pre>
+<pre>          should be removed, or only the first occurrence.                                                            </pre>
+<pre>          Possible values: 0 => Remove only first occurence                                                            </pre>
+<pre>           1 => Remove all occurrences                                                              </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Whether to show in the log the names kept in the list.                                                            </pre>
+<pre>          Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The list in 'namesList' without the names specified in 'names'.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- In the 'sep' parameter, some symbols need to be enclosed using the function                                                                                          </pre>
+<pre>%quote when passed as parameters. This is the case for the comma, for instance.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- If some of the names listed in 'names' are not found in 'namesList', they                                                                                          </pre>
+<pre>are not removed and a warning is issued. The names that are found are removed.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %FindInList                                                                                          </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %Puts                                                                                             </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %InsertInList                                                                                          </pre>
+<pre>- %RemoveRepeated                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %RemoveFromList(x1 x2 x3 x4 , x2 x4);                                                                                          </pre>
+<pre>Returns the list 'x1 x3'.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- %RemoveFromList(%quote(xx,yy,zz,ww) , %quote(yy , zz) , sep=%quote(,));                                                                                          </pre>
+<pre>Returns the list 'xx,ww'. Note that the separator ',' is also the separator used for the                                                                                          </pre>
+<pre>list of names to be removed passed as second parameter.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- %RemoveFromList(%quote(a=0 or b=0 OR c=0 OR d=0) , %quote(b=0 OR d=0) , sep=OR);                                                                                          </pre>
+<pre>Returns the list 'a=0 or c=0'. Note that the separator 'OR' is also the separator used for                                                                                          </pre>
+<pre>the list of names to be removed passed as second parameter.                                                                                          </pre>
+<pre>Note the not case-sensitive feature.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>4.- %RemoveFromList(This is A OR This is B , This is B , sep=OR);                                                                                          </pre>
+<pre>Removes the expression 'This is B' from the list.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>5.- %RemoveFromList(%quote(a=0 OR b=0 OR c=0 OR b=0) , %quote(b=0) , sep=OR);                                                                                          </pre>
+<pre>Returns the list 'a=0 OR c=0'. I.e. all occurrences of 'b=0' are removed.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>6.- %RemoveFromList(%quote(a=0 OR b=0 OR c=0 OR b=0) , %quote(b=0) , sep=OR, allOccurrences=0);                                                                                          </pre>
+<pre>Returns the list 'a=0 OR c=0 OR b=0'. I.e. only the first occurrence of 'b=0' is removed.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Use this macro to remove non relevant variables from the list of regressor variables                                                                                          </pre>
+<pre>used in a regression model, and fit the model again without the non relevant variables.                                                                                          </pre>
+<body>
+</html>

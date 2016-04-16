@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%qqplot</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %qqplot</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 25-Feb-03                                                                                                      </pre>
+<pre>Modified: 12-Jan-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Efectua un Q-Q plot de una variable para una distribucion especificada.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%qqplot(                                                                                            </pre>
+<pre>          data ,                        /* Input dataset */                                         </pre>
+<pre>          var=_NUMERIC_ ,               /* Variables a analizar */                                  </pre>
+<pre>          dist=normal ,                 /* Distribucion de referencia para el Q-Q plot */                              </pre>
+<pre>          mu=mean ,                     /* Establece como se calcula la media */                              </pre>
+<pre>          sigma=std ,                   /* Establece como se calcula el desvio estandar */                              </pre>
+<pre>          probplot=0 ,                  /* (No usado aun) */                                        </pre>
+<pre>          pointlabel= ,                 /* Variable para los point labels del gráfico */                              </pre>
+<pre>          sizelabel=10 ,                /* Tamaño de los point labels en puntos (PT) */                              </pre>
+<pre>          gout= ,                       /* Nombre del graph catalog donde guardar el Q-Q plot */                              </pre>
+<pre>          name="qqplot" ,               /* Nombre del grafico con el Q-Q plot generado */                              </pre>
+<pre>          description="Normal Quantile plot");/* Descripcion del grafico generado */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Input dataset con los datos a utilizar. Puede recibir cualquier                                                             </pre>
+<pre>          opción adicional como en cualquier opción data= de SAS.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>Valores posibles para mu son median, mean.                                                                                          </pre>
+<pre>Valores posibles para sigma son hspr (= qrange/1.349), std.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Exist                                                                                            </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %GetVarList                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<body>
+</html>

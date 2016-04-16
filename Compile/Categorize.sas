@@ -126,10 +126,12 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %* Local variables;
 %local data_name;
+%local out_name;
 %local dkricond;
 %local error;
 %local i;
 %local nobs;
+%local nvar;
 %local byst;
 %local formatst;
 %local renamest;
@@ -229,14 +231,14 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %if &addvars %then %do;
 	%* Store the variable order to be used at the end to restore the variable order;
 	%GetVarOrder(&data, var_order);
-	data _dat(keep=_obs_ &id &by &var) _dat_rest(drop=&id &by &var);
+	data _cat_dat_(keep=_obs_ &id &by &var) _cat_dat_rest_(drop=&id &by &var);
 		format _obs_;
 		set &data;
 		_obs_ = _N_;
 	run;
 %end;
 %else %do;
-	data _dat(keep=_obs_ &id &by &var);
+	data _cat_dat_(keep=_obs_ &id &by &var);
 		format _obs_;
 		set &data;
 		_obs_ = _N_;
@@ -245,7 +247,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %*** GROUPSIZE (this must come AFTER the creation of the analysis dataset in case the number of cases
 %*** changes w.r.t. the input dataset specified in DATA);
-%Callmacro(getnobs, _dat return=1, nobs);
+%Callmacro(getnobs, _cat_dat_ return=1, nobs);
 %if %quote(&groupsize) ~= %then %do;
 	%let groups = %sysfunc(floor(%sysevalf(&nobs/&groupsize)));
 	%if &log %then %do;
@@ -258,7 +260,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %*** Sort by the BY variables;
 %if %quote(&by) ~= %then %do;
-	proc sort data=_dat;
+	proc sort data=_cat_dat_;
 		&byst;
 	run;
 %end;
@@ -267,8 +269,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %if %quote(&condition) = %then %do;
 	%* Note that the output dataset of PROC RANK is the same as the input dataset, since it is used below for
 	%* the continued analysis;
-	proc rank 	data=_dat
-				out=_dat
+	proc rank 	data=_cat_dat_
+				out=_cat_dat_
 				groups=&groups
 				&descending;
 		&formatst;
@@ -285,11 +287,11 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%* Compute the groups separately for each variable when there is a condition to apply
 	%* separately to each of them;
 	%if %quote(&condition) ~= %then %do;
-		%* Note that the output dataset of PROC RANK is a new dataset _dat_rank as this
-		%* dataset may have less records than the original dataset _dat because of the
+		%* Note that the output dataset of PROC RANK is a new dataset _cat_dat_rank_ as this
+		%* dataset may have less records than the original dataset _cat_dat_ because of the
 		%* condition applied to the analyzed variable; 
-		proc rank 	data=_dat(keep=_obs_ &by &vari)
-					out=_dat_rank(keep=_obs_ &by &rankvari)
+		proc rank 	data=_cat_dat_(keep=_obs_ &by &vari)
+					out=_cat_dat_rank_(keep=_obs_ &by &rankvari)
 					groups=&groups
 					&descending;
 			where &vari &condition;	%* CONDITION for the record to be included in the groups calculation;
@@ -298,31 +300,31 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 			var &vari;
 			ranks &rankvari;
 		run;
-		%* Merge back with _dat so that we have the rank variable in the original dataset
+		%* Merge back with _cat_dat_ so that we have the rank variable in the original dataset
 		%* which will allow us to merge back with it after we compute the statistic-valued
 		%* grouped variable below;
 		%* Since we do a LEFT join the original dataset will have the rank variable missing
 		%* for cases excluded from the ranking procedure above;
-		%Merge(	_dat,
-				_dat_rank(keep=_obs_ &by &rankvari),
+		%Merge(	_cat_dat_,
+				_cat_dat_rank_(keep=_obs_ &by &rankvari),
 				by=_obs_,
 				condition=if in1,
 				log=0);
 	%end;
 
 	%* Compute statistics for each group in the currently analyzed variable;
-	%Means(	_dat(keep=&by &rankvari &vari),
+	%Means(	_cat_dat_(keep=&by &rankvari &vari),
 			by=&by &rankvari,
 			format=&format,
 			var=&vari,
 			stat=&value,
 			name=_value&i,		/* Name for the variable name containing the statistic specified in parameter VALUE= */
-			out=_dat_means,
+			out=_cat_dat_means_,
 			log=0);
 
 	%* Merge with original data;
-	%Merge(	_dat,
-			_dat_means(keep=&by &rankvari _value&i),
+	%Merge(	_cat_dat_,
+			_cat_dat_means_(keep=&by &rankvari _value&i),
 			by=&by &rankvari,
 			format=&format,
 			log=0);
@@ -354,7 +356,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 %*** Create output dataset;
 %* Sort the dataset by the original order;
-proc sort data=_dat;
+proc sort data=_cat_dat_;
 	by _obs_;
 run;
 
@@ -364,15 +366,15 @@ options dkricond=nowarn;
 data &out;
 	%if &addvars %then %do;
 		%* Merge back with the input dataset if the output variables have been requested to be added to the input dataset;
-		%* Note that _dat_rest is already sorted by _OBS_ from the beginning;
+		%* Note that _cat_dat_rest_ is already sorted by _OBS_ from the beginning;
 		format &var_order;
-		merge 	_dat_rest(drop=&varcat &varvalue) 
-				_dat(drop=&varcat &varvalue &renamest);
+		merge 	_cat_dat_rest_(drop=&varcat &varvalue) 
+				_cat_dat_(drop=&varcat &varvalue &renamest);
 		by _obs_;
 	%end;
 	%else %do;
 		%* Otherwise, keep just the analyzed variables and new created variables in the output dataset;
-		set _dat(drop=&varcat &varvalue &renamest);
+		set _cat_dat_(drop=&varcat &varvalue &renamest);
 	%end;
 	%if %quote(&varcat) ~= %then %do;
 		%* Increase the RANK variables by 1 because they range from 0 to (groups-1) and I do not like it;
@@ -420,13 +422,26 @@ data &out;
 run;
 options dkricond=&dkricond;
 
+%if &log %then %do;
+	%let out_name = %scan(&out, 1, '(');
+	%callmacro(getnobs, &out_name return=1, nobs nvar);
+	%if %upcase(&out_name) = %upcase(&data_name) %then %do;
+		%put CATEGORIZE: Dataset %upcase(&data_name) updated with the newly created set of categorized variables.;
+		%put CATEGORIZE: The dataset has now &nobs observations and &nvar variables.;
+	%end;
+	%else %do;
+		%put CATEGORIZE: Dataset %upcase(&out_name) created with &nobs observations and &nvar variables;
+		%put CATEGORIZE: containing the categorized variables added to the input dataset.;
+	%end;
+%end;
+
 %*** Clean up;
 %* Delete temporary datasets;
 proc datasets nolist;
-	delete 	_dat
-			_dat_means
-			_dat_rank
-			_dat_rest;
+	delete 	_cat_dat_
+			_cat_dat_means_
+			_cat_dat_rank_
+			_cat_dat_rest_;
 quit;
 
 %* Delete global variables created by %CreateInteractions;

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%LorenzCurve</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %LorenzCurve</h1>
+<pre>Version:                      1.02                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      15-May-2015                                                                               </pre>
+<pre>Modified:                     04-Sep-2015 (previous: 29-Aug-2015)                                                            </pre>
+<pre>SAS version:                  9.4                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Generates Lorenz Curves for a non-negative numeric target variable (generally continuous) in terms of a set                                                                                          </pre>
+<pre>of input variables and creates an output dataset that stores the area between the Lorenz curve and the perfect                                                                                          </pre>
+<pre>equality line (diagonal) relative to the maximum possible area.                                                                                          </pre>
+<pre>The area is always treated as positive regardless of whether the Lorenz curve lays above or below the diagonal.                                                                                          </pre>
+<pre>The rationale behind this logic is to be able to summarize in this area strong nonlinear relationships between                                                                                          </pre>
+<pre>the input variables and the target.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>By default, missing values in the input variables are allowed, in which case they are treated as the                                                                                          </pre>
+<pre>smallest variable value.                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%LorenzCurve(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. */                                        </pre>
+<pre>          target=,                      /* Target variable (assumed non-negative) */                              </pre>
+<pre>          var=,                         /* List of input variables. */                              </pre>
+<pre>          missing=1,                    /* Whether missing values in the input variables are allowed. */                              </pre>
+<pre>          condition=,                   /* Condition to be satisfied by each input variable to be included in the analysis. */                              </pre>
+<pre>          out=,                         /* Output dataset containing the area between the Lorenz Curve and the diagonal */                              </pre>
+<pre>          sortby=descending area,       /* Sorting criteria of the output dataset. */                              </pre>
+<pre>          plot=1,                       /* Whether to plot the Lorenz curve of each analysis variable */                              </pre>
+<pre>          odspath=,                     /* Quoted name of the path where all generated files should be saved. */                              </pre>
+<pre>          odsfile=,                     /* Quoted name of the file where the plots are saved. */                              </pre>
+<pre>          odsfiletype=pdf,              /* Type of the file specified in ODSFILE or output format. */                              </pre>
+<pre>          log=1)                        /* Show messages in log? */                                 </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. It can contain additional options as in any data=                                                            </pre>
+<pre>                              option in SAS (such as keep=, where=, etc.).                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- target:                     Target variable on which the Lorenz Curves are computed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        Blank separated list of input variables to analyze.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- missing:                    Whether missing values in the input variables are allowed.                                                            </pre>
+<pre>                              In such case, they are considered as the smallest value taken by the input variable                                                            </pre>
+<pre>                              and are represented by the leftmost non-zero value in the Lorenz Curve.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- condition:                  Condition to be satisfied by each input variable to be included in the analysis.                                                            </pre>
+<pre>                              It should be given as just the right hand side of a WHERE expression.                                                            </pre>
+<pre>                              Ex: ~= 0                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the area between the Lorenz Curve and the diagonal                                                            </pre>
+<pre>                              (perfect equality line). The absolute value of the area is reported.                                                            </pre>
+<pre>                              The output dataset contains the following columns:                                                            </pre>
+<pre>                              - var: contains the analysis variable name                                                            </pre>
+<pre>                              - nobs: number of observations used in the analysis                                                            </pre>
+<pre>                              - area: area between the Lorenz curve and the perfect equality line (diagonal)                                                            </pre>
+<pre>                              relative to the maximum possible area, which is obtained when the input variable                                                            </pre>
+<pre>                              sorting perfectly sorts the target variable values.                                                            </pre>
+<pre>                              default: <data>_lorenz                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sortby:                     Sorting criteria of the output dataset.                                                            </pre>
+<pre>                              default: descending area (i.e. by descending Lorenz area)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plot:                       Whether to plot the Lorenz curve of each analysis variable.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- odspath:                    Quoted name of the path containing the files where plots should be saved.                                                            </pre>
+<pre>                              This is only valid for HTML output.                                                            </pre>
+<pre>                              default: none                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- odsfile:                    Quoted name of the file where plots should be saved.                                                            </pre>
+<pre>                              default: none                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- odsfiletype:                Type of the file specified in the ODSFILE= option.                                                            </pre>
+<pre>                              default: pdf                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in log?                                                                     </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- Non-negative values: the target variable is assumed to be non-negative.                                                                                          </pre>
+<pre>2.- Default missing values treatement:                                                                                          </pre>
+<pre>                              - missing values in input variables are considered valid and contribute to the cumulative                                                            </pre>
+<pre>                              distribution at the lowest end.                                                            </pre>
+<pre>                              - missing values in the target variable are excluded from the analysis, meaning that the                                                            </pre>
+<pre>                              whole observation is excluded, also not contributing to the cumulative distribution of the                                                            </pre>
+<pre>                              input variable.                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %GetDataName                                                                                                          </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetStat                                                                                                              </pre>
+<pre>- %GetVarLabel                                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %EvaluationChart (for binary targets)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>Get a graphical and quantitative measure of the input variable strength in predicting a numeric target variable,                                                                                          </pre>
+<pre>in general a continuous variable, similar to the Gini index for binary targets.                                                                                          </pre>
+<body>
+</html>

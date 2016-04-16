@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%FindInList</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %FindInList</h1>
+<pre>Version:                      1.03                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      20-Oct-2004                                                                               </pre>
+<pre>Modified:                     31-Mar-2016 (previous: 16-Mar-2016)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Finds names in a list as whole words and returns their name position.                                                                                          </pre>
+<pre>The search for the names is NOT case sensitive.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%FindInList(list, names, sep=%quote( ), match=ALL, sorted=0, out=, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- list:                       List where names are searched for. Different separators can be used.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- names:                      List ot names to be searched for in 'list'. The same separator used in 'list'                                                            </pre>
+<pre>                              should be used here.                                                                      </pre>
+<pre>                              The search is NOT case sensitive.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- sep:                        Separator used to separate the names in 'list' and in 'names'.                                                            </pre>
+<pre>                              The search for 'sep' in 'list' and in 'names' in order to determine                                                            </pre>
+<pre>                              the names present in each list is CASE SENSITIVE.                                                            </pre>
+<pre>                              default: %quote( ) (i.e. the blank space)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- match:                      Number of occurrences of each name in NAMES to be reported as found in LIST.                                                            </pre>
+<pre>                              Possible values: any integer >= 0, ALL.                                                            </pre>
+<pre>                              default: ALL                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sorted:                     Whether the list of names in LIST is sorted in alphabetical order. This is used                                                            </pre>
+<pre>                              to accelerate the search process.                                                            </pre>
+<pre>                              Possible values: 0 => Not sorted, 1 => Sorted.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset where the list of 'names' found in 'list' and their name                                                             </pre>
+<pre>                              positions in the list are stored.                                                            </pre>
+<pre>                              The output dataset has two columns:                                                            </pre>
+<pre>                              - NAME: Contains the name in 'names' found in 'list'.                                                            </pre>
+<pre>                              - POS: Contains the name position of NAME in 'list'.                                                            </pre>
+<pre>                              If this parameter is not empty, the value that is returned by the macro by                                                            </pre>
+<pre>                              default, containing the positions in list of the names found in 'list', is no                                                            </pre>
+<pre>                              longer returned (because of incompatibility issues regarding the creation of                                                            </pre>
+<pre>                              datasets and the return of values).                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>If at least one name is found (and if no output dataset is requested), a list with the positions                                                                                          </pre>
+<pre>of the first occurrence of each name in 'list' is returned.                                                                                          </pre>
+<pre>The position is not the character position but the name position. If no name is found,                                                                                          </pre>
+<pre>the value 0 is returned.                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %FindMatch                                                                                                            </pre>
+<pre>- %InsertInList                                                                                                         </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %RemoveRepeated                                                                                                       </pre>
+<pre>- %SelectName                                                                                                           </pre>
+<pre>- %SelectVar                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let matches = %FindInList(name1 name2 a_xx_b c_XX_d name2, c_xx_d name2);                                                                                          </pre>
+<pre>Stores in macro variable 'matches' the list                                                                                           </pre>
+<pre>4 2                                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let matches = %FindInList(%quote(name1,name2,a_xx_b,c_XX_d), %quote(_xx_,name), sep=%quote(,));                                                                                          </pre>
+<pre>Stores in macro variable 'matches' the value 0.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %FindInList(%quote(name1 OR name2 OR name3), %quote(name2 OR name), sep=OR, out=MATCHES);                                                                                          </pre>
+<pre>The output dataset MATCHES is created with columns NAME and POS, with one observation with                                                                                          </pre>
+<pre>the following value: NAME="name2", POS=2 (because NAME2 is the second name present in the list.                                                                                          </pre>
+<pre>Note that the specification of the separator (OR) has to be in upper case because that is how                                                                                          </pre>
+<pre>it appears in the list where the search is performed and in the list of names that are searched for.                                                                                          </pre>
+<body>
+</html>

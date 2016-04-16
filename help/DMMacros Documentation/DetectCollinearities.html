@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%DetectCollinearities</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %DetectCollinearities</h1>
+<pre>Version:                      1.05                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      11-Oct-2004                                                                               </pre>
+<pre>Modified:                     10-Sep-2015 (previous: 10-Aug-2015)                                                            </pre>
+<pre>SAS Version:                  9.4                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro detects collinearities among continuous variables.                                                                                          </pre>
+<pre>Currently the only implemented method is the one that is based on the                                                                                          </pre>
+<pre>Variance Inflation Factor (VIF) of each variable.                                                                                          </pre>
+<pre>A variable is considered collinear with the other variables when its VIF is larger                                                                                          </pre>
+<pre>than a given threshold (parameter THR, equal to 10 by default)                                                                                          </pre>
+<pre>(a VIF > 10 is equivalent to having an R-Square > 0.9 for the linear regression of                                                                                          </pre>
+<pre>that variable in terms of the others).                                                                                          </pre>
+<pre>Optionally an additional piece of information containing the correlation of the                                                                                          </pre>
+<pre>analyzed variables with a target variable can be provided in the form of a dataset                                                                                          </pre>
+<pre>which can be used to start eliminating variables that are less strongly correlated                                                                                          </pre>
+<pre>with the target based on that correlation measure.                                                                                          </pre>
+<pre>(For more detailed information see description of the METHOD parameter below, under                                                                                          </pre>
+<pre>OPTIONAL PARAMETERS.)                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>Variables with a large VIF are removed from the list of variables analyzed under                                                                                          </pre>
+<pre>one of the following two systems:                                                                                          </pre>
+<pre>- All variables having a VIF larger than a given threshold (parameter THRLARGE)                                                                                          </pre>
+<pre>are removed from the regression simultaneously.                                                                                          </pre>
+<pre>- If the largest VIF is smaller than THRLARGE, but larger than the threshold THR                                                                                          </pre>
+<pre>the variables are removed one by one. The variable with the largest 'criterion' value                                                                                          </pre>
+<pre>is removed first and a new analysis of collinearity is performed on the remaining                                                                                          </pre>
+<pre>variables. The criterion of removal depends on the DATACORR parameter: if this parameter                                                                                          </pre>
+<pre>is empty, the criterion is simply given by the variable's VIF; if DATACORR is not empty,                                                                                          </pre>
+<pre>the criterion is given by a combination of the variable's VIF and the variable's                                                                                          </pre>
+<pre>correlation with the target. The details of the calculation of this criterion are                                                                                          </pre>
+<pre>included below in the description of the METHOD parameter.                                                                                          </pre>
+<pre>This process is repeated iteratively until no variable is detected as a candidate for                                                                                          </pre>
+<pre>removal (because all the VIFs are smaller than the specified threshold THR).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%DetectCollinearities(                                                                                          </pre>
+<pre>          data ,                        /* Input dataset. */                                        </pre>
+<pre>          var=_NUMERIC_ ,               /* List of variables whose collinearity is analyzed. */                              </pre>
+<pre>          method=VIF ,                  /* Method used for detection of collinearity (only VIF is available). */                              </pre>
+<pre>          thr=10 ,                      /* Threshold to define if a variable is collinear with others */                              </pre>
+<pre>          /* (based on 'method'). */                                                                </pre>
+<pre>          thrLarge=50 ,                 /* Threshold used to remove all variables having a VIF larger than */                              </pre>
+<pre>          /* the threshold at the same iteration. */                                                            </pre>
+<pre>          weight= ,                     /* Weight variable used in the regression. */                           </pre>
+<pre>          datacorr= ,                   /* Dataset containing the correlation of the input variables with a target variable. */                              </pre>
+<pre>          out= ,                        /* List of output datasets to contain the removed and kept variables. */                              </pre>
+<pre>          /* (Data options are NOT allowed) */                                                            </pre>
+<pre>          outvif= ,                     /* Output dataset with the VIF of variables at each iteration. */                              </pre>
+<pre>          macrovar=varlist ,            /* Name of the macro variable where the list of variables */                              </pre>
+<pre>          /* NOT removed is stored. */                                                              </pre>
+<pre>          printList=0 ,                 /* Show the list of variables that remain after each iteration? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Blank-separated list of variables whose collinearity is analyzed.                                                            </pre>
+<pre>                              default: _NUMERIC_ (i.e. all numeric variables are analyzed)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- method:                     Method to use for the detection of collinearities among the variables                                                            </pre>
+<pre>                              listed in 'var'.                                                                          </pre>
+<pre>                              Possible values: VIF (Variance Inflation Factor)                                                            </pre>
+<pre>                              (this is currently the only available method)                                                            </pre>
+<pre>                              Description of the available methods:                                                            </pre>
+<pre>                              - VIF: A linear regression is performed for each variable, in which the                                                            </pre>
+<pre>                              variable of interest is regressed on the other variables. The R-Square (R2)                                                            </pre>
+<pre>                              of the regression is computed and the VIF is given by VIF = 1 / (1 - R2).                                                            </pre>
+<pre>                              A VIF = 5 => R2 = 0.8 and VIF = 10 => R2 = 0.9.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              The selected method is used to decide on the removal of highly collinear                                                            </pre>
+<pre>                              variables. First a set of variables having their collinearity measure                                                            </pre>
+<pre>                              larger than the THRLARGE value are removed simultaneously. Secondly,                                                            </pre>
+<pre>                              variables are removed one-by-one after each iteration of the collinearity                                                            </pre>
+<pre>                              analysis process by choosing to remove the variable with the largest value                                                            </pre>
+<pre>                              of a criterion that is based on the collinearity measure.                                                            </pre>
+<pre>                              The definition of the criterion depends on the DATACORR parameter:                                                            </pre>
+<pre>                              - if no correlation information is given for the analyzed variables                                                            </pre>
+<pre>                              through the DATACORR parameter, the criterion is simply the chosen collinearity                                                            </pre>
+<pre>                              measure.                                                                                  </pre>
+<pre>                              - if instead correlation information is given through the DATACORR parameter                                                            </pre>
+<pre>                              the critersion is defined as:                                                             </pre>
+<pre>                              <standardized-collinearity-measure> + <standardized-correlation>                                                            </pre>
+<pre>                              where each standardized measure is computed by standardizing the respective                                                            </pre>
+<pre>                              measures using the RANGE method of PROC STDIZE which generates standardized                                                            </pre>
+<pre>                              variables with values in the [0, 1] range. The values of all the variables                                                            </pre>
+<pre>                              taking part in the collinearity analysis for that iteration are used in the                                                            </pre>
+<pre>                              standardization process.                                                                  </pre>
+<pre>                              default: VIF                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- thr:                        Threshold used to decide whether a variable has a high collinearity with                                                            </pre>
+<pre>                              the other variables, based on 'method'.                                                            </pre>
+<pre>                              default: 10                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- thrLarge:                   Threshold defining the condition above which all the variables having                                                            </pre>
+<pre>                              a VIF larger than this value are removed, simultaneously, i.e. at the same                                                            </pre>
+<pre>                              iteration, or under the same regression being performed.                                                            </pre>
+<pre>                              default: 50                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- datacorr:                   Dataset containing the correlation of the input variables with a target variable.                                                            </pre>
+<pre>                              This information is used in the process of removing varaiables one by one as                                                            </pre>
+<pre>                              described under the METHOD parameter.                                                            </pre>
+<pre>                              The dataset should at least contain two columns:                                                            </pre>
+<pre>                              - VAR: contains the variable names.                                                            </pre>
+<pre>                              - CORR: contains the correlation measure with the hypothetical target.                                                            </pre>
+<pre>                              Data options are allowed after the dataset name, for instance one can rename                                                            </pre>
+<pre>                              variables to comply with the aforementioned requirements.                                                            </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        List of at most two output datasets used to store:                                                            </pre>
+<pre>                              - Dataset 1: the list of removed variables and the measure used to calculate their                                                            </pre>
+<pre>                              degree of collinearity with the other variables.                                                            </pre>
+<pre>                              - Dataset 2: the list of variables NOT removed because of a small collinearity value.                                                            </pre>
+<pre>                              Data options are NOT allowed.                                                             </pre>
+<pre>                              The following columns are created in the output datasets:                                                            </pre>
+<pre>                              - var: variable name                                                                      </pre>
+<pre>                              - label: variable label (if any)                                                            </pre>
+<pre>                              - iter: (for Dataset 1 only) iteration at which the variable was removed.                                                            </pre>
+<pre>                              - <name of the measure used> (as specified by the METHOD parameter) (e.g. VIF)                                                            </pre>
+<pre>                              When the DATACORR parameter is not empty, two additional columns:                                                            </pre>
+<pre>                              - corr: correlation with the target coming from the CORR variable in the DATACORR dataset.                                                            </pre>
+<pre>                              - criterion: (for Dataset 1 only) criterion used to select the variable to remove                                                            </pre>
+<pre>                              during the one-by-one removal process. The variable with the largest criterion value                                                            </pre>
+<pre>                              is removed first.                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outvif:                     Output dataset containing the variable collinearity values at each iteration                                                            </pre>
+<pre>                              of the detection process.                                                                 </pre>
+<pre>                              Data options are allowed.                                                                 </pre>
+<pre>                              The following columns are created in the output dataset:                                                            </pre>
+<pre>                              - var: name of the variable                                                               </pre>
+<pre>                              - iter: iteration at which the variable was removed.                                                            </pre>
+<pre>                              - <name of the measure used> (as specified by the METHOD parameter) (e.g. VIF)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar:                   Name of the global macro variable where the list of variables NOT removed                                                            </pre>
+<pre>                              is stored.                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- printList:                  Whether to show the list of variables that remain in the analysis after                                                            </pre>
+<pre>                              each iteration.                                                                           </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %AddLabels                                                                                                            </pre>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetNobs                                                                                                              </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>The name for the global macro variable where the list of non-collinear macro variables                                                                                          </pre>
+<pre>is returned cannot be any of the parameter names and cannot contain underscores both                                                                                          </pre>
+<pre>at the beginning and at the end.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %DetectCollinearities(test, var=x1-x5 z w, macrovar=noncollinear);                                                                                          </pre>
+<pre>This analyzes collinearity among variables X1-X5, Z and W in dataset TEST and returns the                                                                                          </pre>
+<pre>list of variables NOT detected as collinear with others in macro variable 'noncollinear'.                                                                                          </pre>
+<pre>Two thresholds are used in the detection process: THR=10 and THRLARGE=50 which are their                                                                                          </pre>
+<pre>default values.                                                                                                         </pre>
+<pre>The list of variables removed and kept, and the history of the removal process are NOT                                                                                          </pre>
+<pre>stored in any output dataset, but they are printed in the output destination.                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %DetectCollinearities(test, var=x1-x5 z w, thr=7, out=removed kept, outvif=vifhist);                                                                                          </pre>
+<pre>Same as Ex. 1 with the difference that the threshold used to define a variable as collinear                                                                                          </pre>
+<pre>to others is 7. That is, the removal algorithm stops when no variables being analyzed has                                                                                          </pre>
+<pre>VIF larger than 7.                                                                                                      </pre>
+<pre>In addition:                                                                                                            </pre>
+<pre>- The output dataset REMOVED is created with the list of variables removed and their                                                                                          </pre>
+<pre>respective VIF values.                                                                                                  </pre>
+<pre>- The output dataset KEPT is created with the list of variables NOT removed and their                                                                                          </pre>
+<pre>respective VIF values.                                                                                                  </pre>
+<pre>- The output dataset VIFHIST is created with the history of VIF values at each iteration                                                                                          </pre>
+<pre>of the collinearity detection process.                                                                                          </pre>
+<pre>- The list of variables that are NOT detected as collinear is returned in global macro                                                                                          </pre>
+<pre>variable 'varlist' (the default for option macrovar).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %DetectCollinearities(test, var=x1-x5 z w, thrLarge=5000, datacorr=corrwithtarget,                                                                                          </pre>
+<pre>out=removed kept, outvif=vifhist);                                                                                          </pre>
+<pre>Dataset CORRWITHTARGET containing variables VAR and CORR is passed in the DATACORR= parameter                                                                                          </pre>
+<pre>in order to use this information as part of the variable removal process.                                                                                          </pre>
+<pre>See the METHOD parameter above for more information on this process.                                                                                          </pre>
+<pre>Output datasets REMOVED, KEPT, and VIFHIST are created as explained in example 2.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>The macro is useful to detect and remove variables with redundant information prior to                                                                                          </pre>
+<pre>performing a regression model (linear, logistic, etc.). The use of highly collinear                                                                                          </pre>
+<pre>variables may generate difficulties in the detection of those regressor variables that                                                                                          </pre>
+<pre>are important for the prediction of the target variable in a regression model.                                                                                          </pre>
+<pre>However, they do NOT affect the value predicted by the model.                                                                                          </pre>
+<body>
+</html>

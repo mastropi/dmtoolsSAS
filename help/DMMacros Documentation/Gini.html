@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Gini</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Gini</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 19-Apr-05                                                                                                      </pre>
+<pre>Modified: 04-Sep-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Computes the Gini Index and the Signed Gini Index of variables w.r.t. to a dichotomous target                                                                                          </pre>
+<pre>variable.                                                                                                               </pre>
+<pre>The Gini index of a variable is defined as twice the area between the                                                                                          </pre>
+<pre>Cumulative Distribution Function of the variable for one value of the target variable and                                                                                          </pre>
+<pre>the Cumulative Distribution Function of the variable for the other value of the target variable.                                                                                          </pre>
+<pre>Thus:                                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              Gini = (Area Between Curves)*2;                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>The multiplication by 2 makes the Gini Index values range between 0 and 1.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The Signed Gini Index is numerically equal to the Gini Index.                                                                                          </pre>
+<pre>A positive/negative sign indicates that the probability of the event of interest is larger/smaller                                                                                          </pre>
+<pre>for larger values of the analysis variable.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Gini(                                                                                              </pre>
+<pre>          data,                         /* Input dataset. */                                        </pre>
+<pre>          target=,                      /* Target dichotomous variable. */                              </pre>
+<pre>          var=,                         /* Analysis variables; */                                   </pre>
+<pre>          by=,                          /* By variables. */                                         </pre>
+<pre>          condition=,                   /* Condition that must satisfy each variable to be included in the analyis. */                              </pre>
+<pre>          event=1,                      /* Target event of interest. */                              </pre>
+<pre>          out=,                         /* Output dataset containing the two cumulative distribution functions for each variable. */                              </pre>
+<pre>          outgini=,                     /* Output dataset containing the Gini Index of each variable. */                              </pre>
+<pre>          plot=0,                       /* Show the plots of the two cumulative distribution functions for each variable? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset containing the target variable and the analysis variables.                                                            </pre>
+<pre>                              Data options can be specified as in any data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- target:                     Target dichotomous variable w.r.t which the Gini Index is computed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        Analysis Variables.                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- by:                         By variables.                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- condition:                  Condition that each analysis variable must satisfy in order for the value                                                            </pre>
+<pre>                              to be included in the computation of the Gini Index.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- event:                      Event of interest. It must be one of the values taken by the target variable.                                                            </pre>
+<pre>                              It is used as the reference level to compute the signed Gini Index (GiniSgn),                                                            </pre>
+<pre>                              so that a positive value of GiniSgn indicates that the probability of the                                                            </pre>
+<pre>                              event of interest is LARGER when the analysis variable takes LARGER values.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the CDFs of each analysis variable for each value of                                                            </pre>
+<pre>                              the target variable. This dataset can be used to reproduce the plots generated                                                            </pre>
+<pre>                              by the macro.                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outgini:                    Output dataset containing the Gini Indexes for each variable.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plot:                       Whether to show the plots of the CDFs of each analysis variable for each value                                                            </pre>
+<pre>                              of the target variable, used to compute the Gini Index.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %DefineSymbols                                                                                                        </pre>
+<pre>- %GetDataOptions                                                                                                       </pre>
+<pre>- %GetNobs                                                                                                              </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %Merge                                                                                                                </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %EvaluationChart                                                                                                      </pre>
+<pre>- %KS                                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %Gini(test, target=DQ90, var=score saldo, by=SAMPLE, condition=~=0,                                                                                           </pre>
+<pre>                               out=gini_cdf, outgini=gini, plot=1);                                                            </pre>
+<pre>Computes the Gini Indexes of variables SCORE and SALDO for each value of the dichotomous                                                                                          </pre>
+<pre>target value DQ90, by variable SAMPLE.                                                                                          </pre>
+<pre>Only values different from 0 are included in the computation.                                                                                          </pre>
+<pre>The output dataset GINI_CDF contains the CDFs of the variables SCORE and SALDO for                                                                                          </pre>
+<pre>each value of the target variable DQ90.                                                                                          </pre>
+<pre>The output dataset GINI contains the Gini Indexes of the variables SCORE and SALDO.                                                                                          </pre>
+<pre>A plot of the CDFs for each analysis variable is shown in the graph window.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>This macro can be used in the following situations:                                                                                          </pre>
+<pre>- To assess the impact of a continuous variable in a dichotomous target variable for                                                                                           </pre>
+<pre>exploratory data analysis, when choosing possible variables to be included in a model.                                                                                          </pre>
+<pre>- To assess the performance of a scoring model to predict a dichotomous target variable,                                                                                          </pre>
+<pre>by measuring the degree of separation provided by the model between the two classes of                                                                                          </pre>
+<pre>the target variable.                                                                                                    </pre>
+<body>
+</html>

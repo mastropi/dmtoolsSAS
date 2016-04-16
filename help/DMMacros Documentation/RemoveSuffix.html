@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%RemoveSuffix</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %RemoveSuffix</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 13-Jul-05                                                                                                      </pre>
+<pre>Modified: 19-Aug-06                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>A set of suffixes is removed from each name present in a list.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%RemovePrefis(names, suffix, sep=%quote( ), list=1, log=0);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- names:                      List of names where the suffixes are searched.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Blank-separated list of suffixes to be removed from each name in the list.                                                            </pre>
+<pre>                              The search for the presence of the suffixes is NOT case sensitive.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- sep:                        Separator used between the names of the list.                                                            </pre>
+<pre>                              See NOTES below for comments on particular cases.                                                            </pre>
+<pre>                              default: %quote( ), i.e. a blank space                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- list:                       States whether the list of names passed in NAMES is really a list of names                                                            </pre>
+<pre>                              or is actually a string.                                                                  </pre>
+<pre>                              This affects how the new list is displayed in the log after the suffixes                                                            </pre>
+<pre>                              were removed.                                                                             </pre>
+<pre>                              Possible values are: 0 => The value of NAME should be treated as a string                                                            </pre>
+<pre>                               1 => The value of NAME snould be treated as a list                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values are: 0 => Do not show messages                                                            </pre>
+<pre>                               1 => Show messages                                                                       </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The list passed in LIST where, if present, the suffix passed in SUFFIX is removed                                                                                          </pre>
+<pre>from each name.                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- Some symbols need to be enclosed with the function %quote when passed                                                                                          </pre>
+<pre>as parameters. This is the case for the blank space, the comma, the quotation                                                                                          </pre>
+<pre>mark. In addition, the quotation mark is a special case, which needs to be treated                                                                                          </pre>
+<pre>differently. Namely, the percentage sign should be used before the quotation                                                                                          </pre>
+<pre>mark symbol, as in: %quote(%"). If '%' is not used, SAS will interpret '"' as the                                                                                          </pre>
+<pre>beginning of a string, not as a symbol.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %Puts                                                                                                                 </pre>
+<pre>- %ReplaceChar                                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>- %RemovePrefix                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let list = %RemoveSuffix(x1_L x2_l x_L1 y_l2, _L);                                                                                          </pre>
+<pre>generates the macro variable 'list' with the value:                                                                                          </pre>
+<pre>'x1 x2 x_L1 y_l2'                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let list = %RemoveSuffix(%quote(x1_L,x2_l,x_L1,y_l2), _L, sep=%quote(,));                                                                                          </pre>
+<pre>generates the macro variable 'list' with the value:                                                                                          </pre>
+<pre>'x1 , x2 , x_L1 , y_l2'                                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %let sentence = %RemoveSuffix(This is a text; this is a second text; etc., ;, list=0);                                                                                          </pre>
+<pre>generates the macro variable 'sentence' with the value:                                                                                          </pre>
+<pre>'This is a text this is a second text etc.'                                                                                          </pre>
+<pre>Note the use of option LIST=0. This is just to have the macro display the result as a sentence                                                                                          </pre>
+<pre>and not as a list of names.                                                                                             </pre>
+<body>
+</html>

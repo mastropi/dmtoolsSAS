@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetVarList</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetVarList</h1>
+<pre>Version: 2.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 27-Dec-04                                                                                                      </pre>
+<pre>Modified: 17-Aug-06                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro parses a list of variables in a dataset by converting the keywords                                                                                          </pre>
+<pre>_ALL_, _NUMERIC_, _CHAR_, hyphen strings (such as in x1-x7, id--name), and colon references                                                                                          </pre>
+<pre>to variables (as in id:) into a regular list of variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Note that if just the list of all variables is wished use %GetVarOrder which runs                                                                                          </pre>
+<pre>much faster.                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetVarList(data, var=_ALL_, check=1, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified but THEY ARE IGNORED.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        List of variables to parse.                                                               </pre>
+<pre>                              It can contain the keywords _ALL_, _NUMERIC_, _CHAR_ and hyphen strings                                                            </pre>
+<pre>                              such as in x1-x7.                                                                         </pre>
+<pre>                              Default: _ALL_                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- check:                      Check for existence of the variables in the dataset?                                                            </pre>
+<pre>                              If check = 1 the list of variables obtained as the result of the parsing                                                            </pre>
+<pre>                              procedure is checked for existence in the dataset. Those variables not found                                                            </pre>
+<pre>                              in the dataset are listed in the log with a WARNING message.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>A blank-separated list with the variable names in the input dataset matching the keywords.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- If the last variable in a double hyphen string is found before the first variable, a WARNING                                                                                          </pre>
+<pre>is issued and the returned list for that string is empty.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- The addition of parameter CHECK= was essentially due to the call that is performed to %GetVarList                                                                                          </pre>
+<pre>from macro %CheckInputParameters, where the message of existence or non-existence of variables is                                                                                          </pre>
+<pre>performed there (i.e. when calling %GetVarList from %CheckInputParameters, I don't want the macro                                                                                          </pre>
+<pre>%GetVarList to check for existence of the variables in the dataset because I want this task to be                                                                                          </pre>
+<pre>done by %CheckInputParameters, so that the appropriate messages are issued by this macro).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- If just the list of all variables in the dataset is wished, use rather %GetVarOrder which                                                                                          </pre>
+<pre>runs much faster.                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED:</h3>
+<pre>- %ExistVar                                                                                                             </pre>
+<pre>- %IsNumber                                                                                                             </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %RemoveRepeated                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GetVarNames                                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let vars = %GetVarList(test, var=x1-x5 count: id--name);                                                                                          </pre>
+<pre>The list of passed variables that exist in dataset TEST is returned and stored in macro variable VARS.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let vars = %GetVarList(test, var=x1-x5 count: id--name, check=0);                                                                                          </pre>
+<pre>Same as above but the variables resulting from the parsing process are NOT checked for existence in                                                                                          </pre>
+<pre>dataset TEST.                                                                                                           </pre>
+<body>
+</html>

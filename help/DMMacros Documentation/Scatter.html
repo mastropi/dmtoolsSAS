@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Scatter</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Scatter</h1>
+<pre>Version: 1.02                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 21-Jan-03                                                                                                      </pre>
+<pre>Modified: 28-Jul-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Esta macro realiza scatter plots de a pares a partir de un conjunto                                                                                          </pre>
+<pre>de variables, y los ubica en una misma ventana gráfica.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Scatter( data ,                        /* Dataset con las variables a graficar */                              </pre>
+<pre>          var=_numeric_ ,               /* Variables a graficar */                                  </pre>
+<pre>          with= ,                       /* Variables contra las cual graficar 'var' */                              </pre>
+<pre>          strata= ,                     /* Variable que define distintos grupos */                              </pre>
+<pre>          nolabels=0 ,                  /* No labels */                                             </pre>
+<pre>          novalues=0 ,                  /* No tick mark values */                                   </pre>
+<pre>          sizeofvalues=8 ,              /* Tamaño de los tick mark values */                              </pre>
+<pre>          format= ,                     /* Formato numérico de los tick mark values */                              </pre>
+<pre>          title="Scatter plots");       /* Título del gráfico */                                    </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Input dataset con las variables a graficar. Puede recibir                                                            </pre>
+<pre>          cualquier opción adicional como en cualquier opción                                                            </pre>
+<pre>          data= de SAS.                                                                             </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:    Lista de las variables a graficar (separadas por espacios).                                                            </pre>
+<pre>          Si el parámetro 'with' no se especifica, los scatter plots                                                            </pre>
+<pre>          son gráficos de estas variables consigo mismas.                                                            </pre>
+<pre>          Si el parámetro 'with' no es vacío, estas variables se ubican                                                            </pre>
+<pre>          en las filas del scatter plots y se grafican vs. las variables                                                            </pre>
+<pre>          listadas en 'with'.                                                                       </pre>
+<pre>          default: _numeric_, es decir, todas las variables numéricas                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- with:   Lista de variables a ubicar en las columnas del scatter plot.                                                             </pre>
+<pre>          Si este parámetro no se especifica, se grafican las variables                                                            </pre>
+<pre>          en 'var' contra sí mismas.                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- strata: Nombre de la variable que define los estratos o grupos.                                                            </pre>
+<pre>          Para cada valor distinto en esta columna se usa un color                                                            </pre>
+<pre>          distinto en el gráfico.                                                                   </pre>
+<pre>          Si los estratos están definidos por más de una variable                                                            </pre>
+<pre>          puede usarse la macro %CreateGroupVar para generar una                                                            </pre>
+<pre>          única variable indicadora de los estratos a partir de                                                            </pre>
+<pre>          una lista de variables.                                                                   </pre>
+<pre>                                                                                                    </pre>
+<pre>- nolabels:Define si los labels de los ejes se muestran.                                                            </pre>
+<pre>          Puede ser útil eliminar los labels si hay muchos scatter                                                            </pre>
+<pre>          plots realizados.                                                                         </pre>
+<pre>          Valores posibles: 0 => Se muestran, 1 => No se muestran.                                                            </pre>
+<pre>          default: 0                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- novalues:Define si los valores de los tick marks se muestran.                                                            </pre>
+<pre>          Puede ser útil eliminar los valores de los tick marks en                                                            </pre>
+<pre>          caso de que los valores de las variables sean muy grandes,                                                            </pre>
+<pre>          para poder ver apropiadamente los gráficos.                                                            </pre>
+<pre>          Valores posibles: 0 => Se muestran, 1 => No se muestran.                                                            </pre>
+<pre>          default: 0                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- sizeofvalues:Tamaño del font (en points) a usar para los valores de los                                                            </pre>
+<pre>          tick marks.                                                                               </pre>
+<pre>          Puede ser útil achicar el tamaño del font si hay muchos scatter                                                            </pre>
+<pre>          plots realizados.                                                                         </pre>
+<pre>          default: 8                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- format: Formato a usar para los valores de los tick marks.                                                            </pre>
+<pre>          Puede resultar conveniente usar el formato exponencial Ew.d                                                            </pre>
+<pre>          en caso de que los valores de las variables sean muy grandes, o                                                            </pre>
+<pre>          bien para que los tamaños de los distintos scatter plots sean                                                            </pre>
+<pre>          iguales (ya que en el formato exponencial los números tienen                                                            </pre>
+<pre>          todos la misma longitud). (ej: E7.2) (aparentemente el valor                                                            </pre>
+<pre>          minimo para w es 7.)                                                                      </pre>
+<pre>          default: ninguno (i.e. se mantiene el formato de las variables                                                            </pre>
+<pre>          graficadas)                                                                               </pre>
+<pre>                                                                                                    </pre>
+<pre>- title:  Título a colocar en el gráfico.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %DefineSymbols                                                                                          </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %GetVarList                                                                                          </pre>
+<pre>- %MPlot                                                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GraphXY                                                                                          </pre>
+<pre>- %MPlot                                                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>- %scatter(toplot , var=x y z , nolabels=1)                                                                                          </pre>
+<pre>Genera una scatter matrix de 2x2 donde se grafica x vs. y, x vs. z, y vs. z, sin                                                                                          </pre>
+<pre>que aparezcan los nombres de las variables graficadas.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>- %scatter(toplot , var=x y z , with=x z w)                                                                                          </pre>
+<pre>Genera una scatter matrix de 3x3 donde se grafica x vs. (x z w), y vs. (x z w),                                                                                          </pre>
+<pre>z vs. (x z w).                                                                                          </pre>
+<body>
+</html>

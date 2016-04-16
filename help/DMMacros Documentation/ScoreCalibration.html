@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%ScoreCalibration</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %ScoreCalibration</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 27-May-05                                                                                                      </pre>
+<pre>Modified: 27-May-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>NOTA: Al dia de la fecha 29/7/05 esta macro no fue probada. Entro' en desuso porque ya no se usa                                                                                          </pre>
+<pre>como calibracion del score, sino que ahora se usa una transformacion lineal del LOGIT, que es                                                                                          </pre>
+<pre>el estandar del mercado: a*logit + b.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Calibrates the score of a model for a dichotomous target, by following 3 steps:                                                                                          </pre>
+<pre>1.- Non linear calibration to adjust the score to the observed probability.                                                                                          </pre>
+<pre>2.- Linear calibration to transform the calibrated score to a more intelligible range of values.                                                                                          </pre>
+<pre>3.- Linear calibration to adjust the scores among different populations, in the sense that                                                                                          </pre>
+<pre>the same value of the score represents the same estimated probability.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%ScoreCalibration(                                                                                          </pre>
+<pre>          data,                         /* Input dataset containing the score. */                              </pre>
+<pre>          calib=,                       /* Dataset with the calibration information. */                              </pre>
+<pre>          type=,                        /* Type of calibration performed stored in column TYPE of CALIB. */                              </pre>
+<pre>          score=,                       /* Name of the variable in DATA containing the score. */                              </pre>
+<pre>          function1=,                   /* Name of the column in CALIB containing the non-linear calibration*/                            </pre>
+<pre>          function2=,                   /* Name of the column in CALIB containing the linear calibration of step 2. */                              </pre>
+<pre>          params1=a b c,                /* Names of the parameters used in the non-linear and the linear calibration at step 2. */                              </pre>
+<pre>          params2=1 1 0 0 0,            /* Values of the parameters used in the linear calibration of step 3. */                              </pre>
+<pre>          out=,                         /* Output dataset */                                        </pre>
+<pre>          outerror=,                    /* Output dataset containing the observations that gave error when calibrating. */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %GetVarNames                                                                                          </pre>
+<pre>- %MakeListFromVar                                                                                          </pre>
+<pre>- %RemoveFromList                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<body>
+</html>

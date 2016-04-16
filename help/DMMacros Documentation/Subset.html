@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Subset</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Subset</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 4-Aug-04                                                                                                       </pre>
+<pre>Modified: 4-Aug-04                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro subsets a dataset keeping all the observations of by variables for which a given                                                                                          </pre>
+<pre>WHERE condition is satisfied at least once.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Subset(data, where=, by=, out=);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- where:                      Where statement with which the input dataset is subset.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         List of by variables for which all the observations passing the                                                            </pre>
+<pre>                              WHERE statement are kept in the output dataset.                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset. It can receive data options as those specified in a                                                             </pre>
+<pre>                              data= SAS statement.                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>- The order in which the input dataset is sorted is transfered to the output dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %Drop                                                                                                                 </pre>
+<pre>- %GetDataOptions                                                                                                       </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %Subset(A, where=x>5, by=id, out=A_subset);                                                                                          </pre>
+<pre>Generates the output dataset A_SUBSET containing all the observations in the input                                                                                          </pre>
+<pre>dataset A where x > 5, plus the other observations in A not satisfying the WHERE                                                                                          </pre>
+<pre>condition, but having the same value of ID as those satisfying the condition.                                                                                          </pre>
+<pre>Ex: If the input dataset A contains the following data:                                                                                          </pre>
+<pre>ID                            x                                                                                         </pre>
+<pre>1                             2.1                                                                                       </pre>
+<pre>1                             6.2                                                                                       </pre>
+<pre>1                             3.3                                                                                       </pre>
+<pre>1                             0.1                                                                                       </pre>
+<pre>2                             0.3                                                                                       </pre>
+<pre>2                             2.2                                                                                       </pre>
+<pre>2                             3.2                                                                                       </pre>
+<pre>3                             5.4                                                                                       </pre>
+<pre>3                             3.3                                                                                       </pre>
+<pre>3                             7.3                                                                                       </pre>
+<pre>3                             2.1                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>the output dataset A_SUBSET will be:                                                                                          </pre>
+<pre>ID                            x                                                                                         </pre>
+<pre>1                             2.1                                                                                       </pre>
+<pre>1                             6.2                                                                                       </pre>
+<pre>1                             3.3                                                                                       </pre>
+<pre>1                             0.1                                                                                       </pre>
+<pre>3                             5.4                                                                                       </pre>
+<pre>3                             3.3                                                                                       </pre>
+<pre>3                             7.3                                                                                       </pre>
+<pre>3                             2.1                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>i.e. all the observations for ID = 1 and 3 are kept because at least one observation                                                                                          </pre>
+<pre>with those values of ID satisfies the WHERE condition x > 5.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %Subset(A(obs=100), where=x>5, by=id, out=A_subset(keep=id x));                                                                                          </pre>
+<pre>Same as Example 1 with the addition of data options for the input and output datasets.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Useful in historical customer data to keep all the history of customers satisfying                                                                                          </pre>
+<pre>a given condition in at least one point in time of the historical data.                                                                                          </pre>
+<body>
+</html>

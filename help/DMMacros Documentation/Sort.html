@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title> Sort</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO  Sort</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Dec-00                                                                                                       </pre>
+<pre>Modified: 24-May-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Sorts a one or more datasets by a set of by variables.                                                                                          </pre>
+<pre>(NOTE: No variable in the by variable list should be named 'DESCENDING',                                                                                          </pre>
+<pre>because they are removed from the list.)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Sort(                                                                                              </pre>
+<pre>          data,                         /* Input datasets to be sorted */                              </pre>
+<pre>          by=,                          /* By variables by which the sort is done */                              </pre>
+<pre>          out=,                         /* Output datasets where the sorted datasets are stored */                              </pre>
+<pre>          options=);                    /* Options for the PROC SORT statement. */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Blank separated list of input datasets to be sorted.                                                            </pre>
+<pre>                              They CANNOT have data options as in a data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by=:                        Blank separated list of by variables by which each dataset                                                            </pre>
+<pre>                              listed in 'data' is sorted.                                                               </pre>
+<pre>                              NOTE: It is assumed that no variable in the by variable list                                                            </pre>
+<pre>                              is called DESCENDING, because any variable called DESCENDING                                                            </pre>
+<pre>                              is removed from the list.                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- out:                        Blank separated list of output datasets. The number of                                                            </pre>
+<pre>                              output datasets must be equal to the number of input                                                            </pre>
+<pre>                              datasets. The first dataset in 'out' corresponds to the                                                            </pre>
+<pre>                              first dataset in 'data', the second to the second and so on.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- options:                    Options to be used in the PROC SORT statement.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>- %sort(data1 data2 , a b , out=sorted1 sorted2 , options=nodupkey);                                                                                          </pre>
+<pre>Sorts datasets data1 and data2 by variables 'a' and 'b' and eliminates                                                                                          </pre>
+<pre>observations with repeated values of 'a' and 'b'. The sorted datasets                                                                                          </pre>
+<pre>are stored in sorted1 and sorted2, respectively.                                                                                          </pre>
+<body>
+</html>

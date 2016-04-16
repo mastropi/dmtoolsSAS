@@ -34,3 +34,6 @@ V.3.01: 2015/05/23 (DM)
 	- Changed the default value for parameter GROUPS= from empty to 10.
 	- Changed the default value for parameter VALUES= from mean to empty, so that by default the integer-valued categories are shown in the output IV table. This is to avoid the confusion that in order to have these categories displayed we would have needed to pass an empty value to VALUES=.
 	- Added a label to the VALUE or NUMVALUE column in the IV output table that reflects the statistic computed on the numeric variables or "dummy category" when just a dummy integer-valued category is used.
+
+V.3.02: 2016/04/15 (DM)
+	- New parameter OUTFORMAT= that allows generating an output dataset containing the format definitions corresponding to the information value bins.

@@ -2,7 +2,7 @@
 Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	09-Dec-2003
-Modified: 	01-Sep-2015
+Modified: 	15-Apr-2016
 
 DESCRIPTION:
 Shows help on how to invoke a macro.
@@ -28,7 +28,10 @@ NOTE: The list &macrolist must be updated as new macros include help support.
 %let macrolist = 
 BOXCOX
 CATEGORIZE
+CATEGORIZEPERCENTILES
 CENTER
+CREATECOLORFORMAT
+CREATEFORMATSFROMCUTS
 CREATEGROUPVAR
 CREATEINTERACTIONS
 DETECTCOLLINEARITIES
@@ -77,9 +80,12 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put DATA MANIPULATION;
 		%put -----------------;
 		%put 	Categorize*	%quote(         Categorize a set of variables in a given number of groups.);
+		%put 	CategorizePercentiles*%quote(Categorize a set of variables based on percentile values.);
 		%put	Center*	%quote(             Center and optionally standardize a set of variables.);
 		%put	CheckRepeated %quote(       Check the existence of observations with repeated key values in a dataset);
 		%put 	%quote(                     and creates an output dataset containing those observations.);
+		%put	CreateColorFormat* %quote(  Create a color ramp format based on a range of variable values.);
+		%put	CreateFormatsFromCuts*%quote(Create numeric formats from a dataset containing cut values.);
 		%put	CreateGroupVar*	%quote(     Create a variable identifying groups.);
 		%put	CreateInteractions*	%quote( Create interactions between variables or interaction strings.);
 		%put	CreateLags %quote(          Create a set of lagged variables with lag 1 to n.);
@@ -209,6 +215,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put;
 		%put C;
 		%put 	Categorize*	%quote(         Categorize a set of variables in a given number of groups.);
+		%put 	CategorizePercentiles*%quote(Categorize a set of variables based on percentile values.);
 		%put	Center*	%quote(             Center and optionally standardize a set of variables.);
 		%*%put	CheckInputParameters	;
 		%*%put	CheckRequiredParameters	;
@@ -221,6 +228,8 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	%quote(                     in the other, and viceversa.);
 		%put	Compute	%quote(             Evaluate a given function by forcing the evaluation of its argument.);
 		%put	Cov	%quote(                 Compute covariance matrix of a set of variables.);
+		%put	CreateColorFormat* %quote(  Create a color ramp format based on a range of variable values.);
+		%put	CreateFormatsFromCuts*%quote(Create numeric formats from a dataset containing cut values.);
 		%put	CreateGroupVar*	%quote(     Create a variable identifying groups.);
 		%put	CreateInteractions*	%quote( Create interactions between variables or interaction strings.);
 		%put	CreateLags %quote(          Create a set of lagged variables with lag 1 to n.);
@@ -366,6 +375,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 							%* to call it is displayed;
 %else %do;
 	%put HELP: No help available for macro %upcase(&macro);
-	%put HELP: Open the .SAS file with its name for help.;
+	%put HELP: If available open the HTML documentation (e.g. Macros Documentation.html or similar).;
+	%put HELP: Otherwise open the corresponding .SAS file containing additional help at the top of the macro definition.;
 %end;
 %MEND Help;

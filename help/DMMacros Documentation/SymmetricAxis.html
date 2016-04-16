@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title> SymmetricAxis</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO  SymmetricAxis</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 23-May-03                                                                                                      </pre>
+<pre>Modified: 18-Jul-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Generates a string to be used in a vaxis= or haxis= option in high                                                                                          </pre>
+<pre>resolution graphs, specifying a symmetric axis about 0.                                                                                          </pre>
+<pre>Optionally this string is stored in a global macro variable so that the                                                                                          </pre>
+<pre>above option can be set in a high resolution graph procedure (like GPLOT).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>If requested, the macro also generates two other global macro variables, one                                                                                          </pre>
+<pre>containing the maximum absolute value of the symmetric axis option used                                                                                          </pre>
+<pre>and another one containing the value of the step giving the axis tick marks.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Application: This macro quantity is useful when one wants to make a graph using                                                                                          </pre>
+<pre>symmetric axes about 0 (to get a quick visual feeling of the plot without                                                                                          </pre>
+<pre>having to "read" the minimum an maximum values plotted in the axis because they                                                                                          </pre>
+<pre>are set to be equal and opposite in sign), or when one wants to make several                                                                                          </pre>
+<pre>graphs having the same vertical or horizontal axis, symmetric about 0.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>(Another way of doing it which has the advantage that one can have the macro return values to be assigned                                                                                          </pre>
+<pre>to macro variables is via the use of SAS I/O functions, by opening the dataset with open and then going over                                                                                          </pre>
+<pre>the records of the dataset and getting the maximum value. The problem with this is that this could                                                                                          </pre>
+<pre>be slower...?)                                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%SymmetricAxis(                                                                                          </pre>
+<pre>          _data_ ,                      /* List of input datasets */                                </pre>
+<pre>          var=_NUMERIC_ ,               /* Variables over which the maximum value for the axis is computed */                              </pre>
+<pre>          axis= ,                       /* Macro variable where the string with the axis statement is stored*/                            </pre>
+<pre>          nrodiv=10 ,                   /* Number of divisions used in the axis (= #ticks - 1) */                              </pre>
+<pre>          axismax= ,                    /* Macro variable where the axis' maximum absolute value is stored */                              </pre>
+<pre>          step= ,                       /* Macro variable where the step between axis tick marks is stored */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- _data_: Blank-separated list of input datasets, over which the maximum                                                            </pre>
+<pre>          absolute value over ALL variables listed in 'var' is computed.                                                            </pre>
+<pre>          NOTE: The dataset names cannot have any options.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:    Blank-separated list of variables over whose values                                                            </pre>
+<pre>          the maximum absolute value is computed.                                                            </pre>
+<pre>          default: _NUMERIC_, i.e. all the numeric variables in '_data_'.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- axis:   Name of the macro variable where the axis statement to                                                            </pre>
+<pre>          to set the values of the axis of an hypothetical plot is stored.                                                            </pre>
+<pre>          IMPORTANT: The name cannot be 'axis'.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- nrodiv: Number of divisions to be used between -&axismax and &axismax                                                            </pre>
+<pre>          in order to get the value of &step. It corresponds to the number                                                            </pre>
+<pre>          of divisions into which the axis statement would be divided                                                            </pre>
+<pre>          in an hypothetical plot.                                                                  </pre>
+<pre>          default: 10                                                                               </pre>
+<pre>                                                                                                    </pre>
+<pre>- axismax:Name of the macro variable where the maximum absolute value                                                            </pre>
+<pre>          is stored.                                                                                </pre>
+<pre>          If the parameter is not provided, the value is printed in the log.                                                            </pre>
+<pre>          IMPORTANT: The name cannot be 'axismax'.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- step:   Name of the macro variable where the step is stored.                                                            </pre>
+<pre>          If the parameter is not provided, the value is printed in the log.                                                            </pre>
+<pre>          IMPORTANT: The name cannot be 'step'.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Indicates whether to show messages in the log.                                                            </pre>
+<pre>          Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- Parameter '_data_' does not accept options, only dataset names.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- The maximum absolute value of the axis option is computed as the maximum                                                                                          </pre>
+<pre>absolute value among all the variables specified in the 'var' parameter                                                                                          </pre>
+<pre>contained in the input datasets, which is then rounded to a "nice" value by the                                                                                          </pre>
+<pre>following algorithm:                                                                                          </pre>
+<pre>(Given that maxabs is the maximum absolute value obtained, and assuming that                                                                                          </pre>
+<pre>it is different from 0)                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>exp = round( log10(maxabs/10) - log10(1.5) );                                                                                          </pre>
+<pre>axismax = ceil( maxabs*10**(-exp) ) * 10**exp;                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>This is done in order to have axis with "nice" extreme values. For example                                                                                          </pre>
+<pre>0.37 is "rounded" to 0.4, 28.6 is rounded to 29, etc.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- The number of variables in 'var' can be more than 1, in which case                                                                                          </pre>
+<pre>the maximum absolute value among ALL listed variables is used for the                                                                                          </pre>
+<pre>generation of the axis statement option.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %MakeList                                                                                          </pre>
+<pre>- %Means                                                                                            </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GetStat                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %SymmetricAxis(toplot1 toplot2 , var=y1 y2 , axis=vaxis);                                                                                          </pre>
+<pre>proc gplot data=toplot1;                                                                                          </pre>
+<pre>          plot y1*x y2*x / vaxis=&vaxis;                                                            </pre>
+<pre>proc gplot data=toplot2;                                                                                          </pre>
+<pre>          plot y2*x y2*x / vaxis=&vaxis;                                                            </pre>
+<pre>run;                                                                                                </pre>
+<pre>quit;                                                                                               </pre>
+<pre>                                                                                                    </pre>
+<pre>This code plots y1 vs. x and y2 vs. x in separate plots, both having the same                                                                                          </pre>
+<pre>and symmetric vertical axis, varying from -<max> to <max> in steps of <max>/10.                                                                                          </pre>
+<pre>(in fact, 10 is the default for macro parameter 'nrodiv', which generates                                                                                          </pre>
+<pre>the step to be used in the axis, based on <max>).                                                                                          </pre>
+<pre>Note that <max> is the maximum absolute value of both y1 AND y2 in datasets                                                                                          </pre>
+<pre>toplot1 and toplot2, rounded to a "nice" close enough value so that the extreme                                                                                          </pre>
+<pre>axis values showing in the plot are "nice".                                                                                          </pre>
+<pre>Note that a macro variable named &vaxis is generated by the macro, which is                                                                                          </pre>
+<pre>used in the vertical axis option vaxis=&vaxis of the plot statement, that specifies                                                                                          </pre>
+<pre>the forementioned vertical axis. The option is given by:                                                                                          </pre>
+<pre>vaxis=-<max> to <max> by <max>/10.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- %SymmetricAxis(toplot , var=y1 y2 , axismax=max , step=stp , axis=vaxis , nrodiv=15);                                                                                          </pre>
+<pre>proc gplot data=toplot;                                                                                          </pre>
+<pre>          var y1*x y2*x / overlay vaxis=&vaxis;                                                            </pre>
+<pre>run;                                                                                                </pre>
+<pre>quit;                                                                                               </pre>
+<pre>                                                                                                    </pre>
+<pre>This code generates the plots of y1 vs. x and y2 vs. x on the same graph, with a                                                                                          </pre>
+<pre>vertical symmetric axis running from -<max> to <max> in steps of <max> / 15, where                                                                                          </pre>
+<pre><max> is the maximum absolute value of both y1 AND y2 in dataset toplot, rounded                                                                                          </pre>
+<pre>to an interger close enough, so that the values showing in the plot are "nice".                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>In addition, the macro variables &max and &stp are generated with values <max>                                                                                          </pre>
+<pre>and <step> respectively. Also, macro variable &vaxis is generated as:                                                                                          </pre>
+<pre>'-&max to &max by &step', which is used in the vaxis= option of the plot statement that                                                                                          </pre>
+<pre>specifies the forementioned vertical axis.                                                                                          </pre>
+<body>
+</html>

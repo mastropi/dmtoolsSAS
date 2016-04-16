@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%PrintVarDoesNotExist</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %PrintVarDoesNotExist</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 19-Sep-03                                                                                                      </pre>
+<pre>Modified: 22-Sep-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Prints in the log that not all the variables in a list exist in a dataset.                                                                                          </pre>
+<pre>If desired, the name of the macro where the messsage is generated is also shown.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%PrintVarDoesNotExist(data , var , macro=);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Name of the dataset where the variables are not present.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- var:    List of variables not found.                                                              </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- macro:  Name of the macro from where the message is generated.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %MakeList                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %PrintDataDoesNotExist                                                                                          </pre>
+<pre>- %PrintRequestedParameterMissing                                                                                          </pre>
+<body>
+</html>

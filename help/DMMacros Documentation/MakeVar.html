@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%MakeVar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %MakeVar</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Mar-01                                                                                                       </pre>
+<pre>Modified: 5-Jan-04                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro creates several GLOBAL macro variables with the same root name                                                                                          </pre>
+<pre>whose values are the elements of a blank-separated list.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%MakeVar(valuesList , rootName , log=0);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- valuesList:                 List of values separated by blank spaces to be assigned                                                            </pre>
+<pre>                              to the macro variables.                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- rootName:                   Root to be used for the names of the macro variables created.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values are: 0 => Do not show messages                                                            </pre>
+<pre>                               1 => Show messages                                                                       </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>- This macro is useful to create a set of macro variables with names of the form                                                                                          </pre>
+<pre>'x1' 'x2', etc.                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>- %MakeVar(a b c , x);                                                                                                  </pre>
+<pre>generates GLOBAL macro variables 'x1' 'x2' and 'x3' with the values:                                                                                          </pre>
+<pre>&x1 = a, &x2 = b, &x3 = c.                                                                                              </pre>
+<body>
+</html>

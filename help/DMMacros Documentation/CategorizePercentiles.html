@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CategorizePercentiles</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CategorizePercentiles</h1>
+<pre>Version:                      1.12                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      27-Feb-2003                                                                               </pre>
+<pre>Modified:                     15-Feb-2016 (previuos: 12-Nov-2015)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Categorizes a set of variables in terms of one of the following specifications:                                                                                          </pre>
+<pre>- Number of wished categories or groups                                                                                          </pre>
+<pre>- Specified percentile values                                                                                           </pre>
+<pre>- Number of cases in each category or group                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>This macro differs from th %Categorize macro in that it extends the capabilities of PROC RANK,                                                                                          </pre>
+<pre>as this procedure cannot handle the second option for categorization listed above                                                                                          </pre>
+<pre>(i.e. categorization at specified percentiles values).                                                                                          </pre>
+<pre>The other two options are handled by PROC RANK with no problems.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>************                                                                                                            </pre>
+<pre>*** HOWEVER: Be careful that the macro may not give correct results after adding the BY= parameter (as of Feb-2016) ***                                                                                          </pre>
+<pre>************                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CategorizePercentiles(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. */                                        </pre>
+<pre>          var=_NUMERIC_,                /* Lista de variables numéricas a categorizar. */                              </pre>
+<pre>          by=,                          /* BY variables. */                                         </pre>
+<pre>          out=,                         /* Output dataset con las variables categorizadas. */                              </pre>
+<pre>          condition=,                   /* Condición que deben cumplir los valores de CADA variable para ser */                              </pre>
+<pre>          /* incluida en la categorización. */                                                            </pre>
+<pre>          alltogether=1,                /* Dice si los valores excluidos por CONDITION= se juntan todos en */                              </pre>
+<pre>          /* una categoría (=1) o se genera una categoría para cada valor (=0). */                                                            </pre>
+<pre>          varcat=,                      /* List of names to be used for the categorized variables. */                              </pre>
+<pre>          varvalue=,                    /* List of names to be used for the statistic-valued categorized variables */                              </pre>
+<pre>          to be matched one-to-one with the variables listed in VAR=                                                            </pre>
+<pre>          suffix=_cat,                  /* Sufijo a usar para las variables categorizadas. */                              </pre>
+<pre>          value=,                       /* Statistic a usar para el valor de cada categoría (mean, median,...). */                              </pre>
+<pre>          both=,                        /* Categorizar tanto con valores reales y discretos */                              </pre>
+<pre>          (1, 2, ...) (=1), o solo con discretos (=0)?                                                            </pre>
+<pre>          groupsize=,                   /* Tamaño de cada grupo de la categorización. */                              </pre>
+<pre>          groups=10,                    /* Número de grupos en los que efectuar la categorización. */                              </pre>
+<pre>          percentiles=,                 /* Percentiles a usar para la categorización. */                              </pre>
+<pre>          descending=0,                 /* Should the percentile values be applied to the descending values of the variables? */                              </pre>
+<pre>          log=1);                       /* Mostrar mensajes en el log? */                              </pre>
+<pre>                                                                                                    </pre>
+<pre>El parámetro value puede ser cualquier estadístico válido en PROC MEANS, o bien                                                                                          </pre>
+<pre>nada, para indicar que use números enteros sucesivos.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Puede recibir cualquier opción adicional como                                                            </pre>
+<pre>                              en cualquier opción data= de SAS.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Lista de las variables numéricas a categorizar, separadas por blancos.                                                            </pre>
+<pre>                              default: _NUMERIC_ (es decir todas las variables numéricas)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         BY variables.                                                                             </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset conformado por las variables del input dataset                                                            </pre>
+<pre>                              a las que se les agregan las variables categorizadas.                                                            </pre>
+<pre>                              El número de variables categorizadas y sus valores dependen                                                             </pre>
+<pre>                              de los parámetros 'value' y 'both', como sigue:                                                            </pre>
+<pre>                              - si 'value' es vacío, both=0: se genera una variable categorizada para cada variable,                                                            </pre>
+<pre>                              con números enteros identificando cada categoría: 1 para la categoría                                                            </pre>
+<pre>                              correspondiente a los valores más bajos, 2 para la siguiente, y así                                                            </pre>
+<pre>                              siguiendo (Nota: alguno de los valores puede saltearse en caso de que                                                            </pre>
+<pre>                              la variable original tenga valores repetidos)                                                            </pre>
+<pre>                              - si 'value' NO es vacío, both=0: se genera una variable categorizada para cada                                                            </pre>
+<pre>                              variable, con valores identificatorios de cada categoría que son calculados                                                            </pre>
+<pre>                              a partir del método indicado en 'value'. Por ejemplo si value=mean, el identificador                                                            </pre>
+<pre>                              de cada categoría es el promedio de los valores de la variable original en la                                                            </pre>
+<pre>                              categoría correspondiente.                                                                </pre>
+<pre>                              - si 'value' NO es vacío, both=1: se generan dos tipos de variables categorizadas,                                                            </pre>
+<pre>                              para cada variable: una contiene valores identificatorios de las categorías que                                                            </pre>
+<pre>                              son los mismos que son usados cuando 'value' es vacío, y la segunda contiene                                                            </pre>
+<pre>                              valores identificatorios de las categorías que son los mismos que son usados                                                            </pre>
+<pre>                              cuando 'value' NO es vacío.                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              Los nombres de las variables categorizadas se arman a partir del nombre de                                                            </pre>
+<pre>                              la variable original más el sufijo indicado en 'suffix'. En caso de que                                                            </pre>
+<pre>                              both=1, los dos tipos de variables categorizadas se distinguen agregando el sufijo                                                            </pre>
+<pre>                              '_' seguido del valor de 'value'.                                                            </pre>
+<pre>                              Ej: si suffix=_c, value=mean, both=1 y var=x, se generan las variables                                                            </pre>
+<pre>                              categorizadas: x_c y x_c_mean.                                                            </pre>
+<pre>                              Notar que si el parámetro 'suffix' es vacío, las variables originales                                                            </pre>
+<pre>                              que son categorizadas por esta macro son reemplazadas por las variables                                                            </pre>
+<pre>                              categorizadas. Esto puede ser útil cuando se genera un nuevo dataset.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- condition:                  Condition to be applied to each variable being categorized in order to be                                                            </pre>
+<pre>                              included in the categorization process.                                                            </pre>
+<pre>                              It should be given in form of a right-hand side expression of a WHERE condition                                                            </pre>
+<pre>                              expression.                                                                               </pre>
+<pre>                              Ex: ~= 0                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- alltogether:                Whether the values excluded from the categorization process because of                                                            </pre>
+<pre>                              the CONDITION specification should be left as is in the output dataset                                                            </pre>
+<pre>                              or grouped all together into a single category.                                                            </pre>
+<pre>                              When alltogether = 1 and statistic-valued categorized variables are                                                            </pre>
+<pre>                              requested with the VALUE= parameter, the representative value stored for                                                            </pre>
+<pre>                              the single group containing all the excluded values takes into account                                                            </pre>
+<pre>                              the possibly different NUMBER OF CASES where the input variable takes                                                            </pre>
+<pre>                              each of the excluded values. For example, if VALUE=mean, then the                                                            </pre>
+<pre>                              representative value stored in the statistic-valued categorized variable                                                            </pre>
+<pre>                              is the mean of the excluded cases, which is equivalent to computing the                                                            </pre>
+<pre>                              WEIGHTED average of each excluded value (i.e. weighted by the number of                                                            </pre>
+<pre>                              cases where the input variable takes each of the excluded values).                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varcat:                     List of names to be used for the integer-valued categorized variables.                                                            </pre>
+<pre>                              This parameter is useful when any of the input variables has a long name                                                            </pre>
+<pre>                              making infeasible the attachment of SUFFIX to the original variable name                                                            </pre>
+<pre>                              because the name of the categorized variable results in a name that is longer                                                            </pre>
+<pre>                              than 32 characters.                                                                       </pre>
+<pre>                              If both VARCAT and SUFFIX parameters are specified, whenever possible the                                                            </pre>
+<pre>                              names in the VARCAT parameter will be matched one-to-one with the names listed                                                            </pre>
+<pre>                              in the VAR parameter. If the number of variables specified in the VARCAT                                                            </pre>
+<pre>                              parameter is smaller than the number of variables given in the VAR parameter,                                                            </pre>
+<pre>                              then the SUFFIX value is used to construct the categorized variable names                                                            </pre>
+<pre>                              for the remaining variables listed in VAR not matching a name in VARCAT.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varvalue:                   List of names to be used for the statistic-valued categorized variables to                                                            </pre>
+<pre>                              be matched one-to-one with the names listed in the VAR parameter.                                                            </pre>
+<pre>                              If the number of variables specified in the VARVALUE parameter is smaller                                                            </pre>
+<pre>                              than the number of variables given in the VAR parameter, then the usual                                                            </pre>
+<pre>                              processed based on SUFFIX and VALUE (see below when describing parameter VALUE)                                                            </pre>
+<pre>                              will be used to construct the categorized variable names for the                                                            </pre>
+<pre>                              remaining variables listed in VAR not matching a name in VARVALUE.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Sufijo a usar para nombrar las variables categorizadas, a partir                                                            </pre>
+<pre>                              de las variables originales.                                                              </pre>
+<pre>                              Si su valor es vacío, las variables transformadas tienen el mismo                                                            </pre>
+<pre>                              nombre que las variables originales. Tengase en cuenta sin embargo, que en                                                            </pre>
+<pre>                              este caso se crea una variable temporaria en el input dataset con el                                                            </pre>
+<pre>                              sufijo '_', por lo que cualquier variable que coincida con el                                                            </pre>
+<pre>                              nombre de alguna de las variables que se estan categorizando mas                                                            </pre>
+<pre>                              el sufijo '_' es sobreescrita.                                                            </pre>
+<pre>                              In addition, SUFFIX is set to empty when the user requests only the                                                            </pre>
+<pre>                              statistic-valued categorized variables, via the VALUE= parameter and                                                            </pre>
+<pre>                              BOTH=0 option.                                                                            </pre>
+<pre>                              default: _cat                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- value:                      Value to use for the statistic-based categorized variables.                                                            </pre>
+<pre>                              Any statistic keyword valid in PROC MEANS is accepted.                                                            </pre>
+<pre>                              (e.g. mean, median, q3, etc.)                                                             </pre>
+<pre>                              If VALUE= is empty (default), the values assigned to the categorized                                                            </pre>
+<pre>                              variables are consecutive integer numbers between 1 and the number of                                                            </pre>
+<pre>                              requested groups or categories.                                                            </pre>
+<pre>                              The name of the variables containing the statistic requested by this                                                            </pre>
+<pre>                              parameter (a.k.a. statistic-valued categorized variables) are formed by adding                                                            </pre>
+<pre>                              the suffix _&VALUE to either the suffix specified in parameter SUFFIX                                                            </pre>
+<pre>                              or to the name specified in the VARCAT= parameter for the corresponding variable.                                                            </pre>
+<pre>                              Ex 1: if VALUE=mean and SUFFIX=_cat, the new variables containing the mean                                                            </pre>
+				of the categorized variable in each group is:	<variable-name>_CAT_MEAN
+<pre>                              of the categorized variable in each group is:<variable-name>_CAT_MEAN                                    </pre>
+<pre>                              Ex 2: if VALUE=median and VARCAT=x_grouped, the new variable containing the median                                                            </pre>
+<pre>                              of the categorized variable in each group is: x_grouped_median                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- both:                       Flag indicating whether two categorized variables should be retained                                                            </pre>
+<pre>                              in the output dataset for each analyzed variable:                                                            </pre>
+<pre>                              - an integer-valued categorized variable (IV)                                                            </pre>
+<pre>                              - a statistic-valued categorized variable (SV)                                                             </pre>
+<pre>                              where IV uses consecutive integer values from 1 to the number of groups                                                            </pre>
+<pre>                              as categories for the categorized variable,                                                            </pre>
+<pre>                              and SV uses the value resulting from computing the statistic specified                                                            </pre>
+<pre>                              in parameter VALUE to each group of the IV categorized variable.                                                            </pre>
+<pre>                              Possible values: 0, 1, which imply the following, depending on the value of                                                            </pre>
+<pre>                              parameter VALUE=:                                                                         </pre>
+<pre>                              (a) BOTH=0 and VALUE is empty => Only IV is stored                                        </pre>
+<pre>                              (b) BOTH=0 and VALUE not empty=> Only SV is stored                                        </pre>
+<pre>                              (c) BOTH=1 and VALUE is empty => IV and SV are stored (the MEAN is used                              </pre>
+<pre>                              as statistic for the SV value)                                                            </pre>
+<pre>                              (d) BOTH=1 and VALUE not empty => IV and SV are stored (the statistic                              </pre>
+<pre>                              specified by VALUE= is used for the SV value)                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- groupsize:                  Tamaño de cada grupo de la categorización.                                                            </pre>
+<pre>                              Esta opción tiene prevalencia sobre groups= y percentiles=.                                                            </pre>
+<pre>                              Si no es posible generar todos los grupos de tamaños iguales, el último                                                            </pre>
+<pre>                              grupo (último de acuerdo al orden de los valores de la variable a categorizar)                                                            </pre>
+<pre>                              que resultaría más chico que los demás, se une al ante-último.                                                            </pre>
+<pre>                              *** NOTA ***: Ver seccion NOTES abajo sobre la diferencia entre usar la opción                                                            </pre>
+<pre>                              GROUPSIZE= y usar la opción GROUPS= o PERCENTILES=.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- groups:                     Número de grupos en los que se DESEA categorizar cada variable.                                                            </pre>
+<pre>                              Cada grupo se define a partir de percentiles equidistantes, tantos como                                                            </pre>
+<pre>                              grupos haya. Por ej., si groups=5 los percentiles usados para categorizar                                                            </pre>
+<pre>                              las variables son 20 40 60 80 100.                                                            </pre>
+<pre>                              *** NOTA ***: Ver seccion NOTES abajo sobre la diferencia entre usar la opción                                                            </pre>
+<pre>                              GROUPSIZE= y usar la opción GROUPS= o PERCENTILES=.                                                            </pre>
+<pre>                              default: 10 (es decir se utilizan los percentiles 10 20 ... 100)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- percentiles:                Valores de los percentiles utilizados para categorizar las variables                                                            </pre>
+<pre>                              regresoras.                                                                               </pre>
+<pre>                              Tiene preferencia sobre el parámetro groups, en el sentido de que si                                                            </pre>
+<pre>                              los dos son pasados, se toma el valor de 'percentiles' y no de 'groups'.                                                            </pre>
+<pre>                              Notas:                                                                                    </pre>
+<pre>                              - Si el ultimo valor pasado como percentil no es 100, el percentil 100 es                                                            </pre>
+<pre>                              agregado asi no queda ningun valor de la variable sin categorizar.                                                            </pre>
+<pre>                              - Ver seccion NOTES abajo sobre la diferencia entre pasar la opción                                                            </pre>
+<pre>                              GROUPSIZE= y pasar la opción GROUPS= o PERCENTILES=.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- descending:                 Whether the percentile values should be applied to the descending values                                                            </pre>
+<pre>                              of the variables.                                                                         </pre>
+<pre>                              This has an impact only when the percentile values are not equally spaced                                                            </pre>
+<pre>                              between 0 and 100. For example, the values 6%, 12%, ..., 96%, 100% are not                                                            </pre>
+<pre>                              equally spaced as the last interval has size 4%. If DESCENDING=1, the                                                            </pre>
+<pre>                              percentile values used to compute the categories of each variable are:                                                            </pre>
+<pre>                              4%, 8%, ..., 94%, 100%, that is the interval having size 4% is now the first                                                            </pre>
+<pre>                              interval, that is the first 4% LARGEST values of the variable will be part                                                            </pre>
+<pre>                              of the first category or group.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Indica si se desea ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- TRATAMIENTO DE VALORES REPETIDOS                                                                                          </pre>
+<pre>En caso de que haya valores repetidos de la variable a categorizar, los resultados                                                                                          </pre>
+<pre>obtenidos con la especificación del parámetro GROUPSIZE= y con la especificación del parámetro                                                                                          </pre>
+<pre>GROUPS= o PERCENTILES= no va a ser necesariamente la misma.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>De hecho:                                                                                                               </pre>
+<pre>- La opción GROUPSIZE= fuerza el tamaño de los grupos al tamaño especificado, con lo                                                                                          </pre>
+<pre>que si la variable presenta muchos valores repetidos, seguramente habrá valores de la variable                                                                                          </pre>
+<pre>original que correspondan a dos grupos distintos, por el simple hecho de que si correspondiesen                                                                                          </pre>
+<pre>a un mismo grupo, el grupo tendría más observaciones que las especificadas en groupsize=.                                                                                          </pre>
+<pre>Sin embargo, en estos casos, el hecho de que una observación pertenezca a un grupo y que otra                                                                                          </pre>
+<pre>observación con el mismo valor pertenezca a otro grupo, es arbitraria...!                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- Las opciones GROUPS= y PERCENTILES= en cambio especifican un número DESEADO de grupos                                                                                          </pre>
+<pre>para la variable categorizada, pero no garantizan que exista exactamente ese número de grupos.                                                                                          </pre>
+<pre>De hecho, todos los valores repetidos van a corresponderse con el MISMO grupo. Por ejemplo si la                                                                                          </pre>
+<pre>variable a categorizar tiene solamente 3 valores distintos y groups=10, la variable categorizada                                                                                          </pre>
+<pre>va a tener solamente 3 valores.                                                                                          </pre>
+<pre>Este requerimiento hace que, en caso de que el parámetro 'value' sea vacío, algunas categorías                                                                                          </pre>
+<pre>pueden faltar, de manera que los identificadores de las distintas categorías no sean números                                                                                          </pre>
+<pre>enteros consecutivos. Por ejemplo, si una variable tiene 100 observaciones no missing, de las                                                                                          </pre>
+<pre>cuales 20 tienen el valor 1.3, 35 el valor 7.2 y el resto el valor 8.4, las categorías generadas                                                                                          </pre>
+<pre>al solicitar groups=10, son las siguientes:                                                                                          </pre>
+var	categoría
+<pre>var                           categoría                                                                                 </pre>
+<pre>1.3 -> 1                                                                                                                </pre>
+<pre>7.2 -> 3                                                                                                                </pre>
+<pre>8.4 -> 6                                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- TRATAMIENTO DE MISSING                                                                                              </pre>
+<pre>Missing values are left as missing and are not counted as a separate group. This is to emulate                                                                                          </pre>
+<pre>how PROC RANK treats missing values (they are left as missing).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- LIMITATIONS TO THE NAMES OF THE VARIABLES BEING CATEGORIZED                                                                                          </pre>
+<pre>Because of the SUFFIX added to the original variable names to form the categorized variable names                                                                                          </pre>
+<pre>the names of the variables to be categorized cannot be longer than 32 - (length-of-suffix).                                                                                          </pre>
+<pre>In the best case, the suffix passed by the user can be set to an empty value; however in that case                                                                                          </pre>
+<pre>a temporary variable whose name is the original variable name being categorized plus the suffix '_'                                                                                          </pre>
+<pre>is created by the process. Therefore the absolute limitation to the names of the variables being                                                                                          </pre>
+<pre>categorized is 31.                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>- %RemoveRepeated                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %CategorizePercentiles(test , out=test_cat , var=x z , both=1 , groups=100);                                                                                          </pre>
+<pre>Crea el dataset test_cat a partir del dataset test al que se le agregan las variables                                                                                          </pre>
+<pre>x_c, z_c, x_c_mean y z_c_mean. Las variables x_c y z_c tienen valores enteros entre 1                                                                                          </pre>
+<pre>y 100 que indican alguna de las 100 posibles distintas categorias para las variables                                                                                          </pre>
+<pre>x y z definidas por sus respectivos percentiles 1%, 2%, ... , 99% y 100%.                                                                                          </pre>
+<pre>Es decir el grupo x_c = 1 corresponde a las observaciones con valor de x entre su                                                                                          </pre>
+<pre>mínimo valor y su percentil 1%, el grupo x_c = 2 corresponde a las observaciones con                                                                                          </pre>
+<pre>valor de x entre su percentil 1% y su percentil 2%, etc.                                                                                          </pre>
+<pre>Al pasar el parámetro both=1, también se crean las variables x_c_mean y z_c_mean que se                                                                                          </pre>
+<pre>obtienen de la misma manera que x_c y z_c, con la diferencia de que sus valores están                                                                                          </pre>
+<pre>dados respectivamente por el valor medio de x y z en cada una de las categorías.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %CategorizePercentiles(test , var=x z , suffix=_c , groups=4);                                                                                          </pre>
+<pre>En el dataset test agrega las variables x_c, z_c con las variables x, z categorizadas                                                                                          </pre>
+<pre>en 4 grupos (representados respectivamente por los valores 1, 2, 3, 4), generados a                                                                                          </pre>
+<pre>partir de los percentiles 25%, 50%, 75% y 100%.                                                                                           </pre>
+<pre>Es decir el grupo x_c = 1 corresponde a las observaciones con valor de x entre su mínimo                                                                                          </pre>
+<pre>valor y su percentil 25%, el grupo x_c = 2 corresponde a las observaciones con valor de x                                                                                          </pre>
+<pre>entre su percentil 25% y su percentil 50%, etc.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %CategorizePercentiles(test , var=x z , value=median , suffix=_c , both=0, percentiles=25 50 75 100);                                                                                          </pre>
+<pre>Idem (2), pero ahora los valores representativos de cada grupo no son los números del                                                                                          </pre>
+<pre>1 al 4, sino los valores medianos de las variables en cada grupo de categorización.                                                                                          </pre>
+<pre>Los nombres de las variables categorizadas que contienen dicha información son:                                                                                          </pre>
+<pre>x_c_median z_c_median                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %CategorizePercentiles(test, var=x z, groupsize=10);                                                                                          </pre>
+<pre>Categoriza las variables X y Z en el dataset TEST en grupos que contienen exactamente                                                                                          </pre>
+<pre>10 observaciones cada uno, salvo tal vez la categoría correspondiente a los valores más                                                                                          </pre>
+<pre>grandes de la variable que es categorizada, que puede tener más de 10 observaciones, en                                                                                          </pre>
+<pre>caso de que el número total de valores no missing de la variable no sea exactamente un                                                                                          </pre>
+<pre>múltiplo de 10.                                                                                                         </pre>
+<pre>Las variables categorizadas se almacenan en las variables X_CAT y Z_CAT                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>5.- %CategorizePercentiles(test, var=verylongvariablename longvarname, both=0, varvalue=verylongvariablename);                                                                                          </pre>
+<pre>Because of long variable names, the name for the statistic-valued categorized variables                                                                                          </pre>
+<pre>is given via the VARVALUE= parameter, but just for the first analyzed variable, VERYLONGVARIABLENAME.                                                                                          </pre>
+<pre>The statistic-valued categorized variable for the second variable (LONGVARNAME) instead is assigned                                                                                          </pre>
+<pre>the usual name constructed by adding the statistic keyword as suffix: LONGVARNAME_mean, since                                                                                          </pre>
+<pre>the default statistic to use is the MEAN.                                                                                          </pre>
+<body>
+</html>

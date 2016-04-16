@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CreateColorFormat</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CreateColorFormat</h1>
+<pre>Version:                      1.0                                                                                       </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      07-Apr-2016                                                                               </pre>
+<pre>Modified:                     07-Apr-2016                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Creates a color ramp format based on the range of values taken by the given statistic                                                                                          </pre>
+<pre>(e.g. mean) computed on the analyzed variable for each combination of a set of BY variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>For now, only one analysis variable is supported at a time.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CreateColorFormat(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. Dataset options are allowed. */                              </pre>
+<pre>          var,                          /* One single numeric variable whose values define the color format. */                              </pre>
+<pre>          by,                           /* Blank-separated list of BY variables for which the statistic in STAT is computed. */                              </pre>
+<pre>          fmtname,                      /* Name of the color format to create. Maximum 8 characters! */                              </pre>
+<pre>          stat=mean,                    /* Statistic to use for the analysis variable. */                              </pre>
+<pre>          library=WORK,                 /* Library where the format should be stored. */                              </pre>
+<pre>          out=,                         /* Output dataset with the color format definition. */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Dataset options are allowed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        One single numeric variable whose values define the color ramp format.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         Blank-separated list of BY variables by which the statistic given                                                            </pre>
+<pre>                              in STAT is computed on the analyzed variable.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- fmtname:                    Name of the color format to create.                                                            </pre>
+<pre>                              The name must satisfy the restrictions given by SAS, such as:                                                            </pre>
+<pre>                              - maximum name length: 8 characters                                                            </pre>
+<pre>                              - cannot start with a number                                                              </pre>
+<pre>                              - cannot end with a number                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- stat:                       Statistic to use when computing the range of values taken by the analysis                                                            </pre>
+<pre>                              variable for each combination of the BY variables.                                                            </pre>
+<pre>                              default: mean                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- library:                    Library where the format should be stored.                                                            </pre>
+<pre>                              default: WORK                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset where the color format is stored.                                                            </pre>
+<pre>                              default: (Empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %CreateFormatsFromCuts                                                                                                </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Create a color ramp format to use in PROC REPORT and PROC TABULATE outputs                                                                                          </pre>
+<pre>to color cells based on their values.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>REFERENCES:</h3>
+<pre>- Using color formats in PROC REPORT, PROC TABULATE, etc.:                                                                                          </pre>
+<pre>http://support.sas.com/kb/23/353.html                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- Defining colors using RGB numbers (0-255) which are converted to hexadecimal codes as in CXFFA395:                                                                                          </pre>
+<pre>http://blogs.sas.com/content/iml/2012/10/22/whats-in-a-name.html                                                                                          </pre>
+<body>
+</html>

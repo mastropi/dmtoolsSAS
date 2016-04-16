@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Standardize</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Standardize</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 17-Jul-03                                                                                                      </pre>
+<pre>Modified: 12-Feb-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Estandariza variables a media 0 y desvío 1.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Standardize(                                                                                          </pre>
+<pre>          _data_ ,                      /* Input dataset */                                         </pre>
+<pre>          var=_NUMERIC_ ,               /* Variables a estandarizar */                              </pre>
+<pre>          out= ,                        /* Output dataset */                                        </pre>
+<pre>          suffix=_std ,                 /* Sufijo para los nombres de las variables estandarizadas */                              </pre>
+<pre>          macrovar= ,                   /* Macro variable donde guardar las lista de variables estandarizadas */                              </pre>
+<pre>          log=1);                       /* Mostrar mensajes en el log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- _data_:                     Input dataset.                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Lista separada por blancos de las variables a estandarizar.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset con las variables estandarizadas.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- std:                        Valor del desvío estándar deseado para las variables estandarizadas.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Sufijo a usar para las variables estandarizadas.                                                            </pre>
+<pre>                              default: _std                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar:                   Nombre de la macro variable global donde guardar la lista                                                            </pre>
+<pre>                              con los nombres de las variables estandarizadas creadas.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Indica si se desea ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- Esta macro no hace otra cosa que llamar a la macro %Center con los                                                                                          </pre>
+<pre>parámetros que recibe, agregando el parámetro std=1.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- El proceso de estandarizar variables puede hacerse con PROC STANDARD.                                                                                          </pre>
+<pre>Sin embargo este procedimiento no permite generar nuevas variables con los                                                                                          </pre>
+<pre>valores estandarizados en el input dataset. Permite ya sea sobreescribir las                                                                                          </pre>
+<pre>variables que se transforman, o bien generar un nuevo dataset con las variables                                                                                          </pre>
+<pre>estandarizadas.                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- El valor del parámetro 'macrovar' no puede ser 'macrovar', ni el nombre de                                                                                          </pre>
+<pre>ningún otro parámetro recibido por la macro. Tampoco puede empezar y terminar con                                                                                          </pre>
+<pre>el símbolo '_'. Ejemplo de valores prohibidos: suffix , out , _var_, etc.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Center                                                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Center                                                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %Standardize(test , var=x z , macrovar=var_std);                                                                                          </pre>
+<pre>Estandariza las variables x, z creando nuevas variables x_std, z_std con los                                                                                          </pre>
+<pre>valores estandarizados.                                                                                                 </pre>
+<pre>Se genera la macro variable global 'var_std' con la lista de nombres de las                                                                                          </pre>
+<pre>variables estandarizadas: x_std z_std.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %Standardize(test , var=x z , out=test_s , suffix=_s , macrovar=var_s);                                                                                          </pre>
+<pre>Crea el dataset test_s con todas las variables que estan en test mas las                                                                                          </pre>
+<pre>variables estandarizadas x_s, z_s.                                                                                           </pre>
+<pre>Se genera tambien la macro variable 'var_s' con la lista de los nombres de                                                                                          </pre>
+<pre>las variables estandarizadas: x_s z_s.                                                                                          </pre>
+<body>
+</html>

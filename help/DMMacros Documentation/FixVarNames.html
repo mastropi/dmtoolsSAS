@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%FixVarNames</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %FixVarNames</h1>
+<pre>Version:                      1.01                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      03-Feb-2016                                                                               </pre>
+<pre>Modified:                     17-Mar-2016                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Fix variable names by shortening their number of characters to a specified                                                                                          </pre>
+<pre>maximum minus a specified space.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Name conflicts are resolved by replacing the name of the shortened name with                                                                                          </pre>
+<pre>an appropriate number.                                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>Useful to make sure that all remain SAS valid variable names after adding                                                                                          </pre>
+<pre>a prefix or suffix of fixed length.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%FixVarNames(var, max=32, space=0, replace=, replacement=, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- var:                        List of variables to fix.                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- max:                        Maximum number of characters allowed for each variable                                                            </pre>
+<pre>                              name including the margin space defined by parameter SPACE.                                                            </pre>
+<pre>                              default: 32 (i.e. the maximum allowed number of chars in SAS)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- space:                      Number of characters to leave as margin space for a prefix or                                                            </pre>
+<pre>                              suffix to be added to the variable name before exceeding                                                            </pre>
+<pre>                              the number of characters given in MAX.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- replace:                    One or more consecutive characters to replace in the original                                                            </pre>
+<pre>                              variable name prior to fixing their name (only applied when the                                                            </pre>
+<pre>                              variable actually needs to be shortened).                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- replacement:                One ore more characters to replace the characteres indicated in                                                            </pre>
+<pre>                              REPLACE=.                                                                                 </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The list in input parameter 'var' where names have been shortened to the number                                                                                          </pre>
+<pre>of characters given by max - space.                                                                                          </pre>
+<pre>All variable names are trimmed on the right.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- No check is done for repeated variable names after truncation.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %FindInList                                                                                                           </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %SelectNames                                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %FixVarNames(thisisalongname v234567890test, max=10, space=2);                                                                                          </pre>
+<pre>Returns the list 'thisisal v2345678'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %FixVarNames(A_ID_PERIODO A_TEST V_CR_SAMPLE_SUM, max=20, space=10, replace=_);                                                                                          </pre>
+<pre>Returns the list 'AIDPERIODO A_TEST VCRSAMPLES'                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Use this macro to shorten the variable names to make sure that when adding                                                                                          </pre>
+<pre>a prefix or a suffix to them (with e.g. %MakeList) each generated variable name                                                                                          </pre>
+<pre>is a valid SAS variable.                                                                                                </pre>
+<body>
+</html>

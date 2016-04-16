@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CheckRepeated</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CheckRepeated</h1>
+<pre>Version: 1.03                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Nov-00                                                                                                       </pre>
+<pre>Modified: 20-Oct-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro finds observations with repeated key values, and creates a dataset containing all                                                                                          </pre>
+<pre>the observations with repeated key values.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CheckRepeated(data, by=, out=, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in any data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by=:                        List of key variables that define the condition of repeated observation.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- out:                        Output dataset. Data options can be specified as in any DATA= SAS option.                                                            </pre>
+<pre>                              It contains the observations in the input dataset with repeated key values.                                                            </pre>
+<pre>                              The key variables are placed first in the dataset.                                                            </pre>
+<pre>                              Variable _COUNT_ is added to the output dataset containing the number of                                                            </pre>
+<pre>                              observations with the same key values.                                                            </pre>
+<pre>                              default: _CR_out_                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- The variables analyzed cannot have the name of any reserved word used in the SELECT statement                                                                                          </pre>
+<pre>(such as CASE).                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %CheckRepeated(test, id month, out=repeated);                                                                                          </pre>
+<pre>Finds and stores in dataset REPEATED the observations in TEST that have the same values of                                                                                          </pre>
+<pre>variables ID and MONTH.                                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>This macro is useful to check if there are observations with repeated key values and if so,                                                                                          </pre>
+<pre>to take a look at those observations.                                                                                          </pre>
+<body>
+</html>

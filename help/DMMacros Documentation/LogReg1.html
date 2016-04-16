@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%LogReg1</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %LogReg1</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 12-Sep-05                                                                                                      </pre>
+<pre>Modified: 12-Sep-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Performs univariate Logistic Regression on a set of regressor variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%LogReg1(                                                                                           </pre>
+<pre>          data,                         /* Input dataset */                                         </pre>
+<pre>          target=,                      /* Target variable */                                       </pre>
+<pre>          var=,                         /* Regressor variables */                                   </pre>
+<pre>          condition=,                   /* Condition that each variable must satisfy in order to be included */                              </pre>
+<pre>          /* in the analysis. */                                                                    </pre>
+<pre>          out=_LR1_loglike_,            /* Output dataset with minus the log-likelihood of each regression. */                              </pre>
+<pre>          /* The smaller the log-likelihood the better the model. */                                                            </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                          </pre>
+<pre>- %Getnobs                                                                                          </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %LogisticRegression                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<body>
+</html>

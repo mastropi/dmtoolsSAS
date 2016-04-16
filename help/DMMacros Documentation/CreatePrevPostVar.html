@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CreatePrevPostVar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CreatePrevPostVar</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 4-Aug-04                                                                                                       </pre>
+<pre>Modified: 19-Aug-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro creates variables containing the previous and posterior values of                                                                                          </pre>
+<pre>a given set of variables, where 'previous' and 'posterior' is defined by an order                                                                                          </pre>
+<pre>established by another set of variables, and optionally by a condition that must satisfy                                                                                          </pre>
+<pre>each of the variables (e.g. previous and posterior values are updated only when the value                                                                                          </pre>
+<pre>of the variable is not missing).                                                                                          </pre>
+<pre>This process can be done by BY variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CreatePrevPostVar(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. */                                        </pre>
+<pre>          var=_ALL_,                    /* Variables to process. */                                 </pre>
+<pre>          by=,                          /* By variables by which the process is performed. */                              </pre>
+<pre>          sortby=,                      /* Variables defining the order of the obs. by the by variables. */                              </pre>
+<pre>          out=,                         /* Output dataset. */                                       </pre>
+<pre>          match=,                       /* Matching criterion to update previous and posterior values. */                              </pre>
+<pre>          comparison=~=,                /* Comparison used in the matching criterion. */                              </pre>
+<pre>          which=prevpost,               /* Which values to compute? Prev, Post or both. */                              </pre>
+<pre>          suffixprev=,                  /* Suffix to use for the variables containing the previous values. */                              </pre>
+<pre>          suffixpost=,                  /* Suffix to use for the variables containing the posterior values. */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        List of variables for which the previous and posterior values want                                                            </pre>
+<pre>                              to be stored in new variables.                                                            </pre>
+<pre>                              It can be specified with the format used in any VAR statement in SAS.                                                            </pre>
+<pre>                              (e.g. _ALL_, _NUMERIC_, x1-x3, etc.)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         List of variables by which the computation of the previous and                                                            </pre>
+<pre>                              posterior values are computed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sortby:                     List of variables by which the observations are sorted for each                                                            </pre>
+<pre>                              combination of the BY variables. These variables define what comes                                                            </pre>
+<pre>                              first and what comes next, based on which the previous and posterior                                                            </pre>
+<pre>                              values are computed.                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset.               Data options can be specified as in a data= SAS option.                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- match:                      This value together with COMPARISON are used to specify the condition                                                            </pre>
+<pre>                              that each variable listed in VAR needs to satisfy in order to have                                                            </pre>
+<pre>                              its previous and posterior values updated.                                                            </pre>
+<pre>                              Exs:                                                                                      </pre>
+<pre>                              - if var=x, match=., the previous and posterior values of variable x                                                            </pre>
+<pre>                              are updated only 'if x ~= .' (since the default value of                                                            </pre>
+<pre>                              COMPARISON is '~=').                                                                      </pre>
+<pre>                              - if var=x, match=4, comparison=<, the previous and posterior values of                                                            </pre>
+<pre>                              variable x are updated only 'if x < 4'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- comparison:                 See description of MATCH.                                                                 </pre>
+<pre>                              default: ~=                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- which:                      Specify which values to compute for each variable listed in VAR, whether                                                            </pre>
+<pre>                              the previous values, posterior values, or both. Default is both.                                                            </pre>
+<pre>                              Possible values: prevpost, prev, post.                                                            </pre>
+<pre>                              default: prevpost                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffixprev:                 Suffix to use for the variable with the PREVIOUS value of the variable                                                            </pre>
+<pre>                              of interest.                                                                              </pre>
+<pre>                              default: _prev                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffixpost:                 Suffix to use for the variable with the POSTERIOR value of the variable                                                            </pre>
+<pre>                              of interest.                                                                              </pre>
+<pre>                              default: _post                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- The variables containing the previous and posterior values of each requested variable                                                                                          </pre>
+<pre>are placed right after the variable itself in the output dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- If the variables that contain the previous and posterior values of a variable already                                                                                          </pre>
+<pre>exist in the dataset, they are overwritten.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Drop                                                                                                                 </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetVarNames                                                                                                          </pre>
+<pre>- %InsertInList                                                                                                         </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %CreatePrevPostVar(A, var=x, by=groupID, sortby=mth);                                                                                          </pre>
+<pre>This creates the variables X_PREV and X_POST in dataset A with the previous and posterior                                                                                          </pre>
+<pre>values of variable X by variable GROUPID.                                                                                          </pre>
+<pre>The conditions of 'previous' and 'posterior' are defined by the variable MTH, which                                                                                          </pre>
+<pre>establishes the order of the observations for each value of the by variable GROUPID.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %CreatePrevPostVar(A, var=x, by=groupID, sortby=mth, match=.);                                                                                          </pre>
+<pre>Idem example 1, but previous and posterior values of variable x are updated only                                                                                          </pre>
+<pre>if X is not missing.                                                                                                    </pre>
+<pre>This creates variables containing the previous and posterior values of variable X                                                                                          </pre>
+<pre>that either occur BEFORE and AFTER blocks of observations for which X is missing,                                                                                          </pre>
+<pre>or the usual previous and posterior values when X is not missing.                                                                                          </pre>
+<pre>Ex: This would be the effect on the following data:                                                                                          </pre>
+<pre>groupID                       mth                           X                             X_prev                        </pre>
+<pre>10                            1                             5                             .                             </pre>
+<pre>10                            2                             2                             5                             </pre>
+<pre>10                            3                             4                             2                             </pre>
+<pre>10                            4                             .                             4                             </pre>
+<pre>10                            5                             .                             4                             </pre>
+<pre>10                            6                             .                             4                             </pre>
+<pre>10                            7                             3                             4                             </pre>
+<pre>10                            1                             6                             3                             </pre>
+<pre>234                           2                             7                             .                             </pre>
+<pre>234                           3                             2                             7                             </pre>
+<pre>234                           4                             5                             2                             </pre>
+<body>
+</html>

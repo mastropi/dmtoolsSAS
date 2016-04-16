@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>UE CALCULA EL R2 Y EL R2 AJUSTADO DE UNA REGRESION LOGISTICA. ES UTIL PARA CALCULAR</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO UE CALCULA EL R2 Y EL R2 AJUSTADO DE UNA REGRESION LOGISTICA. ES UTIL PARA CALCULAR</h1>
+<pre>EL R2 DE UN CONJUNTO DE VALIDACION PARA EL QUE SE GENERARON PROBABILIDADES PREDICHAS. */                                                                                          </pre>
+<pre>&rsubmit;                                                                                                               </pre>
+<pre>%MACRO rsquare(data,resp=oy,pred=p,event=1)                                                                                          </pre>
+<pre>                              / store des="Computes the R-Square and the Adjusted R-Square of a logistic regression model";                                                            </pre>
+<pre>data rsquare;                                                                                                           </pre>
+<pre>                              set &data end=eof;                                                                        </pre>
+<pre>                              retain lab n1 nT;                                                                         </pre>
+<pre>                              if _n_ = 1 then do;                                                                       </pre>
+		lab=1; n1=0; nt=0;
+<pre>                              lab=1; n1=0; nt=0;                                                                        </pre>
+		end;
+<pre>                              end;                                                                                      </pre>
+<pre>                              if &resp=&event then n1 = n1+1;                                                            </pre>
+<pre>                              if &resp ~= . then do;                                                                    </pre>
+		nt=nt+1;
+<pre>                              nt=nt+1;                                                                                  </pre>
+<pre>                              if &resp=&event then                                                                      </pre>
+				lab = lab * &pred;
+<pre>                              lab = lab * &pred;                                                                        </pre>
+<pre>                              else                                                                                      </pre>
+				lab = lab * (1-&pred);
+<pre>                              lab = lab * (1-&pred);                                                                    </pre>
+<pre>                              end;                                                                                      </pre>
+<pre>                              if eof then do;                                                                           </pre>
+		alpha = log( (n1/nt)/(1 - (n1/nt)) );
+<pre>                              alpha = log( (n1/nt)/(1 - (n1/nt)) );                                                            </pre>
+		pa = exp(alpha) / (1 + exp(alpha));
+<pre>                              pa = exp(alpha) / (1 + exp(alpha));                                                            </pre>
+		la = (pa**n1) * ( ((1-pa)**(nt-n1)) );
+<pre>                              la = (pa**n1) * ( ((1-pa)**(nt-n1)) );                                                            </pre>
+		nullchi = -2*log(la);
+<pre>                              nullchi = -2*log(la);                                                                     </pre>
+		abchi = -2*log(lab);
+<pre>                              abchi = -2*log(lab);                                                                      </pre>
+		modchi =	nullchi - abchi;
+<pre>                              modchi =                      nullchi - abchi;                                            </pre>
+		r2ent = modchi/nullchi;
+<pre>                              r2ent = modchi/nullchi;                                                                   </pre>
+		r2chi = 1 - exp(-modchi/nt);
+<pre>                              r2chi = 1 - exp(-modchi/nt);                                                              </pre>
+		RSquare=1-((la/lab)**(2/nt));*agregado;
+<pre>                              RSquare=1-((la/lab)**(2/nt));*agregado;                                                            </pre>
+		RSquare_max=1-((la)**(2/nt));*Rmax2 = 1 - {L(0))**(2/n);
+<pre>                              RSquare_max=1-((la)**(2/nt));*Rmax2 = 1 - {L(0))**(2/n);                                                            </pre>
+		Rsquare_adj=RSquare/RSquare_max;
+<pre>                              Rsquare_adj=RSquare/RSquare_max;                                                            </pre>
+		output;
+<pre>                              output;                                                                                   </pre>
+<pre>                              end;                                                                                      </pre>
+<pre>                              keep n1 nt pa la lab nullchi abchi modchi r2ent r2chi alpha RSquare RSquare_max RSquare_adj;                                                            </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>title3 'cross validation r-square measures';                                                                                          </pre>
+<pre>proc print data=rsquare; var n1 nt pa la lab nullchi abchi modchi r2ent r2chi                                                                                           </pre>
+<pre>alpha RSquare RSquare_max RSquare_adj;                                                                                          </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>%MEND;                                                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<body>
+</html>

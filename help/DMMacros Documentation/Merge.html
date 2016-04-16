@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Merge</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Merge</h1>
+<pre>Version: 1.04                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Dec-00                                                                                                       </pre>
+<pre>Modified: 3-Mar-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Efectúa un merge entre dos datasets por BY variables.                                                                                          </pre>
+<pre>No es necesario ordenar previamente los datasets por las by variables.                                                                                          </pre>
+<pre>Asimismo, por default, el orden de las observaciones en los input datasets                                                                                          </pre>
+<pre>no se modifica. Sin embargo el output dataset queda ordenado por las BY variables.                                                                                          </pre>
+<pre>Se pueden establecer condiciones que deben satisfacer las observaciones                                                                                          </pre>
+<pre>para pertenecer al dataset resultante del merge (ej. if in1 and in2).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Merge(                                                                                             </pre>
+<pre>          data1 ,                       /* Primer dataset a mergear */                              </pre>
+<pre>          data2 ,                       /* Segundo dataset a mergear */                              </pre>
+<pre>          out= ,                        /* Output dataset donde se guarda el merge */                              </pre>
+<pre>          by= ,                         /* By variables por las que se hace el merge */                              </pre>
+<pre>          condition=,                   /* Condición a ejecutarse en el merge */                              </pre>
+<pre>          format=,                      /* Contenido del FORMAT statement a usar ANTES del MERGE statement */                              </pre>
+<pre>          /*                            que afecta al output dataset. */                              </pre>
+<pre>          sort=0,                       /* Mantener el orden de las by variables luego del merge? */                              </pre>
+<pre>          log=1);                       /* Mostrar mensajes en el log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data1:  Primer dataset a mergear. Pueden especificarse opciones                                                            </pre>
+<pre>          como las que se espefican en cualquier opción data= de SAS.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- data2:  Segundo dataset a mergear. Pueden especificarse opciones                                                            </pre>
+<pre>          como las que se espefican en cualquier opción data= de SAS.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- out:    Output dataset donde se guarda el resultado del merge.                                                            </pre>
+<pre>          Pueden especificarse opciones como las que se espefican en                                                            </pre>
+<pre>          cualquier opción data= de SAS.                                                            </pre>
+<pre>          Si no se especifica ningún output dataset, la salida se                                                            </pre>
+<pre>          guarda en el primer dataset 'data1'.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- by:     By variables por las que se efectúa el merge.                                                            </pre>
+<pre>          Si no se especifica nada, se hace el merge por número de                                                            </pre>
+<pre>          observación.                                                                              </pre>
+<pre>                                                                                                    </pre>
+<pre>- condition:Condición que deben satisfacer las observaciones para                                                            </pre>
+<pre>          ser parte del dataset resultante del merge. Esta condición                                                            </pre>
+<pre>          se ejecuta en el data step que efectúa el merge.                                                            </pre>
+<pre>          Téngase en cuenta que internamente se crean las variables                                                            </pre>
+<pre>          'in1' e 'in2' que indican si cada observación proviene del                                                            </pre>
+<pre>          dataset data1 o del dataset data2, respectivamente. Por lo                                                            </pre>
+<pre>          tanto estas variables pueden usarse para establecer                                                            </pre>
+<pre>          condiciones para que una observación pertenezca al dataset                                                            </pre>
+<pre>          resultante del merge.                                                                     </pre>
+<pre>          Ver ejemplos abajo en la sección EXAMPLES.                                                            </pre>
+<pre>          NOTA IMPORTANTE: Se supone que en ninguno de los datasets existen                                                            </pre>
+<pre>          las variables IN1 e IN2. De existir, el merge funciona bien igual,                                                            </pre>
+<pre>          pero dichas variables NO son incluidas en el output dataset.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- format: Format statement a usar antes del MERGE y que afecta al output dataset                                                            </pre>
+<pre>          y el orden de las variables.                                                              </pre>
+<pre>                                                                                                    </pre>
+<pre>- sort:   Define si se desea modificar los input datasets ordenándolos por las                                                            </pre>
+<pre>          BY variables, o dejarlos sin modificar, con las observaciones en el                                                            </pre>
+<pre>          orden en que estaban.                                                                     </pre>
+<pre>          NOTA IMPORTANTE: Si SORT=1 y hay WHERE options en los datasets a mergear,                                                            </pre>
+<pre>          los filtros WHERE MODIFICAN LOS DATASETS. Para que los input datasets                                                            </pre>
+<pre>          no se vean modificados, usar SORT=0.                                                            </pre>
+<pre>          Valores posibles:             0 => no modificar los input datasets                              </pre>
+<pre>          1 => ordenar los input datasets por las BY variables                                                            </pre>
+<pre>          default: 0 (no modificar los input datasets)                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Indica si se desean ver los mensajes en el log.                                                            </pre>
+<pre>          Valores posibles: 0 => No, 1 => Si.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- No es necesario ordenar los datasets para efectuar el merge. La macro                                                                                          </pre>
+<pre>los ordena previamente según sea necesario.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- El orden inicial de las observaciones es mantenido en cada input dataset cuando SORT=0.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CheckInputParameters                                                                                          </pre>
+<pre>- %RemoveFromList                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %merge(data1 , data2 , by=A B , condition=if in2);                                                                                          </pre>
+<pre>Hace el merge de DATA1 con DATA2 por las by variables A y B, dejando solamente                                                                                          </pre>
+<pre>las observaciones que vienen de DATA2.                                                                                          </pre>
+<pre>El resultado del merge se guarda en el primer dataset, DATA1.                                                                                          </pre>
+<pre>Como el parámetro sort no fue pasado, su valor es sort=0, con lo que                                                                                          </pre>
+<pre>los datasets DATA1 y DATA2 no son modificados por lo que el orden de las observaciones                                                                                          </pre>
+<pre>no cambia luego de la ejecución de la macro.                                                                                          </pre>
+<pre>El orden de las observaciones en DATA12 está dado por las BY variables.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- %merge(data1 , data2 , by=A B , out=data12 , condition=if in1 and in2, sort=1);                                                                                          </pre>
+<pre>Hace el merge de DATA1 con DATA2 por las by variables A y B, dejando solamente                                                                                          </pre>
+<pre>las observaciones que vienen tanto de DATA1 como de DATA2.                                                                                          </pre>
+<pre>Se crea un nuevo dataset DATA12 con los resultados del merge.                                                                                          </pre>
+<pre>Como el parámetro sort=1 los datasets DATA1 y DATA2 quedan ordenados por las BY variables.                                                                                          </pre>
+<pre>El output dataset DATA12 también queda ordenado por las BY variables.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Mergear datasets sin preocuparse por ordenarlos previamente por las BY variables.                                                                                          </pre>
+<pre>2.- Mergear datasets por BY variables sin modificar el orden de las observaciones en los input                                                                                          </pre>
+<pre>datasets.                                                                                           </pre>
+<body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Boxcox</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Boxcox</h1>
+<pre>Version: 1.09                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 12-Dec-02                                                                                                      </pre>
+<pre>Modified: 11-Feb-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Efectúa la transformación de Box-Cox univariada a un conjunto de datos.                                                                                          </pre>
+<pre>La transformación de Box-Cox tiene tres parámetros y es de la forma:                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>T(x) = x0 { 1 + [((x + s)/x0)^lambda - 1] / lambda }, si lambda ~= 0                                                                            </pre>
+T(x) = x0 [ 1 + log((x + s)/x0) ],						si lambda	= 0.
+<pre>T(x) = x0 [ 1 + log((x + s)/x0) ],si lambda                     = 0.                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>Donde x es la variable a transformar, x0 es el matching point (es decir                                                                                          </pre>
+<pre>el punto cuyo valor no es alterado por la transformación), s es el shift                                                                                          </pre>
+<pre>que debe hacerse a la variable original x para que todos sus valores                                                                                          </pre>
+<pre>sean positivos, y lambda es el parámetro de la transformación que maximiza                                                                                          </pre>
+<pre>la log-likelihood de la variable transformada con el requisito de que la                                                                                          </pre>
+<pre>variable transformada tenga distribución normal.                                                                                          </pre>
+<pre>Por default el matching point es la mediana de los datos a transformar.                                                                                           </pre>
+<pre>La función log() indica logaritmo natural.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Boxcox(                                                                                            </pre>
+<pre>          data ,                        /* Input dataset (required) */                              </pre>
+<pre>          var=_numeric_ ,               /* Variables a transformar */                               </pre>
+<pre>          out= ,                        /* Output dataset */                                        </pre>
+<pre>          suffix=_bc ,                  /* Sufijo a usar para las variables transformadas */                              </pre>
+<pre>          lambda=-3 to 3 by 0.01,       /* Search space del lambda optimo */                              </pre>
+<pre>          exclude= ,                    /* Lista de valores a excluir del analisis */                              </pre>
+<pre>          outLambda= ,                  /* Dataset con el lambda optimo para c/variable */                              </pre>
+<pre>          outLoglik= ,                  /* Dataset c/log-lik p/lambdas del search space */                              </pre>
+<pre>          confidence=0.95 ,             /* Nivel de confianza p/el intervalo de lambda */                              </pre>
+<pre>          matchingPoint=median ,        /* Metodo o valor para la eleccion del x0 */                              </pre>
+<pre>          mu=mean,                      /* Estimacion de la media a usar en el Q-Q plot */                              </pre>
+<pre>          sigma=std,                    /* Estimacion del desvio a usar en el Q-Q plot */                              </pre>
+<pre>          real=0 ,                      /* Utilizar el valor real del lambda optimo? */                              </pre>
+<pre>          plot=0 ,                      /* Mostrar graficos? */                                     </pre>
+<pre>          loglik=1 ,                    /* Mostrar grafico de la log-likelihood? */                              </pre>
+<pre>          qqplot=1 ,                    /* Hacer Q-Q plot? */                                       </pre>
+<pre>          histogram=0 ,                 /* Hacer histograma? */                                     </pre>
+<pre>          log=1 ,                       /* Mostrar mensajes en el Log? */                              </pre>
+<pre>          macrovar=);                   /* Macro variable donde se guarda la lista de */                              </pre>
+<pre>          /* variables transformadas; */                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset con los datos a utilizar. Puede recibir                                                            </pre>
+<pre>                              cualquier opción adicional como en cualquier opción                                                            </pre>
+<pre>                              data= de SAS.                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Lista de las variables a transformar por Box-Cox, separadas                                                            </pre>
+<pre>                              por espacios.                                                                             </pre>
+<pre>                              default: _numeric_, es decir todas las variables numéricas                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset. Este dataset tiene las mismas columnas que el                                                            </pre>
+<pre>                              input dataset al que se le agregan columnas con las                                                            </pre>
+<pre>                              variables transformadas por Box-Cox. Los nombres de estas                                                            </pre>
+<pre>                              columnas coinciden con los nombres de las variables                                                            </pre>
+<pre>                              originales con el sufijo indicado por el parámetro                                                            </pre>
+<pre>                              'suffix' (default = _bc).                                                                 </pre>
+<pre>                              (Ej: si 'x' es la variables original y suffix=T, la                                                            </pre>
+<pre>                              variable transformada se llama 'xT'.)                                                            </pre>
+<pre>                              Si el parametro es vacio, las variables transformadas son                                                            </pre>
+<pre>                              almacenadas en ningun lado.                                                               </pre>
+<pre>                              Para crear las variables transformadas en el input dataset,                                                            </pre>
+<pre>                              especificar el nombre del input dataset en este parámetro.                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Sufijo a utilizar para nombrar las variables transformadas                                                            </pre>
+<pre>                              (sin encerrar entre comillas). Si su valor es vacío, las                                                            </pre>
+<pre>                              variables transformadas tienen el mismo nombre que las                                                            </pre>
+<pre>                              variables originales.                                                                     </pre>
+<pre>                              default: _bc                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- lambda:                     Espacio de búsqueda para el parámetro lambda de la                                                            </pre>
+<pre>                              transformación Box-Cox. El parámetro lambda que se utiliza                                                            </pre>
+<pre>                              en la transformación de Box-Cox resulta de maximizar la                                                            </pre>
+<pre>                              log-likelihood de la variable transformada en el rango de                                                            </pre>
+<pre>                              variación definido por 'lambda'.                                                            </pre>
+<pre>                              formato: lambda=lambda_min TO lambda_max BY step                                                            </pre>
+<pre>                              default: -3 to 3 by 0.01                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- exclude:                    Lista de valores separados por espacios a excluir del analisis                                                            </pre>
+<pre>                              que busca el valor de lambda a utilizar en la transformacion de                                                            </pre>
+<pre>                              Box-Cox.                                                                                  </pre>
+<pre>                              Los valores excluidos no son utilizados en el cálculo del lambda                                                            </pre>
+<pre>                              que maximiza la log-likelihood, y son dejados en la variable                                                            </pre>
+<pre>                              transformada con el mismo valor que en la variable original.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outLambda:                  Output dataset donde se guardan los valores de lambda que                                                            </pre>
+<pre>                              efectúan la transformación de Box-Cox para cada variable, así                                                            </pre>
+<pre>                              como sus intervalos de confianza.                                                            </pre>
+<pre>                              Tiene las siguientes columnas (en este orden):                                                            </pre>
+<pre>                              - var:                        Nombre de la variable transformada.                              </pre>
+<pre>                              - lambda_real:                Valor de lambda que maximiza la log-likelihood.                              </pre>
+<pre>                              - lambda_opt:                 Valor de lambda usado en la transf. Box-Cox.                              </pre>
+<pre>                              - lambda_lower:               Límite inf. del intervalo de confianza p/lambda.                              </pre>
+<pre>                              - lambda_upper:               Límite sup. del intervalo de confianza p/lambda.                              </pre>
+<pre>                              - confidence:                 Nivel de confianza p/los intervalos de confianza.                              </pre>
+<pre>                              - matchingValue:Valor del matching point usado en la transforamción.                                                            </pre>
+<pre>                              - shift:                      Shift con que se corre la variable antes de transformar.                              </pre>
+<pre>                              - loglik:                     Valor maximo de la log-likelihood corresp. a lambda_real.                              </pre>
+<pre>                              - matchingPoint:Forma de calcular el matching point (mean, median, ...)                                                            </pre>
+<pre>                              NOTA: toda opción adicional del tipo de las usadas en opciones                                                            </pre>
+<pre>                              data= de SAS son ignoradas.                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outLoglik:                  Output dataset donde se guardan los valores de lambda del search                                                            </pre>
+<pre>                              space (según viene especificado por el parámetro 'lambda') y los                                                            </pre>
+<pre>                              valores de la log-likelihood correspondientes. El dataset tiene                                                            </pre>
+<pre>                              tantas columnas como variables listadas en el parámetro 'var'                                                            </pre>
+<pre>                              más una:                                                                                  </pre>
+<pre>                              - lambda:                     Valores del search space del lambda óptimo.                              </pre>
+<pre>                              - L_<varj>:                   Valores de la log-likelihood para cada lambda                              </pre>
+<pre>                              para cada variable 'varj'.                                                                </pre>
+<pre>                              Ej: si var=x y, el dataset tiene 3 columnas: lambda, L_x, L_y.                                                            </pre>
+<pre>                              NOTA: toda opción adicional del tipo de las usadas en opciones                                                            </pre>
+<pre>                              data= de SAS son ignoradas.                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- confidence:                 Nivel a usar para el intervalo de confianza para lambda.                                                            </pre>
+<pre>                              default: 0.95                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- matchingPoint:Indica qué valor se utiliza para el matching point, x0, que es                                                                                          </pre>
+<pre>                              el punto cuyo valor no es alterado por la transformación de                                                            </pre>
+<pre>                              Box-Cox. Puede indicarse de dos formas distintas:                                                            </pre>
+<pre>                              a) Con el nombre de la función a utilizar para calcular x0 a                                                            </pre>
+<pre>                              partir de las variables originales.                                                            </pre>
+<pre>                              b) Con el valor numérico que se desea utilizar para x0.                                                             </pre>
+<pre>                              En el caso de dar el nombre de la función, éste puede ser                                                            </pre>
+<pre>                              alguno de los siguientes: median, min, max ó mean.                                                            </pre>
+<pre>                              (Notar que si se elige como   matching point a la media, la media                              </pre>
+<pre>                              de los valores transformados no tiene por qué coincidir con la                                                            </pre>
+<pre>                              media de los valores originales.)                                                            </pre>
+<pre>                              default: median                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<pre>- mu:                         Estimación de la media a utilizar en los Q-Q plot                                                            </pre>
+<pre>                              o Probability plots que evalúan la normalidad de las variables.                                                            </pre>
+<pre>                              A parte de valores numéricos, keywords permitidas son: mean, median.                                                            </pre>
+<pre>                              La opción 'median' provee una estimación más robusta de la media.                                                            </pre>
+<pre>                              default: mean (i.e. la media)                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sigma:                      Estimación del desvío estándar (sigma) a utilizar en los Q-Q plot                                                            </pre>
+<pre>                              o Probability plots que evalúan la normalidad de las variables.                                                            </pre>
+<pre>                              A parte de valores numéricos, keywords permitidas son: std, hspr                                                            </pre>
+<pre>                              (hspr = half spread = qrange/1.349,donde qrange significa                                      </pre>
+<pre>                              interquartile range = Tercer cuartil - Primer cuartil).                                                            </pre>
+<pre>                              La opción 'hspr' provee una estimación más robusta de sigma.                                                            </pre>
+<pre>                              default: std (i.e. desvío estándar de los datos)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- real:                       Indica si en la transformación de Box-Cox se desea utilizar el                                                            </pre>
+<pre>                              valor real encontrado para el lambda que maximiza la                                                            </pre>
+<pre>                              log-likelihood.                                                                           </pre>
+<pre>                              Si no se desea utilizar el valor real, las variables son                                                            </pre>
+<pre>                              transformadas con lambda = 0 si el intervalo de confianza para                                                            </pre>
+<pre>                              lambda incluye el 0, o con lambda = 1 si el intervalo de                                                            </pre>
+<pre>                              confianza incluye el 1. En cualquier otro caso, se utiliza el                                                            </pre>
+<pre>                              valor real de lambda encontrado.                                                            </pre>
+<pre>                              Valores posibles:             0 => No usar el valor real                                  </pre>
+<pre>                              1 => Sí, usar el valor real.                                                              </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plot:                       Indica si se desea ver los gráficos generados por la macro.                                                            </pre>
+<pre>                              Se generan los siguientes gráficos para cada variable transformada:                                                            </pre>
+<pre>                              - log-likelihood en función de los distintos valores de lambda                                                            </pre>
+<pre>                              - Q-Q plots de la variable antes y después de transformar                                                            </pre>
+<pre>                              - Histogramas de la variable antes y después de transformar                                                            </pre>
+<pre>                              Si el parámetro pide mostrar gráficos, por default se muestran                                                            </pre>
+<pre>                              el gráfico de la log-likelihood y los Q-Q plots.                                                            </pre>
+<pre>                              La selección de los gráficos se hace con los parámetros 'loglik',                                                            </pre>
+<pre>                              'qqplot' y 'histogram'.                                                                   </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- loglik:                     Indica si se desea ver el gráfico de la log-likelihood en función                                                            </pre>
+<pre>                              de los distintos valores de lambda, para cada variable.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- qqplot:                     Indica si se desea ver los Q-Q plots de cada variable antes y                                                            </pre>
+<pre>                              después de la transformación.                                                             </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- histogram:                  Indica si se desea ver los histogramas de cada variable antes y                                                            </pre>
+<pre>                              después de la transformación.                                                             </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Indica si se desea ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar:                   Nombre de la macro variable donde se guarda la lista de variables                                                            </pre>
+<pre>                              transformadas.                                                                            </pre>
+<pre>                              Este parámetro es útil cuando el número de variables a transformar                                                            </pre>
+<pre>                              es alto y luego se desea hacer referencia a todas las variables                                                            </pre>
+<pre>                              transformadas.                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>- En el caso de tener variables con valores positivos, es conveniente usar como                                                                                          </pre>
+<pre>matching point el mínimo de los datos (es decir matchingPoint=min). De esta                                                                                          </pre>
+<pre>manera, el valor mínimo de las variables transformadas seguirá siendo positivo.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %GetDataName                                                                                                          </pre>
+<pre>- %GetVarOrder                                                                                                          </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %Qqplot                                                                                                               </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %Boxcox(test(where=(x>0 and y>0)) , out=test_bc , var=x y ,                                                                                          </pre>
+<pre>                              lambda=-1 to 1 by 0.1 , outLambda=lambda_opt ,                                                             </pre>
+<pre>                              outLoglik=loglik , matchingPoint=min , plot=1);                                                            </pre>
+<pre>Busca el lambda optimo para las variables x e y (a partir de los valores                                                                                          </pre>
+<pre>positivos de las mismas) en el intervalo [-1,1] variando lambda a intervalos                                                                                          </pre>
+<pre>de 0.1.                                                                                                                 </pre>
+<pre>Crea el dataset TEST_BC con todas las variables del input dataset más las                                                                                          </pre>
+<pre>variables transformadas, x_bc, y_bc.                                                                                           </pre>
+<pre>Crea el dataset LAMBDA_OPT con los valores óptimos de lambda encontrados y                                                                                          </pre>
+<pre>los intervalos de confianza para el verdadero valor de lambda correspondiente                                                                                          </pre>
+<pre>a cada variable.                                                                                                        </pre>
+<pre>Crea el dataset LOGLIK con los valores de la log-likelihood para cada uno de                                                                                          </pre>
+<pre>los valores de lambda del espacio de búsqueda.                                                                                          </pre>
+<pre>Utiliza como matching point (es decir el valor que no es afectado por la                                                                                          </pre>
+<pre>transformación), el valor mínimo de 'x > 0' y de 'y > 0'.                                                                                          </pre>
+<pre>De esta manera, las variables transformadas seguiran siendo positivas.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %Boxcox(test , out=test_bc(keep=x_bc y_bc) , var=x y , matchingPoint=1);                                                                                          </pre>
+<pre>Utiliza el valor 1 como matching point para efectuar la transformacion de                                                                                          </pre>
+<pre>Box-Cox. Es decir, el valor 1 no es afectado por la transformacion.                                                                                          </pre>
+<pre>Crea el dataset TEST_BC que contiene solamente las variables transformadas,                                                                                          </pre>
+<pre>x_bc, y_bc.                                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %Boxcox(test , out=test , var=x y , suffix=T , macrovar=listT);                                                                                          </pre>
+<pre>Crea las variables transformadas xT, yT en el dataset de entrada, TEST.                                                                                          </pre>
+<pre>Crea la macro variable listT donde se guarda la lista de las variables                                                                                          </pre>
+<pre>transformadas (Es decir &listT = xT yT).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %Boxcox(test , var=x y , plot=1 , histogram=1);                                                                                          </pre>
+<pre>No crea ningun dataset de salida. Simplemente calcula los valores del                                                                                          </pre>
+<pre>parámetro lambda que maximiza la log-likelihood para cada variable                                                                                          </pre>
+<pre>especificada y hace todos los gráficos posibles (log-likelihood, Q-Q plots                                                                                          </pre>
+<pre>de las variables originales y transformadas e histogramas de las variables                                                                                          </pre>
+<pre>originales y transformadas).                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>5.- %Boxcox(test , var=x y , exclude=0 0.5, macrovar=var_bc);                                                                                          </pre>
+<pre>Excluye los valores 0 y 0.5 del análisis para el cálculo del lambda de la                                                                                          </pre>
+<pre>transformación tanto para x como para y.                                                                                          </pre>
+<pre>Además genera la macro variable var_bc con la lista de variables transformadas.                                                                                          </pre>
+<pre>En este caso &var_bc = x_bc y_bc.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Transformación de variables previo a un proceso de detección de outliers que                                                                                          </pre>
+<pre>supone distribución normal multivariada de las mismas.                                                                                          </pre>
+<pre>Notar sin embargo, que %Boxcox efectúa la transformación individualmente a cada variable,                                                                                          </pre>
+<pre>sin tener en cuenta su distribución conjunta. (Aunque esto podría implementarse en un futuro.)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- Generar una variable que tiene una distribución más simétrica que la variable original.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- Separar valores muy apiñados de una variable para poder verlos mejor en un gráfico (por                                                                                          </pre>
+<pre>ej. en un scatter plot entre la variable respuesta de una regresión y una variable regresora).                                                                                          </pre>
+<body>
+</html>

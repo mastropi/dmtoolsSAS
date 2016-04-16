@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Categorize</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Categorize</h1>
+<pre>Version:                      1.0                                                                                       </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      12-Feb-2016                                                                               </pre>
+<pre>Modified:                     12-Feb-2016                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Categorizes a set of numeric variables based on ranks (i.e. equal size binning) and optionally                                                                                          </pre>
+<pre>creates a new set of variables containing a specified statistic (like the mean) for each bin.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Categorize(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. Dataset options are allowed */                              </pre>
+<pre>          var=_NUMERIC_,                /* Blank-separated list of variables to categorize */                              </pre>
+<pre>          by=,                          /* Blank-separated list of BY variables */                              </pre>
+<pre>          format=,                      /* Content of the format statement to use in PROC RANK */                              </pre>
+<pre>          id=,                          /* Blank-separated list of ID variables to keep in the output dataset */                              </pre>
+<pre>          condition=,                   /* Condition that each analysis variable should satisfy in order for the */                              </pre>
+<pre>          /* case to be included in the categorization process */                                                            </pre>
+<pre>          varcat=,                      /* Blank-separated list of names to be used for the rank variables. */                              </pre>
+<pre>          /* This list should be matched one to one with the ariables in VAR. */                                                            </pre>
+<pre>          varvalue=,                    /* Blank-separated list of names to be used for the statistic-valued categorized variables */                              </pre>
+<pre>          /* This list should be matched one to one with the ariables in VAR. */                                                            </pre>
+<pre>          value=,                       /* Statistic to use as representative of each category for the statistic-valued categorized variables */                              </pre>
+<pre>          groupsize=,                   /* Number of cases wished for each group in the categorized variables */                              </pre>
+<pre>          groups=10,                    /* Number of groups to use in the categorization */                              </pre>
+<pre>          descending=0,                 /* Compute ranks on the decreasing values of the analyzed variables? */                              </pre>
+<pre>          out=,                         /* Output dataset with the categorized variables */                              </pre>
+<pre>          addvars=1,                    /* Add categorized variables to the variables present in the input dataset? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Dataset options are allowed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Blank-separated list of numeric variables to categorize.                                                            </pre>
+<pre>                              default=_NUMERIC_                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         Blank-separated list of BY variables by which the categorization                                                            </pre>
+<pre>                              is carried out.                                                                           </pre>
+<pre>                              default: (Empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- format:                     Format to use for the BY variables.                                                            </pre>
+<pre>                              default: (Empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- id:                         ID variable to keep in the output dataset when ADDVARS=0.                                                            </pre>
+<pre>                              default: (Empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %CreateInteractions                                                                                                   </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %FixVarNames                                                                                                          </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %GetVarOrder                                                                                                          </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %Merge                                                                                                                </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GainsChart --> Calls %EvaluationChart with specific parameter values</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GainsChart --> Calls %EvaluationChart with specific parameter values</h1>
+<pre>Version:                      2.01                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      23-Nov-04                                                                                 </pre>
+<pre>Modified:                     22-Jun-2012 (added the ODSFILE, ODSFILETYPE and LIBFORMAT parameters)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro plots a Gains chart for a model with a dichotomous target variable.                                                                                          </pre>
+<pre>For more information see the macro %EvaluationChart.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Keywords used below:                                                                                                    </pre>
+<pre>LR = Logistic Regression                                                                                                </pre>
+<pre>DT = Decision Tree                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GainsChart(                                                                                          </pre>
+<pre>          data,                         /* Input dataset */                                         </pre>
+<pre>          target=y,                     /* Target variable */                                       </pre>
+<pre>          score=p,                      /* Score variable */                                        </pre>
+<pre>          by=,                          /* By variables */                                          </pre>
+<pre>          event=1,                      /* Event of interest */                                     </pre>
+<pre>          model=LR,                     /* Model used to generate the score (LR/Reg, DT/Tree) */                              </pre>
+<pre>          leaf=leaf,                    /* Name of variable defining the leaves in a DT */                              </pre>
+<pre>          step=,                        /* Step to use for the score variable when constructing the plot */                              </pre>
+<pre>          groups=,                      /* Nro. of percentile groups for plot */                              </pre>
+<pre>          percentiles=,                 /* Percentiles to use in plot */                              </pre>
+<pre>          plot=1,                       /* Make plot of Evaluation Chart? */                              </pre>
+<pre>          overlay=0,                    /* Overlay the Evaluation Charts on the same plot? */                              </pre>
+<pre>          best=1,                       /* Show the Best Lift/Gains Curve? */                              </pre>
+<pre>          pointlabels=0,                /* Use pointlabels showing quantile size? */                              </pre>
+<pre>          points=0,                     /* Show points indicating plotting points? */                              </pre>
+<pre>          legend=1,                     /* Show legend? */                                          </pre>
+<pre>          bands=0,                      /* Show confidence bands for the Gains Chart? */                              </pre>
+<pre>          confidence=0.95               /* Confidence level for the Gains confidence bands. */                              </pre>
+<pre>          out=,                         /* Output dataset with the data to make the evaluation charts? */                              </pre>
+<pre>          outstat=,                     /* Output dataset with the KS Statistic and Gini Index */                              </pre>
+<pre>          odsfile=,                     /* Name of the file where the Evaluation Chart is saved */                              </pre>
+<pre>          odsfiletype=pdf,              /* Type of the file specified in ODSFILE */                              </pre>
+<pre>          libformat=,                   /* Library where the target formats created by the macro are stored */                              </pre>
+<pre>          print=,                       /* Show KS and Gini Index in the output window? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>This macro calls %EvaluationChart with option chart=GAINS.                                                                                          </pre>
+<pre>See that macro for more information.                                                                                          </pre>
+<body>
+</html>

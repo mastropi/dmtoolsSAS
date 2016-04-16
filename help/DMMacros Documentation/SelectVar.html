@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%SelectVar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %SelectVar</h1>
+<pre>Version:                      1.06                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      7-Oct-04                                                                                  </pre>
+<pre>Modified:                     05-Aug-2015                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro returns a list of variables in a dataset whose name contains a given keyword.                                                                                          </pre>
+<pre>Not case sensitive.                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%SelectVar(data, key=, pos=, posNot=, not=, notPos=, log=0);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Dataset where the variables are searched.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- key:                        Keyword to search for in the variable names.                                                            </pre>
+<pre>                              It should not contain any spaces.                                                            </pre>
+<pre>                              Not case sensitive.                                                                       </pre>
+<pre>                              Non-name valid keywords are _ALL_, _NUMERIC_ and _CHAR_ in order to retrieve                                                            </pre>
+<pre>                              the list of all the variables, all the numeric variables, or all the character                                                            </pre>
+<pre>                              variables, respectively.                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- pos:                        Position in a name at which the keyword should occur in order to be                                                            </pre>
+<pre>                              considered a match.                                                                       </pre>
+<pre>                              A non-numeric possible value is END, which states that the keyword should                                                            </pre>
+<pre>                              be found at the end of the variable name for a match to be valid.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- posNot:                     Position at which the keyword 'key' should NOT be present in order for                                                            </pre>
+<pre>                              a name containing the key to be considered a match.                                                            </pre>
+<pre>                              A non-numeric possible value is END, which states that the keyword should                                                            </pre>
+<pre>                              NOT be found at the end of the variable name for a match to be valid.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- not:                        Keyword that should NOT appear in a name to be considered a match.                                                            </pre>
+<pre>                              The keyword should not contain any spaces.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- notPos:                     Position at which the 'not' keyword should appear so that only when this is the                                                            </pre>
+<pre>                              case the match with 'key' is disregarded.                                                            </pre>
+<pre>                              A non-numeric possible value is END, which states that the keyword NOT should                                                            </pre>
+<pre>                              be found at the end of the variable name for a match to be excluded.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Whether to show the list of selected variables in the log.                                                            </pre>
+<pre>                              Possible values are: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The list of names present in the dataset containing the keyword 'key'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>If no parameters are passed all variables in the dataset are returned.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %FindMatch                                                                                                            </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GetVarNames                                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let list = %SelectVar(test, key=qq);                                                                                          </pre>
+<pre>This returns in macro variable 'list' the list of variables in dataset TEST                                                                                          </pre>
+<pre>containing the keyword QQ in their name.                                                                                          </pre>
+<pre>All matches are non case sensitive.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let list = %SelectVar(test, key=qq, pos=1, not=pp);                                                                                          </pre>
+<pre>This returns in macro variable 'list' the list of variables in dataset TEST                                                                                          </pre>
+<pre>containing the keyword QQ at the beginning of their name, and NOT containing the                                                                                          </pre>
+<pre>keyword PP in any part of their name.                                                                                          </pre>
+<pre>All matches are non case sensitive.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %let list = %SelectVar(test, key=qq, pos=1, not=pp, notPos=3);                                                                                          </pre>
+<pre>Same as Ex. 2 with the difference that, among the names starting with QQ and containing PP, only                                                                                          </pre>
+<pre>those starting with QQPP are disregarded.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %let list = %SelectVar(test, key=qq, posNot=1, not=pp, notPos=3);                                                                                          </pre>
+<pre>Same as Ex. 2 with the difference that the names starting with QQ are disregarded (e.g. QQQAABB).                                                                                          </pre>
+<pre>In addition, those names containing the key QQ and also containing PP as the third character                                                                                          </pre>
+<pre>are disregarded as well (e.g. AAPPBBQQ).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>5.- %let list = %SelectVar(test, key=qq, pos=END);                                                                                          </pre>
+<pre>This returns in macro variable 'list' the list of variables in dataset TEST                                                                                          </pre>
+<pre>containing the keyword QQ appearing at the end of their name.                                                                                          </pre>
+<pre>All matches are non case sensitive.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>6.- %let list = %SelectVar(test, not=_d, notPos=END);                                                                                          </pre>
+<pre>This returns in macro variable 'list' the list of variables in dataset TEST                                                                                          </pre>
+<pre>NOT containing the keyword _D at the end of their name.                                                                                           </pre>
+<body>
+</html>

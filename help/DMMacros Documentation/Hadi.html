@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Hadi</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Hadi</h1>
+<pre>Version: 1.05                                                                                                           </pre>
+<pre>Author: Santiago Laplagne - Daniel Mastropietro                                                                                          </pre>
+<pre>Created: 17-Dec-02                                                                                                      </pre>
+<pre>Modified: 9-Dec-03                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Implementa el algoritmo de Hadi para detectar outliers en un conjunto de                                                                                           </pre>
+<pre>datos. Es un método robusto de detección y supone una distribución normal                                                                                          </pre>
+<pre>multivariada de los datos.                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Hadi (                                                                                             </pre>
+<pre>          data ,                        /* Input dataset */                                         </pre>
+<pre>          var=_NUMERIC_ ,               /* Analysis variables */                                    </pre>
+<pre>          by= ,                         /* BY variables */                                          </pre>
+<pre>          out= ,                        /* Output dataset with outliers removed */                              </pre>
+<pre>          outAll= ,                     /* Output dataset with all observations and outliers flagged */                              </pre>
+<pre>          nameDistance=mahalanobisDistance ,/* Name of the variable in output dataset to store the Mahalanobis distance */                              </pre>
+<pre>          nameOutlier=outlier,          /* Name of the variable in output dataset to flag outliers */                              </pre>
+<pre>          alpha=0.05 ,                  /* Base significance level for outlier detection */                              </pre>
+<pre>          adjust=1 ,                    /* Flag 0/1: whether the ALPHA should be adjusted by the number of obs. */                              </pre>
+<pre>          fractionGood=0.5 ,            /* Fraction of the observations to be considered as GOOD in the Hadi algorithm */                              </pre>
+<pre>          boxcox=0 ,                    /* Flag 0/1: whether to transform variables with Box-Cox prior to Hadi algorithm */                              </pre>
+<pre>          lambda=-3 to 3 by 0.01        /* Search range for the parameter of the Box-Cox transformation, lambda */                              </pre>
+<pre>          plot=0 ,                      /* Flag 0/1: Show scatter plots and/or plot of Mahalanobis distance? */                              </pre>
+<pre>          scatter=1 ,                   /* Flag 0/1: Generate scatter plots highlighting detected outliers? */                              </pre>
+<pre>          mahalanobis=1 ,               /* Flag 0/1: Generate plot of Mahalanobis distance by observation number? */                              </pre>
+<pre>          log=1);                       /* Flag 0/1: Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset con los datos a utilizar. Puede recibir                                                            </pre>
+<pre>                              cualquier opción adicional como en cualquier opción                                                            </pre>
+<pre>                              data= de SAS.                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Lista de las variables a utilizar en la detección de                                                            </pre>
+<pre>                              outliers, separadas por espacios.                                                            </pre>
+<pre>                              default: _NUMERIC_, es decir, todas las variables numéricas.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         Lista de by variables. La detección de outliers se realiza                                                            </pre>
+<pre>                              para cada combinación de los valores de las by variables.                                                            </pre>
+<pre>                              Puede usarse este parámetro para indicar variables que                                                            </pre>
+<pre>                              definen                       distintos segmentos.                                        </pre>
+<pre>                              (No es necesario ordenar el input dataset por estas variables                                                            </pre>
+<pre>                              porque la macro lo hace automáticamente.)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset donde se guardan las observaciones del                                                            </pre>
+<pre>                              dataset                       original que quedan después de eliminar los                              </pre>
+<pre>                              outliers. A las variables originalmente presentes en el                                                            </pre>
+<pre>                              input dataset se agregan las siguientes variables:                                                            </pre>
+<pre>                              - Distancia de Mahalanobis para cada observacion. El nombre                                                            </pre>
+<pre>                              de la variable es el especificado por el parámetro                                                            </pre>
+<pre>                              'nameDistance'.                                                                           </pre>
+<pre>                              - _THRESHOLD_: Valor de corte de la distancia de Mahalanobis                                                            </pre>
+<pre>                              por encima del cual una observacion es considerada outlier.                                                            </pre>
+<pre>                              - _ALPHA_: Valor del parámetro 'alpha' pasado al invocar la macro.                                                            </pre>
+<pre>                              - _ALPHA_ADJ_: Valor de alpha efectivamente usado para determinar                                                            </pre>
+<pre>                              el valor de corte de la distancia de Mahalanobis (si no se                                                            </pre>
+<pre>                              especifica lo contrario, es el valor de alpha ajustado por el                                                            </pre>
+<pre>                              número de observaciones incluidas en la detección de outliers).                                                            </pre>
+<pre>                              NOTA: Si no se especifica este parámetro ni el parámetro 'outAll',                                                            </pre>
+<pre>                              no se genera ningun output dataset, pero sí se ven los mensajes del                                                            </pre>
+<pre>                              proceso de detección de outliers en el log.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outAll:                     Output dataset donde se guardan todas las observaciones del                                                            </pre>
+<pre>                              dataset original y se agregan 5 nuevas variables. Cuatro de ellas son                                                            </pre>
+<pre>                              las descriptas en el parámetro 'out' y la quinta es la variable que                                                            </pre>
+<pre>                              indica si la observación es o no considerada outlier.                                                            </pre>
+<pre>                              El nombre de esa columna viene dado por el parámetro 'nameOutlier'.                                                            </pre>
+<pre>                              Las observaciones consideradas outliers se indican con el valor 1,                                                            </pre>
+<pre>                              y con un 0 en caso contrario.                                                             </pre>
+<pre>                              NOTA: Si no se especifica este parámetro ni el parámetro 'out',                                                            </pre>
+<pre>                              no se genera ningun output dataset, pero sí se ven los mensajes del                                                            </pre>
+<pre>                              proceso de detección de outliers en el log.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- nameDistance:               Nombre de la columna con las distancias de Mahalanobis calculadas                                                            </pre>
+<pre>                              tras la última iteración del algoritmo. Esta columna se agrega a                                                            </pre>
+<pre>                              los output datasets indicados por los parámetros 'out' y 'outAll'.                                                            </pre>
+<pre>                              default: mahalanobisDistance                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- nameOutlier:                Nombre de la columna con el indicador de outlier/no-outlier en                                                            </pre>
+<pre>                              el dataset indicado por el parámetro 'outAll'.                                                            </pre>
+<pre>                              Valores que toma la variable:                                                             </pre>
+<pre>                              0 => No outlier                                                                           </pre>
+<pre>                              1 => Outlier                                                                              </pre>
+<pre>                              default: outlier                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- alpha:                      Parámetro que determina el cuantil de la distribución                                                             </pre>
+<pre>                              ChiCuadrado a usar para fijar el corte entre outlier y no                                                            </pre>
+<pre>                              outlier.                                                                                  </pre>
+<pre>                              Si el valor del parámetro 'adjust' es 1 (default),                                                            </pre>
+<pre>                              se ajusta este valor segun la transformacion                                                            </pre>
+<pre>                              alpha_adj = 1 - (1 - alpha)^1/n, donde n es el número de                                                            </pre>
+<pre>                              observaciones. De lo contrario alpha_adj = alpha.                                                            </pre>
+<pre>                              Dado el valor de alpha ajustado, el corte a usar                                                            </pre>
+<pre>                              para la distancia de Mahalanobis robusta, para decidir si una                                                            </pre>
+<pre>                              observación es o no outlier es el cuantil (1 - alpha_adj) de                                                            </pre>
+<pre>                              la distribución ChiCuadrado con p grados de libertad, donde p                                                            </pre>
+<pre>                              es el                         número de variables listadas en el parámetro 'var'.                              </pre>
+<pre>                              Este es un ajuste para tener en cuenta el numero de tests                                                            </pre>
+<pre>                              que se hacen sobre el mismo conjunto de datos, y es valido si                                                            </pre>
+<pre>                              dichos tests son independientes (suposicion razonable si los                                                            </pre>
+<pre>                              datos provienen de una muestra aleatoria).                                                            </pre>
+<pre>                              Mientras más chico sea alpha, menos observaciones serán                                                            </pre>
+<pre>                              podadas.                                                                                  </pre>
+<pre>                              default: 0.05                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- adjust:                     Indica si se desea ajustar el nivel alpha por el nro. de                                                            </pre>
+<pre>                              observaciones, para disminuir las chances de detectar un                                                            </pre>
+<pre>                              outlier simplemente por casualidad.                                                            </pre>
+<pre>                              El ajuste efectuado supone independencia entre las observaciones                                                            </pre>
+<pre>                              lo cual es cierto si los datos provienen de una muestra                                                            </pre>
+<pre>                              aleatoria.                                                                                </pre>
+<pre>                              Valores posibles: 0 => No ajustar, 1 => Ajustar.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- fractionGood:               Fracción de observaciones que inicialmente son consideradas                                                            </pre>
+<pre>                              "buenas" por el algoritmo de Hadi. Su valor debe estar entre                                                            </pre>
+<pre>                              0 y 1.                                                                                    </pre>
+<pre>                              default: 0.5                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- boxcox:                     Indica si se desea que las variables sean transformadas por                                                            </pre>
+<pre>                              Box-Cox previo al proceso de detección de outliers por el método                                                            </pre>
+<pre>                              Hadi.                                                                                     </pre>
+<pre>                              El espacio de búsqueda del lambda óptimo para efectuar la                                                            </pre>
+<pre>                              transformación Box-Cox es el intervalo [-3,3] a pasos de 0.01.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- lambda:                     Espacio de búsqueda para el parámetro lambda de la transformación                                                            </pre>
+<pre>                              Box-Cox que se efectúa previamente a la detección de outliers,                                                            </pre>
+<pre>                              en caso de que boxcox=1.                                                                  </pre>
+<pre>                              Para más información ver la macro %Boxcox.                                                            </pre>
+<pre>                              Sólo tiene efecto si boxcox=1.                                                            </pre>
+<pre>                              default: -3 to 3 by 0.01                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plot:                       Indica si se desea ver los gráficos generados por la macro:                                                            </pre>
+<pre>                              - Scatter plots de las variables analizadas, indicando en rojo                                                            </pre>
+<pre>                              las observaciones detectadas como outliers.                                                             </pre>
+<pre>                              - Distancia de Mahalanobis para cada observación.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- scatter:                    Indica si se desea hacer los scatter plots de las variables                                                            </pre>
+<pre>                              analizadas, indicando en rojo las observaciones detectadas como                                                            </pre>
+<pre>                              outliers.                                                                                 </pre>
+<pre>                              Sólo tiene efecto si plot=1.                                                              </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- mahalanobis:                Indica si se desea ver el gráfico de las distancias de Mahalanobis                                                            </pre>
+<pre>                              para cada observación.                                                                    </pre>
+<pre>                              Sólo tiene efecto si plot=1.                                                              </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Indica si se desea ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>- Este algoritmo supone que los datos tiene una distribución normal multivariada.                                                                                          </pre>
+<pre>Si esa condicion no se cumple, el algoritmo funciona de todas formas, pero los                                                                                          </pre>
+<pre>resultados pueden no ser apropiados. En ese caso recomendamos hacer alguna                                                                                          </pre>
+<pre>transformacion previa de los datos antes de llamar a esta función.                                                                                          </pre>
+<pre>Por ejemplo, puede transformarse cada variable utilizando la macro %boxcox.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Any                                                                                                                  </pre>
+<pre>- %Boxcox                                                                                                               </pre>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %DefineSymbols                                                                                                        </pre>
+<pre>- %ExistOption                                                                                                          </pre>
+<pre>- %GetDataName                                                                                                          </pre>
+<pre>- %GetDataOptions                                                                                                       </pre>
+<pre>- %GetLibraryName                                                                                                       </pre>
+<pre>- %GetNobs                                                                                                              </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetStat                                                                                                              </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>- %GetVarOrder                                                                                                          </pre>
+<pre>- %CreateGroupVar                                                                                                       </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %Scatter                                                                                                              </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>- Mahalanobis (IML Module)                                                                                              </pre>
+<pre>- Order (IML Module)                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Boxcox                                                                                                               </pre>
+<pre>- %Mahalanobis                                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %Hadi(test(where=(x1 > 0)) , var=x1-x3 , out=test_hadi , outAll=test_hadi_all ,                                                                                          </pre>
+			boxcox=1 , plot=1);
+<pre>                              boxcox=1 , plot=1);                                                                       </pre>
+<pre>Detecta outliers por el método de Hadi a partir de las variables x1, x2, x3 del                                                                                          </pre>
+<pre>dataset TEST, teniendo en cuenta las observaciones que tienen x1 > 0. La detección                                                                                          </pre>
+<pre>está basada en las variables transformadas por Box-Cox.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>DATASETS DE SALIDA:</h3>
+<pre>- TEST_HADI, con las observaciones que no fueron detectadas como outliers.                                                                                          </pre>
+<pre>- TEST_HADI_ALL, con todas las observaciones incluidas en el análisis y el agregado de                                                                                          </pre>
+<pre>las variables con información relacionada con la detección, entre las cuales está la                                                                                          </pre>
+<pre>variable 'outlier' que indica si una observación es outlier o no (= 1 si lo es,                                                                                          </pre>
+<pre>= 0 en caso contrario).                                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>GRÁFICOS:                                                                                                               </pre>
+<pre>Muestra los siguientes gráficos:                                                                                          </pre>
+<pre>- Scatter plots de las variables x1, x2, x3.                                                                                          </pre>
+<pre>- Distancia de Mahalanobis de cada observación, y el umbral que decide si una                                                                                          </pre>
+<pre>observación es o no outlier.                                                                                            </pre>
+<pre>***************************************************************************************                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %Hadi(test , by=group subgroup , var=xx yy zz tt ww uu ss , outAll=test_hadi ,                                                                                          </pre>
+			alpha=0.001 , adjust=0 , fractionGood=0.35 , plot=1 , scatter=0);
+<pre>                              alpha=0.001 , adjust=0 , fractionGood=0.35 , plot=1 , scatter=0);                                                            </pre>
+<pre>Detecta outliers por el método de Hadi a partir de las variables xx, yy, zz, tt, ww,                                                                                           </pre>
+<pre>uu, ss, por cada valor de las variables GROUP y SUBGROUP.                                                                                          </pre>
+<pre>La detección está basada en las variables originales, es decir sin transformar                                                                                          </pre>
+<pre>por Box-Cox.                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPCIONES:</h3>
+<pre>- alpha=0.001:                pide utilizar el cuantil 0.001 de la distribucion ChiCuadrado para                                                            </pre>
+<pre>definir una observación como outlier.                                                                                          </pre>
+<pre>- adjust=0:                   pide no ajustar el valor de alpha por el número de observaciones. En                                                            </pre>
+<pre>principio esto puede ser útil si en cada uno de los grupos definidos por las by                                                                                          </pre>
+<pre>variables no hay muchas observaciones.                                                                                          </pre>
+<pre>- fractionGood=0.35:          pide considerar solamente el 35% de las observaciones como                                                            </pre>
+<pre>"buenas" (es decir no potencialmente outliers) al iniciar el proceso de detección, en                                                                                          </pre>
+<pre>lugar del 50% default.                                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<h3>DATASETS DE SALIDA:</h3>
+<pre>Genera el dataset TEST_HADI con todas las observaciones incluidas en el análisis y el                                                                                          </pre>
+<pre>agregado de las variables con información relacionada con la detección, entre las cuales                                                                                          </pre>
+<pre>está la variable 'outlier' que indica si una observación es outlier o no (= 1 si lo es,                                                                                          </pre>
+<pre>= 0 en caso contrario).                                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>GRÁFICOS:                                                                                                               </pre>
+<pre>Muestra el gráfico con la distancia de Mahalanobis de cada observación, y el umbral que                                                                                          </pre>
+<pre>decide si una observación es o no outlier, pero omite los scatter plots donde se ven qué                                                                                          </pre>
+<pre>observaciones son outliers y cuáles no (esto porque son muchas las variables utilizadas                                                                                          </pre>
+<pre>en la detección y tal vez los scatter plots no aporten mucho).                                                                                          </pre>
+<pre>***************************************************************************************                                                                                          </pre>
+<body>
+</html>

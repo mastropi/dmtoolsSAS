@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%PiecewiseTransfCuts</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %PiecewiseTransfCuts</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 3-Jan-05                                                                                                       </pre>
+<pre>Modified: 13-Jan-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Macro that finds the best cut points for a linear piecewise transformation of a continuous                                                                                          </pre>
+<pre>variable that maximizes the average R-Square (over the different pieces of the transformation)                                                                                          </pre>
+<pre>with respect to a continuous target variable.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%PiecewiseTransfCuts(                                                                                          </pre>
+<pre>          data,                                                                                     </pre>
+<pre>          target=y,                                                                                 </pre>
+<pre>          var=x,                                                                                    </pre>
+<pre>          by=,                                                                                      </pre>
+<pre>          id=,                                                                                      </pre>
+<pre>          out=_PTC_cuts_,                                                                           </pre>
+<pre>          outall=_PTC_results_,                                                                     </pre>
+<pre>          log=1);                                                                                   </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in any DATA= option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- target:                     Continuous target variable used in the linear regressions that are performed                                                             </pre>
+<pre>                              to determine the best cuts for the piecewise linear transformation.                                                            </pre>
+<pre>                              default: Y                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        Analysis variable used as predictor variable in the linear regressions                                                            </pre>
+<pre>                              performed to determine the best cuts for the piecewise linear transformation.                                                            </pre>
+<pre>                              Only ONE variable can be listed.                                                            </pre>
+<pre>                              NOTE: See NOTES below for directions on how to apply this analysis to more than                                                            </pre>
+<pre>                              one variable stored in different columns of the input dataset.                                                            </pre>
+<pre>                              default: X                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         List of by variables by which the analysis is performed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- id:                         List of ID variables identifying the analysis performed that is stored in the                                                            </pre>
+<pre>                              output datasets. It is assumed that they can take only one combination value for                                                            </pre>
+<pre>                              all the observations used in the analysis.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the best cuts found for each by variable combination.                                                            </pre>
+<pre>                              The output dataset has the following columns (in this order):                                                            </pre>
+<pre>                              - By variables passed in the BY= parameter.                                                            </pre>
+<pre>                              - CUT:                        Best cut value ID: it can take the values 1 or 2. Number 1 indicates                              </pre>
+<pre>                              the smallest cut value found and number 2 indicates the largest                                                            </pre>
+<pre>                              cut value found. Number 2 is not present if the best cut values                                                            </pre>
+<pre>                              found may correspond to a 2-piece piecewise linear transformation.                                                            </pre>
+<pre>                              - TARGET:                     Name of the target variable used in the analysis.                              </pre>
+<pre>                              - X:                          Name of the regressor variable used in the analysis.                              </pre>
+<pre>                              - VALUE:                      Value of the best cut value found that corresponds to the cut value                              </pre>
+<pre>                              ID given in column CUT. The cut value is one of the values taken                                                            </pre>
+<pre>                              by the regressor variable.                                                                </pre>
+<pre>                              - RSQ_mean:                   Average of the R-Square's of the linear regressions in each piece.                              </pre>
+<pre>                              - RMSE_mean:Average of the Root Mean Squared Error's of the linear regressions in                                                            </pre>
+<pre>                              each piece.                                                                               </pre>
+<pre>                              - RSS_mean: Average of the Residual Sum of Square's of the linear regressions in                                                            </pre>
+<pre>                              each piece.                                                                               </pre>
+<pre>                              - All the other variables present in the input dataset except the variable                                                            </pre>
+<pre>                              passed in VAR.                                                                            </pre>
+<pre>                              default: _PTC_cuts_                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outall:                     Output dataset containing the results for all the piecewise linear regressions                                                            </pre>
+<pre>                              tried to find the best cuts. The output dataset has the following columns:                                                            </pre>
+<pre>                              - By variables passed in the BY= parameter.                                                            </pre>
+<pre>                              - TARGET:                     Name of the target variable used in the analysis.                              </pre>
+<pre>                              - X:                          Name of the regressor variable used in the analysis.                              </pre>
+<pre>                              - CASE:                       ID identifying each combination of cut values analyzed to find the                              </pre>
+<pre>                              best cut values.                                                                          </pre>
+<pre>                              - XIND1:                      Index of the values taken by the regressor variable for current case,                              </pre>
+<pre>                              corresponding to cut value CUT1.                                                            </pre>
+<pre>                              - CUT1:                       Smallest cut value used in current case.                              </pre>
+<pre>                              - XIND2:                      Index of the values taken by the regressor variable for current case,                              </pre>
+<pre>                              corresponding to cut value CUT2.                                                            </pre>
+<pre>                              - CUT2:                       Largest cut value used in current case.                              </pre>
+<pre>                              - RSQ_mean:                   Average of the R-Square's of the linear regressions in each piece                              </pre>
+<pre>                              for current case.                                                                         </pre>
+<pre>                              - RSQ1-RSQ3:                  R-Square of pieces 1 thru 3 for current case.                              </pre>
+<pre>                              - RMSE_mean:                  Average of the Root Mean Squared Error's of the linear regressions in                              </pre>
+<pre>                              each piece, for current case.                                                             </pre>
+<pre>                              - RMSE1-RMSE3:                Root Mean Squared Error of pieces 1 thru 3 for current case.                              </pre>
+				- RSS_mean:		Average of the Residual Sum of Square's of the linear regressions in
+<pre>                              - RSS_mean:                   Average of the Residual Sum of Square's of the linear regressions in                              </pre>
+<pre>                              each piece, for current case.                                                             </pre>
+<pre>                              - RSS1-RSS3:                  Residual Sum of Squares of pieces 1 thru 3 for current case.                              </pre>
+<pre>                              default: _PTC_results_                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values are: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- APPLYING THE ANALYSIS TO MORE THAN ONE VARIABLE IN A DATASET                                                                                          </pre>
+<pre>Create a new dataset obtained as the transposition of the columns of the input dataset containing                                                                                          </pre>
+<pre>the analysis variables, using a code similar to the following, where:                                                                                          </pre>
+<pre>- the analysis variables are X and Z,                                                                                          </pre>
+<pre>- the target variable is Y,                                                                                             </pre>
+<pre>- the column in the transposed dataset (TRANSPOSED) containing the values of X and Y is VALUE, and                                                                                          </pre>
+<pre>- the column containing the name of the variable to which VALUE correspondes, is VAR.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>data transposed;                                                                                                        </pre>
+<pre>                              format var $32. value y;                                                                  </pre>
+<pre>                              set original(keep=x z y);                                                                 </pre>
+<pre>                              array cols x y;                                                                           </pre>
+<pre>                              do i = 1 to dim(cols);                                                                    </pre>
+<pre>                              value = cols(i);                                                                          </pre>
+<pre>                              var = vname(cols(i));                                                                     </pre>
+<pre>                              output;                       *** This generates the record;                              </pre>
+<pre>                              end;                                                                                      </pre>
+<pre>                              drop x z;                                                                                 </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>proc sort data=transposed out=transposed(drop=i);                                                                                          </pre>
+<pre>                              by i;                                                                                     </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>Then call the macro %PiecewiseTransfCuts as follows:                                                                                          </pre>
+<pre>%PiecewiseTransfCuts(transposed, target=y, var=value, by=var);                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CreateGroupVar                                                                                                       </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetStat                                                                                                              </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %Pretty                                                                                                               </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SelectNames                                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %PiecewiseTransf                                                                                                      </pre>
+<pre>- %VariableImpact                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %PiecewiseTransfCuts(test, target=earning, var=x, id=varname, out=cuts, outall=allcuts);                                                                                          </pre>
+<pre>This creates the output datasets CUTS and ALLCUTS from the analysis of the relationship between                                                                                          </pre>
+<pre>the continuous variable EARNING used as target variable and the continuous variable X used as                                                                                          </pre>
+<pre>regressor variable contained in dataset TEST.                                                                                          </pre>
+<pre>The dataset CUTS contains the best cuts found and the dataset ALLCUTS contains all the cases                                                                                          </pre>
+<pre>analyzed for the cut values.                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %PiecewiseTransfCuts(test_vi, target=logit, var=value, by=var, out=cuts, outall=allcuts);                                                                                          </pre>
+<pre>This creates the output datasets CUTS and ALLCUTS from the analysis of the relationship between                                                                                          </pre>
+<pre>LOGIT (representing the logit(p) (= log(p/(1-p)) of a dichotomous target variable) and the                                                                                          </pre>
+<pre>continuous variable VALUE, used as predictor variable. The analysis is done by the by variable                                                                                          </pre>
+<pre>VAR which represents the variable to which the values stored in VALUE correspond.                                                                                          </pre>
+<pre>The input dataset TEST_VI may well have been created using macro %VariableImpact applied to the                                                                                          </pre>
+<pre>dataset TEST, where the target variable is the dichotomous target variable generating the variable                                                                                          </pre>
+<pre>LOGIT in TEST_VI and the predictor variables are those given by the values of the variable VAR                                                                                          </pre>
+<pre>in TEST_VI (e.g. the call to %VariableImpact could have been:                                                                                          </pre>
+<pre>%VariableImpact(test, target=delinquent, var=x y z, out=test_vi), which generates                                                                                          </pre>
+<pre>a dataset with column VAR (containing the values "x", "y" or "z" defining each analysis variable)                                                                                          </pre>
+<pre>and column VALUE (containing the values of the categorized variables X, Y or Z)).                                                                                           </pre>
+<pre>The dataset CUTS contains the best cuts found for each by variable value (VAR) and the dataset                                                                                          </pre>
+<pre>ALLCUTS contains all the cases analyzed for each by variable value.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Once the output dataset with the cuts found is generated, the following code can be used to                                                                                          </pre>
+<pre>call the macro %PiecewiseTransf in order to transform the variables according to the cuts found.                                                                                          </pre>
+<pre>proc transpose data=cuts out=cuts_t(drop=_NAME_) prefix=cut;                                                                                          </pre>
+<pre>                              by var;                       * The variable that is to be transformed;                              </pre>
+<pre>                              id cut;                       * The cut ID;                                               </pre>
+<pre>                              var value;                    * The variable containing the cut values;                              </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>* Transform the variables using %PiecewiseTransf and create the new dataset TEST_PWT;                                                                                          </pre>
+<pre>%PiecewiseTransf(                                                                                                       </pre>
+<pre>                              test,                                                                                     </pre>
+<pre>                              cuts=cuts_t,                                                                              </pre>
+<pre>                              prefix=I,                                                                                 </pre>
+<pre>                              join=_X_,                                                                                 </pre>
+<pre>                              fill=0,                                                                                   </pre>
+<pre>                              out=test_pwt,                                                                             </pre>
+<pre>                              log=1);                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>This macro can be used to automatically find the best cut values to be used in a piecewise                                                                                          </pre>
+<pre>linear transformation of a continuous variable with the aim of increasing its predictive power                                                                                          </pre>
+<pre>of a target variable.                                                                                                   </pre>
+<pre>It can be used both for linear and logistic regression.                                                                                          </pre>
+<pre>In linear regression, simply use the target variable of the linear regression as TARGET and the                                                                                          </pre>
+<pre>continuous variable to be transformed as VAR.                                                                                          </pre>
+<pre>In logistic regression, use the logit(p) (= log(p/(1-p))) --where p is the probability of the                                                                                          </pre>
+<pre>event of interest being modelled by the logistic regression-- as TARGET and a variable obtained                                                                                          </pre>
+<pre>from the categorization of the continuous variable used as predictor of the event of interest,                                                                                          </pre>
+<pre>each category of which has a value of the logit.                                                                                          </pre>
+<pre>In order to generate the data necessary to use this macro in the logistic regression framework,                                                                                          </pre>
+<pre>the macro %VariableImpact may result useful. In fact, this macro computes the logit(p) for                                                                                          </pre>
+<pre>each category of a categorized continuous variable. The continuous variable needs to be categorized                                                                                          </pre>
+<pre>for this purpose, because otherwise the value of p (used in logit(p)) cannot be computed.                                                                                          </pre>
+<body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>.sas</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO .sas</h1>
+<pre>Created: ~ 2003                                                                                                         </pre>
+<pre>Modified: 07-Aug-2015                                                                                                   </pre>
+<pre>Macro to export to a file (default CSV file; for TAB delimited file, use type=TAB).                                                                                          </pre>
+<pre>Leave the FILE parameter empty to quickly save the dataset to a CSV file with the same name as the dataset                                                                                          </pre>
+<pre>in the WORK library. */                                                                                                 </pre>
+<pre>&rsubmit;                                                                                                               </pre>
+<pre>%MACRO export(dat, file=, type=csv) / store des="Easily exports a dataset";                                                                                          </pre>
+<pre>%local workdir;                                                                                                         </pre>
+<pre>%if %quote(&file) = %then %do;                                                                                          </pre>
+<pre>                              %let workdir = %sysfunc(getoption(WORK));                                                            </pre>
+<pre>                              %let file = "&workdir\&dat..csv";                                                            </pre>
+<pre>%end;                                                                                                                   </pre>
+<pre>proc export data=&dat                                                                                                   </pre>
+<pre>                              outfile=&file                                                                             </pre>
+<pre>                              dbms=&type replace;                                                                       </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>%MEND export;                                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<body>
+</html>

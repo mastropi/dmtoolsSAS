@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CheckRequiredParameters</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CheckRequiredParameters</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 19-Sep-03                                                                                                      </pre>
+<pre>Modified: 19-Sep-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro is used to check if all the parameters required by a macro                                                                                          </pre>
+<pre>are not empty.                                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CheckRequiredParameters(params , nroRequired , sep=%quote(,));                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- params:                     List of the values taken by the parameters passed to the                                                            </pre>
+<pre>                              macro call being analyzed. They should NOT be separated                                                             </pre>
+<pre>                              by blank spaces, because it is assumed that the parameter                                                            </pre>
+<pre>                              values are the ones separated by blank spaces.                                                            </pre>
+<pre>                              If this is not the case, change the value of 'sep' passed                                                            </pre>
+<pre>                              if necessary (e.g. if the set of values of a single parameter                                                            </pre>
+<pre>                              is separated by commas, do not use sep=%quote(,) when                                                            </pre>
+<pre>                              calling this macro.                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>- nroRequired:                Number of required parameters by the macro call being analyzed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- sep:                        Separator between the parameter values passed in 'params'.                                                            </pre>
+<pre>                              This can be anything EXCEPT the blank space.                                                            </pre>
+<pre>                              default: , (comma)                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The macro returns 1 if the number of parameter values passed in 'params' is the                                                                                          </pre>
+<pre>same as the number specified in 'nroRequired'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>- Though apparently not necessary, it is advisable that there be no space between                                                                                          </pre>
+<pre>the separator and the parameter values. This is to avoid potential problems                                                                                          </pre>
+<pre>with number returned by the macro %GetNroElements that is called by this macro.                                                                                          </pre>
+<pre>(See examples below).                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %CheckRequiredParameters(%quote(test,y x1 x2) , 2);                                                                                          </pre>
+<pre>returns 1 (TRUE).                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %CheckRequiredParameters(%quote(test,,y x1 x2) , 3);                                                                                          </pre>
+<pre>returns 0 (FALSE).                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Call this macro to check if all required parameters by a macro call were passed,                                                                                          </pre>
+<pre>and thus abort the execution of that macro if that is not the case.                                                                                          </pre>
+<body>
+</html>

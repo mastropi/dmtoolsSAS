@@ -1,36 +1,19 @@
 /* MACRO %InformationValue
-Version: 	3.01
+Version: 	3.02
 Author: 	Daniel Mastropietro
 Created: 	06-Jul-2005
-Modified: 	15-Feb-2016 (previous: 23-May-2015)
+Modified: 	15-Apr-2016 (previous: 15-Feb-2016)
 
 DESCRIPTION:
 This macro computes the Information Value (IV) provided by a set of input variables w.r.t.
 a binary target variable.
-The input variables can be either categorical or continuous. In the latter case, the 
-Assuming that the possible values taken by the target variable are 0 and 1, and that the event
-of interest is 1, the expression for the IV is the following:
+The input variables can be either categorical or continuous. In the latter case, the
+input variable is categorized into the specified number of groups.
 
-	IV = Sum{j=1 to J} { [P(j/1) - P(j/0)] * WOE(j)}
+The macro optionally creates an output dataset containing formats that allow reproducing the
+categorization carried out by the macro on the continuous analysis variables.
 
-where:
-- WOE(j) = ln(P(j/1)/P(j/0)) is the Weight-Of-Evidence of category j w.r.t. to target value 1,
-- J is the number of different values taken by the categorized variable,
-- P(j/1) is the probability that the input variable take the value j when the
-target variable takes the value 1, and similarly for P(j/0).
-
-In order to avoid an undefined value of WOE(j), a smoothing factor is used by default in its
-computation, which is equal to smooth_factor = 0.5/(#cases in the analyzed variable), making the
-expression for the smoothed WOE equal to:
-	Smoothed_WOE(j) = ln( (P(j/1) + smooth_factor) / (P(j/0) + smooth_factor) )
-
-The value 0.5 corresponds to a 0.5 adjustment done originally on the COUNTS (which is then
-translated to a COMMON adjustment on the probabilities by dividing by the number of analyzed cases. 
-
-The use of the smoothing factor can be eliminated by setting parameter SMOOTH=0.
-
-Note that the IV is ALWAYS non-negative, since a positive/negative difference of probabilities
-P(j/.) implies a positive/negative value of WOE.
+For more details on the calculation of the Information Value see DETAILS below.
 
 USAGE:
 %InformationValue(
@@ -38,23 +21,15 @@ USAGE:
 	target=,					*** Dichotomous target variable.
 	var=,						*** Analysis variables (character or numeric).
 	event=,						*** Event of interest.
-	groups=,					*** Nro. of groups to use to categorize numeric variables.
+	groups=,					*** Nro. of groups to use to categorize numeric variables. Leave it empty for categorical variables.
 	value=, 					*** Statistic to show for each category of numeric variables.
 	format=,					*** Format to use for each analysis variable.
 	smooth=1,					*** Whether to smooth the WOE calculation in order to avoid missing values.
-	out=_InformationTable_,		*** Table showing the distribution of the target variable.
-								*** for each value of the analysis variables.
+	out=_InformationTable_,		*** Output dataset containing the WOE and IV for each bin of the categorized variables.
 	outiv=_InformationValue_,	*** Output dataset containing the Information Value for each variable.
+	outformat=,					*** Output dataset containing format definitions corresponding to the information value bins.
 	notes=1,					*** Show SAS notes in the log?
 	log=1);						*** Show messages in the log?
-
-NOTES:
-1.- The WOE (Weight of Evidence) is computed using the value specified in parameter EVENT as the
-event of interest. If no value is specified or the value does not correspond to any possible
-target value, the default is use: the largest target value (the concept of largest is extended
-to character target variables based on the alphabetical order).
-For ex., if the possible target values are 0 and 1 and the EVENT parameter is empty, then the WOE
-is computed as ln(P(j/1)/P(j/0)). Otherwise, if EVENT=0, the WOE is computed as ln(P(j/0)/P(j/1)).
 
 REQUIRED PARAMETERS:
 - data:			Input dataset. Data options can be specified as in a data= SAS option.
@@ -131,6 +106,35 @@ OPTIONAL PARAMETERS:
 				- IV:		Information Value of the analysis variable.
 				default: _InformationValue_
 
+- ouformat:		Output dataset containing the formats that could be applied to each input variable
+				in order to reproduce the categorization performed by this macro.
+				IMPORTANT: This dataset is only created when VALUE=MAX, as the format definition
+				is based on knowing the right-end value of each bin.
+
+				This dataset can be used as CNTLIN dataset in the PROC FORMAT statement.
+				The following variables are included in the OUTFORMAT dataset:
+				- var: analyzed variable name.
+				- fmtname: format name.
+				- type: type of format (equal to "N" which means "numeric").
+				- start: left end value of each category (length 20).
+				- end: right end value of each category (length 20).
+				- sexcl: flag Y/N indicating whether the start value is included/excluded in each category.
+				- eexcl: flag Y/N indicating whether the end value is included/excluded in each category.
+				- label: label to use for each category (length 200).
+
+				The format name is generated automatically and has the following form:
+				IV_<nnnn>R
+				where:
+				- <nnnn> is a 4-digit identifier of the format which corresponds to the analyzed
+				numeric variable number when they are sorted alphabetically.
+				- R means that the right-end value is included in each category.
+
+				IMPORTANT: It is assumed that the number of digits including decimal point in the
+				start and end values of each category is not larger than 20 when those numbers are
+				expressed in BEST8. format.
+
+				default: (empty)
+
 - notes:		Indicates whether to show SAS notes in the log.
 				The notes are shown only for the PROC MEANS step.
 				Possible values: 0 => No, 1 => Yes.
@@ -143,6 +147,9 @@ OPTIONAL PARAMETERS:
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Callmacro
 - %Categorize
+- %CreateFormatsFromCuts
+- %ExecTimeStart
+- %ExecTimeStop
 - %ExistVar
 - %FreqMult
 - %Getnobs
@@ -151,6 +158,49 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %RemoveFromList
 - %ResetSASOptions
 - %SetSASOptions
+
+DETAILS:
+Information Value calculation:
+Assuming that the possible values taken by the target variable are 0 and 1, and that the event
+of interest is 1, the expression for the Information Value (IV) is the following:
+
+	IV = Sum{j=1 to J} { [P(j/1) - P(j/0)] * WOE(j)}
+
+where:
+- j is the group or bin identifier of the groups of the input categorical variable or the groups
+into which the input continuous variable is categorized,
+- J is the number of different values taken by the categorized variable,
+- P(j/b) is the proportion of cases falling into bin j when the target variable takes the value b,
+- WOE(j) = ln(P(j/1)/P(j/0)) is the Weight-Of-Evidence of category j w.r.t. to target value 1.d
+
+In order to avoid an undefined value of WOE(j), a smoothing factor is used by default in its
+computation, which is equal to smooth_factor = 0.5/(#cases in the analyzed variable), making the
+expression for the smoothed WOE equal to:
+	Smoothed_WOE(j) = ln( (P(j/1) + smooth_factor) / (P(j/0) + smooth_factor) )
+
+The value 0.5 corresponds to a 0.5 adjustment done originally on the COUNTS (which is then
+translated to a COMMON adjustment on the probabilities by dividing by the number of analyzed cases. 
+
+The use of the smoothing factor can be eliminated by setting parameter SMOOTH=0.
+
+Notes:
+N1) The IV is ALWAYS non-negative, since a positive/negative difference of probabilities
+P(j/b) implies a positive/negative value of WOE.
+
+N2) The WOE is computed based on the value specified in parameter EVENT as the event of interest.
+If no value is specified or the value does not correspond to any possible target value, the default
+event is used, i.e. the largest target value (the concept of largest is extended to character target
+variables based on the alphabetical order).
+
+For ex., if the possible target values are 0 and 1 and the EVENT parameter is empty, then the WOE
+is computed as ln(P(j/1)/P(j/0)). Otherwise, if EVENT=0, the WOE is computed as ln(P(j/0)/P(j/1)).
+
+Note that this results in a computation that is contrary to the definition of WOE usually given in the
+literature, where it is computed as:
+	ln(P(j/0)/P(j/1))
+**regardless** of the event of interest.
+The WOE definition used here favors intuition since a positive WOE in a bin implies an event penetration
+that is larger than the average event penetration (event rate).
 
 APPLICATIONS:
 1.- Have a measure of the information provided by character and numeric variables in the exploratory
@@ -188,9 +238,19 @@ by that value is infinite.
 						smooth=1,
 						out=_InformationTable_,
 						outiv=_InformationValue_,
+						outformat=,
 						notes=0,
 						log=1,
 						help=0) / store des="Computes the Information Value of categorical variables w.r.t. a dichotomous variable";
+/*
+TODO:
+- (2016/04/15) Add a flag parameter MISSING that requests to include missing values in the input variables as valid values to
+be included in the Information Value analysis and calculation.
+In principle this could be accomplished by generating both the categorical and statistic-valued categorical variables when calling
+%Categorize (i.e. add the generation of the categorical _cat variables in that call) and set the categorical variable to 0 when
+it is missing (note that the %Categorize macro keeps the missing values of the input variables as missing both in the _CAT and in the
+_VALUE categorized variables.
+*/
 
 /*----- Macro to display usage -----*/
 %MACRO ShowMacroCall;
@@ -206,10 +266,9 @@ by that value is infinite.
     %put value= , %quote(                  *** Statistic to show for the categories of numeric variables.);
 	%put format= , %quote(                 *** Format to be used for selected analysis variables.);
 	%put smooth=1 , %quote(                *** Whether to smooth the WOE calculation in order to avoid missing values.);
-	%put out=_InformationTable_, %quote(   *** Output dataset containing the WOE for each value of the);
-	%put %quote(                           *** analysis variables.);
-	%put outiv=_InformationValue_ , %quote(*** Output dataset containing the Information Value of each);
-	%put %quote(                           *** analysis variable.);
+	%put out=_InformationTable_, %quote(   *** Output dataset containin the WOE and IV for each bin of the categorized variables.);
+	%put outiv=_InformationValue_ , %quote(*** Output dataset containing the Information Value for each analysis variable.);
+	%put outformat= , %quote(              *** Output dataset containing format definitions corresponding to the information value bins.);
 	%put notes=1 , %quote(                 *** Show SAS notes in the log?);
 	%put log=1) %quote(                    *** Show messages in the log?);
 %MEND ShowMacroCall;
@@ -231,6 +290,7 @@ by that value is infinite.
 %local var_num;
 
 %SetSASOptions(notes=&notes);
+%ExecTimeStart;
 
 %* Show input parameters;
 %if &log %then %do;
@@ -248,6 +308,7 @@ by that value is infinite.
 	%put INFORMATIONVALUE: - smooth = %quote(       &smooth);
 	%put INFORMATIONVALUE: - out = %quote(          &out);
 	%put INFORMATIONVALUE: - outiv = %quote(        &outiv);
+	%put INFORMATIONVALUE: - outformat = %quote(    &outformat);
 	%put INFORMATIONVALUE: - notes = %quote(        &notes);
 	%put INFORMATIONVALUE: - log = %quote(          &log);
 	%put;
@@ -355,7 +416,7 @@ run;
 		%put;
 		%put INFORMATIONVALUE: Categorizing numeric variables into &groups groups.;
 		%if %quote(&value) ~= %then
-			%put INFORMATIONVALUE: and using the &value as representation of each group.;
+			%put INFORMATIONVALUE: and using %upcase(&value) as representation of each group.;
 	%end; 
 	%* Categorize numeric variables;
 	data _iv_data_num_;
@@ -618,10 +679,59 @@ run;
 %if &log %then %do;
 	%let out_name = %scan(&out, 1, '(');
 	%callmacro(getnobs, &out_name return=1, nobs nvar);
-	%put INFORMATIONVALUE: Dataset %upcase(&out_name) created &nobs observations and &nvar variables;
-	%put INFORMATIONVALUE: containing the Information Table;
+	%put INFORMATIONVALUE: Dataset %upcase(&out_name) created with &nobs observations and &nvar variables;
+	%put INFORMATIONVALUE: containing the Information Table.;
 %end;
 /*------------------------------------ Output Table -----------------------------------------*/
+
+
+/*----------------------------------- Formats Table -----------------------------------------*/
+%if %quote(&outformat) ~= %then %do;
+	%local dsid rc;
+	%local varnum vartype;
+	%local cutvar;
+	%* Only generate the OUTFORMAT dataset when the value representing each bin is the MAX value,
+	%* since the formats definition is based on knowing the upper value of each bin;
+	%if %upcase(&value) ~= MAX %then
+		%put INFORMATIONVALUE: WARNING - No OUTFORMAT dataset is created because parameter VALUE <> MAX.;
+	%else %do;
+		%* Create the FORMATS dataset;
+		%* This assumes that the macro was called with value=MAX so that those values can be used as right limit
+		%* of each bin and thus create the formats definition;
+		%if &bothTypes %then
+			%let cutvar = numvalue;
+		%else %do;
+			%* Check if VALUE is numeric;
+			%let dsid = %sysfunc(open(&out));
+			%let varnum = %sysfunc(varnum(&dsid, VALUE));
+			%let vartype = %sysfunc(vartype(&dsid, &varnum));
+			%if %upcase(&vartype) ~= N %then %do;
+				%put INFORMATIONVALUE: WARNING - No OUTFORMAT dataset is created because the analyzed variables are not numeric.;
+				%let cutvar = ;
+			%end;
+			%else;
+				%let cutvar = value;
+			%let rc = %sysfunc(close(&dsid));
+		%end;
+		%if %quote(&cutvar) ~= %then %do;
+			%let out_name = %scan(&out, 1, '(');
+			%* The input dataset for %CreateFormatsFromCuts excludes the cases that correspond to character variables (&cutvar ~= .)
+			%* which may exist when both numeric and character variables are analyzed. Note that in that case &cutvar=numvalue
+			%* so the used condition is fine;
+			%* Note also that the condition &cutvar~=. also eliminates the record with var="--Total--" that should not be considered;
+			%CreateFormatsFromCuts(&out_name(where=(&cutvar~=.)), dataformat=long, cutname=&cutvar, varname=var, includeright=1, out=&outformat, log=0);
+
+			%if &log %then %do;
+				%callmacro(getnobs, &outformat return=1, nobs nvar);
+				%put INFORMATIONVALUE: Dataset %upcase(&outformat) created with &nobs observations and &nvar variables;
+				%put INFORMATIONVALUE: containing the format definitions associated with the information value bins.;
+				%put INFORMATIONVALUE: Use PROC FORMAT CNTLIN=%upcase(&outformat) FMTLIB%str(;) RUN%str(;);
+				%put INFORMATIONVALUE: to run the formats and store them in the FORMATS catalog of the WORK library.;
+			%end;
+		%end;
+	%end;
+%end;
+/*----------------------------------- Formats Table -----------------------------------------*/
 %end;	%* %if ~&error;
 
 proc datasets nolist;
@@ -644,8 +754,8 @@ quit;
 	%put;
 %end;
 
+%ExecTimeStop;
 %ResetSASOptions;
 
 %end;	%* %if ~%CheckInputParameters;
 %MEND InformationValue;
-

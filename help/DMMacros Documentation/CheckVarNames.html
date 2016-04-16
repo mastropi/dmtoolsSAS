@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CheckVarNames</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CheckVarNames</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      03-Feb-2016                                                                               </pre>
+<pre>Modified:                     03-Feb-2016                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Check variable names length compared to a maximum allowed number of characters given                                                                                          </pre>
+<pre>by a max value minus a margin space.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Useful to find out which variable names should be changed in order to still comply with                                                                                          </pre>
+<pre>valid SAS variable names after adding a prefix or suffix of fixed length.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CheckVarNames(var, max=32, space=0);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- var:                        List of variables to check.                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- max:                        Maximum number of characters allowed for each variable                                                            </pre>
+<pre>                              name including the space defined by parameter SPACE.                                                            </pre>
+<pre>                              default: 32 (i.e. the maximum allowed number of chars in SAS)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- space:                      Number of characters that would be added to the original variable                                                            </pre>
+<pre>                              name as a prefix or suffix.                                                               </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The variables in list 'var' whose name exceeds the maximum allowed number of characters                                                                                          </pre>
+<pre>given by max - space.                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>This macro is intended to be used solely for end user information, i.e. not to be called                                                                                          </pre>
+<pre>from another macro. It is possible, but the macro always prints something in the log.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let var2fix = %CheckVarNames(thisisalongname x v234567890test shortvar, max=10, space=2);                                                                                          </pre>
+<pre>Shows the list:                                                                                                         </pre>
+<pre>thisisalongname (7)                                                                                                     </pre>
+<pre>v234567890test (6)                                                                                                      </pre>
+<pre>and returns the names of the two variables to fix.                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Use this macro to check which variable names should be shorten and by how much in order                                                                                           </pre>
+<pre>to make sure their names are still valid after adding a prefix or a suffix (using e.g. %MakeList)                                                                                          </pre>
+<pre>of a fixed length.                                                                                                      </pre>
+<body>
+</html>

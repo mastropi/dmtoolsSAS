@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%DefineSymbols</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %DefineSymbols</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Santiago Laplagne - Daniel Mastropietro                                                                                          </pre>
+<pre>Created: 17-Dec-02                                                                                                      </pre>
+<pre>Modified: 25-Sep-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Define simbolos de la misma forma pero con distintos colores para usar en                                                                                           </pre>
+<pre>los gráficos por estratos o grupos.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%DefineSymbols (height=1, value=dot);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>None                                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- height: Tamaño de los simbolos a utilizar en el gráfico.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- value:  Forma de los símbolos. Algunos posibles valores son: plus, dot,                                                             </pre>
+<pre>          circle, triangle. Ver la opción 'value' del statement SYMBOL                                                            </pre>
+<pre>          de SAS/GRAPH.                                                                             </pre>
+<pre>          default: dot (punto relleno)                                                              </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Show messages in the log?                                                                 </pre>
+<pre>          Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>- Esta macro la usa la macro %GraphStrata para graficar los estratos con                                                                                          </pre>
+<pre>distintos colores.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Colors                                                                                           </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GraphXY                                                                                          </pre>
+<pre>- %Colors                                                                                           </pre>
+<body>
+</html>

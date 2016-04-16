@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%MPlot</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %MPlot</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      14-Jan-03                                                                                 </pre>
+<pre>Modified:                     13-Jul-2012 (previous: 19-Feb-2003)                                                            </pre>
+<pre>SAS:                          v9.3                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro makes several plots in the same window using a specified panel                                                                                          </pre>
+<pre>structure.                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%MPlot(   gplot ,                       ** Statements defining what to plot                              </pre>
+<pre>          nrows ,                       ** Nro of rows in the panel                                 </pre>
+<pre>          ncols ,                       ** Nro of columns in the panel                              </pre>
+<pre>          direction=byrows ,            ** Direction to use to place the plots                              </pre>
+<pre>          matrix=0 ,                    ** Do plot names use matrix-like notation?                              </pre>
+<pre>          plotName=plot ,               ** Root used for the plot names                              </pre>
+<pre>          tempcat=work.tempcat ,        ** Catalog to store temporary plots                              </pre>
+<pre>          gout=work.gseg ,              ** Catalog to store the multiple plot produced                              </pre>
+<pre>          hfactor=1 ,                   ** Horizontal maximiz. factor for each plot                              </pre>
+<pre>          vfactor=1 ,                   ** Vertical maximiz. factor for each plot                              </pre>
+<pre>          frame=0 ,                     ** Put a frame in every plot?                               </pre>
+<pre>          title="Multiple plot" ,       ** Overall title                                            </pre>
+<pre>          description=&title);          ** Plot description (as shown in 'Results')                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- gplot:  Statements defining what to plot. This can be any SAS/GRAPH                                                            </pre>
+<pre>          procedure or any other procedure that generates high resolution                                                            </pre>
+<pre>          plots (e.g. the histogram statement in proc univariate).                                                            </pre>
+<pre>          Each plot must have a different name, which should be made up                                                            </pre>
+<pre>          of a common root and a unique identification number (which                                                            </pre>
+<pre>          must be between 1 and the number of cells in the panel used                                                            </pre>
+<pre>          for plotting).                                                                            </pre>
+<pre>          See examples below.                                                                       </pre>
+<pre>                                                                                                    </pre>
+<pre>- nrows:  Number of row panels into which the graph window is divided.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- ncols:  Number of column panels into which the graph window is divided.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- direction:Direction by which the plots are placed in the panel.                                                            </pre>
+<pre>          Possible values are 'byrows' and 'cols'.                                                            </pre>
+<pre>          This value is irrelevant if matrix=1.                                                            </pre>
+<pre>          default: byrows (i.e. the panel rows are filled before filling                                                            </pre>
+<pre>          the columns, following the number sequence given in the plot                                                            </pre>
+<pre>          names)                                                                                    </pre>
+<pre>                                                                                                    </pre>
+<pre>- matrix: Defines whether the plot names defined in 'gplot' use                                                            </pre>
+<pre>          matrix-like notation (e.g. plot11, plot12, plot21, etc.).                                                            </pre>
+<pre>          Possible values: 0 => No matrix notation, 1 => Matrix notation                                                            </pre>
+<pre>          default: 0 (i.e. the plot names are of the form plot1, plot2,                                                            </pre>
+<pre>          plot3, etc.)                                                                              </pre>
+<pre>                                                                                                    </pre>
+<pre>- plotName:Root used for the plot names as defined in parameter 'gplot'.                                                            </pre>
+<pre>          default: plot                                                                             </pre>
+<pre>                                                                                                    </pre>
+<pre>- tempcat:Name of the catalog to store temporary plots.                                                            </pre>
+<pre>          default: work.tempcat                                                                     </pre>
+<pre>                                                                                                    </pre>
+<pre>- gout:   Name of the catalog to store the multiple plot produced by                                                            </pre>
+<pre>          the macro.                                                                                </pre>
+<pre>          default: work.gseg (i.e. the default catalog where the high                                                            </pre>
+<pre>          resolution plots are stored by SAS)                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- hfactor:Horizontal maximization factor to be used for each plot,                                                            </pre>
+<pre>          with respect to the default horizontal size.                                                            </pre>
+<pre>          default: 1 (i.e. no maximization)                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- vfactor:Vertical maximization factor to be used for each plot,                                                            </pre>
+<pre>          with respect to the default vertical size.                                                            </pre>
+<pre>          default: 1 (i.e. no maximization)                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- frame:  Defines whether each plot is enclosed in a frame.                                                            </pre>
+<pre>          Possible values: 0 => No frame, 1 => Frame                                                            </pre>
+<pre>          default: 0 (i.e. No frame)                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- novalues:Defines whether the tick mark values should be displayed.                                                            </pre>
+<pre>          default: 0 (i.e. the values are displayed)                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- title:  Overall title.                                                                            </pre>
+<pre>          default: "Multiple plot"                                                                  </pre>
+<pre>                                                                                                    </pre>
+<pre>- description:Plot description as seen in the 'Results' window.                                                            </pre>
+<pre>          The description must be enclosed in quotes.                                                            </pre>
+<pre>          It is useful for identifying the plot among other different                                                            </pre>
+<pre>          plots in the graphics window.                                                             </pre>
+<pre>          default: the same value as 'title'                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- nonotes:Defines whether notes are shown regarding the plot specified                                                            </pre>
+<pre>          in parameter 'gplot'.                                                                     </pre>
+<pre>          Possible values: 0 => Notes are shown, 1 => No notes are shown                                                            </pre>
+<pre>          default: 0 (i.e. notes are shown)                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- When specifying the parameter 'gplot' use the %str function to mask SAS                                                                                          </pre>
+<pre>statements and semicolons. Ex:                                                                                          </pre>
+<pre>%let gplot = %str(                                                                                          </pre>
+<pre>proc gplot data=toplot gout=tempcat;                                                                                          </pre>
+<pre>          plot y*x / name="plot1";                                                                  </pre>
+<pre>          plot z*x / name="plot2";                                                                  </pre>
+<pre>run;);                                                                                              </pre>
+<pre>(Notice that it is not necessary to use a quit statement to end the gplot                                                                                          </pre>
+<pre>procedure.)                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- The names given to the plots as specified in the procedure/s defined in                                                                                          </pre>
+<pre>the parameter 'gplot' must not exist in the catalog selected for output in                                                                                          </pre>
+<pre>such procedure/s (which is specified by the 'gout' option in the proc statement).                                                                                          </pre>
+<pre>If no 'gout' option is specified, the default catalog is WORK.GSEG, and thus                                                                                          </pre>
+<pre>the above condition must hold for this catalog.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- In order to avoid problems with already existent plot names, use option                                                                                          </pre>
+<pre>'gout=tempcat' in the procedure/s defined in 'gplot', where tempcat is a catalog                                                                                          </pre>
+<pre>that should be empty or non existent. By default, %MPlot uses a catalog named                                                                                          </pre>
+<pre>'tempcat' as the catalog for storing temporary plots (as those produced by                                                                                          </pre>
+<pre>the procedure/s specified in 'gplot').                                                                                          </pre>
+<pre>See examples 1 and 2 below.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Scatter                                                                                          </pre>
+<pre>- %GraphXY                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- Doing two plots in a 2x1 panel structure:                                                                                          </pre>
+<pre>%let gplot = %str(                                                                                          </pre>
+<pre>proc gplot data=toplot gout=tempcat;                                                                                          </pre>
+<pre>          plot y*x / name="plot1";                                                                  </pre>
+<pre>          plot z*x / name="plot2";                                                                  </pre>
+<pre>run;);                                                                                              </pre>
+<pre>%mplot(&gplot , 2 , 1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- Doing a scatter plot between two variables and placing their respective                                                                                          </pre>
+<pre>histograms in the diagonal of a 2x2 panel.                                                                                          </pre>
+<pre>%let plots = %str(                                                                                          </pre>
+<pre>proc univariate data=toplot gout=tempcat;                                                                                          </pre>
+<pre>          histogram x / name="graph11";                                                             </pre>
+<pre>          histogram y / name="graph22";                                                             </pre>
+<pre>run;                                                                                                </pre>
+<pre>proc gplot data=toplot gout=tempcat;                                                                                          </pre>
+<pre>          plot y*x / name="graph12";                                                                </pre>
+<pre>run;);                                                                                              </pre>
+<pre>%mplot(&plots , 2 , 2 , plotName=graph , matrix=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- Doing two plots in a 2x2 panel structure. Since direction=bycols,                                                                                          </pre>
+<pre>the plot named 'plot2' is placed in the (2,1) position of the panel, and                                                                                          </pre>
+<pre>'plot3' is placed in the (1,2) position:                                                                                          </pre>
+<pre>%let gplot = %str(                                                                                          </pre>
+<pre>proc gplot data=toplot gout=tempcat;                                                                                          </pre>
+<pre>          plot y*x / name="plot2";                                                                  </pre>
+<pre>          plot z*x / name="plot3";                                                                  </pre>
+<pre>run;);                                                                                              </pre>
+<pre>%mplot(&gplot , 2 , 2 , direction=bycols);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>(Notice that the plot numbers do not need to start at 1, but all of them                                                                                          </pre>
+<pre>must be integer numbers between 1 and the number of cells in the panel                                                                                          </pre>
+<pre>structure.)                                                                                          </pre>
+<body>
+</html>

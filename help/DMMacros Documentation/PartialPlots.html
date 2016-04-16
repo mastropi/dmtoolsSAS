@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%PartialPlots</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %PartialPlots</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Oct-2003                                                                                                     </pre>
+<pre>Modified: 12-Jan-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro generates partial plots (in principle for a linear regression model).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%PartialPlots(data , target=, var= , obs= , weight= , out=);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset used in the regression.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- obs:                        Name of the variable containing the observation number.                                                            </pre>
+<pre>                              (This is required but the idea is to change it to optional in the future.)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- target:                     Target variable used in the regression.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        List of regression variables.                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- weight:                     Weight variable used in the regression.                                                            </pre>
+<pre>                                                                                                                        </pre>
+- out:			Name to use as the root of the output datasets that contain	the data needed
+<pre>- out:                        Name to use as the root of the output datasets that containthe data needed                                             </pre>
+<pre>                              to do the partial plots for each variable. The names of the output datasets                                                            </pre>
+<pre>                              are of the form: <out>_Intercept (partial plot for the intercept) and                                                             </pre>
+<pre>                              <out>_<var>, where <var> is the name of each regression variable analyzed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>The observation number is used to label the points.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %DefineSymbols                                                                                                        </pre>
+<pre>- %GetDataOptions                                                                                                       </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>- %Merge                                                                                                                </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<body>
+</html>

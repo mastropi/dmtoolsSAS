@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetNroElements</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetNroElements</h1>
+<pre>Version:                      2.03                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      03-Mar-201                                                                                </pre>
+<pre>Modified:                     05-Feb-2016 (previous: 19-Sep-2003)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Returns the number of elements in a list separated by a given separator.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetNroElements(list , sep=%quote( ));                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- list:   A list of unquoted names separated by blanks.                                                            </pre>
+<pre>          (See example below.)                                                                      </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- sep:    Separator symbol that defines the different elements                                                             </pre>
+<pre>          in &list. Some symbols need to be enclosed with the                                                            </pre>
+<pre>          function %quote. See NOTES below.                                                            </pre>
+<pre>          default: %quote( ), i.e. a blank space                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The number of elements in 'list'.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- Some symbols need to be enclosed within the function %quote when passed                                                                                          </pre>
+<pre>as parameters. This is the case for the blank space, the comma, the                                                                                          </pre>
+<pre>quotation mark. In addition, the quotation mark is a special case, which                                                                                          </pre>
+<pre>needs to be treated differently. Namely, the percentage sign should be used                                                                                          </pre>
+<pre>before the quotation mark symbol, as in: %quote(%"). If '%' is not used, SAS                                                                                          </pre>
+<pre>will interpret '"' as the beginning of a string, not as a symbol.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- The search for SEP in the list in order to determine the number of elements in the list                                                                                          </pre>
+<pre>is CASE SENSITIVE. This was done like this because in function %SCAN (which is used in this macro)                                                                                          </pre>
+<pre>the search for the separator passed as third parameter is CASE SENSITIVE.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- If the list starts or ends with a separator, no count is done before or                                                                                          </pre>
+<pre>after the first and last separator, respectively.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>4.- If the separator is non-blank, blank values are counted, even if they occur                                                                                          </pre>
+<pre>at the beginning or at the end.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let nro = %GetNroElements(A B Home x y z 54);                                                                                          </pre>
+<pre>assigns the value 7 to the macro variable &nro.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- %let nro = %GetNroElements(%quote(A , B , Home) , sep=%quote(,));                                                                                          </pre>
+<pre>assigns the value 3 to the macro variable &nro.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- %let nro = %GetNroElements(%quote(A"B"C) , sep=%quote(%"));                                                                                          </pre>
+<pre>assigns the value 3 to the macro variable &nro.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>Examples for the notes (3) and (4):                                                                                          </pre>
+<pre>If the list is:Nro. of elements returns:                                                                 </pre>
+<pre>A , B , C (sep=,)                       3                                                           </pre>
+<pre>A.B.C     (sep=.)                       3                                                           </pre>
+<pre>A ,, B , C(sep=,)                       3                                                           </pre>
+<pre>A , , B , C(sep=,)                       4 --> because a blank space between separators is counted.                              </pre>
+<pre>,A , B , C(sep=,)                       3 since the list begins with a separator                              </pre>
+<pre>,A , B ,  (sep=,)                       2 if the last character is ','                              </pre>
+<pre>,A , B ,  (sep=,)                       3 if the last character is ' '                              </pre>
+	A B C		(sep= ) 3 as the first character is a separator (' ')
+<pre>          A B C                         (sep= ) 3 as the first character is a separator (' ')                              </pre>
+<body>
+</html>

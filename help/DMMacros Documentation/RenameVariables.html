@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%RenameVariables</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %RenameVariables</h1>
+<pre>Version: 1.02                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 09-Sep-05                                                                                                      </pre>
+<pre>Modified: 19-Aug-06                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro renames variables in a dataset.                                                                                          </pre>
+<pre>The rename information is taken either from a SAS table or from an external file (CSV, TXT, worksheet)                                                                                          </pre>
+<pre>containing two columns, one with the list of the old names and the other with the list                                                                                          </pre>
+<pre>of the new names of the variables to be renamed.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%RenameVariables(                                                                                          </pre>
+<pre>          data,                         /* Input dataset where the rename is to be carried out */                              </pre>
+<pre>          rename=,                      /* Name of the dataset containing the rename information */                              </pre>
+<pre>          import=0,                     /* Whether to import the rename information from the file specified in FILE= */                              </pre>
+<pre>          file=,                        /* Name of the file to be imported containing the rename information */                              </pre>
+<pre>          type=CSV,                     /* Type of file specified in FILE= */                              </pre>
+<pre>          old=original,                 /* Name of the variable in dataset RENAME= containing the old variable names */                              </pre>
+<pre>          new=new,                      /* Name of the variable in dataset RENAME= containing the new variable names */                              </pre>
+<pre>          norepeated=1,                 /* Whether there might be repeated names in the new variable names list */                              </pre>
+<pre>          notes=0,                      /* Show SAS notes in the log? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset where the rename is to be carried out.                                                            </pre>
+<pre>                              Data options CANNOT be specified.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- rename:                     Name of the dataset containing the rename information.                                                            </pre>
+<pre>                              This dataset either exists or is created by importing the rename information                                                            </pre>
+<pre>                              from the file specified in FILE=.                                                            </pre>
+<pre>                              The dataset must have at least 2 columns, containing the old (current) variable                                                            </pre>
+<pre>                              names and the new vavriable names to be assigned.                                                            </pre>
+<pre>                              If a variable does not have to be renamed, it can still appear in the dataset.                                                            </pre>
+<pre>                              In such cases, the new name must be either empty or the same as the current                                                            </pre>
+<pre>                              name of the variable.                                                                     </pre>
+<pre>                              The names of the columns containing the old (current) variable names and the                                                            </pre>
+<pre>                              new variable names are specified in parameters OLD= and NEW= respectively.                                                            </pre>
+<pre>                              See below.                                                                                </pre>
+<pre>                              default: _RENAME_                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<pre>- import:                     Whether to import the rename information from the file specified in FILE=                                                            </pre>
+<pre>                              or take the information from the dataset specified in RENAME=.                                                            </pre>
+<pre>                              Possible values: 0 => Take the information from the dataset RENAME=                                                            </pre>
+<pre>                               1 => Import the information from the file FILE=                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- file:                       External file from which the old and new names are read.                                                            </pre>
+<pre>                              The name must be enclosed in quotes.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- type:                       Type of the external file (e.g. CSV).                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- old:                        Name of the variable in the RENAME= dataset containing the list of the old                                                            </pre>
+<pre>                              (current) variable names.                                                                 </pre>
+<pre>                              default: old                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- new:                        Name of the variable in the RENAME= dataset containing the list of the new                                                            </pre>
+<pre>                              variable names.                                                                           </pre>
+<pre>                              default: new                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- norepeated:                 States whether there might be repeated names in the list of new variable                                                            </pre>
+<pre>                              names to be defined with the rename statement.                                                            </pre>
+<pre>                              When NOREPEATED=1, the process may take a long time if the number of variables                                                            </pre>
+<pre>                              to be renamed is large (say larger than 50) because the check for repeated names                                                            </pre>
+<pre>                              is time consuming.                                                                        </pre>
+<pre>                              Checking for repeated names allows knowing the number of repeated names that                                                            </pre>
+<pre>                              exist among the list of new variable names.                                                            </pre>
+<pre>                              Possible values: 0 => There are no repeated names in the new variable names list                                                            </pre>
+<pre>                               1 => There might be repeated names in the new variable names list                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- notes:                      Show SAS notes in the log?                                                                </pre>
+<pre>                              Possible values: 0 => Yes, 1 => No                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => Yes, 1 => No                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- The old and new names are stored in an external file that is imported. This file can                                                                                          </pre>
+<pre>be Excel, CSV or TXT.                                                                                                   </pre>
+<pre>This file is typically generated by exporting to Excel the information produced by a                                                                                          </pre>
+<pre>PROC CONTENTS run on the dataset of interest and then editing this informataion in Excel                                                                                          </pre>
+<pre>to define the new variable names.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- Even if NOTES=0, SAS notes generated by the PROC DATASETS used to rename the variables                                                                                          </pre>
+<pre>are shown.                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CreateInteractions                                                                                                   </pre>
+<pre>- %GetLibraryName                                                                                                       </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %Import                                                                                                               </pre>
+<pre>- %Puts                                                                                                                 </pre>
+<pre>- %RemoveRepeated                                                                                                       </pre>
+<pre>- %RemoveSuffix                                                                                                         </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<body>
+</html>

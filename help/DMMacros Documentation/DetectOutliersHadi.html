@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%DetectOutliersHadi</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %DetectOutliersHadi</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      04-Oct-2004                                                                               </pre>
+<pre>Modified:                     31-Mar-2016 (previous: 04-Oct-2004) (simply changed the user of %SetVarOrder after this macro was changed with a new parameter DATASTEP=0 that does NOT run a data step)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro detects univariate outliers with the Hadi method.                                                                                          </pre>
+The macro %Hadi is	called to detect outliers for each individual requested variable.
+<pre>The macro %Hadi is            called to detect outliers for each individual requested variable.                                                            </pre>
+<pre>By default, a Box-Cox transformation is performed prior to the outlier detection                                                                                          </pre>
+<pre>in order to attain a nearly normal distribution for each variable.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%DetectOutliersHadi(                                                                                          </pre>
+<pre>          data,                                                                                     </pre>
+<pre>          var=_NUMERIC_,                                                                            </pre>
+<pre>          alpha=0.05,                                                                               </pre>
+<pre>          adjust=1,                                                                                 </pre>
+<pre>          boxcox=1,                                                                                 </pre>
+<pre>          nameOutlier=outlier,                                                                      </pre>
+<pre>          out=,                                                                                     </pre>
+<pre>          macrovar=,                                                                                </pre>
+<pre>          log=1);                                                                                   </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Blank-separated list of variables on which the outlier detection is                                                            </pre>
+<pre>                              to be performed.                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- alpha:                      Probability level used to define an observation as an outlier.                                                            </pre>
+<pre>                              Possible values: between 0 and 1                                                            </pre>
+<pre>                              default: 0.05                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- adjust:                     Whether to adjust or not the level alpha by the number of observations                                                            </pre>
+<pre>                              in the dataset so that the probability of detecting outliers just                                                            </pre>
+<pre>                              by chance is reduced.                                                                     </pre>
+<pre>                              Possible values: 0 => Do not adjust, 1 => Adjust                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- boxcox:                     Whether to perform a Box-Cox transformation for symmetrization of                                                            </pre>
+<pre>                              each variable's distribution prior to the outlier detection.                                                            </pre>
+<pre>                              Possible options: 0 => Do not transform, 1 => Transform                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- nameOutlier:                Name to use for the variable indicating the number of observations                                                            </pre>
+<pre>                              that were detected as outlier in at least one of the variables.                                                            </pre>
+<pre>                              It is also the name used as the radical for the variables indicating                                                            </pre>
+<pre>                              whether an observation is an outlier for each of the variables.                                                            </pre>
+<pre>                              The names of these variables have the form:                                                            </pre>
+<pre>                              <nameOutlier>_<analysis-variable>                                                            </pre>
+<pre>                              Ex: if nameOutlier=outlier and var=x z, then the names of the                                                            </pre>
+<pre>                              outlier indicator variables are: outlier_x, outlier_z.                                                            </pre>
+<pre>                              default: outlier                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset. Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                              The output dataset contains the same observations and variables as                                                            </pre>
+<pre>                              the input dataset, plus the following variables:                                                            </pre>
+<pre>                              - one variable for each analysis variable containing a 0/1 flag                                                            </pre>
+<pre>                              indicating whether an observation was detected as an outlier for                                                            </pre>
+<pre>                              the corresponding analysis variable. Its name has the form:                                                            </pre>
+<pre>                              <nameOutlier>_<analysis-variable>                                                             </pre>
+<pre>                              - a variable indicating whether the corresponding observation was                                                            </pre>
+<pre>                              detected as an outlier for any of the analysis variable. Its name is                                                            </pre>
+<pre>                              the name passed in option nameOutlier=.                                                            </pre>
+<pre>                              - _ALPHA_: level used in the detection of outliers.                                                            </pre>
+<pre>                              - _ALPHA_ADJ_: _ALPHA_ adjusted by the number of observations to reduce                                                            </pre>
+<pre>                              the probabilities of detecting outliers just by chance.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar:                   Name of the global macro variable where the list of variables                                                            </pre>
+<pre>                              indicating outliers in each input variable is stored.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in log?                                                                     </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>- The name 'data' cannot be used as the name of the macro variable to return the list of                                                                                          </pre>
+<pre>the variables containing the outlier indicator.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Drop                                                                                                                 </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %Hadi                                                                                                                 </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>- %SetVarOrder                                                                                                          </pre>
+<body>
+</html>

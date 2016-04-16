@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%DetectOutliers</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %DetectOutliers</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 8-Mar-05                                                                                                       </pre>
+<pre>Modified: 12-Sep-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro detects outliers with the MAD method, by iteratively increasing the multiplier                                                                                          </pre>
+<pre>for the MAD starting at 9 in given steps (default = 3) so that the percentage of outliers                                                                                          </pre>
+<pre>detected in each variable is not larger than a given percentage (default pcntmax = 1%).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>When calling the macro %DetectOutliersMAD, the value zero and &miss are excluded with                                                                                          </pre>
+<pre>the CONDITION parameter.                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>An output dataset is created with the observations detected as outliers. Default: _DO_outliers_.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %DetectOutliers                                                                                                       </pre>
+<pre>- %FreqMult                                                                                                             </pre>
+<pre>- %GetNobs                                                                                                              </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<body>
+</html>

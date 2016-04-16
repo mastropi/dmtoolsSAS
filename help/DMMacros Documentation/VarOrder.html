@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%VarOrder</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %VarOrder</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 05-Sep-05                                                                                                      </pre>
+<pre>Modified: 05-Sep-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Orders the variables in a dataset alphabetically.                                                                                          </pre>
+<pre>Optionally lowcases or upcases their names prior to ordering.                                                                                          </pre>
+<pre>The label of the input dataset is preserved.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%VarOrder(data, case=, out=, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Options are not accepted.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- case:                       Defines whether the variables should be lowcased (=LOWCASE), upcased (=UPCASE)                                                            </pre>
+<pre>                              or not changed (=<empty>) before setting them in alphabetical order.                                                            </pre>
+<pre>                              Possible values: LOWCASE, UPCASE                                                            </pre>
+<pre>                              default: <empty>                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset where the alphabetical order is set.                                                            </pre>
+<pre>                              If empty, the alphabetical order is set in the input dataset.                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Shows messages in the log?                                                                </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CreateVarFromList                                                                                                    </pre>
+<pre>- %GetVarNames                                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %VarOrder(test);                                                                                                    </pre>
+<pre>Orders variables alphabetically in dataset TEST.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %VarOrder(test, case=upcase);                                                                                          </pre>
+<pre>Upcases and orders variables alphabetically in dataset TEST.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %VarOrder(test, case=lowcase, out=test_ordered);                                                                                          </pre>
+<pre>Creates dataset TEST_ORDERED with variables in dataset TEST lowcased and ordered alphabetically.                                                                                          </pre>
+<body>
+</html>

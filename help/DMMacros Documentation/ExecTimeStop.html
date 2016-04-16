@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<html>
+<pre>%* MACRO %ExectTimeStop;                                                                                                </pre>
+<pre>%* Created: 01-Sep-2015;                                                                                                </pre>
+<pre>%* Modified: 12-Feb-2016;                                                                                               </pre>
+<pre>%* Author: Daniel Mastropietro;                                                                                          </pre>
+<pre>%* Stop measuring the execution time and show it in the log;                                                                                          </pre>
+<pre>%* The maximum macro call level at which the execution time is reported is set by the macro %ExecTimeStart();                                                                                          </pre>
+<pre>%* Ref: http://www.sascommunity.org/wiki/Tips:Program_run_time;                                                                                          </pre>
+<pre>%* SEE ALSO:                                                                                                            </pre>
+<pre>%* - %ExecTimeStart                                                                                                     </pre>
+<pre>%* - %SetSASOptions                                                                                                     </pre>
+<pre>%* - %ResetSASOptions;                                                                                                  </pre>
+<pre>&rsubmit;                                                                                                               </pre>
+<pre>%MACRO ExecTimeStop() / store des="Measures the time elapsed since %ExecTimeStart was last called";                                                                                          </pre>
+<pre>%local _datetime_end_;                                                                                                  </pre>
+<pre>%local _diff_time_;                                                                                                     </pre>
+<pre>%* Show the execution time for the outer-most macro being executed;                                                                                          </pre>
+<pre>%* The macro variable _Macro_Call_Level_ is handled by %SetSASOptions and %ResetSASOptions;                                                                                          </pre>
+<pre>%if %ExistMacroVar(_Macro_Call_Level_) %then                                                                                          </pre>
+<pre>                              %if &_Macro_Call_Level_ <= &_Macro_Call_Level_Report_Max_ %then %do;%* This check should go on a separate line because if _Macro_Call_Level_ does not exist, the above IF gives an error;                              </pre>
+<pre>                              %put;                         %* Leave a blank line w.r.t. the previous time report;                              </pre>
+<pre>                              %if %ExistMacroVar(_datetime_start_&_Macro_Call_Level_) %then %do;                                                            </pre>
+<pre>                              %let _datetime_end_ = %sysfunc(DATETIME());                                                            </pre>
+			%put *** START TIME: %quote(	%sysfunc(putn(&&_datetime_start_&_Macro_Call_Level_, datetime20.)));
+<pre>                              %put *** START TIME: %quote(  %sysfunc(putn(&&_datetime_start_&_Macro_Call_Level_, datetime20.)));                              </pre>
+			%put *** END TIME: %quote(	%sysfunc(datetime(), datetime20.));
+<pre>                              %put *** END TIME: %quote(    %sysfunc(datetime(), datetime20.));                              </pre>
+<pre>                              %let _diff_time_ = %sysevalf(&_datetime_end_ - &&_datetime_start_&_Macro_Call_Level_);                                                            </pre>
+<pre>                              %* Need to round &_DIFF_TIME_ in order to convert the macro variable into a number;                                                            </pre>
+<pre>                              %* Otherwise, the comparison is performed on the characters making up the macro variable value!;                                                            </pre>
+<pre>                              %if %sysfunc(round(&_diff_time_, 1)) < 60 %then                                                            </pre>
+<pre>                              %put *** EXECUTION TIME:%sysfunc(putn(&_diff_time_, 4.0)) sec;                                                            </pre>
+<pre>                              %else                                                                                     </pre>
+<pre>                              %put *** EXECUTION TIME: %sysfunc(putn(%sysevalf(&_datetime_end_ - &&_datetime_start_&_Macro_Call_Level_), hhmm8.2)) (hh:mm);                                                            </pre>
+<pre>                              %* Delete the global macro variable created by %ExecTimeStart;                                                            </pre>
+<pre>                              %symdel _datetime_start_&_Macro_Call_Level_;                                                            </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>                              %else %do;                                                                                </pre>
+<pre>                              %put Unable to measure execution time...;                                                            </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>                              %if &_Macro_Call_Level_ = 1 %then                                                            </pre>
+<pre>                              %* We have reached macro call level = 1 => the outermost macro has ended execution and we need to delete the global macro variable _Macro_Call_Level_Report_Max_;                                                            </pre>
+<pre>                              %symdel _Macro_Call_Level_Report_Max_;                                                            </pre>
+<pre>%MEND ExecTimeStop;                                                                                                     </pre>
+<body>
+</html>

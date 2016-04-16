@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Center</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Center</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 17-Jul-03                                                                                                      </pre>
+<pre>Modified: 12-Feb-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Centra variables, es decir resta la media de las variables para que la                                                                                          </pre>
+<pre>nueva variable tenga media 0.                                                                                           </pre>
+<pre>Opcionalmente escala las variables de manera de tener un desvio estándar                                                                                          </pre>
+<pre>determinado.                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Center(                                                                                            </pre>
+<pre>          _data_ ,                      /* Input dataset */                                         </pre>
+<pre>          var=_NUMERIC_ ,               /* Variables a centrar */                                   </pre>
+<pre>          out= ,                        /* Output dataset */                                        </pre>
+<pre>          std= ,                        /* Valor del desvío estándar deseado para las variables centradas */                              </pre>
+<pre>          suffix=_c ,                   /* Sufijo para los nombres de las variables centradas */                              </pre>
+<pre>          macrovar= ,                   /* Macro variable donde guardar la lista de las variables centradas */                              </pre>
+<pre>          log=1);                       /* Mostrar mensajes en el log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- _data_:                     Input dataset.                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        Lista separada por blancos de las variables a centrar.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset con las variables centradas.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- std:                        Valor del desvío estándar deseado para las variables centradas.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Sufijo a usar para las variables centradas.                                                            </pre>
+<pre>                              default: _c                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar:                   Nombre de la macro variable global donde guardar la lista                                                            </pre>
+<pre>                              con los nombres de las variables centradas creadas.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Indica si se desea ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- El proceso de centrar variables puede hacerse con PROC STANDARD.                                                                                          </pre>
+<pre>Sin embargo este procedimiento no permite generar nuevas variables con los                                                                                          </pre>
+<pre>valores centrados en el input dataset. Permite ya sea sobreescribir las variables                                                                                          </pre>
+<pre>que se transforman, o bien generar un nuevo dataset con las variables centradas.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- El valor del parámetro 'macrovar' no puede ser 'macrovar', ni el nombre de                                                                                          </pre>
+<pre>ningún otro parámetro recibido por la macro. Tampoco puede empezar y terminar con                                                                                          </pre>
+<pre>el símbolo '_'. Ejemplo de valores prohibidos: suffix , out , _var_, etc.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %DeleteMacroVar                                                                                                       </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetStat                                                                                                              </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Standardize                                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %Center(test , var=x z , macrovar=var_cent);                                                                                          </pre>
+<pre>Centra las variables x, z creando nuevas variables x_c, z_c con los valores centrados.                                                                                          </pre>
+<pre>Se genera la macro variable global 'var_cent' con la lista de nombres de las variables                                                                                          </pre>
+<pre>centradas: x_c z_c.                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %Center(test , var=x z , std=1 , out=test_cent , suffix=_cent , macrovar=var_cent);                                                                                          </pre>
+<pre>Crea el dataset test_cent con todas las variables que estan en test mas las variables                                                                                          </pre>
+<pre>centradas x_cent, z_cent, que son escaladas para que tengan desvío estándar igual a 1.                                                                                          </pre>
+<pre>Se genera tambien la macro variable 'var_cent' con la lista de nombres de las variables                                                                                          </pre>
+<pre>centradas: x_cent z_cent.                                                                                               </pre>
+<body>
+</html>

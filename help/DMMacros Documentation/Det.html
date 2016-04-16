@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Det</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Det</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Santiago Laplagne                                                                                               </pre>
+<pre>Created: 17-Dec-02                                                                                                      </pre>
+<pre>Modified: 02-Jan-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Calcula el determinante de una matriz, usando la función det del proc IML.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Det (data, det =, log = 0);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Input dataset con los datos a utilizar. Puede recibir                                                            </pre>
+<pre>          cualquier opción adicional como en cualquier opción data=                                                            </pre>
+<pre>          de SAS.                                                                                   </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- det:    Nombre de la macro variable donde se guarda el valor del                                                             </pre>
+<pre>          determinante. Si no se indica ningún nombre, el valor se                                                             </pre>
+<pre>          imprime en el Output Window.                                                              </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Indica si se desea ver mensajes en el log generados por la                                                            </pre>
+<pre>          macro.                                                                                    </pre>
+<pre>          Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>          default: 0                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>- Para que la macro modifique el valor de la variable indicada en det, ésta                                                                                          </pre>
+<pre>debe haber sido definida previamente. Si la llamada está dentro de una macro                                                                                           </pre>
+<pre>puede definirse así:                                                                                          </pre>
+<pre>%local determinante;                                                                                          </pre>
+<pre>%Det (datos, det = determinante)                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>Si la llamada se hace fuera de una macro, puede definirse así:                                                                                          </pre>
+<pre>%let determinate = 0;                                                                                          </pre>
+<pre>%Det (datos, det = determinante)                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>Si la matriz no es cuadrada el determinante no se puede calcular y se                                                                                          </pre>
+<pre>imprime un mensaje de error en el LOG.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Cov                                                                                              </pre>
+<body>
+</html>

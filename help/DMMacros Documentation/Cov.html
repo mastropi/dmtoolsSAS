@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Cov</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Cov</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Santiago Laplagne - Daniel Mastropietro                                                                                          </pre>
+<pre>Created: 17-Dec-02                                                                                                      </pre>
+<pre>Modified: 28-Jul-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Calcula la matriz de covarianza de los datos, usando proc corr.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Cov (data, out=, var=_numeric_);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Input dataset con los datos a utilizar. Puede recibir                                                            </pre>
+<pre>          cualquier opción adicional como en cualquier opción data=                                                            </pre>
+<pre>          de SAS.                                                                                   </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- out:    Output dataset donde se guarda la matriz de covarianza de                                                            </pre>
+<pre>          los datos. La matriz es de tamaño p x p, donde p es el                                                            </pre>
+<pre>          el número de variables listadas en 'var'.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- var:    Lista de las variables a utilizar para calcular la matriz                                                             </pre>
+<pre>          de covarianza.                                                                            </pre>
+<pre>          default: _numeric_, es decir, todas las variables numéricas                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>- La matriz de covarianza se usa en el cálculo de la distancia Mahalanobis.                                                                                           </pre>
+<pre>Esta macro se usa en la macro %CutMahalanobisChi. La macro %Hadi tambien                                                                                          </pre>
+<pre>calcula la matriz de covarianza pero por cuestiones de eficiencia usa su                                                                                          </pre>
+<pre>propia rutina dentro de IML.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                          </pre>
+<pre>- %Getnobs                                                                                          </pre>
+<body>
+</html>

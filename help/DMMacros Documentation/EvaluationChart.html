@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%EvaluationChart</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %EvaluationChart</h1>
+<pre>Version:                      3.03                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      24-Sep-2004                                                                               </pre>
+<pre>Modified:                     19-Mar-2016 (previous: 03-Aug-2015)                                                            </pre>
+<pre>SAS Version:                  9.3                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro plots an evaluation chart for a scoring model with a categorical target variable                                                                                          </pre>
+<pre>which can be either binary or multilevel.                                                                                          </pre>
+<pre>Available evaluation charts are:                                                                                          </pre>
+<pre>- Lift Chart                                                                                                            </pre>
+<pre>- Gains Chart (%Captured Response for each level of the target variable) (only available for                                                                                          </pre>
+<pre>dichotomouse variables)                                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>Optionally, an output dataset with the data necessary to reproduce the evaluation charts is                                                                                          </pre>
+<pre>created. These data include the confidence bands for the Gains Charts.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Keywords used below:                                                                                                    </pre>
+<pre>LR = Logistic Regression                                                                                                </pre>
+<pre>DT = Decision Tree                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%EvaluationChart(                                                                                          </pre>
+<pre>          data,                         /* Input datasets */                                        </pre>
+<pre>          target=y,                     /* Target variable */                                       </pre>
+<pre>          score=p,                      /* Score variable(s) */                                     </pre>
+<pre>          by=,                          /* By variables */                                          </pre>
+<pre>          event=1,                      /* Event of interest */                                     </pre>
+<pre>          model=LR,                     /* Model used to generate the score (LR, DT) */                              </pre>
+<pre>          leaf=leaf,                    /* Name of variable defining the leaves in a DT */                              </pre>
+<pre>          step=,                        /* Percent step to use for the score variable when constructing the plot */                              </pre>
+<pre>          groups=,                      /* Nro. of percentile groups to use in plot */                              </pre>
+<pre>          percentiles=,                 /* Percentiles to use in plot */                              </pre>
+<pre>          chart=lift,                   /*                            Type of evaluation chart */   </pre>
+<pre>          plot=1,                       /* Make plot of Evaluation Chart? */                              </pre>
+<pre>          overlay=0,                    /* Overlay the Evaluation Charts on the same plot? */                              </pre>
+<pre>          best=1,                       /* Show the Best Lift/Gains Curve? */                              </pre>
+<pre>          pointlabels=0,                /* Use pointlabels showing quantile size? */                              </pre>
+<pre>          points=1,                     /* Show points indicating plotting points? */                              </pre>
+<pre>          legend=1,                     /* Show legend in graph? */                                 </pre>
+<pre>          bands=0,                      /* Show confidence bands for the Gains Chart? */                              </pre>
+<pre>          bandtype=SIMUL,               /* Type of confidence bands to compute, simultaneous or pointwise */                              </pre>
+<pre>          confidence=0.95,              /* Confidence level for the Gains confidence bands */                              </pre>
+<pre>          out=,                         /* Output dataset with the data to make the evaluation charts */                              </pre>
+<pre>          outstat=,                     /* Output dataset with the KS Statistic and Gini Index */                              </pre>
+<pre>          odsfile=,                     /* Quoted name of the file where the Evaluation Chart is saved */                              </pre>
+<pre>          odsfiletype=pdf,              /* Type of the file specified in ODSFILE */                              </pre>
+<pre>          libformat=,                   /* Library where the target formats created by the macro are stored */                              </pre>
+<pre>          print=1,                      /* Show KS and Gini Index in the output window? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Dataset or list of datasets containing the target and score variables to be used                                                            </pre>
+<pre>                              in the construction of the Evaluation Chart.                                                            </pre>
+<pre>                              When multiple datasets are specified, the evaluation chart shows the curves                                                            </pre>
+<pre>                              for each dataset overlayed on the same graph.                                                            </pre>
+<pre>                              In addition, it is assumed that the target and score variables have the same name                                                            </pre>
+<pre>                              are of the same type and can potentially take the same values in all datasets.                                                            </pre>
+<pre>                              Data options are only allowed when only one dataset is specified.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- target:                     Target variable that is predicted by the model under analysis.                                                            </pre>
+<pre>                              The type of variable depends on the type of evaluation chart being requested.                                                            </pre>
+<pre>                              The target variable can be either character or numeric.                                                            </pre>
+<pre>                              default: y                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- score:                      Score variable or list of score variables generated by the scoring model to evaluate.                                                            </pre>
+<pre>                              If a list of variables is given, the final score used for the graph is the sum of the                                                            </pre>
+<pre>                              given score variables. This is useful in case of multilevel target variables and when                                                            </pre>
+<pre>                              we want to analyze the performance of the model for a set of levels.                                                            </pre>
+<pre>                              It is assumed that a higher score implies a higher probability that the                                                            </pre>
+<pre>                              target variable be equal to the event specified in EVENT=.                                                            </pre>
+<pre>                              default: p                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by:                         List of by variables by which the computation of the evaluation charts is performed.                                                            </pre>
+<pre>                              If by variables are passed ONLY one dataset is allowed in 'data'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- event:                      Level(s) of the target variable that represent the event of interest in the analysis.                                                            </pre>
+<pre>                              The values have to be of the same type as the type of the target variable.                                                            </pre>
+<pre>                              For character values, use SINGLE quotes to enclose their values.                                                            </pre>
+<pre>                              When more than one value is defined as an event, separate the different values with                                                            </pre>
+<pre>                              a blank space.                                                                            </pre>
+<pre>                              Ex: EVENT='1-Low' '2-Middle'                                                              </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- model:                      Type of model used to generate the scoring model.                                                            </pre>
+<pre>                              Possible values: LR (for Logistic Regression), DT or TREE (for Decision Tree)                                                            </pre>
+<pre>                              When MODEL=DT or TREE, the number of points generated in the evaluation chart                                                            </pre>
+<pre>                              is given by the number of leaves in the tree.                                                            </pre>
+<pre>                              default: LR                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- leaf:                       Name of the variable defining the leaves in a DT.                                                            </pre>
+<pre>                              Only used when MODEL=DT or MODEL=TREE.                                                            </pre>
+<pre>                              default: leaf                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- step:                       Step (in percent) to use for the score variable to make the evaluation chart.                                                            </pre>
+<pre>                              This is the percentage to be used to group the ordered score values in order                                                            </pre>
+<pre>                              to compute the number of target events present in each group, which is used                                                            </pre>
+<pre>                              to construct the evaluation chart.                                                            </pre>
+<pre>                              This parameter has an effect only when:                                                            </pre>
+<pre>                              - the model used to generate the scoring model is NOT a Decision Tree.                                                            </pre>
+<pre>                              (i.e. MODEL ~= DT and MODEL ~= TREE). For DTs the score values are grouped                                                            </pre>
+<pre>                              by the leaves of the tree.                                                                </pre>
+<pre>                              However, even if the scoring model is a DT, the number of groups specified                                                            </pre>
+<pre>                              in this parameter is used to generate the 'Best Curve' in that case, which                                                            </pre>
+<pre>                              reflects the best possible performance of a model with the data used to create                                                            </pre>
+<pre>                              the scoring model.                                                                        </pre>
+<pre>                              - parameter 'percentiles' is empty.                                                            </pre>
+<pre>                              Leave all GROUPS=, STEP=, PERCENTILES= empty if no grouping is wished.                                                            </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- groups:                     Nro. of groups to use for the scoring variable to make the evaluation chart.                                                            </pre>
+<pre>                              This number defines the step (in %) used for each point in the evaluation chart,                                                            </pre>
+<pre>                              which is calculated as 100/groups.                                                            </pre>
+<pre>                              For ex. if GROUPS=20, the step is 5%.                                                            </pre>
+<pre>                              This parameter has an effect only when:                                                            </pre>
+<pre>                              - the model used to generate the scoring model is NOT a Decision Tree.                                                            </pre>
+<pre>                              (i.e. MODEL ~= DT and MODEL ~= TREE). For DTs the groups used to generate                                                            </pre>
+<pre>                              the evaluation chart are given by the leaves of the tree.                                                            </pre>
+<pre>                              However, even if the scoring model is a DT, the number of groups specified                                                            </pre>
+<pre>                              in this parameter is used to generate the 'Best Curve' in that case, which                                                            </pre>
+<pre>                              reflects the best possible performance of a model with the data used to create                                                            </pre>
+<pre>                              the scoring model.                                                                        </pre>
+<pre>                              - parameter 'step' and 'percentiles' are both empty.                                                            </pre>
+<pre>                              Leave all GROUPS=, STEP=, PERCENTILES= empty if no grouping is wished.                                                            </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- percentiles:                List of percentiles of the scoring variable to use in the evaluation chart.                                                            </pre>
+<pre>                              If empty, the number of groups passed in 'groups' is used.                                                            </pre>
+<pre>                              This parameter overrides any value passed in parameter 'groups'.                                                            </pre>
+<pre>                              Leave all GROUPS=, STEP=, PERCENTILES= empty if no grouping is wished.                                                            </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- chart:                      Type of evaluation chart to be made.                                                            </pre>
+<pre>                              Possible values:                                                                          </pre>
+				- LIFT:	Lift chart for the prediction of the target variable equal to 'event'
+<pre>                              - LIFT:                       Lift chart for the prediction of the target variable equal to 'event'                              </pre>
+<pre>                              - GAINS: %Captured Response for each level of the target variable                                                            </pre>
+<pre>                              default: lift                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plot:                       Whether to plot the evaluation chart.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- overlay:                    Whether to overlay all the evaluation charts on the same plot for comparison purposes.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- best:                       Whether to plot the Best Lift/Gains curve.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1 when the plot corresponds to a single dataset with no BY variables,                                                            </pre>
+<pre>                              Otherwise the default value is 0. The reason for setting the value to 0 when                                                            </pre>
+<pre>                              BY variables are passed is because the event rate in each of the dataset may be                                                            </pre>
+<pre>                              different, making therefore the Best curve (which is based on the WHOLE dataset)                                                            </pre>
+<pre>                              uninformative. Note that when multiple datasets are passed, there is no best                                                            </pre>
+<pre>                              curve (unless of course the datasets come from the same original dataset that                                                            </pre>
+<pre>                              is splitted according to BY variable values... but this case is not taken into                                                            </pre>
+<pre>                              account).                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>- pointlabels:                Whether to show point labels in the evaluation chart indicating the number of                                                            </pre>
+<pre>                              observations falling in each percentile.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- points:                     Show points indicating plotting points in the graph?                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- legend:                     Show legend in graph?                                                                     </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- bands:                      Whether to create (in the output dataset) and show the confidence bands for                                                            </pre>
+<pre>                              the Gains Charts.                                                                         </pre>
+<pre>                              Even if no Gains Charts are requested (because CHART~=GAINS), 4 columns                                                            </pre>
+<pre>                              for each analyzed dataset containing the confidence bands are created in                                                            </pre>
+<pre>                              the output dataset.                                                                       </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- bandtype:                   Type of confidence bands to compute, whether simultaneous bands or pointwise                                                            </pre>
+<pre>                              intervals.                                                                                </pre>
+<pre>                              Possible values: POINT (alias POINTWISE), SIMUL (alias SIMULTANEOUS)                                                            </pre>
+<pre>                              default: SIMUL                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- confidence:                 Confidence level for the confidence bands.                                                            </pre>
+<pre>                              Possible values: 0.80, 0.90, 0.95, 0.98, 0.99.                                                            </pre>
+<pre>                              default: 0.95                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the data to make all available evaluation charts                                                            </pre>
+<pre>                              (LIFT, GAINS) for each dataset/model analyzed.                                                            </pre>
+<pre>                              The output dataset contains the following columns:                                                            </pre>
+<pre>                              - model:                      Name of the dataset, BY group or model being evaluated.                              </pre>
+<pre>                              - type:                       Type of model (specified in the MODEL parameter).                              </pre>
+<pre>                              - <target>:                   Value of the event of interest specified in the EVENT parameter.                              </pre>
+<pre>                              (the name of the column is defined by the TARGET parameter)                                                            </pre>
+<pre>                              - <score>:                    Average value of the score variable for the corresponding quantile.                              </pre>
+<pre>                              (the name of the column is defined by the SCORE parameter)                                                            </pre>
+<pre>                              - quantile:                   Quantile of the score rank (HORIZONTAL AXIS of Evaluation Chart).                              </pre>
+<pre>                              - Naive:                      Naive 45-degree line corresponding to the Gains using random selection.                              </pre>
+<pre>                              - BestLift:                   Best possible Lift with the data at hand.                              </pre>
+<pre>                              - BestGainsEvent:             Best possible Event Gains with the data at hand.                              </pre>
+<pre>                              - BestGainsNonEvent:          Best possible Non-event Gains with the data at hand.                              </pre>
+<pre>                              - LiftLower:                  Lower end of confidence band for the Lift.                              </pre>
+<pre>                              - Lift:                       Data for the Lift Charts (VERTICAL AXIS).                              </pre>
+<pre>                              - LiftUpper:                  Upper end of confidence band for the Lift.                              </pre>
+<pre>                              - GainsEventLower:            Lower end of confidence band for the Event Gains.                              </pre>
+<pre>                              - GainsEvent:                 Data for the Gains Chart for <target>=<event> (VERTICAL AXIS).                              </pre>
+<pre>                              - GainsEventUpper:            Upper end of confidence band for the Event Gains.                              </pre>
+<pre>                              - GainsNonEventLower:         Lower end of confidence band for the Non-Event Gains.                              </pre>
+<pre>                              - GainsNonEvent:              Data for the Gains Chart for <target>~=<event> (VERTICAL AXIS).                              </pre>
+<pre>                              - GainsNonEventUpper:         Upper end of confidence band for the Non-Event Gains.                              </pre>
+<pre>                              - hits:                       Nro. of hits (events) in current quantile.                              </pre>
+<pre>                              - n:                          Nro. of observations in current quantile.                              </pre>
+<pre>                              - CumHits:                    Cumulative nro. of hits (events) up to current quantile.                              </pre>
+<pre>                              - CumN:                       Cumulative nro. of obs up to current quantile.                              </pre>
+<pre>                              - TotalHits:                  Total nro. of hits in the dataset.                              </pre>
+<pre>                              - TotalN:                     Total nro. of observations in the dataset.                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outstat:                    Output dataset with the KS Statistic and Gini Index. It has the following columns:                                                            </pre>
+<pre>                              - model:                      Name of the dataset, BY group or model being evaluated.                              </pre>
+<pre>                              - TotalN:                     Total number of cases used for the computation of the measures.                              </pre>
+<pre>                              - EventRate:                  Event Rate                                                  </pre>
+<pre>                              - type:                       Type of model (specified in the MODEL parameter).                              </pre>
+<pre>                              - KSLower:                    Lower end of the confidence interval for KS.                              </pre>
+<pre>                              - KS:                         Kolmogorov-Smirnov statistic.                               </pre>
+<pre>                              - KSUpper:                    Upper end of the confidence interval for KS.                              </pre>
+<pre>                              - QuantileAtKSLower:          Quantile at which the Lower KS occurs.                              </pre>
+<pre>                              - QuantileAtKS:               Quantile at which the KS value occurs.                              </pre>
+<pre>                              - QuantileAtKSUpper:          Quantile at which the Upper KS occurs.                              </pre>
+<pre>                              - GiniLower:                  Lower end of the confidence interval for the Gini Index.                              </pre>
+<pre>                              - Gini:                       Gini Index                                                  </pre>
+<pre>                              - GiniUpper:                  Upper end of the confidence interval for the Gini Index.                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- odsfile:                    Quoted name of the file where the Evaluation Chart should be saved in the                                                            </pre>
+<pre>                              format given by the ODSFILETYPE= parameter.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- odsfiletype:                Type of file to be created at the location specified by the ODSFILE= parameter.                                                            </pre>
+<pre>                              default: pdf                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- libformat:                  Library where the target formats defined by the macro are stored.                                                            </pre>
+<pre>                              This is useful when the macro is called from within Enterprise Miner where                                                            </pre>
+<pre>                              the formats should be stored in the APFMTLIB library in order to be available                                                            </pre>
+<pre>                              in different nodes, including the Results window of a particular node execution!                                                            </pre>
+<pre>                              default: WORK                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- print:                      Whether to show the KS and Gini Index for each dataset analyzed or for each                                                            </pre>
+<pre>                              by variables combination.                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- Together with the evaluation chart for the scoring model being evaluated, the curve                                                                                          </pre>
+<pre>corresponding to the best possible model is also shown (which appears as 'Best' in                                                                                          </pre>
+<pre>the graph).                                                                                                             </pre>
+<pre>When more than one dataset is passed for evaluation, the computation of the best curve is based                                                                                          </pre>
+<pre>on the last dataset listed in 'data'. This may not be of concern if, as usually is the case,                                                                                          </pre>
+<pre>all datasets listed for evaluation contain the same data and only differ on the predicted score.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- When more than one dataset are passed in DATA=, the following should be noted:                                                                                          </pre>
+<pre>- The target variable should take the same values in all datasets listed, because the best curve                                                                                          </pre>
+<pre>is computed using the target variable stored in the last dataset listed.                                                                                          </pre>
+<pre>- The best curve is computed for the last dataset listed. That is the best curve uses the                                                                                          </pre>
+<pre>percentile groups defined by the last dataset listed.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %Categorize                                                                                                           </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %Colors                                                                                                               </pre>
+<pre>- %CreateInteractions                                                                                                   </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %GetDataOptions                                                                                                       </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetVarAttrib                                                                                                         </pre>
+<pre>- %GetVarType                                                                                                           </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GainsChart (which cals %EvaluationChart with parameter CHART=GAINS)                                                                                          </pre>
+<pre>- %LiftChart (which calls %EvaluationChart with parameter CHART=LIFT)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %EvaluationChart(scoredData, target=DQ, score=p, pointlabels=1, groups=20);                                                                                          </pre>
+<pre>This creates a lift chart for the target variable DQ using the score stored in variable P                                                                                          </pre>
+<pre>in dataset SCOREDDATA. The event of interest used in the scoring model is DQ=1                                                                                          </pre>
+<pre>(since the default for parameter 'event' is 1).                                                                                          </pre>
+<pre>The model is assumed to be a Logistic Regression model.                                                                                          </pre>
+<pre>The lift chart is based on grouping the score variable into 20 groups, which implies that                                                                                          </pre>
+<pre>a 5% step is used for the horizontal axis containing the score.                                                                                          </pre>
+<pre>Each point in the chart has a label that shows the number of observations falling in there,                                                                                          </pre>
+<pre>that were used to compute the evaluation measure.                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %EvaluationChart(scoredData, score=pred, event="Delinquent", model=DT, leaf=segment);                                                                                          </pre>
+<pre>This creates a lift chart for target variable Y (the default) using the score variable PRED                                                                                          </pre>
+<pre>in dataset SCOREDDATA. The event of interest used in the scoring model is Y="Delinquent".                                                                                          </pre>
+<pre>The model is assumed to be a Decision Tree model.                                                                                          </pre>
+<pre>The variable containing the tree leaf to which each observation is mapped by the tree is                                                                                          </pre>
+<pre>SEGMENT.                                                                                                                </pre>
+<pre>The percentiles of the score variable used to make the evaluation chart are given by the                                                                                          </pre>
+<pre>number of observations in each tree leaf.                                                                                          </pre>
+<body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%IsNumber</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %IsNumber</h1>
+<pre>Version:                      1.02                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      23-Dec-2004                                                                               </pre>
+<pre>Modified:                     31-Mar-2016 (previous: 10-Mar-2005)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro states whether a string looks like a number or optionally a SET of numbers.                                                                                          </pre>
+<pre>The macro just says whether the string "looks like" a number and doesn't really verify that it is                                                                                          </pre>
+<pre>a number as it doesn't check for consistency of the number(s).                                                                                          </pre>
+<pre>The only thing that the macro does is to check wheter all the characters that make up the string                                                                                          </pre>
+<pre>are digits or any of the following symbols: ' ', '.', '+', '-', '*', '/', 'E', 'e'                                                                                          </pre>
+<pre>(for numbers in exponential notation).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%IsNumber(str, multiple=0, sep=%quote( ));                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- str:                        String to analyze.                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- multiple:                   Flag indicating whether multiple numbers separated by 'sep' are allowed                                                            </pre>
+<pre>                              in the string to be considered a valid number or set of numbers.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sep:                        Single character separating the plausible numbers in 'str'.                                                            </pre>
+<pre>                              default: %quote( ) (i.e. a blank space)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUE:</h3>
+<pre>The macro returns 1 if the input string looks like a number or a set of numbers and 0 otherwise.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let number = %IsNumber(3.235);                                                                                          </pre>
+<pre>Stores the value 1 in macro variable 'isnumber'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let number = %IsNumber(3.2+38..47-287.429);                                                                                          </pre>
+<pre>Stores the value 1 in macro variable 'isnumber'.                                                                                          </pre>
+<pre>(Even if the string is NOT actually a number!)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %let number = %IsNumber(3s3874-3);                                                                                          </pre>
+<pre>Stores the value 0 in macro variable 'isnumber'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %let number = %IsNumber(0.3 | 1e-5 |-0.8, multiple=1, sep=|)                                                                                          </pre>
+<pre>Stores the value 1 in macro variable 'isnumber'.                                                                                          </pre>
+<body>
+</html>

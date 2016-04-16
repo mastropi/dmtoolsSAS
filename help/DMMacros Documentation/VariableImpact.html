@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%VariableImpact</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %VariableImpact</h1>
+<pre>Version:                      1.04                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      30-Sep-2004                                                                               </pre>
+<pre>Modified:                     15-Feb-2016 (previous: 23-May-2015)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro makes plots of a binary target variable vs. individual predictor variables                                                                                          </pre>
+<pre>in order to analyze their individual impact on the target.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The plots show either the proportion or the logit of the proportion of the event of                                                                                          </pre>
+<pre>interest by groups of each predictor variable, created from its categorization.                                                                                          </pre>
+<pre>(logit(p) = log(p/(1-p)))                                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>An output dataset can be created to later produce the plots. Together with the output                                                                                          </pre>
+<pre>dataset, an annotate dataset is created containing the necessary information to annotate                                                                                          </pre>
+<pre>the plots, and a global macro variable (VI_GPLOT) is created with the statements necessary                                                                                          </pre>
+<pre>to generate the plots in the future.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>This is useful to decide possible transformations of the predictor variable prior to                                                                                          </pre>
+<pre>fitting for example a logistic regression model.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%VariableImpact(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. */                                        </pre>
+<pre>          target=,                      /* Target binary variable. */                               </pre>
+<pre>          var=,                         /* List of predictor variables to analyze. */                              </pre>
+<pre>          event=1,                      /* Event of interest for target variable. */                              </pre>
+<pre>          condition=,                   /* Condition that the values of each predictor variable must satisfy */                              </pre>
+<pre>          /*                            in order to be included       in the analysis. */           </pre>
+<pre>          value=mean,                   /* Value to use to categorize predictor variables. */                              </pre>
+<pre>          groups=10,                    /* Nro. of groups to use in the categorization. */                              </pre>
+<pre>          groupsize=,                   /* Size of each category. */                                </pre>
+<pre>          percentiles=,                 /* Percentiles to use in the categorization. */                              </pre>
+<pre>          out=,                         /* Output dataset with the data necessary to produce the plots. */                              </pre>
+<pre>          plot=1,                       /* Show the plots? */                                       </pre>
+<pre>          plotWhat=logit,               /* What to plot: logit(p) or p. */                              </pre>
+<pre>          pointlabel=n,                 /* Variable with the point labels to show in the graph. */                              </pre>
+<pre>          pointlabels=1,                /* Show point labels? */                                    </pre>
+<pre>          lines=0,                      /* Show lines connecting the points? */                              </pre>
+<pre>          bars=0,                       /* Show horizontal and vertical error bars? */                              </pre>
+<pre>          barwidth=1,                   /* Multiplier for the error bars. */                              </pre>
+<pre>          log=1);                       /* Show messages in log? */                                 </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- target:                     Target binary variable. It can be character or numeric.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- var:                        List of predictor variables whose relation with TARGET= is plotted.                                                            </pre>
+<pre>                              For now, only numeric variables are allowed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- event:                      Value of the target variable representing the event of interest.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- condition:                  Condition that each predictor variable must satisfy in order to be included                                                            </pre>
+<pre>                              in the analysis of its impact in the target variable.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- value:                      Statistic keyword to use to compute the values representing each category.                                                            </pre>
+<pre>                              It can be any statistic keyword that is valid in PROC MEANS.                                                            </pre>
+<pre>                              If no value is specified, the different categories are                                                            </pre>
+<pre>                              represented with a natural number ranging from 1 to the number of groups.                                                            </pre>
+<pre>                              default: mean                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- groups:                     Nro. of groups into which each variable is categorized.                                                            </pre>
+<pre>                              The groups are defined by equally spaced percentiles, which are as many as                                                            </pre>
+<pre>                              the number of groups. For ex. if groups=5, then the percentiles that                                                            </pre>
+<pre>                              define the different categories are: 20 40 60 80 100.                                                            </pre>
+<pre>                              default: 10 (i.e. the percentiles used are 10 20 ... 100)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- groupsize:                  Size of each category.                                                                    </pre>
+<pre>                              This has prevalence over the options GROUPS= and PERCENTILES=, in the                                                            </pre>
+<pre>                              sense that if groupsize= is passed, GROUPS= and PERCENTILES= are ignored.                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- percentiles:                List of percentiles to use to define the categories.                                                            </pre>
+<pre>                              It has prevalence over the variable GROUPS= in the sense that if                                                            </pre>
+<pre>                              percentiles= is passed, the option GROUPS= is ignored.                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset with the data necessary to produce all the variable impact                                                            </pre>
+<pre>                              plots generated by this macro (one plot for each variable listed in VAR=).                                                            </pre>
+<pre>                              The output dataset contains the following columns:                                                            </pre>
+<pre>                              - VAR: name of each variable being analyzed.                                                            </pre>
+<pre>                              - VALUE: value of the variable indicated in column VAR as categorized to                                                            </pre>
+<pre>                              produce the plots.                                                                        </pre>
+<pre>                              - P: proportion of 'event' present in each categorized value of the variable.                                                            </pre>
+<pre>                              - N: number of observations present in each categorized value of the variable.                                                            </pre>
+<pre>                              - P_LOWER: lower end of the error bar for P.                                                            </pre>
+<pre>                              - P_UPPER: upper end of the error bar for P.                                                             </pre>
+<pre>                              - LOGIT: logit(P) = log(P/(1-P)).                                                            </pre>
+<pre>                              - LOGIT_LOWER: lower end of the error bar for logit(P).                                                            </pre>
+<pre>                              - LOGIT_UPPER: upper end of the error bar for logit(P).                                                            </pre>
+<pre>                              In addition, when this parameter is passed, the following is created:                                                            </pre>
+<pre>                              - An annotate dataset called <out>_anno, containing information used to annotate                                                            </pre>
+<pre>                              the plots.                                                                                </pre>
+<pre>                              - A global macro variable called VI_GPLOT containing the PROC GPLOT statements                                                            </pre>
+<pre>                              necessary to produce all the variable impact plots generated by this macro in                                                            </pre>
+<pre>                              the future, using the output dataset and the annotate dataset.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plot:                       Whether to show the plot.                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- plotWhat:                   What to plot in the vertical axis of the graphs, whether P, the                                                            </pre>
+<pre>                              proportion of EVENT= in variable TARGET= or Logit(P) = log(p/(1-p)).                                                            </pre>
+<pre>                              Possible values: LOGIT, P                                                                 </pre>
+<pre>                              default: LOGIT                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- pointlabel:                 Variable name containing the point labels to show in the graphs.                                                            </pre>
+<pre>                              This option has an effect only if POINTLABELS=1.                                                            </pre>
+<pre>                              Possible values:                                                                          </pre>
+<pre>                              n => # obs in each category                                                               </pre>
+<pre>                              p => Proportion of TARGET=EVENT in each category                                                            </pre>
+<pre>                              default: n                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- pointlabels:                Show point labels in the graphs?                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- lines:                      Whether to show lines connecting the points in the plot.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- bars:                       Whether to show horizontal and vertical error bars, as follows:                                                            </pre>
+<pre>                              - horizontal bars: min-max bars for the values of independent                                                            </pre>
+<pre>                              variable present each category of its categorized version.                                                            </pre>
+<pre>                              - vertical bars: error bars for the estimated probability (or logit                                                            </pre>
+<pre>                              of probability) for the event of interest (defined in EVENT=)                                                             </pre>
+<pre>                              for each category of the independent variable being analyzed.                                                            </pre>
+<pre>                              When PLOTWHAT=p, the vertical error bars are computed as the                                                            </pre>
+<pre>                              (p +- barwidth*SE), where p is the estimated probability, barwidth is                                                            </pre>
+<pre>                              the value passed in BARWIDTH= and SE is the standard error of p.                                                            </pre>
+<pre>                              When PLOTWHAT=logit, the vertical error bars have the limits                                                            </pre>
+<pre>                              logit(p - barwidth*SE) and logit(p + barwidth*SE).                                                            </pre>
+<pre>                              Possible values: 0 => Do not show error bars, 1 => Show error bars.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- barwidth:                   Multiplier for SE (standard error) used to compute the vertical error                                                            </pre>
+<pre>                              bars.                                                                                     </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in log?                                                                     </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Categorize                                                                                                           </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %DefineSymbols                                                                                                        </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetStat                                                                                                              </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %RemoveRepeated                                                                                                       </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetAxis                                                                                                              </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Categorize                                                                                                           </pre>
+<pre>- %TestLogisticFit                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %VariableImpact(test, target=y, var=x1 x2, event='Paid', groups=20, plotWhat=p);                                                                                          </pre>
+<pre>This plots the proportion of Y='Paid' in dataset TEST for each category of X1 and X2,                                                                                          </pre>
+<pre>obtained from categorizing these variables in 20 groups.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %VariableImpact(test, target=y, var=x z w, groupsize=40, pointlabel=p);                                                                                          </pre>
+<pre>This plots log(p/(1-p)), where p is the proportion of Y=1 in dataset TEST for each                                                                                          </pre>
+<pre>category of variables X, Z and W, obtained from categorizing these variables in                                                                                          </pre>
+<pre>groups of size 40 (obs).                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %VariableImpact(test, target=y, var=x z w, out=test_vi, groupsize=40, plot=0);                                                                                          </pre>
+<pre>This does the same thing as Example 2, with the difference that no plot is produced but rather                                                                                          </pre>
+<pre>the dataset TEST_VI is generated containing the results of the analysis for each variable.                                                                                          </pre>
+<pre>Each analysis is identified with the name of the variable under column VAR of the output                                                                                          </pre>
+<pre>dataset.                                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>This macro is useful during the preliminary steps of a logistic regression model in order                                                                                          </pre>
+<pre>to analyze if a potentially predictive continuous variable needs to be transformed when                                                                                          </pre>
+<pre>doing the logistic regression.                                                                                          </pre>
+<body>
+</html>

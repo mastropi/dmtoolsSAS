@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%MakeListFromName</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %MakeListFromName</h1>
+<pre>Version: 1.05                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Mar-01                                                                                                       </pre>
+<pre>Modified: 6-Jul-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro generates a list of (unquoted) numbered names from a single (unquoted) name                                                                                          </pre>
+<pre>used as root.                                                                                                           </pre>
+<pre>For example, it can generate the list 'x1 x2 x3' from name 'x'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%MakeListFromName(                                                                                          </pre>
+<pre>          name ,                                                                                    </pre>
+<pre>          length= ,                                                                                 </pre>
+<pre>          start=1 ,                                                                                 </pre>
+<pre>          step= ,                                                                                   </pre>
+<pre>          stop= ,                                                                                   </pre>
+<pre>          prefix= ,                                                                                 </pre>
+<pre>          suffix= ,                                                                                 </pre>
+<pre>          sep=%quote( ) ,                                                                           </pre>
+<pre>          log=0);                                                                                   </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- name:                       Name (unquoted) to be used as the root for all generated names.                                                            </pre>
+<pre>                              (Leave blank if a list of numbers is desired. See example 3).                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>NOTE: Not all of the following parameters are required. Exactly three of them should have a value,                                                                                          </pre>
+<pre>and parameter START must always be present.                                                                                          </pre>
+<pre>- length:                     Number of names to be generated in the list.                                                            </pre>
+<pre>                              If no value is passed, it is computed as                                                            </pre>
+<pre>                              floor('start' - 'stop') + 1.                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- start:                      Starting label value. It can be any real number.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- stop:                       Stopping label value. It can be any real number.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- step:                       Step to use for the numbers labeling the elements in the list.                                                            </pre>
+<pre>                              It can be any real number.                                                                </pre>
+<pre>                              (e.g. if step=2, name=x, length=3 the list will be x1 x3 x5)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- prefix:                     Prefix to be added to every name in the list.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Suffix to be added to every name in the list.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sep:                        Separator to be used between the names of the list.                                                            </pre>
+<pre>                              default: %quote( ), i.e. a blank space                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              In this case the generated list is shown.                                                            </pre>
+<pre>                              Possible values are: 0 => Do not show messages                                                            </pre>
+<pre>                               1 => Show messages                                                                       </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>- The list generated is returned in a macro variable. Therefore the output of                                                                                          </pre>
+<pre>this macro can be assigned to a macro variable in a %let statement, or shown                                                                                          </pre>
+<pre>in the log with a %put statement.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- Three out of the 4 parameters START, STEP, STOP and LENGHT must be passed,                                                                                          </pre>
+<pre>and START must ALWAYS be passed (default = 1).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- Some symbols need to be enclosed with the function %quote when passed                                                                                          </pre>
+<pre>as parameters. This is the case for the blank space, the comma, the quotation                                                                                          </pre>
+<pre>mark. In addition, the quotation mark is a special case, which needs to be treated                                                                                          </pre>
+<pre>differently. Namely, the percentage sign should be used before the quotation                                                                                          </pre>
+<pre>mark symbol, as in: %quote(%"). If '%' is not used, SAS will interpret '"' as the                                                                                          </pre>
+<pre>beginning of a string, not as a symbol.                                                                                          </pre>
+<pre>See examples below.                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeVar                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let list1 = %MakeListFromName(x , length=5 , start=0 , step=10);                                                                                          </pre>
+<pre>assigns the following list to macro variable 'list1':                                                                                          </pre>
+<pre>'x0 x10 x20 x30 x40'.                                                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %put list2 = %MakeListFromName(x , start=1 , step=1 , length=5 , prefix=%quote(%") , suffix=%quote(%") , sep=%quote(,));                                                                                          </pre>
+<pre>shows the following list in the log:                                                                                          </pre>
+<pre>'"x1","x2","x3","x4","x5"'.                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %put list2 = %MakeListFromName(x , start=-1 , step=-2 , stop=-6, sep=%quote( or ));                                                                                          </pre>
+<pre>shows the following list in the log:                                                                                          </pre>
+<pre>'x-1 or x-3 or x-5'.                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %put ListOfNumbers = %MakeListFromName( , length=3 , start=0 , step=10);                                                                                          </pre>
+<pre>shows the following list in the log:                                                                                          </pre>
+<pre>'0 10 20'.                                                                                                              </pre>
+<pre>(Note that the first parameter is empty.)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>This macro is useful to generate a list of variable names with the same root                                                                                          </pre>
+<pre>but different numbers identifying each of them, as in 'x1 x2 x3 x4 x5 x6 x7'.                                                                                          </pre>
+<body>
+</html>

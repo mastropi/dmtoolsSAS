@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%RemoveRepeated</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %RemoveRepeated</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 16-Sep-03                                                                                                      </pre>
+<pre>Modified: 16-Jan-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro removes repeated names from a list of names.                                                                                          </pre>
+<pre>It is intended to be used in a SAS macro language context.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%RemoveRepeated(namesList , sep=%quote( ), log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- namesList:                  List of names separated by any character.                                                            </pre>
+<pre>                              For some characters used as separators, the list                                                            </pre>
+<pre>                              should be enclosed in the %str or %quote function.                                                            </pre>
+<pre>                              IMPORTANT: If the separator is not a blank space, there                                                            </pre>
+<pre>                              should be at least a blank space between the separator                                                            </pre>
+<pre>                              and the names. Also, in such cases any blank space                                                            </pre>
+<pre>                              within a name plays the role of separator as well.                                                            </pre>
+<pre>                              See examples 2 and 3 below.                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- sep:                        Separator used to separate the names in 'namesList'.                                                            </pre>
+<pre>                              The search for 'sep' in 'namesList' in order to determine                                                            </pre>
+<pre>                              the names present in each list is CASE SENSITIVE.                                                            </pre>
+<pre>                              default: blank space                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The list in 'namesList' without the repeated names.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- The search for 'names' in 'namesList' and the separator indicated in 'sep' is                                                                                          </pre>
+<pre>NOT case sensitive.                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- In the 'sep' parameter, some symbols need to be enclosed using the function                                                                                          </pre>
+<pre>%quote when passed as parameters. This is the case for the comma, for instance.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %InserInList                                                                                                          </pre>
+<pre>- %RemoveFromList                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %RemoveRepeated(x1 x2 X2 x4);                                                                                          </pre>
+<pre>Returns 'x1 x2 x4'. Note the non-case sensitive feature.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %RemoveRepeated(%quote(XX,yy,xx,ww) , sep=%quote(,));                                                                                          </pre>
+<pre>Returns 'XX , yy , ww'.                                                                                                 </pre>
+<pre>Note the not case-sensitive feature.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %RemoveRepeated(This is B OR This is B , sep=OR);                                                                                          </pre>
+<pre>Returns the list 'This is B'.                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Apply it to a list of variables to be used as regressors in a regression procedure                                                                                          </pre>
+<pre>such as PROC REG. If repeated names are not removed from the list, the regression procedure                                                                                          </pre>
+<pre>aborts.                                                                                                                 </pre>
+<body>
+</html>

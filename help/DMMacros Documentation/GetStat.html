@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetStat</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetStat</h1>
+<pre>Version: 1.03                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 21-May-03                                                                                                      </pre>
+<pre>Modified: 6-Mar-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Calcula un estadístico a partir de variables especificadas en un                                                                                          </pre>
+<pre>dataset y devuelve su valor para cada variable en correspondientes                                                                                          </pre>
+<pre>macro variables globales.                                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>Opcionalmente guarda el estadistico para cada variable especificada en                                                                                          </pre>
+<pre>un output dataset.                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>Esta macro es útil cuando se desea calcular el valor de un estadístico                                                                                          </pre>
+<pre>de una variable (como la media) para ser utilizado en cálculos dentro de un                                                                                          </pre>
+<pre>data step, ya que evita el largo proceso de calcular dicho estadístico con                                                                                           </pre>
+<pre>PROC MEANS, y luego mergear el dataset creado con el dataset original.                                                                                          </pre>
+<pre>Además evita la creación de un dataset de mayor tamaño con el valor del                                                                                          </pre>
+<pre>estadístico repetido en cada observación (que es el resultado del merge                                                                                          </pre>
+<pre>mencionado).                                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>NO SIRVE para usar cuando se desea calcular un estadístico por by                                                                                          </pre>
+<pre>variables.                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetStat(                                                                                           </pre>
+<pre>          _data_ ,                      /* Input dataset */                                         </pre>
+<pre>          var=_NUMERIC_ ,               /* Lista de variables a utilizar en los calculos */                              </pre>
+<pre>          stat=mean ,                   /* Estadistico a calcular (uno solo) */                              </pre>
+<pre>          name= ,                       /* Nombres para las macro variables */                              </pre>
+<pre>          prefix= ,                     /* Prefijo para los nombres de las macro variables */                              </pre>
+<pre>          suffix= ,                     /* Sufijo para los nombres de las macro variables */                              </pre>
+<pre>          weight= ,                     /* Variable a usar como peso en el calculo de 'stat' */                              </pre>
+<pre>          out= ,                        /* Output dataset con los valores de las macro variables */                              </pre>
+<pre>          macrovar= ,                   /* Macro variable global con la lista de macro variables generadas */                              </pre>
+<pre>          log=1);                       /* Mostrar mensajes en el log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- _data_: Input dataset. Puede recibir cualquier opción adicional como                                                             </pre>
+<pre>          en cualquier opción data= de SAS.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:    Lista de variables para las cuales se calcula el estadistico                                                            </pre>
+<pre>          indicado en 'stat'.                                                                       </pre>
+<pre>          default: _NUMERIC_, es decir todas las variables numéricas.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- stat:   Estadístico solicitado.                                                                   </pre>
+<pre>          Puede ser solamente uno y su valor puede ser cualquiera                                                            </pre>
+<pre>          de las statistic keywords válidas en PROC MEANS.                                                            </pre>
+<pre>          default: mean                                                                             </pre>
+<pre>                                                                                                    </pre>
+<pre>- name:   Lista de nombres a usar para las macro variables globales                                                            </pre>
+<pre>          generadas. La cantidad de nombres especificada debe ser                                                            </pre>
+<pre>          la misma que el número de variables en 'var'.                                                            </pre>
+<pre>          IMPORTANTE: Estos nombres no pueden coincidir con ninguno de                                                            </pre>
+<pre>          los nombres utilizados para los parámetros de la macro                                                            </pre>
+<pre>          (ej: var, stat, etc.), ni tener el símbolo '_' al principio                                                            </pre>
+<pre>          y al final del nombre (ej: _var_, etc.).                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- prefix: Prefijo a usar para nombrar las macro variables generadas                                                            </pre>
+<pre>          con el valor del estadistico solicitado.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- suffix: Sufijo a usar para nombrar las macro variables generadas                                                            </pre>
+<pre>          con el valor del estadistico solicitado.                                                            </pre>
+<pre>          default: mismo nombre que el estadistico solicitado antecedido                                                            </pre>
+<pre>          por un '_'. Ej. si stat=stddev, el sufijo es '_stddev'.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- weight: Variable a usar como peso en el calculo del estadistico                                                            </pre>
+<pre>          solicitado. Cumple las mismas funciones que el weight statement                                                            </pre>
+<pre>          del PROC MEANS.                                                                           </pre>
+<pre>                                                                                                    </pre>
+<pre>- out:    Output dataset donde se guardan los valores de las macro variables                                                            </pre>
+<pre>          generadas con los mismos nombres que las macro variables.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- macrovar:Macro variable global con la lista de las macro variables generadas                                                            </pre>
+<pre>          donde se guardan los valores calculados.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Indica si se desea ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>          Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- TRATAMIENTO DE MISSING VALUES                                                                                          </pre>
+<pre>Los missing values no se usan en los calculos de los estadisticos. Son eliminados automaticamente                                                                                          </pre>
+<pre>por la macro PROC MEANS que es invocada para hacer los calculos.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %GetVarList                                                                                          </pre>
+<pre>- %Means                                                                                            </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %Means                                                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- Ejemplo de aplicación:                                                                                          </pre>
+<pre>%GetStat(test , var=x y z , weight=peso, macrovar=list);                                                                                          </pre>
+<pre>data test;                                                                                          </pre>
+<pre>          set test;                                                                                 </pre>
+<pre>          xc = x - &x_mean;                                                                         </pre>
+<pre>          yc = y - &y_mean;                                                                         </pre>
+<pre>          zc = z - &z_mean;                                                                         </pre>
+<pre>run;                                                                                                </pre>
+<pre>Genera las macro variables globales x_mean, y_mean, z_mean calculadas como el promedio                                                                                          </pre>
+<pre>ponderado por la variable peso.                                                                                          </pre>
+<pre>Dichos promedios son luego usados en el data step para generar variables xc, yc, zc                                                                                          </pre>
+<pre>centradas.                                                                                          </pre>
+<pre>Tambien genera la macro variable global list con la lista 'x_mean y_mean z_mean', es                                                                                          </pre>
+<pre>decir con la lista de macro variables generadas que contienen el estadistico requerido.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- %GetStat(test , var=x y z , stat=stddev , name=var1 var2 var3 , suffix=_std , out=test_stddev);                                                                                          </pre>
+<pre>Genera las macro variables globales var1_std, var2_std, var3_std conteniendo el desvío                                                                                          </pre>
+<pre>estándar de las variables x, y, z. Además almacena dichos valores en el output dataset                                                                                           </pre>
+<pre>test_stddev, en las variables var1_std, var2_std, var3_std.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- %GetStat(test , var=x1 x2 x3 , stat=mean , prefix=mean , out=test_mean);                                                                                          </pre>
+<pre>Genera las macro variables globales mean_x1, mean_x2, mean_x3 con el valor de la media de las                                                                                          </pre>
+<pre>variables x1, x2, x3. Además almacena dichos valores en el output dataset test_mean, en las                                                                                          </pre>
+<pre>variables mean_x1, mean_x2, mean_x3.                                                                                          </pre>
+<body>
+</html>

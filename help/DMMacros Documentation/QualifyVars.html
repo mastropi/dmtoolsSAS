@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%QualifyVars</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %QualifyVars</h1>
+<pre>Version:                      1.02                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      03-Aug-2015                                                                               </pre>
+<pre>Modified:                     29-Sep-2015 (previous: 28-Aug-2015)                                                            </pre>
+<pre>SAS Version:                  9.4                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Qualifies a set of varibales into categorical or interval (continuous) based on the number of distinct values.                                                                                          </pre>
+<pre>In addition it computes the following summary information:                                                                                          </pre>
+<pre>- #zeros, %zeros                                                                                                        </pre>
+<pre>- #missing, %missing                                                                                                    </pre>
+<pre>- Number of distinct values                                                                                             </pre>
+<pre>- List of distinct values taken for the variables with a maximum number of distinct values                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%QualifyVars(                                                                                          </pre>
+<pre>          data,                         /* Input dataset (data options are allowed) */                              </pre>
+<pre>          var=_ALL_,                    /* List of variables to qualify. */                              </pre>
+<pre>          maxncat=50,                   /* Max. number of distinct values to qualify variable as categorical. */                              </pre>
+<pre>          maxnfreq=50,                  /* Max. number of distinct values to list the distinct values. */                              </pre>
+<pre>          out=,                         /* Output dataset (data options are allowed). */                              </pre>
+<pre>          sortby=level nvalues var,     /* Sorting criteria of the output dataset. */                              </pre>
+<pre>          log=1);                       /* Show messages in log? */                                 </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in a data= SAS option..                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        List of variables to analyze.                                                             </pre>
+<pre>                              default: _ALL_                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- maxncat:                    Maximum number of distinct values for a variable to be classified as categorical.                                                             </pre>
+<pre>                              default: 50                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- maxnfreq:                   Maximum number of distinct values that a variable can take in order to show                                                            </pre>
+<pre>                              the distinct values taken by the variable.                                                            </pre>
+<pre>                              When empty, it is set to the same value as MAXNCAT.                                                            </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the variable qualification.                                                            </pre>
+<pre>                              It contains the following columns in the order given:                                                            </pre>
+<pre>                              - var                         Char                          Variable Name                 </pre>
+<pre>                              - label                       Char                          Variable Label                </pre>
+<pre>                              - nobs                        Num                           Total Number of Observations in input dataset</pre>
+<pre>                              - type                        Char                          Variable Type                 </pre>
+<pre>                              - level                       Char                          Assigned level of variable (categorical or interval)</pre>
+<pre>                              - values                      Char                          Values taken by categorical variables with less than maxnfreq distinct values.</pre>
+<pre>                              - nvalues                     Num                           Number of Different Values    </pre>
+<pre>                              - nmiss                       Num                           Number of Missing Values      </pre>
+<pre>                              - nzeros                      Num                           Number of Zeros               </pre>
+<pre>                              - pvalues                     Num                           Percent of Distinct Values    </pre>
+<pre>                              - pmiss                       Num                           Percent of Missing Values     </pre>
+<pre>                              - pzeros                      Num                           Percent of Zeros              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sortby:                     List of variables to sort the output dataset by.                                                            </pre>
+<pre>                              default: level nvalues var (so that categorical variables are listed on top and                                                            </pre>
+<pre>                              they are sorted by increasing number of distinct values taken)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %FreqMult                                                                                                             </pre>
+<pre>- %GetDataName                                                                                                          </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetVarAttrib                                                                                                         </pre>
+<pre>- %GetVarType                                                                                                           </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GraphStrata</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GraphStrata</h1>
+<pre>******* ESTA MACRO ES OBSOLETA A PARTIR DE 15/1/03. USAR %GraphXY *******                                                                                          </pre>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Santiago Laplagne                                                                                               </pre>
+<pre>Created: 17-Dec-02                                                                                                      </pre>
+<pre>Modified: 06-Jan-03                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Realiza un scatter plot de dos variables, usando distintos colores según                                                                                          </pre>
+<pre>una columna que define estratos o grupos.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GraphStrata(data, varX, varY, varStrata, file= ,                                                            </pre>
+<pre>          title="Scatter plot of 'varY' vs. 'varX' by 'varStrata'",                                                            </pre>
+<pre>          height = 0.8);                                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Input dataset con los datos a utilizar. Puede recibir                                                            </pre>
+<pre>          cualquier opción adicional como en cualquier opción data=                                                            </pre>
+<pre>          de SAS.                                                                                   </pre>
+<pre>- varX:   Nombre de la variable 'x' para graficar los puntos de                                                            </pre>
+<pre>          coordenadas                   (x, y).                                                     </pre>
+<pre>- varY:   Nombre de la variable 'y' para graficar los puntos de                                                             </pre>
+<pre>          coordenadas (x, y).                                                                       </pre>
+<pre>- varStrata:Nombre de la variable que define los estratos o grupos.                                                            </pre>
+<pre>          Para cada valor distinto en esta columna se usa un color                                                            </pre>
+<pre>          distinto en el gráfico.                                                                   </pre>
+<pre>          Si los estratos están definidos por más de una variable                                                            </pre>
+<pre>          puede usarse la macro %CreateGroupVar para generar una                                                            </pre>
+<pre>          única variable indicadora de los estratos a partir de                                                            </pre>
+<pre>          una lista de variables.                                                                   </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- file:   Nombre del archivo donde guardar el gráfico en formato JPG.                                                            </pre>
+<pre>          Debe indicarse entre comillas la ubicación y el nombre del                                                            </pre>
+<pre>          archivo a utilizar.                                                                       </pre>
+<pre>          En caso de pasar este parámetro, no se muestra ningún                                                            </pre>
+<pre>          gráfico en pantalla.                                                                      </pre>
+<pre>- title:  Título del gráfico (puede ser entre comillas o no).                                                            </pre>
+<pre>          default: "Scatter plot of 'varY' vs 'varX' by 'varStrata'"                                                            </pre>
+<pre>- height: Tamaño de los símbolos a utilizar en el gráfico.                                                            </pre>
+<pre>          default: 0.8                                                                              </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>- Esta macro puede usarse para graficar la salida 'outAll' de las macros                                                                                           </pre>
+<pre>%CutMahalanobisChi y %Hadi.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS USED IN THIS MACRO:</h3>
+<pre>- %DefineSymbols                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %CutMahalanobisChi                                                                                          </pre>
+<pre>- %Hadi                                                                                             </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>- graphStrata(data, x, y, grupo, file="C:\graficos\xy.jpg", title="Por grupo");                                                                                          </pre>
+<body>
+</html>

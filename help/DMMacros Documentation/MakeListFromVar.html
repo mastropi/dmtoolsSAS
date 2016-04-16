@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%MakeListFromVar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %MakeListFromVar</h1>
+<pre>Version:                      1.04                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      20-Oct-2004                                                                               </pre>
+<pre>Modified:                     04-Feb-2016 (previous: 08-Oct-2012)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro returns a macro variable containing the values of a variable in a dataset.                                                                                          </pre>
+<pre>If no variable is specified, the list is generated from the first column in the dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%MakeListFomVar(                                                                                          </pre>
+<pre>          data,                         /* Dataset containing the variable values to store in the macro variable. */                              </pre>
+<pre>          var=,                         /* Name of the variable whose values are stored in the macro variable. */                              </pre>
+<pre>          sep=%quote( ),                /* Separator to use in the list of values stored in the macro variable. */                              </pre>
+<pre>          strip=1,                      /* Use the strip function to eliminate leading and trailing blanks from values? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. NO data options are allowed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        The variable of interest (ONLY ONE VARIABLE is allowed).                                                            </pre>
+<pre>                              If no variable is passed, the values are read from the first column in the                                                            </pre>
+<pre>                              dataset.                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sep:                        Separator used to create the list returned by the macro.                                                            </pre>
+<pre>                              default: blank space                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>- strip:                      Use the strip function to eliminate leading and trailing blanks from variable values?                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>A list with the values of a variable in a dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Puts                                                                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let values = %MakeListFromVar(test, var=x);                                                                                          </pre>
+<pre>Stores in macro variable 'values' the values of variable X in dataset TEST.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let valuesBlanksAllowed = %quote(%MakeListFromVar(test, var=x, sep=|));                                                                                          </pre>
+<pre>Stores in macro variable 'valuesBlanksAllowed' the values of variable X in dataset TEST                                                                                          </pre>
+<pre>where values for different records are separated with '|'.                                                                                          </pre>
+<pre>Note the use of macro %quote() enclosing the %MakeListFromVar call so that a blank                                                                                          </pre>
+<pre>value at the first or last record will be preserved as a blank value.                                                                                          </pre>
+<body>
+</html>

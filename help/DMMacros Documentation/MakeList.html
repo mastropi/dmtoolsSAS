@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%MakeList</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %MakeList</h1>
+<pre>Version: 1.18                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 1-Mar-01                                                                                                       </pre>
+<pre>Modified: 31-Jan-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>From a list of names, a new list is returned where an optional prefix and                                                                                          </pre>
+<pre>suffix is added to each name in the list, and a word or character is used                                                                                          </pre>
+<pre>as separator between the names.                                                                                          </pre>
+<pre>By default, the separator is the blank space, but other words or characters                                                                                          </pre>
+<pre>can be specified. In this case, there is still a blank space between the                                                                                          </pre>
+<pre>names and the separator.                                                                                                </pre>
+<pre>The macro is intended to be used in a SAS macro language context.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%MakeList(namesList , prefix= , suffix= , sep=%quote( ) , nospace=0 , log=0);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- namesList:                  Blank-separated list of names.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- prefix:                     Prefix to be added to every name in the list.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Suffix to be added to every name in the list.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sep:                        Separator to be used between the names of the list.                                                            </pre>
+<pre>                              According to the value of parameter NOSPACE, a blank space                                                            </pre>
+<pre>                              can be left or not between the separator and the names.                                                            </pre>
+<pre>                              See NOTES below for comments on particular cases.                                                            </pre>
+<pre>                              default: %quote( ), i.e. a blank space                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- nospace:                    Whether to leave a space between separator and names.                                                            </pre>
+<pre>                              Possible values:              0 => leave a space                                          </pre>
+<pre>                                                            1 => do not leave a space                                   </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              In this case the generated list is shown.                                                            </pre>
+<pre>                              Possible values are: 0 => Do not show messages                                                            </pre>
+<pre>                               1 => Show messages                                                                       </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The generated list.                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- Some symbols need to be enclosed with the function %quote when passed                                                                                          </pre>
+<pre>as parameters. This is the case for the blank space, the comma, the quotation                                                                                          </pre>
+<pre>mark. In addition, the quotation mark is a special case, which needs to be treated                                                                                          </pre>
+<pre>differently. Namely, the percentage sign should be used before the quotation                                                                                          </pre>
+<pre>mark symbol, as in: %quote(%"). If '%' is not used, SAS will interpret '"' as the                                                                                          </pre>
+<pre>beginning of a string, not as a symbol.                                                                                          </pre>
+<pre>See examples 2 and 3 below.                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- This macro is useful to create a set of variable names from a list of                                                                                          </pre>
+<pre>variable names, all affected by a given prefix and/or a given suffix.                                                                                          </pre>
+<pre>See example 1 below.                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>- %MakeVar                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let list = %MakeList(a b , prefix=First. , sep=OR);                                                                                          </pre>
+<pre>generates the macro variable 'list' with the value:                                                                                          </pre>
+<pre>'First.a OR First.b'                                                                                                    </pre>
+<pre>This can be used in a data step to test the condition that the value of                                                                                          </pre>
+<pre>variables a or b occurs for the first time.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %let total = %MakeList(x y z , prefix=Total_);                                                                                          </pre>
+<pre>generates the macro variable 'total' with the value:                                                                                          </pre>
+<pre>'Total_x Total_y Total_z'.                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %let quotedList = %Makelist(a b c , prefix=%quote(%") , suffix=%quote(%") , sep=%quote(,));                                                                                          </pre>
+<pre>generates the macro variable quoteList with the value:                                                                                          </pre>
+<pre>'"a" , "b" , "c"'.                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %let commaSeparatedList = %Makelist(a b c , sep=%quote(,) , nospace=1);                                                                                          </pre>
+<pre>generates the macro variable commaSeparatedList with the value:                                                                                          </pre>
+<pre>'a,b,c'.                                                                                                                </pre>
+<body>
+</html>

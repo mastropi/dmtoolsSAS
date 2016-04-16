@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%ReplaceChar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %ReplaceChar</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 20-Jul-05                                                                                                      </pre>
+<pre>Modified: 19-Aug-06                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro replaces the character at a given position with a string.                                                                                          </pre>
+<pre>If the replacement is a string larger than 1, the length of the name is increased.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%ReplaceChar(name, pos, str);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The string or name with the character at the position POS replaced with the string STR.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>None                                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %let newname = %ReplaceChar(test, 2, o);                                                                                          </pre>
+<pre>Creates the macro variable 'newname' with the value 'tost'.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- %let newname = %ReplaceChar(test, 2, oa);                                                                                          </pre>
+<pre>Creates the macro variable 'newname' with the value 'toast'.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- %let newname = %ReplaceChar(test, 4, ts);                                                                                          </pre>
+<pre>Creates the macro variable 'newname' with the value 'tests'.                                                                                          </pre>
+<body>
+</html>

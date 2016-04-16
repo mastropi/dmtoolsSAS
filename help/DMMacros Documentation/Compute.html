@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Compute</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Compute</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 29-Sep-04                                                                                                      </pre>
+<pre>Modified: 29-Sep-04                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro simply evaluates a given function that can accept more than one argument separated                                                                                          </pre>
+<pre>by commas. (e.g. max, min, sum, etc.)                                                                                          </pre>
+<pre>The macro was created in order to force the evaluation of such functions, prior to input                                                                                          </pre>
+<pre>to another macro. See section EXAMPLES below.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Compute(func, arg);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %EvalExp                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %EvalExp                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.-                                                                                                 </pre>
+<pre>%let max = %Compute(max, %quote(3 , 5.2 , 4.8));                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>This is equivalent to:                                                                                          </pre>
+<pre>%let max = %sysfunc(max(3, 5.2, 4.8));                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.-                                                                                                 </pre>
+<pre>%let list = %nrstr(&x1 , &x2 , &x3);                                                                                          </pre>
+<pre>%let max = %Compute(max, %quote(&list));                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>(The following:                                                                                          </pre>
+<pre>%let max = %sysfunc(max(&list));                                                                                          </pre>
+<pre>does not work, because the macro variables &x1, &x2, &x3 are not resolved to numbers.)                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.-                                                                                                 </pre>
+<pre>%let max = %Compute(max, %MakeList(fit1 fit3, prefix=&, suffix=_max, sep=%quote(,)));                                                                                          </pre>
+<body>
+</html>

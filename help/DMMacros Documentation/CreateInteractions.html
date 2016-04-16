@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title> CreateInteractions</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO  CreateInteractions</h1>
+<pre>Version: 1.01                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 15-Jul-03                                                                                                      </pre>
+<pre>Modified: 26-Jul-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Crea nuevas variables como interacción o producto entre pares de variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>A partir de una lista de variables, crea nuevas variables o strings que                                                                                          </pre>
+<pre>corresponden a productos o interacciones consigo mismas o con otras variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Por ejemplo, si la lista de variables es 'x y z', puede crear variables de                                                                                          </pre>
+<pre>interacción en un dataset correspondientes a los productos de a pares x*y x*z y*z,                                                                                          </pre>
+<pre>o bien puede crear strings con los nombres de variables de interacción ya creadas                                                                                          </pre>
+<pre>de la forma x_X_y x_X_z y_X_z, donde el símbolo _X_ indica interacción.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Asimismo cada elemento de la lista de variables arriba indicada puede interactuarse                                                                                          </pre>
+<pre>con otra lista de variables como 's t' creando los productos x*s x*t y*s y*t z*s z*t.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Las alternativas manejadas por la macro son las siguientes. Se pueden crear:                                                                                          </pre>
+<pre>1.- TODAS CON TODAS:                                                                                                    </pre>
+<pre>                              Productos de a pares entre las variables de una lista, todas con todas.                                                            </pre>
+<pre>                              Ej: Dada la lista: x y z, genera:                                                            </pre>
+		x*x x*y x*z	y*y y*z	z*z
+<pre>                              x*x x*y x*z                   y*y y*z                       z*z                           </pre>
+<pre>2.- TODAS CON LAS DEMAS:                                                                                                </pre>
+<pre>                              Productos de a pares entre las variables de una lista, cada una con las demás                                                            </pre>
+<pre>                              (es decir sin interactuar una variable consigo misma).                                                            </pre>
+<pre>                              Ej: Dada la lista: x y z, genera:                                                            </pre>
+<pre>                              x*y x*z y*z                                                                               </pre>
+<pre>3.- TODAS CONSIGO MISMA:                                                                                                </pre>
+<pre>                              Productos de las variables de una lista, cada una consigo misma.                                                            </pre>
+<pre>                              Ej: Dada la lista: x y z, genera:                                                            </pre>
+<pre>                              x*x y*y z*z                                                                               </pre>
+<pre>4.- TODAS CON TODAS IMPORTANDO EL ORDEN DEL PRODUCTO:                                                                                          </pre>
+<pre>                              Idem caso (1) pero generando también los productos en el orden contrario.                                                            </pre>
+<pre>                              Ej: Dada la lista: x y z, genera:                                                            </pre>
+		x*x x*y x*z	y*x y*y y*z	z*x z*y z*z
+<pre>                              x*x x*y x*z                   y*x y*y y*z                   z*x z*y z*z                   </pre>
+<pre>5.- TODAS CON TODAS ENTRE DOS LISTAS DE VARIABLES:                                                                                          </pre>
+<pre>                              Productos de a pares entre las variables de dos listas distintas, todas con todas.                                                            </pre>
+<pre>                              Ej: Dadas las listas: 'x y z' y 's t' genera:                                                            </pre>
+		x*s x*t	y*s y*t	z*s z*t
+<pre>                              x*s x*t                       y*s y*t                       z*s z*t                       </pre>
+<pre>6.- VARIABLE A VARIABLE ENTRE DOS LISTAS:                                                                                          </pre>
+<pre>                              Productos de a pares entre las variables de dos listas distintas, variable a variable                                                            </pre>
+<pre>                              (es decir, no todas con todas sino la interacción entre las variables que están en                                                            </pre>
+<pre>                              la misma posición).                                                                       </pre>
+<pre>                              Ej: Dadas las listas: 'x y z' y 's t u' genera:                                                            </pre>
+<pre>                              x*s y*s z*u                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>Ver ejemplos abajo con la numeración correspondiente para ver cómo invocar la macro                                                                                          </pre>
+<pre>para generar las interacciones indicadas en cada caso.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CreateInteractions(                                                                                          </pre>
+<pre>          var ,                         /* Lista de variables a interactuar. */                              </pre>
+<pre>          with= ,                       /* Lista de variables con las que se interactuan las variables */                              </pre>
+<pre>          /* anteriores. */                                                                         </pre>
+<pre>          data= ,                       /* Input dataset. */                                        </pre>
+<pre>          out= ,                        /* Output dataset. */                                       </pre>
+<pre>          allInteractions=1 ,           /* Efectuar todas las interacciones posibles entre las variables? */                              </pre>
+<pre>          join=_X_ ,                    /* Caracteres con los que se unen los nombres de las variables. */                              </pre>
+<pre>          /* para armar el nombre de la variable de interacción. */                                                            </pre>
+<pre>          prefix= ,                     /* Prefijo a usar en los nombres de las variables o strings de interacción. */                              </pre>
+<pre>          suffix= ,                     /* Sufijo a usar en los nombres de las variables o strings de interacción. */                              </pre>
+<pre>          name1= ,                      /* Lista de nombres a usar para la primera parte del nombre de las */                              </pre>
+<pre>          /* variables o strings de interacción. */                                                            </pre>
+<pre>          name2= ,                      /* Lista de nombres a usar para la segunda parte del nombre de las */                              </pre>
+<pre>          /* variables o strings de interacción. */                                                            </pre>
+<pre>          sep=,                         /* Separador entre las interacciones de la lista almacenada en MACROVAR=.*/                            </pre>
+<pre>          macrovar= ,                   /* Nombre de la macro variable con las variables o strings de interacción */                              </pre>
+<pre>          log=1);                       /* Mostrar mensajes en el log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- var:                        Lista de variables a interactuar.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- with:                       Lista de variables con las que se interactuan las variables de                                                            </pre>
+<pre>                              la lista dada en 'var'.                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- data:                       Input dataset que contiene las variables indicadas en                                                            </pre>
+<pre>                              'var' y eventualmente en 'with'.                                                            </pre>
+<pre>                              Puede recibir opciones adicionales como en cualquier opción                                                            </pre>
+<pre>                              data= de SAS.                                                                             </pre>
+<pre>                              Si su valor es vacío, la macro no crea variables de interacción                                                            </pre>
+<pre>                              sino sólo strings indicando los nombres de variables de                                                            </pre>
+<pre>                              interacción ya creadas.                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset.                                                                           </pre>
+<pre>                              Puede recibir opciones adicionales como en cualquier opción                                                            </pre>
+<pre>                              data= de SAS.                                                                             </pre>
+<pre>                              Si su valor es vacío, las variables de interacción se crean en                                                            </pre>
+<pre>                              el input dataset.                                                                         </pre>
+<pre>                              Si el input dataset es vacío, este parámetro se ignora.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- allInteractions:            Efectuar todas las interacciones posibles entre las variables?                                                            </pre>
+<pre>                              Valores posibles:                                                                         </pre>
+<pre>                              0 => No (se usa para los casos 2, 3 y 6 indicados arriba).                                                            </pre>
+<pre>                              1 => Sí (se usa para los casos 1, 4 y 5 indicados arriba).                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- join:                       Caracteres con los que se unen los nombres de las variables.                                                            </pre>
+<pre>                              para armar los nombres de las variables o de los strings de                                                            </pre>
+<pre>                              interacción.                                                                              </pre>
+<pre>                              Si las variables se crean en un dataset, estos caracteres deben                                                            </pre>
+<pre>                              ser caracteres válidos en nombres de variables de SAS.                                                            </pre>
+<pre>                              Por ej., si join=_X_, la variable o string correspondiente a                                                            </pre>
+<pre>                              la interacción entre x1 y x2 es x1_X_x2.                                                            </pre>
+<pre>                              default: _X_                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- prefix:                     Prefijo a usar en cada uno de los nombres de las variables o                                                            </pre>
+<pre>                              strings de interacción.                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Sufijo a usar en cada uno de los nombres de las variables o                                                            </pre>
+<pre>                              strings de interacción.                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- name1:                      Lista de nombres a usar para la primera parte del nombre de las                                                            </pre>
+<pre>                              variables o strings de interacción.                                                            </pre>
+<pre>                              Debe tener el mismo número de elementos que la lista pasada en                                                            </pre>
+<pre>                              'var'.                                                                                    </pre>
+<pre>                              Ver ejemplo 1 abajo.                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>- name2:                      Lista de nombres a usar para la segunda parte del nombre de las                                                            </pre>
+<pre>                              variables o strings de interacción.                                                            </pre>
+<pre>                              Debe tener el mismo número de elementos que la lista pasada en                                                            </pre>
+<pre>                              'with'.                                                                                   </pre>
+<pre>                              Ver ejemplo 1 abajo.                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sep:                        Separador a usar entre las interacciones construidas en la lista                                                            </pre>
+<pre>                              que se almacena en la macro variable 'macrovar'.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar:                   Nombre de la macro variable que contiene la lista de las                                                            </pre>
+<pre>                              variables o strings de interacción creados por la macro.                                                            </pre>
+<pre>                              Su nombre NO puede ser 'macrovar', ni tener underscores al                                                            </pre>
+<pre>                              comienzo y al final, ni coincidir con el nombre de ningún                                                            </pre>
+<pre>                              otro parámetro de la macro.                                                               </pre>
+<pre>                              default: _interactions_                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Indica si se desean ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>                              Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>1.- Al armar los nombres de las variables de interacción tener en cuenta que el                                                                                          </pre>
+<pre>largo máximo para el nombre de una variable en un dataset es 32 caracteres.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %CreateInteractions(x y z , data=test , out=test_int , macrovar=int);                                                                                          </pre>
+<pre>Crea el dataset TEST_INT con todas las variables de TEST más las variables de interacción                                                                                          </pre>
+x_X_x x_X_y x_X_z	y_X_y y_X_z	z_X_z que contienen los productos entre todos los pares
+<pre>x_X_x x_X_y x_X_z             y_X_y y_X_z                   z_X_z que contienen los productos entre todos los pares                              </pre>
+de variables posibles para la lista 'x y z', es decir: x*x x*y x*z	y*y y*z	z*z,
+<pre>de variables posibles para la lista 'x y z', es decir: x*x x*y x*zy*y y*z                       z*z,                                                        </pre>
+<pre>respectivamente.                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %CreateInteractions(x y z);                                                                                          </pre>
+<pre>Crea la macro variable &_interactions_ con los strings de interacción correspondientes                                                                                          </pre>
+<pre>al (hipotético) producto de cada variable con las demás (es decir no se incluye el producto                                                                                          </pre>
+<pre>de cada variable consigo misma):                                                                                          </pre>
+<pre>x_X_y x_X_z y_X_z                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %CreateInteractions(x y z , with=x y z , data=test ,                                                                                           </pre>
+<pre>                              allInteractions=0 , join= , suffix=2 , macrovar=cuad);                                                            </pre>
+<pre>En el dataset TEST se crean las variables:                                                                                          </pre>
+<pre>x2 y2 z2,                                                                                                               </pre>
+<pre>con el cuadrado de                                                                                                      </pre>
+<pre>x y z.                                                                                                                  </pre>
+<pre>(Es decir la opción allInteractions=0 pide que solamente se armen los productos                                                                                          </pre>
+<pre>x*x y*y z*z.)                                                                                                           </pre>
+<pre>Además se crea la macro variable &cuad con la lista de variables creadas:                                                                                          </pre>
+<pre>&cuad = x2 y2 z2.                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<pre>4.- %CreateInteractions(x y z , with=x y z , join=__ , macrovar=allint);                                                                                          </pre>
+<pre>Crea la macro variable &allint con los strings de interacción correspondientes                                                                                          </pre>
+<pre>al (hipotético) producto de todas las variables en la lista 'x y z' con todas, importando                                                                                          </pre>
+<pre>el orden del producto. Es decir las interacciones:                                                                                          </pre>
+x__x x__y x__z	y__x y__y y__z	z__x z__y z__z
+<pre>x__x x__y x__z                y__x y__y y__z                z__x z__y z__z                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>Notar la necesidad de incluir la misma lista ('x y z') dos veces, tanto en el primer                                                                                          </pre>
+<pre>parámetro como en el parámetro with=. De lo contrario, estaríamos en el caso del ejemplo 2.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>5.- %CreateInteractions(variable1 variable2 , with=z1 z2 , data=test ,                                                                                          </pre>
+<pre>                              join=X , name1=v1 v2 , macrovar=int);                                                            </pre>
+<pre>En el dataset TEST se crean las nuevas variables:                                                                                          </pre>
+<pre>v1Xz1 = variable1*z1                                                                                                    </pre>
+<pre>v1Xz2 = variable1*z2                                                                                                    </pre>
+<pre>v2Xz1 = variable2*z1                                                                                                    </pre>
+<pre>v2Xz2 = variable2*z2                                                                                                    </pre>
+<pre>Observar que los nombres 'variable1' y 'variable2' se cambian a 'v1' y 'v2'.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Además se crea la macro variable &int que contiene la lista de variables creadas:                                                                                          </pre>
+<pre>&int = v1Xz1 v1Xz2 v2Xz1 v2Xz2.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>6.- %CreateInteractions(x y z , with=r s t , data=test ,                                                                                          </pre>
+<pre>                              allInteractions=0 , join= , sep=+, prefix=p_ , suffix=_s, macrovar=sum);                                                            </pre>
+<pre>En el dataset TEST se crean las variables de interacción:                                                                                          </pre>
+<pre>p_xr_s p_ys_s p_zt_s,                                                                                                   </pre>
+<pre>con los productos variable a variable:                                                                                          </pre>
+<pre>x*r y*s z*t.                                                                                                            </pre>
+<pre>(Es decir la opción allInteractions=0 pide que solamente se armen los productos                                                                                          </pre>
+<pre>variable a variable según el orden en que aparecen.)                                                                                          </pre>
+<pre>(Notar que los caracteres de unión son vacíos (pues join= es vacío).)                                                                                          </pre>
+<pre>Además se crea la macro variable global SUM con el siguiente valor:                                                                                          </pre>
+<pre>x*r + y*s + z*t                                                                                                         </pre>
+<pre>                                                                                                                        </pre>
+<pre>Notar que el número de variables listadas en with= debe ser el mismo que las listadas                                                                                          </pre>
+<pre>en el primer parámetro.                                                                                                 </pre>
+<body>
+</html>

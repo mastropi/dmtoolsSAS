@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetVarLabel --> Calls %GetVarAttrib with specific parameter values</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetVarLabel --> Calls %GetVarAttrib with specific parameter values</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      04-Sep-2015                                                                               </pre>
+<pre>Modified:                     04-Sep-2015                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Returns the label of a given variable in a dataset.                                                                                          </pre>
+<pre>For more information see the macro %GetVarAttrib.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetVarLabel(data, var);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The unquoted label of the variable.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>%let xlabel = %GetVarLabel(test, x);                                                                                          </pre>
+<pre>Macro variable 'xlabel' will contain the unquoted label of variable x in dataset test.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>This macro calls %GetVarAttrib with the third parameter FUN=varlabel.                                                                                          </pre>
+<pre>See that macro for more information.                                                                                          </pre>
+<body>
+</html>

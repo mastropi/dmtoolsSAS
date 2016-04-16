@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetRegVarList</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetRegVarList</h1>
+<pre>Created: 11-Mar-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>Macro que lee la lista de variables que quedan en una regresion y que tambien funciona                                                                                          </pre>
+<pre>cuando hay variables categoricas.                                                                                          </pre>
+<pre>Esta macro se puede agregar a la macro %LogisticRegression para corregir los nombres de                                                                                          </pre>
+<pre>las variables generadas por el ODS OUTPUT ParameterEstimates del PROC LOGISTIC,                                                                                          </pre>
+<pre>aun cuando hay variables categoricas.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>SUPUESTOS:</h3>
+<pre>- El dataset DATA contiene una sola observacion con la lista de los parametros estimados                                                                                          </pre>
+<pre>para cada variable presente en el MODEL statement. En un PROC LOGISTIC, este dataset                                                                                          </pre>
+<pre>es generado con la opcion OUTEST del PROC LOGISTIC.                                                                                          </pre>
+<pre>- El dataset DATA fue generado con la opcion LABEL en LABEL (en lugar de NOLABEL),                                                                                          </pre>
+<pre>aunque al mismo tiempo el label de las variables debe ser vacio (para que el LABEL que                                                                                           </pre>
+<pre>aparezca en el dataset DATA coincida con el nombre de la variable) porque esta macro justamente                                                                                          </pre>
+<pre>aprovecha la informacion del LABEL para determinar los nombres de las variables categoricas.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OBSERVACIONES:</h3>
+<pre>- El parametro TARGET es el nombre de la variable que se usa como target en la regresion.                                                                                          </pre>
+<pre>- La lista de variables (en orden alfabetico) se almacena en la macro variable global                                                                                          </pre>
+<pre>pasada como parametro en MACROVAR=, que por default es _REGVAR_.                                                                                          </pre>
+<pre>- Se crea el dataset _REGVAR_ con la lista de variables regresoras, pero esta lista se                                                                                          </pre>
+<pre>diferencia de la lista guardada en la macro variable homonima, porque el dataset puede                                                                                          </pre>
+<pre>tener nombres repetidos en caso de variables categoricas con mas de 2 niveles y porque                                                                                          </pre>
+<pre>no esta' ordenado alfabeticamente sino en el orden en que aparecen en el PROC LOGISTIC output.                                                                                          </pre>
+<pre>Esto es asi para poder mergear luego con el dataset creado por ej. con el ODS OUTPUT                                                                                          </pre>
+<pre>ParameterEstimates del PROC LOGISTIC que tiene la maldita desventaja de truncar a 20                                                                                          </pre>
+<pre>el largo del nombre de las variables.                                                                                          </pre>
+<pre>El dataset tiene dos columnas: VAR y OBS. La variable OBS sirve justamente para mergear                                                                                          </pre>
+<pre>con la tabla de parametros estimados creada con ODS OUTPUT ParameterEstimates. Notar que                                                                                          </pre>
+<pre>el orden de los parametros en la tabla creada por el ODS OUTPUT es el mismo que el orden                                                                                          </pre>
+<pre>generado por esta macro en el datset _REGVAR_. Por esto se puede hacer facilmente el merge.                                                                                          </pre>
+<pre>El nombre de este dataset se puede cambiar con el parametro OUT=.                                                                                          </pre>
+<body>
+</html>

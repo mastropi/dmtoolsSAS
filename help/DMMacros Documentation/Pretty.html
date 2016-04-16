@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Pretty</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Pretty</h1>
+<pre>Version: 1.02                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 11-Jul-03                                                                                                      </pre>
+<pre>Modified: 5-Jan-05                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>This macro rounds a number to the closest number, where closest depends on the magnitude                                                                                          </pre>
+<pre>of the absolute value, being proportional to 1/10th of its first significant value (1/10th                                                                                          </pre>
+<pre>is the default and can be adjusted with parameter ROUNDOFF=. For ex. if ROUNDOFF=0.001, then                                                                                          </pre>
+<pre>the 1/10th changes to 1/1000th).                                                                                          </pre>
+For ex., if x = 0.374, then	the closest number downwards would be 0.37 and the closest
+<pre>For ex., if x = 0.374, then   the closest number downwards would be 0.37 and the closest                                                            </pre>
+<pre>number upwards would be 0.38. If x = 37.4, the respective closest numbers are 37 and 38.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>By default, a positive number is rounded upwards and a negative number is rounded downwards.                                                                                          </pre>
+<pre>This comes from assuming that this macro is commonly used to round the minimum and maximum                                                                                          </pre>
+<pre>numbers of a plotting variable and that the number 0 is in between the minimum and the maximum.                                                                                          </pre>
+<pre>For ex. a plot for which the values in the vertical axis variable run from -3.231 to 2.8374.                                                                                          </pre>
+<pre>If the number is 0, 0 is returned.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The upwards and downwards default rounding can be changed with parameter ROUND=, which should                                                                                          </pre>
+<pre>be equal to UP to force an upwards rounding and equal to DOWN to force a donwards rounding.                                                                                          </pre>
+<body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%SaveResults</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %SaveResults</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 10-Oct-05                                                                                                      </pre>
+<pre>Modified: 25-Oct-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CreateVarFromList                                                                                                    </pre>
+<pre>- %ExistVar                                                                                                             </pre>
+<pre>- %Export                                                                                                               </pre>
+<pre>- %FindMatch                                                                                                            </pre>
+<pre>- %FixNames                                                                                                             </pre>
+<pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetRegVarList                                                                                                        </pre>
+<pre>- %InsertInList                                                                                                         </pre>
+<pre>- %KeepInList                                                                                                           </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %Merge                                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>AGREGAR:</h3>
+<pre>- Calcular el nro. de observaciones eliminadas del desarrollo por outliers e influyentes.                                                                                          </pre>
+<pre>Usar para esto la segunda variable listada en la macro variable TARGETS, que es la que se                                                                                          </pre>
+<pre>supone se uso en el modelo.                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- Calcular el residuo estandarizado para las cuentas NO usadas en TRAINING. Habria que ver                                                                                          </pre>
+<pre>La formula es (y - p)/sqrt(p*(1-p)) (ya fue verificada contra la que calcula sas en el proc logistic).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>SUPUESTOS:</h3>
+<pre>- Para generar todas las salidas es necesario haber generado las siguientes salidas                                                                                          </pre>
+<pre>en el PROC LOGISTIC:                                                                                                    </pre>
+<pre>                              - PROC LOGISTIC outest=                                                                   </pre>
+<pre>                              - OUTPUT out=                                                                             </pre>
+<pre>                              - ODS OUTPUT ParameterEstimates=                                                            </pre>
+<pre>                              - ODS OUTPUT TypeIII=                                                                     </pre>
+<body>
+</html>

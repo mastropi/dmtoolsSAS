@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html>
+<pre>&rsubmit;                                                                                                               </pre>
+<pre>%MACRO SaveMacroVar(data=_vmacro_, var=, type=GLOBAL)                                                                                          </pre>
+<pre>                              / store des="Creates a dataset containing the values of macro variables";                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>data &data;                                                                                                             </pre>
+<pre>                              set sashelp.vmacro;                                                                       </pre>
+<pre>                              %if %quote(&var) ~= %then %do;                                                            </pre>
+<pre>                              where                         upcase(scope) = upcase("&type") and                              </pre>
+<pre>                              upcase(name) in (%EvalExp(%MakeList(%upcase(&var), prefix=%quote(%"), suffix=%quote(%"))));                                                            </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>                              %else %do;                                                                                </pre>
+<pre>                              where                         upcase(scope) = upcase("&type");                              </pre>
+<pre>                              %end;                                                                                     </pre>
+<pre>run;                                                                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>%MEND SaveMacroVar;                                                                                                     </pre>
+<body>
+</html>

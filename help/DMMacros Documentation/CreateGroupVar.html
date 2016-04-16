@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title> %CreateGroupVar</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO  %CreateGroupVar</h1>
+<pre>Version:                      1.03                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      01-Dec-2000                                                                               </pre>
+<pre>Modified:                     21-Jun-2012                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro creates a single group id variable from a set of by variables, so that                                                                                          </pre>
+<pre>the different by groups are identified with the values of that variable.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%CreateGroupVar(                                                                                          </pre>
+<pre>          _data_ ,                      /* Input dataset */                                         </pre>
+	by= ,				*** By variables from which the group id variable is created
+<pre>          by= ,                         /* By variables from which the group id variable is created */                              </pre>
+<pre>          out= ,                        /* Output dataset */                                        </pre>
+<pre>          name=_GROUPID_ ,              /* Name to be used for the group id variable */                              </pre>
+<pre>          ngroups=,                     /* Name of the global macro variable where the nro. of different */                              </pre>
+<pre>          /* groups is stored */                                                                    </pre>
+<pre>          sort=0,                       /* Sort the output dataset by the by variables or keep original order? */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- _data_:                     Input dataset.                                                                            </pre>
+<pre>                              It can receive any additional option as in any SAS data= option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- by=:                        By variables from the group id variable is created.                                                            </pre>
+<pre>                              The keyword DESCENDING is accepted in order to define how the group                                                            </pre>
+<pre>                              variable maps the original order of the BY variables being identified.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- out:                        Output dataset.                                                                           </pre>
+<pre>                              If this parameter is empty, the group id variable is added to                                                            </pre>
+<pre>                              the intput dataset.                                                                       </pre>
+<pre>                              The variables in the output dataset are placed so that the by                                                            </pre>
+<pre>                              variables and the group id variable appear first.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- name:                       Name to be used for the group id variable created.                                                            </pre>
+<pre>                              default: _GROUPID_                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>- ngroups:                    Name of the macro variable where the nro. of different                                                            </pre>
+<pre>                              groups found in the by variables is stored.                                                            </pre>
+<pre>                              This name cannot be 'ngroups', nor any other name used for the                                                            </pre>
+<pre>                              input parameters, and cannot have underscores at the beginning                                                            </pre>
+<pre>                              and at the end (such as in _nrogroups_).                                                            </pre>
+<pre>                              This number coincides with the number of different values of                                                            </pre>
+<pre>                              the group id varible.                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sort:                       Whether the output dataset should be sorted by the by variables or                                                            </pre>
+<pre>                              whether the original order of the observations should be kept.                                                            </pre>
+<pre>                              Possible values: 0 => Keep original order, 1 => Sort by by variables.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => Do not show, 1 => Show.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>NOTES:</h3>
+<pre>The dataset should not have a variable named _CreateGroupVar_obs_. If it does, it will                                                                                          </pre>
+<pre>be overwritten in the output dataset.                                                                                          </pre>
+<pre>The name of the global macro variable passed in parameter NGROUPS= cannot be _DATA_ nor any                                                                                          </pre>
+<pre>other parameter name, and it cannot contain underscores.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %GraphXY                                                                                                              </pre>
+<pre>- %Scatter                                                                                                              </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %CreateGroupVar(test , by=strata substrata , name=group , ngroups=nrogroups);                                                                                          </pre>
+<pre>Creates group id variable 'group' in dataset TEST, which has a different value for each                                                                                          </pre>
+<pre>combination of the values of variables 'strata' and 'substrata'.                                                                                          </pre>
+<pre>The number of different values taken by 'group' is stored in the global macro variable                                                                                          </pre>
+<pre>&nrogroups.                                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %CreateGroupVar(test , by=strata substrata , out=test_group , name=group, sort=1);                                                                                          </pre>
+<pre>Creates dataset TEST_GROUP with group id variable 'group', identifying each different                                                                                          </pre>
+<pre>combination of the values of variables 'strata' and 'substrata'.                                                                                          </pre>
+<pre>Since SORT=1, the output dataset is sorted by the by variables STRATA and SUBSTRATA.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Used to create the 'strata' variable used in the graphical macros %GraphXY and %Scatter                                                                                          </pre>
+<pre>that identifies the different groups defining the colors used for the points in a scatter                                                                                          </pre>
+<pre>plot.                                                                                                                   </pre>
+<pre>Ex:                                                                                                                     </pre>
+<pre>%CreateGroupVar(test , by=strata substrata , name=group);                                                                                          </pre>
+<pre>%GraphXY(test , x , y , strata=group);                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- To deal more simply with groups that are defined by the values of multiple variables,                                                                                          </pre>
+<pre>since they can be referred to with a single variable.                                                                                          </pre>
+<body>
+</html>

@@ -2,10 +2,13 @@
 Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	23-Nov-2004
-Modified: 	31-Mar-2016 (previous: 10-Mar-2016)
+Modified: 	15-Apr-2016 (previous: 31-Mar-2016)
 
 DESCRIPTION:
 This macro makes linear piecewise transformations to a set of variables from specified cut values.
+
+It optionally creates an output dataset containing formats that allow analyzing the input variables
+as categorical variables where each piece defines a category.
 
 USAGE:
 %PiecewiseTransf(
@@ -105,11 +108,12 @@ OPTIONAL PARAMETERS:
 				If no output dataset is given, the piecewise variables are created in the input dataset.
 				default: (empty)
 
-- ouformat:		Output dataset containing the formats that could be applied to each piecewise variable
-				to generate a bin for each piece.
+- ouformat:		Output dataset containing the formats that could be applied to each input variable
+				in order to regard each piece of the generated piecewise transformation as different a category.
+
 				This dataset can be used as CNTLIN dataset in the PROC FORMAT statement.
 				The following variables are included in the OUTFORMAT dataset:
-				- var: analyzed variable name .
+				- var: analyzed variable name.
 				- fmtname: format name.
 				- type:type of format (equal to "N" which means "numeric").
 				- start: left end value of the piece interval (length 20).
@@ -120,13 +124,15 @@ OPTIONAL PARAMETERS:
 
 				The format name in the FMTNAME variable is either read from the second column of the
 				input CUTS dataset if that column is character or is made up by this macro with the following
-				name format:
-					PW_<nnnn><S>
+				name form:
+				<prefix><nnnn><S>
 				where:
-				- <nnnn> is the variable number when the analyzed variables given in VAR= and/or
-				included in the CUTS dataset are sorted alphabetically.
-				- <S> is a single-character suffix which is either "R" when the right-end value is included
-				in the piece interval or "L" when the left-end value is included in the piece interval.
+				- <prefix> is the first 3 characters of parameter PREFIX.
+				- <nnnn> is a 4-digit identifier of the format which corresponds to the number of the
+				analyzed variables given in VAR= and/or included in the CUTS dataset when they are sorted
+				alphabetically.
+				- <S> is a single-character suffix which is either R when the right-end value is included
+				in the piece interval or L when the left-end value is included in the piece interval.
 
 				IMPORTANT: It is assumed that the number of digits including decimal point in the
 				start and end values of each piece is not larger than 20 when those numbers are expressed
@@ -145,6 +151,7 @@ _pwlist_: 		contains the list of all the piecewise variables created in the outp
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Callmacro
 - %CheckInputParameters
+- %CreateFormatsFromCuts
 - %ExecTimeStart
 - %ExecTimeStop
 - %ExistVar
@@ -743,92 +750,17 @@ run;
 		by var;
 	run;
 
-	%* Transpose dataset to create the CNTLIN dataset to use as input to PROC FORMAT;
-	%* NOTE: This assumes that the cut values for each variable are sorted in ascending order!;
-	data _PT_cuts_t;
-		keep var fmtname cut;
-		length fmtname $8;
-		%* Rename the variable name containing the format names to FMTNAME if the column with the format names are given in the CUTS dataset;
-		set _PT_cuts_(%if %quote(&varfmtname) ~= %then %do; rename=(&varfmtname=fmtname) %end;);
-		%if %quote(&varfmtname) = %then %do;
-		retain count 1;
-		%if &includeright %then %do;
-		retain suffix "R";
-		%end;
-		%else %do;
-		retain suffix "L";
-		%end;
-		%* Create the variable FMTNAME since it was not provided by the user in the CUTS dataset;
-		fmtname = cats("PW_", put(count, z4.), suffix);	%* The length of the format names must be 8 and cannot end in a number;
-		count + 1;
-		%end;
-		array acuts(*) &varcuts;
-		do i = 1 to dim(acuts);
-			cut = acuts(i);
-			output;
-		end;
-	run;
+	%* Create the FORMAT dataset;
+	%CreateFormatsFromCuts(_PT_cuts_, dataformat=wide, varname=var, varfmtname=&varfmtname, prefix=&prefix, includeright=&includeright, out=&outformat, log=0);
 
-	%* Create the OUTFORMAT= dataset;
-	data &outformat;
-		keep var fmtname type start end sexcl eexcl label;
-		format var fmtname type start end sexcl eexcl label;
-		length var $32 fmtname $8 type $1 start $20 end $20 sexcl $1 eexcl $1 label $200;
-		set _PT_cuts_t;
-		where cut ~= .;		%* Remove the missing of CUT coming from variables with number of cuts less than the maximum;
-		by var;
-		retain type "N";	%* N = Numeric variables;
-		retain start;
-		retain count;
-		%* Convert the START and END values to string (they should be string because of the LOW and HIGH values;
-		start = compress(put(lag(cut), best8.));
-		end = compress(put(cut, best8.));
-		%* Define open and close parentheses depending on the INCLUDERIGHT= parameter;
-		%if &includeright %then %do;
-		openparen = "(";
-		closeparen = "]";
-		sexcl = "Y";
-		eexcl = "N";
-		%end;
-		%else %do;
-		openparen = "[";
-		closeparen = ")";
-		sexcl = "N";
-		eexcl = "Y";
-		%end;
-		if first.var then do;
-			%* Update the values of the first case;
-			count = 0;
-			start = "LOW";
-			openparen = "[";
-			sexcl = "N";
-		end;
-		%* Number the labels so that they can be sorted correctly in alphabetical order;
-		count + 1;
-		label = cat(put(count, z3.), " - ", openparen, compress(start), ", ", compress(end), closeparen);
-		output;
-		if last.var then do;
-			count + 1;
-			%* Define the open parenthesis depending on the INCLUDERIGHT= parameter;
-			%* This is important here in case there is only one cut for the variable and if that is the case
-			%* this last record will have the settings of the first record (defined in block FIRST.VAR above)
-			%* and we do not want that;
-			%if &includeright %then %do;
-			openparen = "(";
-			sexcl = "Y";
-			%end;
-			%else %do;
-			openparen = "[";
-			sexcl = "N";
-			%end;
-			start = end;
-			end = "HIGH";
-			closeparen = "]";
-			eexcl = "N";
-			label = cat(put(count, z3.), " - ", openparen, compress(start), ", ", compress(end), closeparen);
-			output;
-		end;
-	run;
+	%if &log %then %do;
+		%put;
+		%put PIECEWISETRANSF: Dataset %upcase(&outformat) created containing the formats definition that can be used;
+		%put PIECEWISETRANSF: to analyze the input variabes as categorical variables where each piece of the generated;
+		%put PIECEWISETRANSF: piecewise variables corresponds to a different category.;
+		%put PIECEWISETRANSF: Use PROC FORMAT CNTLIN=%upcase(&outformat) FMTLIB%str(;) RUN%str(;);
+		%put PIECEWISETRANSF: to run the formats and store them in the FORMATS catalog of the WORK library.;
+	%end;
 %end;
 
 %* Show the list of dummy and piecewise variables created in the output dataset;

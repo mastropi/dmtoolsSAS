@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Mahalanobis</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Mahalanobis</h1>
+<pre>Version: 1.04                                                                                                           </pre>
+<pre>Author: Santiago Laplagne - Daniel Mastropietro                                                                                          </pre>
+<pre>Created: 2-Dec-02                                                                                                       </pre>
+<pre>Modified: 12-Aug-2011 (previous: 28-Jul-04)                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Calcula la distancia de Mahalanobis para todos los puntos de un dataset                                                                                          </pre>
+<pre>de un conjunto de variables especificado.                                                                                          </pre>
+<pre>Si el conjunto de variables es pensado como un vector X (de dimension p),                                                                                          </pre>
+<pre>la distancia de Mahalanobis se calcula como:                                                                                          </pre>
+<pre>                              M = (X - Mu)' S^(-1) (X - Mu),                                                            </pre>
+<pre>donde Mu es un vector de dimension p, que da el centroide de los datos                                                                                          </pre>
+<pre>y S una matriz de forma de tamaño p*p con información sobre la estructura                                                                                          </pre>
+<pre>de los datos. Por default Mu se calcula como el vector de medias de los                                                                                          </pre>
+<pre>datos y S como la matriz de covarianza.                                                                                          </pre>
+<pre>Es posible especificar tanto el vector Mu como la matriz de covarianza S                                                                                          </pre>
+<pre>a usar en el calculo de la distancia de Mahalanobis, que son leidas de                                                                                          </pre>
+<pre>sendos datasets.                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Mahalanobis(                                                                                          </pre>
+<pre>          data ,                        /* Input dataset */                                         </pre>
+<pre>          out= ,                        /* Output dataset */                                        </pre>
+<pre>          var=_NUMERIC_ ,               /* Variables a transformar */                               </pre>
+<pre>          id= ,                         /* Nombre de la variable que identifica las obs. en los gráficos */                              </pre>
+<pre>          center= ,                     /* Input dataset con el centroide, Mu */                              </pre>
+<pre>          cov= ,                        /* Input dataset con la matriz de covarianza, S */                              </pre>
+<pre>          method=mean ,                 /* Metodo usado para calcular el centroide, Mu */                              </pre>
+<pre>          outDistance= ,                /* Output dataset con los valores de M */                              </pre>
+<pre>          nameDistance=mahalanobisDistance , /* Nombre de la var c/los valores de M */                                                            </pre>
+<pre>          threshold= ,                  /* Umbral a mostrar en el gráfico de las dist de Mahalanobis */                              </pre>
+<pre>          plot=0 ,                      /* Mostrar graficos con las distancias de Mahalanobis? */                              </pre>
+<pre>          log=1);                       /* Mostrar mensajes en el Log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- data:   Input dataset con los datos a utilizar. Puede recibir cualquier                                                             </pre>
+<pre>          opción adicional como en cualquier opción data= de SAS.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- out:    Output dataset. Este dataset coincide con el input dataset                                                            </pre>
+<pre>          al que se le agrega una columna con la distancia de                                                            </pre>
+<pre>          Mahalanobis, M, calculada a partir de las variables listadas                                                            </pre>
+<pre>          en el parámetro 'var'. El nombre de esta columna es el                                                            </pre>
+<pre>          indicado por el parámetro 'nameDistance', cuyo valor default es                                                            </pre>
+<pre>          'mahalanobisDistance'.                                                                    </pre>
+<pre>                                                                                                    </pre>
+<pre>- var:    Lista de las variables a utilizar para calcular la distancia                                                            </pre>
+<pre>          de Mahalanobis, separadas por espacios.                                                            </pre>
+<pre>          default: _numeric_, es decir todas las variables numéricas                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- id:     Nombre de la variable usada como índice para graficar las                                                            </pre>
+<pre>          distancias de Mahalanobis, en caso de que dicho gráfico sea                                                            </pre>
+<pre>          requerido con el parámetro plot=1.                                                            </pre>
+<pre>          Esta variable debe existir en el input dataset, pero no tiene                                                            </pre>
+<pre>          por qué tener valores únicos (es decir sus valores pueden                                                            </pre>
+<pre>          repetirse).                                                                               </pre>
+<pre>          La variable es guardada en el dataset especificado en                                                            </pre>
+<pre>          outDistance junto con las distancias de Mahalanobis.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- center: Input dataset con el vector del centroide, Mu, a utilizar en                                                            </pre>
+<pre>          el cálculo de la distancia de Mahalanobis. (El nombre de                                                            </pre>
+<pre>          la variable no es relevante.)                                                             </pre>
+<pre>                                                                                                    </pre>
+<pre>- cov:    Input dataset con la matriz de forma, S, a utilizar en                                                            </pre>
+<pre>          el cálculo de la distancia de Mahalanobis. (Los nombres                                                            </pre>
+<pre>          de las variables o columnas no son relevantes.)                                                            </pre>
+<pre>          Si este parámetro no se pasa, la matriz S se calcula como                                                            </pre>
+<pre>          la matriz de covarianza de los datos.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- method: Método utilizado para el cálculo del centroide, Mu, en caso                                                            </pre>
+<pre>          de que no se pase el parámetro 'center'.                                                            </pre>
+<pre>          Por el momento el único valor posible es 'mean', que indica                                                            </pre>
+<pre>          que 'Mu' se calcule como la media de los datos.                                                            </pre>
+<pre>          default: mean                                                                             </pre>
+<pre>                                                                                                    </pre>
+<pre>- outDistance:Output dataset donde se guardan (únicamente) los valores de la                                                            </pre>
+<pre>          distancia de Mahalanobis para cada punto.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- nameDistance:Nombre de la columna con las distancias de Mahalanobis. Esta                                                            </pre>
+<pre>          columna es generada tanto en el output dataset indicado en                                                            </pre>
+<pre>          'outDistance', como en el output dataset especificado por el                                                            </pre>
+<pre>          parámetro 'out'.                                                                          </pre>
+<pre>          default: mahalanobisDistance                                                              </pre>
+<pre>                                                                                                    </pre>
+<pre>- threshold:Valor a mostrar con una línea horizontal en el gráfico de las                                                            </pre>
+<pre>          distancias de Mahalanobis. Es útil para visualizar el umbral                                                            </pre>
+<pre>          o valor de corte que se usaría para decidir si una observación                                                            </pre>
+<pre>          es o no outlier.                                                                          </pre>
+<pre>          Si su valor no es asignado, no se muestra ninguna línea horizontal.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- plot:   Indica si se desea ver un gráfico con las distancias de                                                            </pre>
+<pre>          Mahalanobis, para cada valor de la variable especificada en                                                            </pre>
+<pre>          'id'. Si no se especifica ninguna variable en 'id', las                                                            </pre>
+<pre>          distancias de Mahalanobis se grafican en el orden en que                                                            </pre>
+<pre>          aparecen las observaciones en el input dataset.                                                            </pre>
+<pre>          Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>          default: 0                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Indica si se desea ver mensajes en el log generados por la macro.                                                            </pre>
+<pre>          Valores posibles: 0 => No, 1 => Sí.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- --- Distribución de la distancia de Mahalanobis ---                                                                                          </pre>
+<pre>Para el caso en que los datos para los cuales se calcula la distancia de Mahalanobis                                                                                          </pre>
+<pre>provienen de una distribución normal multivariada, entonces:                                                                                          </pre>
+<pre>(a) Si tanto el centroide como la matriz de covarianza son cantidades provistas en                                                                                          </pre>
+<pre>          forma externa (a los datos para los que se calcula la distancia de Mahalanobis),                                                            </pre>
+<pre>          la distancia de Mahalanobis tiene distribución Chi2(p) (Chi-cuadrado con p grados de                                                            </pre>
+<pre>          libertad).                                                                                </pre>
+<pre>(b) Si el centroide y/o la matriz de covarianza son calculados en forma interna                                                                                          </pre>
+<pre>          (es decir estimados a partir de los datos para los que se calcula la distancia de                                                            </pre>
+<pre>          Mahalanobis), la distancia de Mahalanobis tiene *aproximadamente* distribución                                                            </pre>
+<pre>          Chi2(p) (Chi-cuadrado con p grados de libertad), y tanto más se aproxima a ella                                                            </pre>
+<pre>          cuanto más grande es el número de observaciones para las que se calcula la distancia.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- --- Tratamiento de valores missing ---                                                                                          </pre>
+<pre>Las observaciones que presentan valor missing en al menos una de las variables de análisis                                                                                          </pre>
+<pre>pasadas en el parámetro var= son eliminadas del cálculo del centroide y de la matriz de                                                                                          </pre>
+<pre>covarianza (en caso de que éstos fueran calculados a partir de los datos), pero permanecen                                                                                          </pre>
+<pre>en el output dataset, donde la distancia de Mahalanobis aparece con valor missing.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Any                                                                                              </pre>
+<pre>- %Cov                                                                                              </pre>
+<pre>- %DefineSymbols                                                                                          </pre>
+<pre>- %Drop                                                                                             </pre>
+<pre>- %ExistOption                                                                                          </pre>
+<pre>- %GetDataOptions                                                                                          </pre>
+<pre>- %GetVarOrder                                                                                          </pre>
+<pre>- %GetVarList                                                                                          </pre>
+<pre>- %Means                                                                                            </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>- Mahalanobis (IML Module)                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %CutMahalanobisChi                                                                                          </pre>
+<pre>- %BoxCox                                                                                           </pre>
+<pre>- %Hadi                                                                                             </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %Mahalanobis(A(where=(x>0)) , out=A_maha , var=x y ,                                                                                          </pre>
+<pre>           center=Mu , cov=S , nameDistance=dist , plot=1);                                                            </pre>
+<pre>Calcula la distancia de Mahalanobis basada en las variables X e Y del dataset A para cada                                                                                          </pre>
+<pre>observacion en que la variable X > 0.                                                                                          </pre>
+<pre>El vector centroide se lee del dataset MU supuesto con 2 observaciones y una variable.                                                                                          </pre>
+<pre>(El nombre de la variable puede ser cualquiera.)                                                                                          </pre>
+<pre>La matriz de covarianza se lee del dataset S supuesto con 2 observaciones y 2 variables.                                                                                          </pre>
+<pre>(Los nombres de las variables pueden ser cualesquiera.)                                                                                          </pre>
+<pre>Las distancias de Mahalanobis calculadas se guardan en el dataset A_MAHA en la columna                                                                                          </pre>
+<pre>llamada DIST.                                                                                           </pre>
+<pre>La opción PLOT=1 pide efectuar el gráfico de las distancias de Mahalanobis indizadas por                                                                                          </pre>
+<pre>número de observación.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- %Mahalanobis(A , out=A_maha(keep=idvar x y mahalanobisDistance) , var=x y , id=idvar, plot=1);                                                                                          </pre>
+<pre>Calcula la distancia de Mahalanobis basada en las variables X e Y para todas las observaciones                                                                                          </pre>
+<pre>del dataset A.                                                                                          </pre>
+<pre>Las distancias de Mahalanobis calculadas se guardan en el dataset A_MAHA en la columna                                                                                          </pre>
+<pre>llamada MAHALANOBISDISTANCE. En este dataset se conservan solamente las variables IDVAR, X, Y y                                                                                          </pre>
+<pre>MAHALANOBISDISTANCE.                                                                                          </pre>
+<pre>La variable IDVAR (no tiene por qué tener valores únicos) se utiliza para indizar el gráfico                                                                                          </pre>
+<pre>de las distancias de Mahalanobis solicitado por el parámetro PLOT=1.                                                                                          </pre>
+<body>
+</html>

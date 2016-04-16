@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%KeepInList</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %KeepInList</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 26-Apr-05                                                                                                      </pre>
+<pre>Modified: 25-Oct-05                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro keeps a list of specified names in a given source list.                                                                                          </pre>
+<pre>By default, all occurrences of the names in the source list are kept,                                                                                          </pre>
+<pre>but an option (allOccurrences=0) can be set to keep only the first occurrence.                                                                                          </pre>
+<pre>The search for names in the source list is NOT case sensitive.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%KeepInList(namesList, names, sep=%quote( ), allOccurrences=1, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUESTED PARAMETERS:</h3>
+<pre>- namesList:List of names where the names to keep are searched.                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- names:  List of names to be kept in 'namesList'.                                                            </pre>
+<pre>          NO repeated names are allowed in this list.                                                            </pre>
+<pre>                                                                                                    </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- sep:    Separator used to separate the names in 'namesList'.                                                            </pre>
+<pre>          The search for 'sep' in 'namesList' and in 'list' in order to determine                                                            </pre>
+<pre>          the names present in each list is CASE SENSITIVE.                                                            </pre>
+<pre>          See NOTES below for comments on particular cases.                                                            </pre>
+<pre>          default: %quote( ) (i.e. the blank space)                                                            </pre>
+<pre>                                                                                                    </pre>
+<pre>- allOccurrences:Specifies whether all occurrences of 'names' in 'namesList'                                                            </pre>
+<pre>          should be kept, or only the first occurrence.                                                            </pre>
+<pre>          Possible values: 0 => Keep only first occurence                                                            </pre>
+<pre>           1 => Keep all occurrences                                                                </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- norepeated:Specifies whether no repeated names are found in the list passed in NAMES.                                                            </pre>
+<pre>          The only reason to pass the value NOREPEATED=0 is to avoid warning messages                                                            </pre>
+<pre>          in the log stating that one of the repeated names listed in NAMES was not                                                            </pre>
+<pre>          found in the list passed in NAMESLIST, when it was actually found for a                                                            </pre>
+<pre>          previous occurrence of that name in NAMES.                                                            </pre>
+<pre>          That is, as far as functionallity, the macro takes proper care of repeated names                                                            </pre>
+<pre>          in NAMES.                                                                                 </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<pre>- log:    Whether to show in the log the names kept in the list.                                                            </pre>
+<pre>          Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>          default: 1                                                                                </pre>
+<pre>                                                                                                    </pre>
+<h3>RETURNED VALUES:</h3>
+<pre>The list in 'namesList' without the names specified in 'names'.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>NOTES:</h3>
+<pre>1.- In the 'sep' parameter, some symbols need to be enclosed using the function                                                                                          </pre>
+<pre>%quote when passed as parameters. This is the case for the comma, for instance.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- If some of the names listed in 'names' are not found in 'namesList', they                                                                                          </pre>
+<pre>are not kept and a warning is issued. The names that are found are kept.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %FindInList                                                                                          </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %Puts                                                                                             </pre>
+<pre>                                                                                                    </pre>
+<h3>SEE ALSO:</h3>
+<pre>- %InsertInList                                                                                          </pre>
+<pre>- %RemoveFromList                                                                                          </pre>
+<pre>- %RemoveRepeated                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %KeepInList(x1 x2 x3 x4 , x2 x4);                                                                                          </pre>
+<pre>Returns the list 'x2 x4'.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>2.- %KeepInList(%quote(xx,yy,zz,ww) , %quote(yy , zz) , sep=%quote(,));                                                                                          </pre>
+<pre>Returns the list 'yy,zz'. Note that the separator ',' is also the separator used for the                                                                                          </pre>
+<pre>list of names to be kept passed as second parameter.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>3.- %KeepInList(%quote(a=0 or b=0 or c=0 OR d=0) , %quote(b=0 OR d=0) , sep=OR);                                                                                          </pre>
+<pre>Returns the list 'b=0 or d=0'. Note that the separator 'OR' is also the separator used for                                                                                          </pre>
+<pre>the list of names to be kept passed as second parameter.                                                                                          </pre>
+<pre>Note the not case-sensitive feature.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>4.- %KeepInList(This is A OR This is B , This is B , sep=OR);                                                                                          </pre>
+<pre>Keeps the expression 'This is B' in the list.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>5.- %KeepInList(%quote(a=0 OR b=0 OR c=0 OR b=0) , %quote(b=0) , sep=OR);                                                                                          </pre>
+<pre>Returns the list 'b=0 or b=0'. I.e. all occurrences of 'b=0' are kept.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<pre>6.- %KeepInList(%quote(a=0 OR b=0 OR c=0 OR b=0) , %quote(b=0) , sep=OR, allOccurrences=0);                                                                                          </pre>
+<pre>Returns the list 'b=0'. I.e. only the first occurrence of 'b=0' is kept.                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Use this macro to keep relevant variables in a list of regressor variables                                                                                          </pre>
+<pre>used in a regression model, and fit the model again only with those relevant variables.                                                                                          </pre>
+<body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%CheckDiff</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %CheckDiff</h1>
+<pre>Version: 1.00                                                                                                           </pre>
+<pre>Author: Daniel Mastropietro                                                                                             </pre>
+<pre>Created: 28-Jun-06                                                                                                      </pre>
+<pre>Modified: 09-Aug-06                                                                                                     </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>This macro shows the observations in a dataset having different values of ONE given variable                                                                                          </pre>
+<pre>for the same combination of BY variable values.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The output dataset stores...                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>how many different values of a certain variable there are for each by group.                                                                                          </pre>
+<pre>The by groups are defined by the parameter 'byvars' and the variable (only one) whose different                                                                                          </pre>
+<pre>values we are interested in is defined in the parameter 'var'.                                                                                          </pre>
+<pre>The macro prints (in the log file) the number of by groups in which the variable &var                                                                                          </pre>
+<pre>has more than one different value.                                                                                           </pre>
+<pre>The data set &dataout contains those groups identified by the by variables that have more                                                                                          </pre>
+<pre>than one different value of &var.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>                                                                                                    </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Data options can be specified as in any data= SAS option.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Callmacro                                                                                                            </pre>
+<pre>- %Getnobs                                                                                                              </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>                                                                                                                        </pre>
+<body>
+</html>
