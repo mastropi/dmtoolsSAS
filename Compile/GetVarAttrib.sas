@@ -5,7 +5,7 @@ Created: 		07-Jun-2012
 Modified: 		07-Jun-2012
 
 DESCRIPTION:
-Returns the requested attribute from of a given variable in a dataset.
+Returns the requested attribute of a given variable in a dataset.
 
 USAGE:
 %GetVarAttrib(data, var, fun);
@@ -13,7 +13,7 @@ USAGE:
 REQUIRED PARAMETERS:
 - data:		Input dataset where the variable of interest exists.
 
-- var:		Variable whose type wants to be retrieved.
+- var:		Variable for which the requested attribute should be retrieved.
 
 - fun:		SAS file I/O function to be used to retrieve the requested attribute
 			Examples are: vartype, varlen, varlabel, varnum, etc.

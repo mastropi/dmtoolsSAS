@@ -280,7 +280,8 @@ dataset TEST.
 	%* Close input dataset;
 	%let rc = %sysfunc(close(&dsid));
 
-	%* Check for existence of the variables in the list created if CHECK=1; 
+	%* Check for existence of the variables in the list created if CHECK=1;
+	%* WARNING: (2016/04/20) This process may considerably slow down execution for large datasets (e.g. 1 minute instead of 1 second for 3 million records);
 	%if &check and %quote(&varlist) ~= %then %do;
 		%* Remove repeated variables in the variable list just created;
 		%let varlist = %RemoveRepeated(&varlist, log=0);

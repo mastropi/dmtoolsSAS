@@ -37,3 +37,6 @@ V.3.01: 2015/05/23 (DM)
 
 V.3.02: 2016/04/15 (DM)
 	- New parameter OUTFORMAT= that allows generating an output dataset containing the format definitions corresponding to the information value bins.
+
+V.3.03: 2016/05/17 (DM)
+	- Parameter FORMAT= renamed to FORMATS= to adapt to the new signature of version 2.02 of %FreqMult which is called from the the macro.

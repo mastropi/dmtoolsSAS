@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %InformationValue</h1>
-<pre>Version:                      3.02                                                                                      </pre>
+<pre>Version:                      3.03                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      06-Jul-2005                                                                               </pre>
-<pre>Modified:                     15-Apr-2016 (previous: 15-Feb-2016)                                                            </pre>
+<pre>Modified:                     17-May-2016 (previous: 15-Apr-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>This macro computes the Information Value (IV) provided by a set of input variables w.r.t.                                                                                          </pre>
@@ -32,7 +32,7 @@ pre {display: block}
 <pre>          event=,                       /* Event of interest. */                                    </pre>
 <pre>          groups=,                      /* Nro. of groups to use to categorize numeric variables. Leave it empty for categorical variables. */                              </pre>
 <pre>          value=,                       /* Statistic to show for each category of numeric variables. */                              </pre>
-<pre>          format=,                      /* Format to use for each analysis variable. */                              </pre>
+<pre>          formats=,                     /* Formats to use for each analysis variable. */                              </pre>
 <pre>          smooth=1,                     /* Whether to smooth the WOE calculation in order to avoid missing values. */                              </pre>
 <pre>          out=_InformationTable_,       /* Output dataset containing the WOE and IV for each bin of the categorized variables. */                              </pre>
 <pre>          outiv=_InformationValue_,     /* Output dataset containing the Information Value for each variable. */                              </pre>
@@ -68,10 +68,12 @@ pre {display: block}
 <pre>                              default: empty => each category is represented by an arbitrary integer value (normally                                                            </pre>
 <pre>                              going from 1 to the number of groups, but this depends on how variable values are grouped)                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- format:                     Format to use for each analysis variable listed in VAR. This statement can be                                                            </pre>
-<pre>                              used to define groups.                                                                    </pre>
-<pre>                              Just the format name needs to be specified, and only one format is allowed, which                                                            </pre>
-<pre>                              applies to ALL the variables listed in VAR=.                                                            </pre>
+<pre>- formats:                    Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.                                                            </pre>
+<pre>                              This statement can be used to define groups.                                                            </pre>
+<pre>                              The formats should be specified as in any FORMAT statement.                                                            </pre>
+<pre>                              Ex:                                                                                       </pre>
+<pre>                              var1 varf.                                                                                </pre>
+<pre>                              var2 varg.                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- smooth:                     Flag indicating whether to smooth or not the computation of the WOE to avoid                                                            </pre>
 <pre>                              missing values of WOE in extreme situations when the same value of the target                                                            </pre>
@@ -217,7 +219,7 @@ pre {display: block}
 <pre>the relationship between the variable and the target variable be linear, as is required by other measures                                                                                          </pre>
 <pre>such as the KS or Gini.                                                                                                 </pre>
 <pre>However, the following two notes should be taken into account when computing the Information Value:                                                                                          </pre>
-<pre>                              - Continuous variables should be analyzed in categories (using the FORMAT= parameter for example).                                                            </pre>
+<pre>                              - Continuous variables should be analyzed in categories (using the GROUPS= parameter or the FORMATS= parameter).                                                            </pre>
 <pre>                              - The Information Value computation does not take into account the size of each categorical value.                                                            </pre>
 <pre>                              This means that if a category is too small with respect to the number of observations in the dataset                                                            </pre>
 <pre>                              and provides a lot of information about the target variable, this may not be reflected in the                                                            </pre>

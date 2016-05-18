@@ -15,8 +15,8 @@ USAGE:
 	cutname=,			*** Name of the variable in input dataset containing the cut values when DATAFORMAT=LONG.
 	varname=,			*** Name of the variable in input dataset containing the variables for which formats are defined.
 	varfmtname=,		*** Name of the variable in input dataset containing the names of the formats to create (max 8 characters!).
-	prefix=F,			*** Prefix to use in the automatically generated format name when VARFMTNAME is empty.
 	includeright=1,		*** Whether the intervals defined by the cut values should be closed on the right.
+	prefix=F,			*** Prefix to use in the automatically generated format name when VARFMTNAME is empty.
 	out=,				*** Output dataset containing the format definitions.
 	storeformats=0,		*** Whether to run the formats and store them in a catalog.
 	library=WORK,		*** Library where the catalog containing the formats should be stored when STOREFORMATS=1.
@@ -82,26 +82,17 @@ OPTIONAL PARAMETERS:
 					Note that FMTNAME cannot be empty if DATAFORMAT=LONG and VARNAME is empty.
 					default: (empty)
 
+- includeright:		Flag indicating whether the intervals defined by the cut values should be
+					closed on the right.
+					Possible values: 0 => No, 1 => Yes
+					default: 1
+
 - prefix:			Prefix to use in the automatically generated format name when VARFMTNAME is
 					empty.
 					The prefix is truncated to its first 3 characters in order to abide by the
 					SAS rule that format names should be at most 8 characters long.
 					The prefix cannot be empty and cannot be a number.
 					default: F
-
-- includeright:		Flag indicating whether the intervals defined by the cut values should be
-					closed on the right.
-					Possible values: 0 => No, 1 => Yes
-					default: 1
-
-- storeformats:		Flag indicating whether to run the formats and store them in a catalog
-					in the library specified by parameter LIBRARY.
-					Possible values: 0 => No, 1 => Yes
-					default: 0
-
-- library:			Library where the catalog containing the formats should be stored when
-					STOREFORMATS=1.
-					default: WORK
 
 - out:				Output dataset where the format definitions are saved.
 					This dataset has the structure required by the CNTLIN dataset in PROC FORMAT
@@ -124,6 +115,15 @@ OPTIONAL PARAMETERS:
 					numbers are expressed in BEST8. format.
 
 					default: _FORMATS_
+
+- storeformats:		Flag indicating whether to run the formats and store them in a catalog
+					in the library specified by parameter LIBRARY.
+					Possible values: 0 => No, 1 => Yes
+					default: 0
+
+- library:			Library where the catalog containing the formats should be stored when
+					STOREFORMATS=1.
+					default: WORK
 
 - log:				Show messages in the log?
 					Possible values: 0 => No, 1 => Yes

@@ -2,7 +2,7 @@
 Version: 	1.15	
 Author: 	Daniel Mastropietro
 Created: 	01-Sep-2000
-Modified: 	04-Feb-2016 (previous: 22-Nov-2011)
+Modified: 	21-Apr-2016 (previous: 04-Feb-2016)
 
 DESCRIPTION:
 Runs PROC MEANS with the statements and options "usually" used. The supported statements are:
@@ -554,6 +554,7 @@ options nonotes;
 	run;
 	data _Means_out_(label="&label");
 		format &by &class &id &namevar &stat;
+		length &namevar $32;
 		set &out_name;
 		array _cols_ &varnames;		%*** Column names in the output dataset to be transposed;
 		array _newcols_ &stat;		%*** Column names in the transposed dataset;

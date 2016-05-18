@@ -32,6 +32,5 @@ V.2.01: 2015/08/05 (DM)
 	- Changed the sorting of the output dataset to: VAR, BY-variables, value taken by VAR, TARGET variable, instead of maintaining the order of the variables as listed by the user at the calling statement.
 	- Documentation was improved.
 
-
-
-
+V.2.02: 2016/05/17 (DM)
+	- New parameter FORMATS= which is the result of renaming parameter FORMAT=. Parameter FORMATS= now accepts different formats for different variables. We just need to pass the formats definition as in any FORMAT statement in SAS.

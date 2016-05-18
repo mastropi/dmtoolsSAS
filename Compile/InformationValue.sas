@@ -1,8 +1,8 @@
 /* MACRO %InformationValue
-Version: 	3.02
+Version: 	3.03
 Author: 	Daniel Mastropietro
 Created: 	06-Jul-2005
-Modified: 	15-Apr-2016 (previous: 15-Feb-2016)
+Modified: 	17-May-2016 (previous: 15-Apr-2016)
 
 DESCRIPTION:
 This macro computes the Information Value (IV) provided by a set of input variables w.r.t.
@@ -23,7 +23,7 @@ USAGE:
 	event=,						*** Event of interest.
 	groups=,					*** Nro. of groups to use to categorize numeric variables. Leave it empty for categorical variables.
 	value=, 					*** Statistic to show for each category of numeric variables.
-	format=,					*** Format to use for each analysis variable.
+	formats=,					*** Formats to use for each analysis variable.
 	smooth=1,					*** Whether to smooth the WOE calculation in order to avoid missing values.
 	out=_InformationTable_,		*** Output dataset containing the WOE and IV for each bin of the categorized variables.
 	outiv=_InformationValue_,	*** Output dataset containing the Information Value for each variable.
@@ -59,10 +59,12 @@ OPTIONAL PARAMETERS:
 				default: empty => each category is represented by an arbitrary integer value (normally
 				going from 1 to the number of groups, but this depends on how variable values are grouped)
 
-- format:		Format to use for each analysis variable listed in VAR. This statement can be
-				used to define groups.
-				Just the format name needs to be specified, and only one format is allowed, which
-				applies to ALL the variables listed in VAR=.
+- formats:		Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.
+				This statement can be used to define groups.
+				The formats should be specified as in any FORMAT statement.
+				Ex:
+				var1 varf.
+				var2 varg.
 
 - smooth:		Flag indicating whether to smooth or not the computation of the WOE to avoid
 				missing values of WOE in extreme situations when the same value of the target
@@ -208,7 +210,7 @@ phase of building a model to predict a dichotomous target variable. This measure
 the relationship between the variable and the target variable be linear, as is required by other measures
 such as the KS or Gini.
 However, the following two notes should be taken into account when computing the Information Value:
-	- Continuous variables should be analyzed in categories (using the FORMAT= parameter for example).
+	- Continuous variables should be analyzed in categories (using the GROUPS= parameter or the FORMATS= parameter).
 	- The Information Value computation does not take into account the size of each categorical value.
 	This means that if a category is too small with respect to the number of observations in the dataset
 	and provides a lot of information about the target variable, this may not be reflected in the
@@ -234,7 +236,7 @@ by that value is infinite.
 						event=,
 						groups=10,
 						value=,
-						format=,
+						formats=,
 						smooth=1,
 						out=_InformationTable_,
 						outiv=_InformationValue_,
@@ -264,7 +266,7 @@ _VALUE categorized variables.
     %put event= , %quote(                  *** Event of interest.);
     %put groups=20 , %quote(               *** Nro. of groups to use to categorize numeric variables.);
     %put value= , %quote(                  *** Statistic to show for the categories of numeric variables.);
-	%put format= , %quote(                 *** Format to be used for selected analysis variables.);
+	%put formats= , %quote(                *** Formats to be used for selected analysis variables or target.);
 	%put smooth=1 , %quote(                *** Whether to smooth the WOE calculation in order to avoid missing values.);
 	%put out=_InformationTable_, %quote(   *** Output dataset containin the WOE and IV for each bin of the categorized variables.);
 	%put outiv=_InformationValue_ , %quote(*** Output dataset containing the Information Value for each analysis variable.);
@@ -304,7 +306,7 @@ _VALUE categorized variables.
     %put INFORMATIONVALUE: - event = %quote(        &event);
     %put INFORMATIONVALUE: - groups = %quote(       &groups);
     %put INFORMATIONVALUE: - value = %quote(        &value);
-	%put INFORMATIONVALUE: - format = %quote(       &format);
+	%put INFORMATIONVALUE: - formats = %quote(      &formats);
 	%put INFORMATIONVALUE: - smooth = %quote(       &smooth);
 	%put INFORMATIONVALUE: - out = %quote(          &out);
 	%put INFORMATIONVALUE: - outiv = %quote(        &outiv);
@@ -454,7 +456,7 @@ run;
 %* the WHERE= option were not used, we could have a Division by Zero error in the data stet where the WOE
 %* and the Information Value are computed because the sum of count0 and count1 could be 0.
 %* Note that this option is required because the SPARSE option is also used (which is also needed);
-%FreqMult(_iv_data_(where=(not missing(&target))), target=&target, var=&var, format=&format, options=outpct SPARSE, out=_iv_freqmult_, log=0);
+%FreqMult(_iv_data_(where=(not missing(&target))), target=&target, var=&var, formats=&formats, options=outpct SPARSE, out=_iv_freqmult_, log=0);
 %* Check whether all the variables in VAR are of the same type or not;
 %if (%ExistVar(_iv_freqmult_, numvalue charvalue, log=0)) %then
 	%let bothTypes = 1;
@@ -719,7 +721,8 @@ run;
 			%* which may exist when both numeric and character variables are analyzed. Note that in that case &cutvar=numvalue
 			%* so the used condition is fine;
 			%* Note also that the condition &cutvar~=. also eliminates the record with var="--Total--" that should not be considered;
-			%CreateFormatsFromCuts(&out_name(where=(&cutvar~=.)), dataformat=long, cutname=&cutvar, varname=var, includeright=1, out=&outformat, log=0);
+			%* Note: the use of the PREFIX=iv_ is to mimic the prefix used in %PiecewiseTransf by default when generating the formats dataset (pw_);
+			%CreateFormatsFromCuts(&out_name(where=(&cutvar~=.)), dataformat=long, cutname=&cutvar, varname=var, includeright=1, prefix=iv_, out=&outformat, log=0);
 
 			%if &log %then %do;
 				%callmacro(getnobs, &outformat return=1, nobs nvar);

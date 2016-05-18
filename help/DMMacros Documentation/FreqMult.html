@@ -8,19 +8,23 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %FreqMult</h1>
-<pre>Version:                      2.01                                                                                      </pre>
+<pre>Version:                      2.02                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      15-Oct-2004                                                                               </pre>
-<pre>Modified:                     05-Aug-2015 (previous: 07-Sep-06)                                                            </pre>
+<pre>Modified:                     17-May-2016 (previous: 05-Aug-2015)                                                            </pre>
 <pre>SAS Version:                  9.4                                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>This macro computes the frequencies of a list of variables (using PROC FREQ) and stores the                                                                                          </pre>
 <pre>results in an output dataset containing the frequencies of all the variables.                                                                                          </pre>
-<pre>The output can be either long (i.e. one row per value of the variables) or wide (i.e. one row                                                                                          </pre>
-<pre>per variable).                                                                                                          </pre>
-<pre>The analyzed variables can be either character, numeric or mixed.                                                                                          </pre>
+<pre>Optionally the variables can be analyzed crossed against a target variable.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The analyzed variables can be either character, numeric or of both types in the same analysis.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
 <pre>By default missing values are NOT treated as a valid value in the computations of the percents.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The output dataset can be either long (i.e. one row per value of the variables) or wide (i.e. one row                                                                                          </pre>
+<pre>per variable).                                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%FreqMult(                                                                                          </pre>
@@ -28,7 +32,7 @@ pre {display: block}
 <pre>          target=,                      /* Target variable to cross the variables VAR with. */                              </pre>
 <pre>          var=_ALL_,                    /* List of variables to analyze. */                              </pre>
 <pre>          by=,                          /* List of BY variables. */                                 </pre>
-<pre>          format=,                      /* Format to use for each variable listed in VAR. */                              </pre>
+<pre>          formats=,                     /* Formats to use for selected analysis variables and/or target variable. */                              </pre>
 	out=_FreqMult_,			*** Output dataset containing the frequencies.
 <pre>          out=_FreqMult_,               /* Output dataset containing the frequencies. */                              </pre>
 <pre>          options=,                     /* Options for the TABLES statement. */                              </pre>
@@ -49,10 +53,13 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <pre>- by:                         List of BY variables, by which the frequency analysis is done.                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- format:                     Format to use for each analysis variable listed in VAR. This statement can be                                                            </pre>
-<pre>                              used to define groups.                                                                    </pre>
-<pre>                              Just the format name needs to be specified, and only one format is allowed, which                                                            </pre>
-<pre>                              applies to ALL the variables listed in VAR=.                                                            </pre>
+<pre>- formats:                    Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.                                                            </pre>
+<pre>                              This statement can be used to define groups.                                                            </pre>
+<pre>                              The output dataset is sorted by the formatted values of each formatted analysis variable.                                                            </pre>
+<pre>                              The formats should be specified as in any FORMAT statement.                                                            </pre>
+<pre>                              Ex:                                                                                       </pre>
+<pre>                              var1 varf.                                                                                </pre>
+<pre>                              var2 varg.                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- out:                        Output dataset, containing the frequencies of each variable listed in 'var'.                                                            </pre>
 <pre>                              The dataset is sorted by analyzed variable, BY variables and target variable.                                                            </pre>
@@ -69,6 +76,7 @@ pre {display: block}
 <pre>                              - value(*):                   Value taken by the variable when all variables are of the same type.                              </pre>
 <pre>                              - numvalue(*):                Values taken by the variable, if numeric.                              </pre>
 <pre>                              - charvalue(*):               Values taken by the variable, if character.                              </pre>
+<pre>                              - formattedvalue(+):(CHAR) Formatted values taken by any formatted analysis variables.                                                            </pre>
 <pre>                              - <target variable> if any.                                                               </pre>
 <pre>                              - nvalues:                    Number of different values taken by the variable.                              </pre>
 <pre>                              - nobs:                       Number of observations used in computations.                              </pre>
@@ -77,21 +85,26 @@ pre {display: block}
 <pre>                              (*) If all the variables are character or all the variables are numeric,                                                            </pre>
 <pre>                              then only the VALUE column is present. Otherwise, the columns NUMVALUE and                                                            </pre>
 <pre>                              CHARVALUE are present and VALUE is not.                                                            </pre>
+<pre>                              (+) The FORMATTEDVALUE colun is only present when at least one analysis variable                                                            </pre>
+<pre>                              has a format defined.                                                                     </pre>
 <pre>                                                                                                                        </pre>
 <pre>                              WIDE FORMAT (TRANSPOSE=1):                                                                </pre>
 <pre>                              - var:                        Variable name corresponding to the frequencies shown.                              </pre>
 <pre>                              - type:                       Variable type ("character" or "numeric").                              </pre>
-<pre>                              - values:                     List of values taken by the variable separated by columns.                              </pre>
+<pre>                              - values:                     List of (formatted(*)) values taken by the variable separated by columns.                              </pre>
 <pre>                              - <target variable> if any.                                                               </pre>
+<pre>                              (*) The values stored in the VALUES column are the formatted values if the                                                            </pre>
+<pre>                              analysis variable has a format defined.                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>                              default: _FreqMult_                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <pre>- options:                    Options for the TABLES statement.                                                            </pre>
 <pre>                              Note: If statistics options (such as Chisq) are specified, they are NOT                                                            </pre>
-<pre>                              generated in the output dataset, because the output dataset has only the                                                            </pre>
+<pre>                              generated in the output dataset, because the output dataset only contains the                                                            </pre>
 <pre>                              frequency distribution for each variable.                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- missing:                    Whether the missing values should be considered as valid variable values.                                                            </pre>
+<pre>- missing:                    Whether the missing values should be considered as valid variable values                                                            </pre>
+<pre>                              for the percent calculations.                                                             </pre>
 <pre>                              Possible values: 0 => Missing values are NOT valid values                                                            </pre>
 <pre>                               1 => Missing values are valid values                                                            </pre>
 <pre>                              default: 0                                                                                </pre>
@@ -118,6 +131,7 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
 <pre>- %Callmacro                                                                                                            </pre>
+<pre>- %FindInList                                                                                                           </pre>
 <pre>- %GetDataOptions                                                                                                       </pre>
 <pre>- %Getnobs                                                                                                              </pre>
 <pre>- %GetLibraryName                                                                                                       </pre>
@@ -138,10 +152,17 @@ pre {display: block}
 <pre>Assuming that variables XNUM and YNUM are numeric and that variable ZCHAR is character, two                                                                                          </pre>
 <pre>columns are created in dataset TEST_FREQ containing the values taken by the variables:                                                                                          </pre>
 <pre>NUMVALUE, for the values taken by XNUM and YNUM, and CHARVALUE, for the values taken by ZCHAR.                                                                                          </pre>
-<pre>;                                                                                                                       </pre>
+<pre>                                                                                                                        </pre>
 <pre>2.- %FreqMult(test, var=xnum ynum zchar, out=test_freq(keep=var numvalue charvalue percent), missing=1);                                                                                          </pre>
 <pre>Same as above, but missing values are now considered as valid variable values.                                                                                          </pre>
 <pre>In addition only the variables VAR, NUMVALUE, CHARVALUE and COUNT are kept in the output                                                                                          </pre>
 <pre>dataset.                                                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %FreqMult(test, by=group, var=xnum ynum zchar, formats=xnum fxnum. zchar $fzchar., transpose=1, out=test_freq);                                                                                          </pre>
+<pre>This computes the frequencies of the values taken by the variables XNUM, YNUM and ZCHAR by each value                                                                                          </pre>
+<pre>of the BY variable GROUP and stores the results in dataset TEST_FREQ after transposing the output get                                                                                          </pre>
+<pre>one record per BY group and analysis variable value.                                                                                          </pre>
+<pre>Variables XNUM and ZCHAR have a format and their formatted values are shown in the VALUES column                                                                                          </pre>
+<pre>of the output dataset (instead of the original ones).                                                                                          </pre>
 <body>
 </html>

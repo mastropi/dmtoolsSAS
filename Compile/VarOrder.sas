@@ -1,8 +1,8 @@
 /* MACRO %VarOrder
-Version: 1.00
-Author: Daniel Mastropietro
-Created: 05-Sep-05
-Modified: 05-Sep-05
+Version: 	1.01
+Author: 	Daniel Mastropietro
+Created: 	05-Sep-2005
+Modified: 	20-Apr-2016 (previous: 05-Sep-2005)
 
 DESCRIPTION:
 Orders the variables in a dataset alphabetically.
@@ -10,7 +10,7 @@ Optionally lowcases or upcases their names prior to ordering.
 The label of the input dataset is preserved.
 
 USAGE:
-%VarOrder(data, case=, out=, log=1);
+%VarOrder(data, case=, out=, macrovar=, log=1);
 
 REQUIRED PARAMETERS:
 - data:			Input dataset. Options are not accepted.
@@ -23,6 +23,10 @@ OPTIONAL PARAMETERS:
 
 - out:			Output dataset where the alphabetical order is set.
 				If empty, the alphabetical order is set in the input dataset. 
+
+- macrovar:		Name of global macro variable to be created with the list of variables sorted
+				alphabetically.
+				default: (empty)
 
 - log:			Shows messages in the log?
 				Possible values: 0 => No, 1 => Yes
@@ -41,11 +45,13 @@ Orders variables alphabetically in dataset TEST.
 2.- %VarOrder(test, case=upcase);
 Upcases and orders variables alphabetically in dataset TEST.
 
-3.- %VarOrder(test, case=lowcase, out=test_ordered);
+3.- %VarOrder(test, case=lowcase, out=test_ordered, macrovar=varorder);
 Creates dataset TEST_ORDERED with variables in dataset TEST lowcased and ordered alphabetically.
+In addition, the global macro variable VARORDER is created with the list of variables sorted
+alphabetically.
 */
 &rsubmit;
-%MACRO VarOrder(data, case=, out=, log=1)
+%MACRO VarOrder(data, case=, out=, macrovar=, log=1)
 	/ store des="Orders variables alphabetically in a dataset";
 %local data label varnames;
 %local createstr1 createstr2 casestr;	%* Strings used in the message to the log;
@@ -104,6 +110,14 @@ run;
 	%end;
 	%put VARORDER: Dataset %upcase(&out) &createstr1 with variables &createstr2 &casestr ordered alphabetically.;
 %end;
+
+%if %quote(&macrovar) ~= %then %do;
+	%global &macrovar;
+	%let &macrovar = &varnames;
+	%if &log %then
+		%put VARORDER: Global macro variable (%upcase(&macrovar)) created with the list of variables in alphabetical order.;
+%end;
+
 %* Delete temporary datasets;
 proc datasets nolist;
 	delete 	_VarOrder_pc_
