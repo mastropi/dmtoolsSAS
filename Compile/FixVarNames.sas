@@ -2,7 +2,7 @@
 Version: 	1.01
 Author: 	Daniel Mastropietro
 Created: 	03-Feb-2016
-Modified: 	17-Mar-2016
+Modified: 	28-May-2016
 
 DESCRIPTION:
 Fix variable names by shortening their number of characters to a specified
@@ -95,9 +95,9 @@ is a valid SAS variable.
 %do i = 1 %to &nro_vars;
 	%let vari = %scan(&var, &i, ' ');
 
-	%let lastchar = %sysfunc(min(%length(&vari), &maxnchar));
 	%* Check if there would be any changes in the variable name;
 	%if %eval(&lastchar = %length(&vari)) %then %do;
+		%* No changes in the variable name;
 		%let varfixi = &vari;
 		%let changed = &changed 0;
 	%end;
@@ -106,6 +106,7 @@ is a valid SAS variable.
 		%if %quote(&replace) ~= %then
 			%let vari = %sysfunc(transtrn(&vari, &replace, &replacement));
 		%* FIX the variable name;
+		%let lastchar = %sysfunc(min(%length(&vari), &maxnchar));
 		%let varfixi = %substr(&vari, 1, &lastchar);
 		%let changed = &changed 1;
 	%end;
@@ -136,7 +137,7 @@ is a valid SAS variable.
 			%do %until(&resolved);
 				%* Number of characters to replace with the number;
 				%let nreplace = %length(&number);
-				%let lastchar = %length(&varfixi)-&nreplace;
+				%let lastchar = %length(&varfixi) - &nreplace;
 				%if &lastchar < 1 %then %do;
 					%put FIXVARNAMES: WARNING - Cannot resolve conflict without making an invalid variable name starting with a number.;
 					%put FIXVARNAMES: The variable name will NOT be changed to resolve the conflict (%upcase(&varfixi)).;

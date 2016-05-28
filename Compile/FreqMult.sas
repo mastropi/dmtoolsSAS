@@ -66,7 +66,7 @@ OPTIONAL PARAMETERS:
 					- value(*):			Value taken by the variable when all variables are of the same type.
 					- numvalue(*): 		Values taken by the variable, if numeric.
 					- charvalue(*):		Values taken by the variable, if character.
-					- formattedvalue(+):(CHAR) Formatted values taken by any formatted analysis variables.
+					- fmtvalue:			(CHAR) Formatted values for all variables (even without explicit format).
 					- <target variable> if any.
 					- nvalues: 			Number of different values taken by the variable.
 					- nobs:				Number of observations used in computations.
@@ -75,8 +75,6 @@ OPTIONAL PARAMETERS:
 					(*) If all the variables are character or all the variables are numeric,
 					then only the VALUE column is present. Otherwise, the columns NUMVALUE and
 					CHARVALUE are present and VALUE is not.
-					(+) The FORMATTEDVALUE colun is only present when at least one analysis variable
-					has a format defined.
 
 					WIDE FORMAT (TRANSPOSE=1):
 					- var:					Variable name corresponding to the frequencies shown.
@@ -84,7 +82,7 @@ OPTIONAL PARAMETERS:
 					- values:				List of (formatted(*)) values taken by the variable separated by columns.
 					- <target variable> if any.
 					(*) The values stored in the VALUES column are the formatted values if the
-					analysis variable has a format defined.
+					analysis variable has an explicit format defined.
 
 					default: _FreqMult_
 
@@ -247,11 +245,10 @@ aplica solamente a la ultima variable analizada con el TABLES statement.
 %*** Macro variables related to variable formats;
 %local format_target;		%* Possible format for the target variable;
 %local hasformat;			%* List of flags indicating which variables have formats defined;
-%local atleast1format;
 %local formati;				%* Format name to apply to each analyzed variable;
 %local pos;					%* Position of the analyzed variable &VARI in the list of formats given in &FORMAT;
-%local maxlengthformattedvalues;
-%local maxlengthformattedvaluesi;
+%local maxlengthfmtvalues;
+%local maxlengthfmtvaluesi;
 %*** Macro variables related to variable types;
 %local bothTypes type;
 %*** Macro variables related to output dataset;
@@ -348,6 +345,7 @@ run;
 
 %let maxlength = 0;
 %let vartype = ;
+%let hasformat = ;
 proc freq data=_FreqMult_data_ noprint;
 	%* Check if the target variable has a format and if so apply it;
 	%if %quote(&target) ~= and %quote(&formats) ~= %then %do;
@@ -386,6 +384,10 @@ proc freq data=_FreqMult_data_ noprint;
 			%else
 				%let hasformat = &hasformat 0;
 		%end;
+		%else %do;
+			%* We still store the list HASFORMAT to ease programming below when generating the formatted values in the output dataset;
+			%let hasformat = &hasformat 0;
+		%end;
 
 		&byst;
 
@@ -400,11 +402,6 @@ proc freq data=_FreqMult_data_ noprint;
 			%put FREQMULT: Computing frequencies of variable %upcase(&vari)...;
 	%end;
 run;
-%* Keep track whether at least one analyzed variable has a format;
-%let atleast1format = %eval(%index(&hasformat, 1) > 0);
-%if &atleast1format %then
-	%* Create a variable that is used to shrink the value of the FORMATTEDVALUE variable in the output dataset to its minimum possible value;
-	%let maxlengthformattedvalues = 0;
 
 %* Check if variables of both types (i.e. character and numeric) where analyzed. This affects
 %* the name of the variable containing the freq values and whether it is necessary (in case
@@ -424,8 +421,14 @@ run;
 proc datasets library=&library nolist;
 	delete &out_name;
 quit;
+%let maxlengthfmtvalues = 0;	%* This variable is used to shrink the value of the FMTVALUE variable in the output dataset to its minimum possible length;
 %do i = 1 %to &nro_vars;
 	%let vari = %scan(&var, &i, ' ');
+	%* Get the type of the analyzed variable (used for naming CHARVALUE or NUMVALUE in the data step below);
+	%if %scan(&vartype, &i, ' ') = C %then
+		%let type = char;
+	%else
+		%let type = num;
 	%* Number of different values found in varible &var;
 	%Callmacro(getnobs, _FreqMult_out&i return=1, nvalues);
 	%* Number of observations used in computations (i.e. sum of COUNT);
@@ -446,15 +449,11 @@ quit;
 		%* Define the order of the variables and their lengths;
 		format &byvarlist var type;
 		length type $10;
-		%if &atleast1format %then %do;
-		%* Keep track of the length of the formatted values so that we can shorten its value to its minimum next;
-		retain _maxlengthformattedvalues 0;
-		%end;
+		%* Keep track of the length of the formatted values so that we can shorten its value to its minimum possible value below;
+		retain _maxlengthfmtvalues 0;
 		%if &bothTypes %then %do;
-			%if %scan(&vartype, &i, ' ') = C %then
-				%let type = char;
-			%else
-				%let type = num;
+			%* In this case, both variables NUMVALUE and CHARVALUE should exist in the dataset so that there is no problem
+			%* when appending to the final output dataset which will contain both variables (as variables of both types are analyzed);
 			format numvalue best12.;	%* This format is to avoid showing ** when the format is not long enough for the variables value (eg 2. instead of 8.);
 			format charvalue;
 			%* Define the lengths of numeric and character variables to avoid truncation;
@@ -462,31 +461,27 @@ quit;
 			length charvalue $&_charlength_max_;
 		%end;
 		%else %do;
-			%if %scan(&vartype, &i, ' ') = C %then %do;
-				length value $&_charlength_max_;		%* This is to avoid the message VARIABLE VALUE HAS DIFFERENT LENGTHS ON BASE AND DATA FILE in the PROC APPEND below;
-				format value $&_charlength_max_..;
+			%if &type = char %then %do;
+				length charvalue $&_charlength_max_;	%* This is to avoid the message VARIABLE VALUE HAS DIFFERENT LENGTHS ON BASE AND DATA FILE in the PROC APPEND below;
+				format charvalue $&_charlength_max_..;
 			%end;
 			%else %do;
-				length value &_numlength_max_;			%* This is to avoid the message VARIABLE VALUE HAS DIFFERENT LENGTHS ON BASE AND DATA FILE in the PROC APPEND below;
-				format value best12.;	%* This format is to avoid showing ** when the format is not long enough (eg 2. instead of 8.);
+				length numvalue &_numlength_max_;		%* This is to avoid the message VARIABLE VALUE HAS DIFFERENT LENGTHS ON BASE AND DATA FILE in the PROC APPEND below;
+				format numvalue best12.;				%* This format is to avoid showing ** when the format is not long enough (eg 2. instead of 8.);
 			%end;
 		%end;
-		%* Create the formatvalue variable if at least one format was specified;
-		%if &atleast1format %then %do;
-			%* Set the length of FORMATVALUE to a very large one. Then we will shrinken its length to the minimum possible;
-			%* The name formatTEDvale is used (instead of e.g. formatvalue) to mimic how SAS indicates things like e.g. order=formatTED;
-			length formattedvalue $255;
-			format formattedvalue $255.;
-		%end;
+		%* Create the fmtvalue variable;
+		%* Note that this variable is created for ALL variables, even if they do not have an explicit format defined.
+		%* This is to make handling the output dataset by the user easier, as they can directly refer to the FMTVALUE
+		%* variable to retrieve the values taken by the analysis variables, regardless of the type of the variable;
+		%* Set the length of FMTVALUE to a very large one. Then we will shrinken its length to the minimum possible;
+		length fmtvalue $255;
+		format fmtvalue $255.;
 		format &target nvalues nobs;
 
-		set _FreqMult_out&i
-			(%if ~&bothTypes %then %do; rename=(&type.value=value) %end;) end=lastobs;
-			%** Note that in case only one type of variable is analyzed (i.e. character or
-			%** numeric), the name used for the variable containing the freq values
-			%** is VALUE (not CHARVALUE or NUMVALUE as is the case when both types are present).
-			%** Note also that in that case the value of &TYPE is the same for all variables (either char or num);
+		set _FreqMult_out&i end=lastobs;
 		if _N_ = 1 then set _FreqMult_means_;
+
 		format percent 7.2;
 		length var $&maxlength;
 		var = "&vari";
@@ -496,33 +491,39 @@ quit;
 		%else %do;
 			type = "numeric";
 		%end;
-		%* Compute the formatted value;
-		%if &atleast1format %then %do;
-			%* Check if the current variable VARI has a format specified when calling %FreqMult;
-			%if %scan(&hasformat, &i, ' ') = 1 %then %do;
-				%* Get the format name;
-				%let pos = %FindInList(&formats, &vari, log=0);
-				%let formati = %scan(&formats, %eval(&pos+1), ' ');
-				%if ~&bothTypes %then %do;
-					formattedvalue = put(value, &formati);
-				%end;
-				%else %do;
-					formattedvalue = put(&type.value, &formati);
-				%end;
-				_maxlengthformattedvalues = max(_maxlengthformattedvalues, length(formattedvalue));
+		%* Compute the formatted value and check if the current variable VARI has a format specified;
+		%if %scan(&hasformat, &i, ' ') = 1 %then %do;
+			%* Get the format name;
+			%let pos = %FindInList(&formats, &vari, log=0);
+			%let formati = %scan(&formats, %eval(&pos+1), ' ');
+			fmtvalue = put(&type.value, &formati);
+		%end;
+		%else %do;
+			%if &type = num %then %do;
+			fmtvalue = put(numvalue, best12.);
+%*			fmtvalue = trim(left(put(numvalue, best12.)));
+			%end;
+			%else %do;
+			fmtvalue = charvalue;
 			%end;
 		%end;
+		_maxlengthfmtvalues = max(_maxlengthfmtvalues, length(fmtvalue));
 		%* Number of different values found for current variable;
 		nvalues = &nvalues;
+
+		%* Rename the variable containing the analysis variables values to VALUE when all analyzed variables
+		%* are of the same type;
+		%if ~&bothTypes %then %do;
+		rename &type.value = value;
+		%end;
+
 		label 	var = "Variable Name"
 				type = "Variable Type"
 				%if &bothTypes %then %do;
 				numvalue = "Value taken by numeric variables"
 				charvalue = "Value taken by character variables"
 				%end;
-				%if &atleast1format %then %do;
-				formattedvalue = "Formatted value"
-				%end;
+				fmtvalue = "Formatted value"
 				%if %quote(&target) ~= %then %do;
 				nvalues = "Number of Combinations"
 				%end;
@@ -530,14 +531,20 @@ quit;
 				nvalues = "Number of Different Values"
 				%end;
 				nobs = "Total Number of Valid Observations";
-		%if &atleast1format %then %do;
-			if lastobs then
-				call symput('maxlengthformattedvaluesi', _maxlengthformattedvalues);
-			drop _maxlengthformattedvalues;
-		%end;
+		if lastobs then
+			call symput('maxlengthfmtvaluesi', _maxlengthfmtvalues);
+		drop _maxlengthfmtvalues;
 	run;
-	%if &atleast1format %then
-		%let maxlengthformattedvalues = %sysfunc(max(&maxlengthformattedvalues, &maxlengthformattedvaluesi));
+	%let maxlengthfmtvalues = %sysfunc(max(&maxlengthfmtvalues, &maxlengthfmtvaluesi));
+
+	%* Sort values by their formatted values when the variable has a format;
+	%* Note that this step is needed because the default option in PROC FREQ is ORDER=DATA, and
+	%* we want the values to be sorted by their formatted values when the variable has a format;
+	%if %scan(&hasformat, &i, ' ') = 1 %then %do;
+		proc sort data=_Freqmult_out&i;
+			by &by fmtvalue;
+		run;
+	%end;
 
 	%*** Append the results of the current variable to the output dataset with al the analyzed variables;
 	%* NOTE: The output dataset is sorted by VAR and then by the BY variables;
@@ -548,6 +555,7 @@ quit;
 %*** Create the output dataset and transpose the data if requested;
 %if &transpose %then %do;
 	%* Sort by VAR, <BY variables>, <TARGET variable>, which is needed for the transpose process;
+	%* Additionaly, the variable values are sorted by their formatted value fmtvalue;
 	proc sort data=_FreqMult_out_;
 		by var &by &target;
 	run;
@@ -557,63 +565,19 @@ quit;
 		%* but taking that case into account is too cumbersome and not worth it at this point;
 		keep &byvarlist var type values &target;
 		format &byvarlist var type values &target;
-		set _FreqMult_out_(keep=&byvarlist var type &target %if &bothTypes %then %do; charvalue numvalue %end; %else %do; value %end;
-															%if &atleast1format %then %do; formattedvalue %end;) end=lastobs;
+		set _FreqMult_out_(keep=&byvarlist var type &target
+								%if &bothTypes %then %do; charvalue numvalue %end; %else %do; value %end;
+								fmtvalue) end=lastobs;
 		by var &by &target;
 		length valuec values $&maxlengthvalues;	%* valuec stores the value of the variable as character, variable values stores all the values taken by the variable;
 		retain values;				%* This variable contains all the concatenated values taken by each variable;
 		retain maxlengthvalues;		%* This variable is used to measure the maximum length of the VALUES variable;
 
-		%* Read the current variable value (depending on the value of &bothTypes this is read from different variables);
-		%if &bothTypes %then %do;
-		if type = "character" then do;
-			%* Define the value to transpose: we should use the formattedvalue when it is not missing (meaning that the variable has a format defined);
-			%if &atleast1format %then %do;
-			if not missing(formattedvalue) then
-				_charvalue = formattedvalue;
-			else
-				_charvalue = charvalue;
-			%end;
-			%else %do;
-			_charvalue = charvalue;
-			%end;
-			if missing(_charvalue) then
-				valuec = "<Miss>";
-			else
-				valuec = _charvalue;
-		end;
-		else
-			%* Store the numeric value as character;
-			%* Note that, regarding formatted values, I cannot apply the same logic as above for character values
-			%* because variable FORMATTEDVALUE is character while variable NUMVALUE is numeric...;
-			%* Note also that when &ATLEAST1FORMAT = 1 I additionally check for MISSING(FORMATTEDVALUE) in the
-			%* first IF below that checkes for missing(NUMVALUE) because formatted values (of numeric variables at least)
-			%* NEVER take missing values, as e.g. the original missing value . is converted to . as a character, and
-			%* therefore is not missing. So, when checking for MISSING(formattedvalue) we are actually checking that the
-			%* variable does NOT have a format and therefore we can check for missing(NUMVALUE) in order to assign <Miss> to VALUEC;
-			if %if &atleast1format %then %do; missing(formattedvalue) and %end; missing(numvalue) then
-				valuec = "<Miss>";
-			else
-				%if &atleast1format %then %do;
-				if not missing(formattedvalue) then
-					valuec = formattedvalue;
-				else
-				%end;
-					valuec = trim(left(put(numvalue, best12.)));
-		%end;
-		%else %do;
-		%* When all the variables are of the same type we follow the same logic as for numeric variables
-		%* as we do not know the type of VALUE (whether character or numeric);
-		if %if &atleast1format %then %do; missing(formattedvalue) and %end; missing(value) then
+		%* Read the current variable value from the formatted value;
+		%* Missing values in both character and numeric variables are replaced with <Miss>;
+		valuec = fmtvalue;
+		if valuec = "" or valuec = "." then
 			valuec = "<Miss>";
-		else
-			%if &atleast1format %then %do;
-			if not missing(formattedvalue) then
-				valuec = formattedvalue;
-			else
-			%end;
-				valuec = trim(left(put(value, best12.)));
-		%end;
 
 		%* Start a new group;
 		if %MakeList(var &byvarlist &target, prefix=First., sep=or) then
@@ -645,25 +609,27 @@ quit;
 	options varlenchk=&varlenchk_opt;
 %end;
 %else %do;
-	%if &atleast1format %then %do;
-		%*** Compress the length of the FORMATTEDVALUE variable to its possible minimum;
-		%* Set the option that checks variable length change to no-warning, o.w. there is a warning that data may have been truncated;
-		%let varlenchk_opt = %sysfunc(getoption(varlenchk));
-		options varlenchk=nowarn;
-		data _FreqMult_out_;
-			format &byvarlist var type %if &bothTypes %then %do; charvalue numvalue %end; %else %do; value %end; formattedvalue;
-			length formattedvalue $&maxlengthformattedvalues;
-			format formattedvalue $&maxlengthformattedvalues..;
-			set _FreqMult_out_;
-		run;
-		options varlenchk=&varlenchk_opt;
-	%end;
+	%*** Compress the length of the FMTVALUE variable to its possible minimum and create the output dataset;
+	%* Set the option that checks variable length change to no-warning, o.w. there is a warning that data may have been truncated;
+	%let varlenchk_opt = %sysfunc(getoption(varlenchk));
+	options varlenchk=nowarn;
+	data _FreqMult_out_;
+		format &byvarlist var type %if &bothTypes %then %do; charvalue numvalue %end; %else %do; value %end; fmtvalue;
+		length fmtvalue $&maxlengthfmtvalues;
+		format fmtvalue $&maxlengthfmtvalues..;
+		set _FreqMult_out_;
+	run;
+	options varlenchk=&varlenchk_opt;
 
-	%* Sort by VAR, <BY variables>, value of variable, <TARGET variable>, and create the final output datset;
-	%* Note that the value of the variable comes before the TARGET variable in the sort order because this is the way
-	%* it is sorted by PROC FREQ of <var>*<target>;
+	%* Sort by VAR and create the final output dataset;
+	%* This step is important so that the output dataset is sorted by the analyzed variables and the user
+	%* can easily find their variable of interest and do things like FIRST.var in a DATA step (without having to sort the dataset);
+	%* Note that we only include the VAR column in the sort process because I do not want to mess up with the original order
+	%* in the dataset on the variables values since this sort order depends on each analyzed variable, on whether they had a format
+	%* defined or not and I do not want to change that order (this order was taken care of above, soon after the computation 
+	%* of the _FreqMult_out&i dataset;
 	proc sort data=_FreqMult_out_ out=&out;
-		by var &by %if &atleast1format %then %do; formattedvalue %end; %if &bothTypes %then %do; charvalue numvalue %end; %else %do; value %end; &target;
+		by var;
 	run;
 %end;
 
