@@ -76,7 +76,7 @@ pre {display: block}
 <pre>                              - value(*):                   Value taken by the variable when all variables are of the same type.                              </pre>
 <pre>                              - numvalue(*):                Values taken by the variable, if numeric.                              </pre>
 <pre>                              - charvalue(*):               Values taken by the variable, if character.                              </pre>
-<pre>                              - formattedvalue(+):(CHAR) Formatted values taken by any formatted analysis variables.                                                            </pre>
+<pre>                              - fmtvalue:                   (CHAR) Formatted values for all variables (even without explicit format).                              </pre>
 <pre>                              - <target variable> if any.                                                               </pre>
 <pre>                              - nvalues:                    Number of different values taken by the variable.                              </pre>
 <pre>                              - nobs:                       Number of observations used in computations.                              </pre>
@@ -85,8 +85,6 @@ pre {display: block}
 <pre>                              (*) If all the variables are character or all the variables are numeric,                                                            </pre>
 <pre>                              then only the VALUE column is present. Otherwise, the columns NUMVALUE and                                                            </pre>
 <pre>                              CHARVALUE are present and VALUE is not.                                                            </pre>
-<pre>                              (+) The FORMATTEDVALUE colun is only present when at least one analysis variable                                                            </pre>
-<pre>                              has a format defined.                                                                     </pre>
 <pre>                                                                                                                        </pre>
 <pre>                              WIDE FORMAT (TRANSPOSE=1):                                                                </pre>
 <pre>                              - var:                        Variable name corresponding to the frequencies shown.                              </pre>
@@ -94,7 +92,7 @@ pre {display: block}
 <pre>                              - values:                     List of (formatted(*)) values taken by the variable separated by columns.                              </pre>
 <pre>                              - <target variable> if any.                                                               </pre>
 <pre>                              (*) The values stored in the VALUES column are the formatted values if the                                                            </pre>
-<pre>                              analysis variable has a format defined.                                                            </pre>
+<pre>                              analysis variable has an explicit format defined.                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>                              default: _FreqMult_                                                                       </pre>
 <pre>                                                                                                                        </pre>

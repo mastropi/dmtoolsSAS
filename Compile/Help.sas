@@ -2,7 +2,7 @@
 Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	09-Dec-2003
-Modified: 	15-Apr-2016
+Modified: 	28-May-2016
 
 DESCRIPTION:
 Shows help on how to invoke a macro.
@@ -157,6 +157,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put 	%quote(                     linear regression.);
 		%put	PiecewiseTransf %quote(     Perform a linear piecewise transformation on continuous variables.); 
 		%put	QualifyVars %quote(         Automatically qualify variables into categorical or continuous.);
+		%put	Score %quote(               Compute the score of a regression model on a new dataset.);
 		%put	TestLogisticFit* %quote(    Test the fit of a logistic regression model.);
 		%put	VariableImpact*	%quote(     Make plots to evaluate the univariate impact of a set of continuous variable);
 		%put	%quote(                     on a binary target.);
@@ -174,6 +175,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	Help %quote(                Show this help information.);
 		%put 	ODSOutputClose %quote(      Close an open ODS output file.);
 		%put 	ODSOutputOpen %quote(       Open an ODS output file for writing.);
+		%put	ShowMacroVars %quote(       Show a list of macro variable values in the output window.);
 		%put;
 		%put STRING MANIPULATION;
 		%put -------------------;
@@ -344,11 +346,13 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put;
 		%put S;
 		%put	Scatter	%quote(             Make 2D scatter plots among pairwise variables.);
+		%put	Score %quote(               Compute the score of a regression model on a new dataset.);
 		%put	SelectName(s) %quote(       Return a subset of names from a list.);
 		%put	SelectVar %quote(           Return a list of variable names in a dataset matching a keyword.);
 		%*%put	SetSASOptions	;
 		%put	SetAxis %quote(             Create the string for an AXIS statement so that pretty values are shown.);
 		%put	SetVarOrder	%quote(         Set the order in which variables are stored in a dataset.);
+		%put	ShowMacroVars %quote(       Show a list of macro variable values in the output window.);
 		%put	Sort* %quote(               User friendly PROC SORT. Several datasets can be sorted simultaneously.);
 		%put	Standardize* %quote(        Center and standardize variables.);
 		%put 	Subset %quote(              Subset a dataset with a WHERE condition by by variables.);

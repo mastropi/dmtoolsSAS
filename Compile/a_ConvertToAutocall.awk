@@ -17,7 +17,7 @@
 BEGIN{IGNORECASE=1}
 
 # Remove the STORE keyword
-/\/[ ]*store[ ]+des/ { count++; gsub("store", ""); }
+/\/[ ]*store[ ]+des/ { count++; gsub(/store[ ]+des/, "des"); }
 # Do not output the line with the &rsubmit because it generates large problems with "open code recursion detected"... very messy!
 # Only lines having just that word '&rsubmit;' are excluded.
 { if (! ($0 ~ /^[ ]*&rsubmit;[ ]*$/)) print }

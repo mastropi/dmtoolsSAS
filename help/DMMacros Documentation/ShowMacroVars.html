@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%ShowMacroVars</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %ShowMacroVars</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      28-May-2016                                                                               </pre>
+<pre>Modified:                     28-May-2016                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Shows a set of macro variables and their values in the output and in the log windows and                                                                                          </pre>
+<pre>creates an output dataset containing them.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The output dataset name is called MACROVARS_<yyyymmddTHHmmss> where                                                                                          </pre>
+<pre>the suffix is the time stamp when the macro is run.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%ShowMacroVars(macrovars, maxlength=50);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERES:</h3>
+<pre>- macrovars:                  Blank-separated list of macro variable names to show.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- maxlength:                  Maximum length of the value of the macro variables to show.                                                            </pre>
+<pre>                              default: 50                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- sort:                       Whether to sort the macro variables alphabetically.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- store:                      Whether to store the macro variable names and values in a                                                            </pre>
+<pre>                              dataset called MacroVars_<yyyymmddTHHmmss>.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- library:                    Library where the output dataset is stored.                                                            </pre>
+<pre>                              default: WORK                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>This macro can be used to show a set of parameters defined to run a process                                                                                          </pre>
+<pre>in the output window, so that they are clearly seen by the user.                                                                                          </pre>
+<body>
+</html>

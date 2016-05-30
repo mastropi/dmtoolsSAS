@@ -8,24 +8,24 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %KeepInList</h1>
-<pre>Version: 1.00                                                                                                           </pre>
-<pre>Author: Daniel Mastropietro                                                                                             </pre>
-<pre>Created: 26-Apr-05                                                                                                      </pre>
-<pre>Modified: 25-Oct-05                                                                                                     </pre>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      26-Apr-2005                                                                               </pre>
+<pre>Modified:                     28-May-2016                                                                               </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
-<pre>This macro keeps a list of specified names in a given source list.                                                                                          </pre>
-<pre>By default, all occurrences of the names in the source list are kept,                                                                                          </pre>
+<pre>This macro keeps a list of specified namesToKeep in a given source list.                                                                                          </pre>
+<pre>By default, all occurrences of the namesToKeep in the source list are kept,                                                                                          </pre>
 <pre>but an option (allOccurrences=0) can be set to keep only the first occurrence.                                                                                          </pre>
-<pre>The search for names in the source list is NOT case sensitive.                                                                                          </pre>
+<pre>The search for namesToKeep in the source list is NOT case sensitive.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
-<pre>%KeepInList(namesList, names, sep=%quote( ), allOccurrences=1, log=1);                                                                                          </pre>
+<pre>%KeepInList(namesList, namesToKeep, sep=%quote( ), allOccurrences=1, log=1);                                                                                          </pre>
 <pre>                                                                                                    </pre>
 <h3>REQUESTED PARAMETERS:</h3>
 <pre>- namesList:List of names where the names to keep are searched.                                                            </pre>
 <pre>                                                                                                    </pre>
-<pre>- names:  List of names to be kept in 'namesList'.                                                            </pre>
+<pre>- namesToKeep:List of names to keep in 'namesList'.                                                            </pre>
 <pre>          NO repeated names are allowed in this list.                                                            </pre>
 <pre>                                                                                                    </pre>
 <h3>OPTIONAL PARAMETERS:</h3>
@@ -35,19 +35,19 @@ pre {display: block}
 <pre>          See NOTES below for comments on particular cases.                                                            </pre>
 <pre>          default: %quote( ) (i.e. the blank space)                                                            </pre>
 <pre>                                                                                                    </pre>
-<pre>- allOccurrences:Specifies whether all occurrences of 'names' in 'namesList'                                                            </pre>
+<pre>- allOccurrences:Specifies whether all occurrences of 'namesToKeep' in 'namesList'                                                            </pre>
 <pre>          should be kept, or only the first occurrence.                                                            </pre>
 <pre>          Possible values: 0 => Keep only first occurence                                                            </pre>
 <pre>           1 => Keep all occurrences                                                                </pre>
 <pre>          default: 1                                                                                </pre>
 <pre>                                                                                                    </pre>
-<pre>- norepeated:Specifies whether no repeated names are found in the list passed in NAMES.                                                            </pre>
+<pre>- norepeated:Specifies whether no repeated names are found in the list passed in NAMESTOKEEP.                                                            </pre>
 <pre>          The only reason to pass the value NOREPEATED=0 is to avoid warning messages                                                            </pre>
-<pre>          in the log stating that one of the repeated names listed in NAMES was not                                                            </pre>
+<pre>          in the log stating that one of the repeated names listed in NAMESTOKEEP was not                                                            </pre>
 <pre>          found in the list passed in NAMESLIST, when it was actually found for a                                                            </pre>
-<pre>          previous occurrence of that name in NAMES.                                                            </pre>
+<pre>          previous occurrence of that name in NAMESTOKEEP.                                                            </pre>
 <pre>          That is, as far as functionallity, the macro takes proper care of repeated names                                                            </pre>
-<pre>          in NAMES.                                                                                 </pre>
+<pre>          in NAMESTOKEEP.                                                                           </pre>
 <pre>          default: 1                                                                                </pre>
 <pre>                                                                                                    </pre>
 <pre>- log:    Whether to show in the log the names kept in the list.                                                            </pre>
@@ -55,13 +55,13 @@ pre {display: block}
 <pre>          default: 1                                                                                </pre>
 <pre>                                                                                                    </pre>
 <h3>RETURNED VALUES:</h3>
-<pre>The list in 'namesList' without the names specified in 'names'.                                                                                          </pre>
+<pre>The list in 'namesList' with just the names specified in 'namesToKeep'.                                                                                          </pre>
 <pre>                                                                                                    </pre>
 <h3>NOTES:</h3>
 <pre>1.- In the 'sep' parameter, some symbols need to be enclosed using the function                                                                                          </pre>
 <pre>%quote when passed as parameters. This is the case for the comma, for instance.                                                                                          </pre>
 <pre>                                                                                                    </pre>
-<pre>2.- If some of the names listed in 'names' are not found in 'namesList', they                                                                                          </pre>
+<pre>2.- If some of the names listed in 'namesToKeep' are not found in 'namesList', they                                                                                          </pre>
 <pre>are not kept and a warning is issued. The names that are found are kept.                                                                                          </pre>
 <pre>                                                                                                    </pre>
 <h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
