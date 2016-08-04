@@ -1,8 +1,8 @@
 /* MACRO %GetVarList
-Version: 2.00
-Author: Daniel Mastropietro
-Created: 27-Dec-04
-Modified: 17-Aug-06
+Version: 	2.01
+Author: 	Daniel Mastropietro
+Created: 	27-Dec-2004
+Modified:	20-Jun-2016 (previous: 17-Aug-2006)
 
 DESCRIPTION:
 This macro parses a list of variables in a dataset by converting the keywords
@@ -13,7 +13,7 @@ Note that if just the list of all variables is wished use %GetVarOrder which run
 much faster.
 
 USAGE:
-%GetVarList(data, var=_ALL_, check=1, log=1);
+%GetVarList(data, var=_ALL_, check=0, log=1);
 
 REQUIRED PARAMETERS:
 - data:			Input dataset. Data options can be specified but THEY ARE IGNORED.
@@ -29,7 +29,7 @@ OPTIONAL PARAMETERS:
 				procedure is checked for existence in the dataset. Those variables not found
 				in the dataset are listed in the log with a WARNING message.
 				Possible values: 0 => No, 1 => Yes
-				default: 1
+				default: 0
 
 - log:			Show messages in the log?
 				Possible values: 0 => No, 1 => Yes
@@ -46,7 +46,8 @@ is issued and the returned list for that string is empty.
 from macro %CheckInputParameters, where the message of existence or non-existence of variables is
 performed there (i.e. when calling %GetVarList from %CheckInputParameters, I don't want the macro
 %GetVarList to check for existence of the variables in the dataset because I want this task to be
-done by %CheckInputParameters, so that the appropriate messages are issued by this macro).
+done by %CheckInputParameters, so that the appropriate messages are issued by this macro. Therefore
+I call %GetVarList with CHECK=0 from within %CheckInputParameters).
 
 3.- If just the list of all variables in the dataset is wished, use rather %GetVarOrder which
 runs much faster.
@@ -62,15 +63,15 @@ SEE ALSO:
 - %GetVarNames
 
 EXAMPLES:
-1.- %let vars = %GetVarList(test, var=x1-x5 count: id--name);
+1.- %let vars = %GetVarList(test, var=x1-x5 count: id--name, check=1);
 The list of passed variables that exist in dataset TEST is returned and stored in macro variable VARS.
 
-2.- %let vars = %GetVarList(test, var=x1-x5 count: id--name, check=0);
+2.- %let vars = %GetVarList(test, var=x1-x5 count: id--name);
 Same as above but the variables resulting from the parsing process are NOT checked for existence in
 dataset TEST.
 */
 &rsubmit;
-%MACRO GetVarList(data, var=_ALL_, check=1, log=1) / store des="Parses a list of variable names";
+%MACRO GetVarList(data, var=_ALL_, check=0, log=1) / store des="Parses a list of variable names";
 %local i j;
 %local hyphen hyphen2 name name2 nro_elements vari varlist;
 %local character charFound firstFound lastFound;
@@ -284,7 +285,9 @@ dataset TEST.
 	%* WARNING: (2016/04/20) This process may considerably slow down execution for large datasets (e.g. 1 minute instead of 1 second for 3 million records);
 	%if &check and %quote(&varlist) ~= %then %do;
 		%* Remove repeated variables in the variable list just created;
-		%let varlist = %RemoveRepeated(&varlist, log=0);
+		%* DM-2016/06/20: Commented out the call to %RemoveRepeated because it takes TOO LONG when the number of variables is 
+		%* large (~ 500 or more);
+		%*%let varlist = %RemoveRepeated(&varlist, log=0);
 
 		%* Check if all variables in &varlist exist, o.w. give an error;
 		%if ~%ExistVar(&data_name, %quote(&varlist), macrovar=_NotFound_, log=0) %then %do;

@@ -19,3 +19,6 @@ V.1.03: 2012/10/08 (DM)
 
 V.1.04: 2015/10/15 (DM)
 	- Renamed the macro name from %RenameVariables to %RenameVars to make it compliant with other macro names such as %SetVarOrder, %VarOrder, etc.
+
+V.1.05: 2016/08/04 (DM)
+	- The macro now checks which OLD variable names are present in the input dataset in order to avoid error messages in the log during the rename process.

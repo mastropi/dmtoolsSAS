@@ -51,6 +51,8 @@ NOTES:
 It is assumed that the variables VAR, TYPE, COUNT, N and PERCENT do NOT exist in the input dataset.
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
+- %ExecTimeStart
+- %ExecTimeStop
 - %GetNroElements
 - %GetVarList
 - %GetVarType
@@ -91,6 +93,7 @@ The information is stored, respectively, in variables NMISS, PCNTMISS, NM1 and P
 %local lastby nro_byvars;
 
 %SetSASOptions;
+%ExecTimeStart;
 
 %if &log %then %do;
 	%put;
@@ -321,5 +324,6 @@ quit;
 	%put;
 %end;
 
+%ExecTimeStop;
 %ResetSASOptions;
 %MEND MissingValues;

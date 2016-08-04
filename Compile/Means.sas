@@ -199,13 +199,17 @@ The solution to this is not simple, that is why a note on this is shown.)
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Callmacro
 - %CheckInputParameters
+- %ExecTimeStart
+- %ExecTimeStop
 - %GetDataOptions
 - %GetLibraryName
 - %GetNobs
 - %GetNroElements
 - %GetVarList
 - %GetVarNames
+- %SetSASOptions
 - %RemoveFromList
+- %ResetSASOptions
 
 SEE ALSO:
 - %FreqMult
@@ -341,11 +345,10 @@ Ex: Computing the distribution of a set of numeric variables.
 %* Statements for the MEANS procedure;
 %local byst classst formatst idst droptypefreqst noprintst outputst statst weightst;
 
-%* NOTE that there is no call to macro %SetSASOptions because we make a very specific
-%* use of the NOTES option here (unlike the %SetSASOptions macro which removes notes;
 %let notes_option = %sysfunc(getoption(notes));
+%SetSASOptions;
+%ExecTimeStart;
 %let label_option = %sysfunc(getoption(label));
-options nonotes;
 %if &nolabel %then %do;
 	options nolabel;
 %end;
@@ -604,14 +607,16 @@ proc datasets nolist;
 			_Means_out_
 			_Means_contents_;
 quit;
-options &notes_option;
-options &label_option;
 
 %if &log %then %do;
 	%put;
 	%put MEANS: Macro ends;
 	%put;
 %end;
+
+options &label_option;
+%ExecTimeStop;
+%ResetSASOptions;
 
 %end;	%* %if ~&error;
 

@@ -2,7 +2,7 @@
 Version: 	1.01
 Author: 	Daniel Mastropietro
 Created: 	03-Feb-2016
-Modified: 	28-May-2016
+Modified: 	16-Jun-2016 (previous: 28-May-2016)
 
 DESCRIPTION:
 Fix variable names by shortening their number of characters to a specified
@@ -71,8 +71,8 @@ is a valid SAS variable.
 &rsubmit;
 %MACRO FixVarNames(var, max=32, space=0, replace=, replacement=, log=1) / store des="Fixes variable names by shortening their names to an allowed maximum minus a space";
 %local i j;
-%local maxnchar;
-%local lastchar;		%* Last character to keep from each variable name (this is used to avoid an out-of-range error in the %substr() macro when trimming variable names);
+%local maxlen;			%* Maximum length allowed for the variable name based on parameters MAX= and SPACE=;
+%local lastchar;		%* Position of the last character to keep in each variable name (this is used to avoid an out-of-range error in the %substr() macro when trimming variable names);
 %local nro_vars;
 %local changed;			%* List of 0s and 1s indicating which variable names were changed by the process;
 %local changedi;
@@ -90,13 +90,14 @@ is a valid SAS variable.
 
 %*** 1.- First fixing step, where variable names are shortened but no conflicting names are checked;
 %let nro_vars = %GetNroElements(&var);
-%let maxnchar = %eval(&max - &space);
+%let maxlen = %eval(&max - &space);
 %let changed = ;
 %do i = 1 %to &nro_vars;
 	%let vari = %scan(&var, &i, ' ');
 
-	%* Check if there would be any changes in the variable name;
-	%if %eval(&lastchar = %length(&vari)) %then %do;
+	%* Check if there would be any changes in the variable name by comparing the variable name length
+	%* with the maximum allowed name length (MAXLEN): if the former is smaller or equal, then the variable name should not be changed;
+	%if %length(&vari) <= &maxlen %then %do;
 		%* No changes in the variable name;
 		%let varfixi = &vari;
 		%let changed = &changed 0;
@@ -106,7 +107,7 @@ is a valid SAS variable.
 		%if %quote(&replace) ~= %then
 			%let vari = %sysfunc(transtrn(&vari, &replace, &replacement));
 		%* FIX the variable name;
-		%let lastchar = %sysfunc(min(%length(&vari), &maxnchar));
+		%let lastchar = %sysfunc(min(%length(&vari), &maxlen));
 		%let varfixi = %substr(&vari, 1, &lastchar);
 		%let changed = &changed 1;
 	%end;

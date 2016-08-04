@@ -38,3 +38,6 @@ V.1.01: 2016/03/10 (DM)
 		varfixremove=,	*** One or more consecutive characters to remove from the variable name when fixing their name, if needed.
 		out=,			*** Output dataset containing the indicator and piecewise linear variables. Data options are allowed.
 		log=1);			*** Whether to show messages in the log.
+
+V1.03: 2016/06/16 (DM)
+	- Added new parameter DROPALLEQUAL=0, which is used to indicate whether we would like to drop the created dummy variables having all cases equal to the same value from the output dataset. It was introduced because currently this criterion is fulfilled by running a separate PROC FREQ on each variable and it takes a long time for large datasets. The next step is to call %FreqMult to compute the frequencies.

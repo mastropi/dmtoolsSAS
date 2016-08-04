@@ -1,8 +1,8 @@
 /* MACRO %Score
-Version:		1.00
+Version:		1.01
 Author:			Daniel Mastropietro
 Created:		19-May-2016
-Modified:		29-May-2016
+Modified:		30-Jun-2016
 
 DESCRIPTION:
 Score a new dataset based on the estimated parameters of a regression model.
@@ -34,6 +34,7 @@ USAGE:
 									*** (SCORE and SCORECHECK should have different names).
 		responsecheck=,				*** Response variable against which the RESPONSE variable should be compared
 									*** (RESPONSE and RESPONSECHECK should have different names).
+		varcheck=,					*** Blank-separated list of additional variables to keep in the OUTCHECK dataset.
 		outcheck=,					*** Output dataset used for the comparison, containing only matching observations.
 		out=,						*** Output dataset containing the score and response values.
 		plot=1,						*** Show plots?
@@ -93,6 +94,15 @@ OPTIONAL PARAMETERS:
 						(e.g. sigmoid transformation of score in logistic model).
 						default: p
 
+- datacheck:			Dataset containing the SCORECHECK and/or RESPONSECHECK variables
+						against which the score and/or response variables calculated by this macro
+						should be compared.
+						Cases are matched by the ID variables if given, or by observation number
+						if no ID variables are given, in which case it is assumed that both
+						datasets have the same number of observations.
+						Only matching cases are compared.
+						default: empty
+
 - scorecheck			Score variable in the DATA or DATACHECK dataset against which the SCORE variable should
 						be compared.
 						It must have a different name than the SCORE variable.
@@ -103,13 +113,12 @@ OPTIONAL PARAMETERS:
 						It must have a different name than the RESPONSE variable.
 						default: empty
 
-- datacheck:			Dataset containing the SCORECHECK and/or RESPONSECHECK variables
-						against which the score and/or response variables calculated by this macro
-						should be compared.
-						Cases are matched by the ID variables if given, or by observation number
-						if no ID variables are given, in which case it is assumed that both
-						datasets have the same number of observations.
-						Only matching cases are compared.
+- varcheck:				Blank-separated list of variables in the DATACHECK dataset to keep in the
+						OUTCHECK dataset apart from the SCORECHECK and RESPONSECHECK variables.
+						Normally these are model variables that should be analyzed when the check is
+						not satisfactory.
+						This parameter only makes sense when the DATACHEK dataset is different from the
+						input dataset to score.
 						default: empty
 
 - outcheck:				Output dataset containing all the variables in the DATACHECK dataset but just
@@ -153,7 +162,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 
 SEE ALSO:
 - %FreqMult: to generate the distribution of the categorical variables present in the model that is needed
-by this macro 
+by this macro.
 */
 &rsubmit;
 %MACRO Score(	data,
@@ -169,6 +178,7 @@ by this macro
 				datacheck=,
 				scorecheck=,
 				responsecheck=,
+				varcheck=,
 				outcheck=,
 				out=,
 				outfile=,
@@ -187,6 +197,7 @@ currently implemented).
 
 %local datavars;		%* Variables present in the input dataset to score;
 %local formats;			%* Formats of variables (containing variable name and format name);
+%local idxname;			%* Name of the index name created to join datasets;
 %local idst;			%* ID Statement to use in PROC TRANSREG;
 %local modelvars;		%* List of model variables;
 %local modelvars_use;	%* List of model variables to use in PROC SCORE;
@@ -328,12 +339,20 @@ run;
 	%* This is to avoid sorting the dataset to score which might be problematic if too big...;
 	%if %quote(&id) ~= %then %do;
 		proc sql;
-			create index idx on _score_dummies_ (%MakeList(&id, sep=%quote(,)));
+			%if %GetNroElements(&id) = 1 %then %do;
+				%* This is necessary because the index name must be equal to the variable when there is only ONE variable to index!!;
+				create index &id on _score_dummies_ (&id);
+				%let idxname = &id;
+			%end;
+			%else %do;
+				create index idx on _score_dummies_ (%MakeList(&id, sep=%quote(,)));
+				%let idxname = idx;
+			%end;
 		quit;
 		%* Merge with the dummy variables;
 		data _score_data_;
 			set &data;
-			set _score_dummies_(keep=&id &vardummies) key=idx;
+			set _score_dummies_(keep=&id &vardummies) key=&idxname;
 			if _IORC_ then _ERROR_ = 0;
 			if ~_IORC_;
 		run;
@@ -391,7 +410,11 @@ run;
 	data _score_pred_;
 		format &id &score &response;
 		set _score_pred_;
-		&response = 1 / (1 + exp(-&score));
+		&response = 1 / (1 + exp(- min( max(-700, &score), +700) ));
+			%* NOTE: Use min() and max() to bound the value of the score to use in the exponential functoin
+			%* in order to avoid under- or overflow. Note that the smallest and largest double numbers
+			%* that can be represented are obtained by the function constant() with the SMALL and BIG arguments,
+			%* and these gives a minimum exponent for exp() of ~ -708 and a maximum of ~ 709;
 	run;
 %end;
 %if %quote(&outfile) = %then %do;
@@ -418,13 +441,20 @@ options &option_mprint;
 		%* Read the score to check from the DATACHECK dataset into a temporary dataset;
 		%* This is needed in order to safely create the index on the ID variables,
 		%* as if an index on the same variables exist, an error is raised;
-		data _score_check_(%if %quote(&id) ~= %then %do; index=(idx=(&id) / unique) %end;);
+		data _score_check_(%if %quote(&id) ~= %then %do;
+								%if %GetNroElements(&id) = 1 %then %do;
+								index=(&id / unique)
+								%end;
+								%else %do;
+								index=(idx=(&id) / unique)
+								%end;
+							%end;);
 			%if %quote(&outcheck) = %then %do;
 			%* We only keep the necessary variables for the score comparison when
 			%* the user did NOT request any output dataset to store the compared records (OUTCHECK).
 			%* Otherwise, we need to keep all the variables in _SCORE_CHECK_ because below we
 			%* create the OUTCHECK dataset with ALL the variables in the DATACHECK dataset;
-			keep &id &checkvar;	%* Note that this KEEP does NOT go as part of the data option (although it would make the process faster) because we want any data options passed by the user in DATACHECK to take place;
+			keep &id &checkvar &varcheck;	%* Note that this KEEP does NOT go as part of the data option (although it would make the process faster) because we want any data options passed by the user in DATACHECK to take place;
 			%end;
 			set &datacheck;
 		run;
@@ -437,40 +467,42 @@ options &option_mprint;
 		set _score_pred_;
 		%if %quote(&datacheck) ~= %then %do;
 		%* Read the score to check from the DATACHECK dataset;
-		set _score_check_(keep=&id &checkvar) %if %quote(&id) ~= %then %do; key=idx %end;;
+		set _score_check_(keep=&id &checkvar) %if %quote(&id) ~= %then %do; key=&idxname %end;;
 		if _IORC_ ~= 0 then _ERROR_ = 0;
 		_incheck = (_IORC_ = 0);
 		%end;
 		_pred_diff = &responsevar - &checkvar;	%* CHECKVAR is either &SCORECHECK or &RESPONSECHECK;
 	run;
-	title "Comparison between the computed score/response (%upcase(&responsevar)) and the benchmark score/response (%upcase(&checkvar))";
-	title2 "(only matching observations are considered)";
-	proc compare base=_score_pred_(where=(_incheck));
-		%if %quote(&id) ~= %then %do;
-		id &id;
+	%if %quote(&datacheck) ~= %then %do;
+		title "Comparison between the computed score/response (%upcase(&responsevar)) and the benchmark score/response (%upcase(&checkvar))";
+		title2 "(only matching observations are considered)";
+		proc compare base=_score_pred_(where=(_incheck));
+			%if %quote(&id) ~= %then %do;
+			id &id;
+			%end;
+			var &responsevar;
+			with &checkvar;
+		run;
+		%if &plot %then %do;
+			proc univariate data=_score_pred_(where=(_incheck));
+				var _pred_diff;
+				histogram;
+			run;
+			proc sgplot data=_score_pred_(where=(_incheck));
+				scatter x=&checkvar y=&responsevar;
+			run;
 		%end;
-		var &responsevar;
-		with &checkvar;
-	run;
-	%if &plot %then %do;
-		proc univariate data=_score_pred_(where=(_incheck));
-			var _pred_diff;
-			histogram;
-		run;
-		proc sgplot data=_score_pred_(where=(_incheck));
-			scatter x=&checkvar y=&responsevar;
-		run;
+		title2;
+		title;
 	%end;
-	title2;
-	title;
 
 	%* Create the output dataset containing the cases that were used for the score comparison;
 	%if %quote(&outcheck) ~= and %quote(&datacheck) ~= %then %do;
 		data &outcheck;
-			format &id &score &response &checkvar _pred_diff;
+			format &id &score &response &checkvar _pred_diff &varcheck;
 			set _score_pred_(keep=%if %quote(&id) ~= %then %do; &id %end; &score &response);
 			%* Read ALL the variables from the DATACHECK dataset;
-			set _score_check_ %if %quote(&id) ~= %then %do; key=idx %end;;
+			set _score_check_ %if %quote(&id) ~= %then %do; key=&idxname %end;;
 			if _IORC_ ~= 0 then _ERROR_ = 0;
 			if _IORC_ = 0;
 			_pred_diff = &responsevar - &checkvar;	%* CHECKVAR is either &SCORECHECK or &RESPONSECHECK;
