@@ -1,8 +1,8 @@
 /* InformationValue-Test.sas
-Created: 17/08/05
-Modified: 12/08/06
-Author: Daniel Mastropietro
-Description: Tests run on macro %InformationValue.
+Created: 		17-Aug-2005
+Modified: 		17-Jun-2017 (previous: 12-Aug-2006)
+Author: 		Daniel Mastropietro
+Description: 	Tests run on macro %InformationValue.
 */
 
 *** Test dataset taken from "Credit Scoring for Risk Managers" de Elizabeth Mays, pag. 97.
@@ -13,13 +13,13 @@ data testiv;
 	do i = 1 to good;
 		obs = _N_;
 		y = 0; 
-		z = "Bad";
+		z = "Good";
 		output;
 	end;
 	do i = 1 to bad;
 		obs = _N_;
 		y = 1; 
-		z = "Good";
+		z = "Bad";
 		output;
 	end;
 	length z $5;
@@ -59,16 +59,27 @@ proc format;
 				14-20 = '14-20';
 run;
 
-%InformationValue(testiv, target=y, var=group, groups=20);	* 1.022;
+%InformationValue(testiv, target=y, var=group, groups=20);	* IV = 1.022, IVAdj = 1.022, IVEntropyAdj = 0.256;
 * Treat the analysis variable GROUP as categorical;
-%InformationValue(testiv, target=y, var=group, groups=);	* 1.022;
-%InformationValue(testiv, target=z, var=group, groups=20, event="Bad");	* 1.022;
-%InformationValue(testiv, target=y, var=group, formats=group group., event=0);	* 0.809;
-%InformationValue(testiv, target=z, var=group, event="Bad", formats=group group.); * 0.809;
-%InformationValue(testiv, target=y, var=group, value=max, outformat=_informationformats_, groups=20); * 1.022;
-%InformationValue(testiv, target=z, var=group, value=max, outformat=_informationformats_, groups=20); * 1.022;
+%InformationValue(testiv, target=y, var=group, groups=);	* IV = 1.022, IVAdj = 0.511 (IV adjusted to 10 groups), IVEntropyAdj = 0.256;
+%InformationValue(testiv, target=z, var=group, groups=20, event="Bad");	* IV = 1.022, IVAdj = 1.022, IVEntropyAdj = 0.256;
+%InformationValue(testiv, target=y, var=group, formats=group group., event=0);	* Default: 10 groups: IV = 0.809, IVAdj = 4.046, IVEntropyAdj = 0.539;
+%InformationValue(testiv, target=z, var=group, event="Bad", formats=group group., groups=); * No grouping: IV = 0.459, IVAdj = 1.531, IVEntropyAdj = 0.221;
+%InformationValue(testiv, target=y, var=group, value=max, outformat=_informationformats_, groups=20); * IV = 1.022, IVAdj = 1.022, IVEntropyAdj = 0.256;
+%InformationValue(testiv, target=z, var=group, value=max, outformat=_informationformats_, groups=20); * IV = 1.022, IVAdj = 1.022, IVEntropyAdj = 0.256;
 ** (17/08/05) v1.00: OK;
 ** (13/08/06) v1.01: OK;
 ** (31/07/12) v3.00: OK;	** added the SMOOTH= parameter to compute smoothed WOE values;
 ** (15/04/16) v3.02: OK;	** added the OUTFORMAT= parameter;
 ** (17/05/16) v3.03: OK; 	** renamed FORMAT= parameter with FORMATS= parameter to adapt to new version 2.02 of %FreqMult;
+** (17/06/18) v4.00: OK;
+
+* Tests on SASHELP.HEART;
+%FreqMult(sashelp.heart, target=status);
+%InformationValue(sashelp.heart, target=status, var=_ALL_, groups=, out=_informationvalue1_, outtable=_informationtable1_);
+%InformationValue(sashelp.heart, target=status, var=_ALL_, groups=, out=_iv_, outtable=_it_);
+%InformationValue(sashelp.heart, target=status, var=AgeAtStart AgeCHDdiag Smoking Smoking_Status Weight_Status Weight Sex, groups=20, out=_ivadj1_, outtable=_itadj1_);
+%InformationValue(sashelp.heart, target=status, var=AgeAtDeath AgeAtStart AgeCHDdiag Height Weight Sex, groups=);
+
+proc print data=_informationtable_;
+run;

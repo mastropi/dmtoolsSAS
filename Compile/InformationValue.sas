@@ -1,32 +1,34 @@
 /* MACRO %InformationValue
-Version: 	3.03
+Version: 	4.00
 Author: 	Daniel Mastropietro
 Created: 	06-Jul-2005
-Modified: 	17-May-2016 (previous: 15-Apr-2016)
+Modified: 	17-Jun-2017 (previous: 17-May-2016, 15-Apr-2016)
 
 DESCRIPTION:
 This macro computes the Information Value (IV) provided by a set of input variables w.r.t.
 a binary target variable.
 The input variables can be either categorical or continuous. In the latter case, the
 input variable is categorized into the specified number of groups.
+Numeric variables are considered continuous if the GROUPS= parameter is not empty. Otherwise,
+they are considered categorical.
 
 The macro optionally creates an output dataset containing formats that allow reproducing the
 categorization carried out by the macro on the continuous analysis variables.
 
-For more details on the calculation of the Information Value see DETAILS below.
+For more details on the calculation of the Information Value see the DETAILS section below.
 
 USAGE:
 %InformationValue(
 	data,						*** Input dataset.
 	target=,					*** Dichotomous target variable.
-	var=,						*** Analysis variables (character or numeric).
+	var=_ALL_,					*** Analysis variables (character or numeric).
 	event=,						*** Event of interest.
-	groups=,					*** Nro. of groups to use to categorize numeric variables. Leave it empty for categorical variables.
+	groups=,					*** Nro. of groups to use to categorize numeric variables. Leave it empty if ALL analyzed variables are categorical.
 	value=, 					*** Statistic to show for each category of numeric variables.
 	formats=,					*** Formats to use for each analysis variable.
 	smooth=1,					*** Whether to smooth the WOE calculation in order to avoid missing values.
-	out=_InformationTable_,		*** Output dataset containing the WOE and IV for each bin of the categorized variables.
-	outiv=_InformationValue_,	*** Output dataset containing the Information Value for each variable.
+	out=_InformationValue_,		*** Output dataset containing the Information Value for each variable.
+	outtable=_InformationTable_,*** Output dataset containing the WOE and IV for each bin of the categorized variables.
 	outformat=,					*** Output dataset containing format definitions corresponding to the information value bins.
 	notes=1,					*** Show SAS notes in the log?
 	log=1);						*** Show messages in the log?
@@ -73,40 +75,50 @@ OPTIONAL PARAMETERS:
 				Possible values: 0 => do not smooth, 1 => smooth
 				default: 1
 
-- out:			Output dataset containing the distribution of the target variable for each value
+- out:			Output datase containing the Information Value of each variable listed in VAR.
+				Data options can be specified as in a data= SAS option.
+				The dataset has the following columns:
+				- var: 			Variable name.
+				- n: 			Number of observations in the dataset with non missing values of the
+								analysis variable and the target variable.
+				- nvalues: 		Number of distinct values taken by the variable.
+				- nused:		Number of distinct values of the variable that were used in the 
+								computation of the Information Value. This is the same as the number
+								of variable values for which the WOE is missing, which corresponds
+								to values for which the information provided is infinite.
+				- IV:			Information Value of the analysis variable.
+				- IVAdj:		Adjusted Information Value based on the number of cases in each bin
+								and on the number of groups that contribute to the IV.
+				- EntropyRel:	Entropy of the analyzed variable relative to the maximum possible entropy
+								(which occurs when all categories of the analyzed variable have the same
+								number of cases).
+				default: _InformationValue_
+
+- outtable:		Output dataset containing the distribution of the target variable for each value
 				of the variables listed in VAR.
 				Data options can be specified as in a data= SAS option.
 				The dataset has the following columns:
 				- var: 			Variable name.
-				- numvalue(*):	Value taken by the numeric variables.
-				- charvalue(*):	Value taken by the character variables.
+				- numvalue(*):	Value taken by the numeric variables in the corresponding bin.
+				- charvalue(*):	Value taken by the character variables in the corresponding bin.
 				- n: 			Number of observations in the dataset with non missing values of the
-								analysis variable and the target variable.
-				- nNonEvent: 	Number of Non-Events.
-				- pcntNonEvent:	Percent of Non-Events.
-				- nEvent: 		Number of Events.
-				- pcntEvent: 	Percent of Events.
-				- WOE: 			Weight Of Evidence of the corresponding value of the analysis variable.
-				- IV:			Information Value of the analysis variable.
+								target variable for the corresponding bin.
+				- pcnt:			Proportion of observations in the dataset with non missing values of
+								the target variable for the corresponding bin.
+				- nNonEvent: 	Number of Non-Events in the corresponding bin.
+				- pcntNonEvent:	Proportion of Non-Events in the corresponding bin.
+				- nEvent: 		Number of Events in the corresponding bin.
+				- pcntEvent: 	Proportion of Events in the corresponding bin.
+				- WOE: 			Weight Of Evidence of the analysis variable by the corresponding bin.
+				- IV:			Contribution to the Information Value of the analysis variable by the
+								corresponding bin.
+				- IVAdj:		Contribution to the Adjusted Information Value of the analysis variable
+								by the corresponding bin.
 				(*) If all the analysis variables are character or all the analysis variables are
 				numeric, there is only one column containing the values taken by the variables whose 
 				name is VALUE. In this case, the columns NUMVALUE and CHARVALUE are not present in 
 				the output dataset.
 				default: _InformationTable_
-
-- outiv:		Output datase containing the Information Value of each variable listed in VAR.
-				Data options can be specified as in a data= SAS option.
-				The dataset has the following columns:
-				- var: 		Variable name.
-				- n: 		Number of observations in the dataset with non missing values of the
-							analysis variable and the target variable.
-				- nvalues: 	Number of distinct values taken by the variable.
-				- nused:	Number of distinct values of the variable that were used in the 
-							computation of the Information Value. This is the same as the number
-							of variable values for which the WOE is missing, which corresponds
-							to values for which the information provided is infinite.
-				- IV:		Information Value of the analysis variable.
-				default: _InformationValue_
 
 - ouformat:		Output dataset containing the formats that could be applied to each input variable
 				in order to reproduce the categorization performed by this macro.
@@ -173,12 +185,27 @@ where:
 into which the input continuous variable is categorized,
 - J is the number of different values taken by the categorized variable,
 - P(j/b) is the proportion of cases falling into bin j when the target variable takes the value b,
-- WOE(j) = ln(P(j/1)/P(j/0)) is the Weight-Of-Evidence of category j w.r.t. to target value 1.d
+- WOE(j) = ln(P(j/1)/P(j/0)) is the Weight-Of-Evidence of category j w.r.t. to target value 1
+
+Note that the WOE can be interpreted as logit(P(1/j)) - logit(P(1)), i.e. the Delta Logit observed
+in category j w.r.t. the overall population logit.
+In practice the WOE is adjusted by the number of cases in the category, i.e. the weight is reduced
+*towards 0* by the value log(J)/ncases(j) i.e.:
+	WOE_adj(j) 	= max(0, WOE(j) - log(J)/ncases(j)) if WOE(j) >= 0
+				= min(0, WOE(j) + log(J)/ncases(j)) if WOE(j) < 0
+This adjustment makes it possible for categories with too few cases (for which the information
+provided about the target variable is unreliable) have a WOE = 0.
+
+The IV expression can also be interpreted as follows, in terms of the event probability:
+	IV = Sum{j=1 to J} { N(j)/N { [P(1/j)/P(1) - P(0/j)/P(0)] * [logit(P(1/j)) - logit(P(1)] }
+
+where we observe that every term in the summation is weighted by N(j)/N, i.e. the proportion
+of observations in category j.
 
 In order to avoid an undefined value of WOE(j), a smoothing factor is used by default in its
 computation, which is equal to smooth_factor = 0.5/(#cases in the analyzed variable), making the
 expression for the smoothed WOE equal to:
-	Smoothed_WOE(j) = ln( (P(j/1) + smooth_factor) / (P(j/0) + smooth_factor) )
+	WOE_smoothed(j) = ln( (P(j/1) + smooth_factor) / (P(j/0) + smooth_factor) )
 
 The value 0.5 corresponds to a 0.5 adjustment done originally on the COUNTS (which is then
 translated to a COMMON adjustment on the probabilities by dividing by the number of analyzed cases. 
@@ -223,9 +250,9 @@ However, the following two notes should be taken into account when computing the
 quasi-complete separation, which means that the variable is almost a perfect separator of the target
 variable.
 Such variables could be identified by looking at the number of distinct values of the analysis variable
-that are used in the computation of the Information Value (stored in column NUSED of the OUTIV= dataset).
+that are used in the computation of the Information Value (stored in column NUSED of the OUT= dataset).
 If this value is too small with respect to the number of distinct values taken by the analysis variable
-(stored in column NVALUES of the OUTIV= dataset), it means that for many variable values the target value
+(stored in column NVALUES of the OUT= dataset), it means that for many variable values the target value
 is only one (as opposed to 2), giving a missing value of the WOE, which means that the information provided
 by that value is infinite.
 */
@@ -238,8 +265,8 @@ by that value is infinite.
 						value=,
 						formats=,
 						smooth=1,
-						out=_InformationTable_,
-						outiv=_InformationValue_,
+						outtable=_InformationTable_,
+						out=_InformationValue_,
 						outformat=,
 						notes=0,
 						log=1,
@@ -260,19 +287,19 @@ _VALUE categorized variables.
 	%put INFORMATIONVALUE: The macro call is as follows:;
 	%put;
 	%put %nrstr(%InformationValue%();
-	%put data , (REQUIRED) %quote(         *** Input dataset.);
-	%put target= , %quote(                 *** Target dichotomous variable.);
-	%put var=_ALL_ , %quote(               *** Analysis variables.);
-    %put event= , %quote(                  *** Event of interest.);
-    %put groups=20 , %quote(               *** Nro. of groups to use to categorize numeric variables.);
-    %put value= , %quote(                  *** Statistic to show for the categories of numeric variables.);
-	%put formats= , %quote(                *** Formats to be used for selected analysis variables or target.);
-	%put smooth=1 , %quote(                *** Whether to smooth the WOE calculation in order to avoid missing values.);
-	%put out=_InformationTable_, %quote(   *** Output dataset containin the WOE and IV for each bin of the categorized variables.);
-	%put outiv=_InformationValue_ , %quote(*** Output dataset containing the Information Value for each analysis variable.);
-	%put outformat= , %quote(              *** Output dataset containing format definitions corresponding to the information value bins.);
-	%put notes=1 , %quote(                 *** Show SAS notes in the log?);
-	%put log=1) %quote(                    *** Show messages in the log?);
+	%put data , (REQUIRED) %quote(           *** Input dataset.);
+	%put target= , %quote(                   *** Target dichotomous variable.);
+	%put var=_ALL_ , %quote(                 *** Analysis variables.);
+    %put event= , %quote(                    *** Event of interest.);
+    %put groups=20 , %quote(                 *** Nro. of groups to use to categorize numeric variables.);
+    %put value= , %quote(                    *** Statistic to show for the categories of numeric variables.);
+	%put formats= , %quote(                  *** Formats to be used for selected analysis variables or target.);
+	%put smooth=1 , %quote(                  *** Whether to smooth the WOE calculation in order to avoid missing values.);
+	%put out=_InformationValue_ , %quote(    *** Output dataset containing the Information Value for each analysis variable.);
+	%put outtable=_InformationTable_, %quote(*** Output dataset containin the WOE and IV for each bin of the categorized variables.);
+	%put outformat= , %quote(                *** Output dataset containing format definitions corresponding to the information value bins.);
+	%put notes=1 , %quote(                   *** Show SAS notes in the log?);
+	%put log=1) %quote(                      *** Show messages in the log?);
 %MEND ShowMacroCall;
 /*----- Macro to display usage -----*/
 
@@ -285,7 +312,7 @@ _VALUE categorized variables.
 %else %do;
 /************************************* MACRO STARTS ******************************************/
 %local bothTypes;
-%local error nobs nvar out_name outiv_name;
+%local error nobs nvar out_name out_name;
 %local TargetType;
 %local value0 value1;
 %local varlen;
@@ -309,7 +336,7 @@ _VALUE categorized variables.
 	%put INFORMATIONVALUE: - formats = %quote(      &formats);
 	%put INFORMATIONVALUE: - smooth = %quote(       &smooth);
 	%put INFORMATIONVALUE: - out = %quote(          &out);
-	%put INFORMATIONVALUE: - outiv = %quote(        &outiv);
+	%put INFORMATIONVALUE: - outtable = %quote(     &outtable);
 	%put INFORMATIONVALUE: - outformat = %quote(    &outformat);
 	%put INFORMATIONVALUE: - notes = %quote(        &notes);
 	%put INFORMATIONVALUE: - log = %quote(          &log);
@@ -405,6 +432,14 @@ run;
 	%let var = %RemoveFromList(&var, &target, log=0);
 %end;
 
+%** GROUPS=;
+%* Define the number of groups to use for the IV adjustement (it is equal to the specified number of groups if this
+%* is given, if not it is set to 10, because the thresholds normally used to define weak, middle, or strong variables
+%* are supposedly based on an IV computed on 10 groups;
+%let nadj = 10;
+%if &groups ~= %then
+	%let nadj = &groups;
+
 %*** SMOOTH=;
 %* Define the smoothing factor adjusting the COUNTS in the calculation of the WOE in order to avoid missing values;
 %if &smooth %then
@@ -456,32 +491,33 @@ run;
 %* the WHERE= option were not used, we could have a Division by Zero error in the data stet where the WOE
 %* and the Information Value are computed because the sum of count0 and count1 could be 0.
 %* Note that this option is required because the SPARSE option is also used (which is also needed);
-%FreqMult(_iv_data_(where=(not missing(&target))), target=&target, var=&var, formats=&formats, options=outpct SPARSE, out=_iv_freqmult_, log=0);
+%FreqMult(_iv_data_(where=(not missing(&target))), target=&target, var=&var, formats=&formats, options=outpct SPARSE, missing=0, out=_iv_freqmult_, log=0);
 %* Check whether all the variables in VAR are of the same type or not;
 %if (%ExistVar(_iv_freqmult_, numvalue charvalue, log=0)) %then
 	%let bothTypes = 1;
 %else
 	%let bothTypes = 0;
-%* Sort the _iv_FreqMult_ dataset by the VAR variables, because the order in which they appear in it
-%* is the one given by the order in which they are listed in the VAR= parameter;
-%* Note that it is not necessary to sort by the column containing the values taken by the variables
-%* because the dataset generated by %FreqMult is already sorted by this column;
+%* Sort the _iv_FreqMult_ dataset by the VAR variables and values to merge, because the order in which
+%* they appear in it is the one given by the order in which they are listed in the VAR= parameter;
+%* In addition we need to sort by the column containing the values taken by the variables
+%* because, even though the dataset generated by %FreqMult sorts the values, this sorting may be
+%* by their FORMATTED values which may not coincide with the sorting by the actual values...;
 proc sort data=_iv_freqmult_;
-	by var;
+	by var %if &bothTypes %then %do; numvalue charvalue %end; %else %do; value %end;;
 run;
 %* Divide the output dataset FREQMULT into two datasets, one containing the numbers and
 %* percentages for target = &value0 and the other containing those for target = &value1;
 data _iv_freq0_ _iv_freq1_;
 	set _iv_freqmult_;
 	format percent pct_row pct_col 7.1;
-
+/*
 	%if &bothTypes %then %do;
 	where not (missing(numvalue) and missing(charvalue));
 	%end;
 	%else %do;
 	where not missing(value);
 	%end;
-
+*/
 	%if &TargetType = C %then %do;
 		if &target = "&value0" then output _iv_freq0_;
 		else if &target = "&value1" then output _iv_freq1_;
@@ -493,7 +529,7 @@ data _iv_freq0_ _iv_freq1_;
 run;
 %* Merge the numbers for target = &value0 and for target = &value1 into one dataset, one row per each
 %* value of each analysis variable;
-data _iv_freq03_;
+data _iv_freq01_;
 	merge 	_iv_freq0_(drop=&target nvalues rename=(count=count0 percent=percent0 pct_row=pct_row0 pct_col=pct_col0))
 			_iv_freq1_(drop=&target nvalues rename=(count=count1 percent=percent1 pct_row=pct_row1 pct_col=pct_col1));
 	%if &bothTypes %then %do;
@@ -506,27 +542,34 @@ run;
 
 %* Compute the total number of &value0 and &value1 by each variable;
 %Means(
-	_iv_freq03_, 
+	_iv_freq01_, 
 	by=var, 
 	stat=n sum,
 	var=count0 count1, 
-	out=_iv_sum03_(drop=count1_n rename=(count0_n=nvalues)),
+	out=_iv_sum01_(drop=count1_n rename=(count0_n=nvalues)),
 	log=0
 );
 
 %*** Compute WOE and Information Value. The reference value for these computations is the
 %*** &value0 value of the target variable. This means that the WOE is computed as log(P(j/1)/P(j/0));
-%let outiv_name = %scan(&outiv, 1, '(');
-data _iv_freq03_(drop=nused)
-	 &outiv_name(keep=var nobs nvalues nused IVTotal rename=(nobs=n IVTotal=IV));
-	format var nobs nvalues nused;
-	format WOE IV IVTotal 10.3;
-	merge 	_iv_freq03_(in=in1)
-			_iv_sum03_(in=in2);
+%let out_name = %scan(&out, 1, '(');
+data _iv_freq01_(drop=nused)
+	 &out_name(	keep=var nobs nmiss nvalues nused pct_row1_min pct_row1_max pct_row1_delta IVTotal IVTotalAdj /*IVTotalEntropyAdj EntropyTotal*/ EntropyTotalRel
+				rename=(nobs=n pct_row1_min=pcntEventMin pct_row1_max=pcntEventMax pct_row1_delta=pcntEventRange IVTotal=IV IVTotalAdj=IVAdj /*IVTotalEntropyAdj=IVEntropyAdj EntropyTotal=Entropy*/ EntropyTotalRel=EntropyRel));
+	format var nobs nmiss nvalues nused pct_row1_min pct_row1_max pct_row1_delta;
+	format WOE IV IVTotal IVAdj IVTotalAdj IVEntropyAdj IVTotalEntropyAdj Entropy EntropyTotal 10.3;
+	format pct_row1_min pct_row1_max pct_row1_delta EntropyTotalRel percent7.1;
+	merge 	_iv_freq01_(in=in1)
+			_iv_sum01_(in=in2);
 	by var;
+	retain pct_row1_min pct_row1_max;
 	if first.var then do;
 		IVTotal = 0;
+		EntropyTotal = 0;
+		nmiss = 0;
 		nused = 0;
+		pct_row1_min = .;
+		pct_row1_max = .;
 	end;
 	format percent0 percent1 pct_row0 pct_row1 pct_col0 pct_col1 percent7.1;
 	percent0 = count0 / (count0_sum + count1_sum);
@@ -536,6 +579,10 @@ data _iv_freq03_(drop=nused)
 	pct_col0 = count0 / count0_sum;
 	pct_col1 = count1 / count1_sum;
 
+	%* Update the minimum and maximum percent of the event for this variable;
+	pct_row1_min = min(of pct_row1_min pct_row1);
+	pct_row1_max = max(of pct_row1_max pct_row1);
+
 	%if &reference = 0 %then %do;
 	pdiff = pct_col1 - pct_col0;		%* P(j/1) - P(j/0);
 	%end;
@@ -543,6 +590,11 @@ data _iv_freq03_(drop=nused)
 	pdiff = pct_col0 - pct_col1;		%* P(j/0) - P(j/1);
 	%end;
 
+	%* Count the number of missing values taken by the analyzed variable;
+	if %if &bothTypes %then %do; missing(numvalue) and missing(charvalue) %end; %else %do; missing(value) %end; then
+		nmiss + count0 + count1;
+
+	%* Compute the WOE and the IV for the current category or bin;
 	if pct_col1 + &smooth_factor ~= 0 and pct_col0 + &smooth_factor ~= 0 then do;
 
 		%if &reference = 0 %then %do;
@@ -551,6 +603,12 @@ data _iv_freq03_(drop=nused)
 		%else %do;
 		WOE = log( (pct_col0 + &smooth_factor/(count0_sum+count1_sum)) / (pct_col1 + &smooth_factor/(count0_sum+count1_sum)) );	%* P(j/0) / P(j/1) possibly adjusted by a smoothing factor;
 		%end;
+
+		%* (2017/06/18) Correction by log(K)/ncases based on the paper by Quinlan "Improved use of continuous attributes in C4.5";
+		if WOE > 0 then
+			WOE = max(0, WOE - log(nvalues)/(count0 + count1));		%* WOE - log(K)/ncases(k) lower bounded by 0;
+		else
+			WOE = min(0, WOE + log(nvalues)/(count0 + count1));		%* WOE + log(K)/ncases(k) upper bounded by 0;
 
 		IV = WOE*pdiff;
 		IVTotal + IV;
@@ -565,30 +623,70 @@ data _iv_freq03_(drop=nused)
 		%** is COMPLETELY determined, which means that the information provided by knowing that particular
 		%** value of the variable is infinite!
 		%** This means that the information provided by the analysis variable should be larger than
-		%** the information provided should there be no missing values of WOE.
+		%** the information provided when there are no missing values of WOE.
 		%** I verified this with a numerical example (i.e. the absolute value of IV decreased when
 		%** all values of WOE were not missing w.r.t. the absolute value of IV obtained when one of the WOE
 		%** values was missing). I simply replaced, say TARGET = &value0 with TARGET = &value1, at one 
 		%** single observation for which the analysis variable takes the value for which WOE is missing and
 		%** looked at how the IV changed;
 	end;
-	output _iv_freq03_;
-	if last.var then output &outiv_name;
 
-	label 	nvalues = "Number of Distinct Values"
-			nused 	= "Number of Distinct Values used in the IV Computation"
-			WOE 	= "Weight of Evidence"	/* This name comes from the SAS help for the Credit Scoring node in Enterprise Miner */
-			IV 		= "Information Value"
-			IVTotal = "Information Value";
+	%* Entropy of the analyzed variable to be used for the IV adjustment by the number of groups in the analyzed variable when adjust=1;
+	count = count0 + count1;
+	Entropy = -(count/(count0_sum + count1_sum)) * log(count/(count0_sum + count1_sum));
+	EntropyTotal + Entropy;
+	%* IV adjusted by number of groups. See definition of &nadj at the beginning;
+	IVAdj = IV * log(&nadj) / log(nvalues);					%* Note: here we need to adjust by the number of categories used in the computation of IV.
+															%* At this point, this information is stored in nvalues which comes from _FreqMult_.
+															%* Later on nvalues will contain the number of non-missing categories and nused will
+															%* contain the number of categories used in the computation of IV (this value is constructed as we speak...);
+	%* Total Entropy-adjusted IV;
+	IVTotalEntropyAdj = IVTotal * (1 + EntropyTotal) / (1 + log(nvalues));
+	%* Total adjusted IV;
+%*	IVTotalAdj = IVTotal * &nadj / nvalues;
+%*	IVTotalAdj = IVTotal / (1 + EntropyTotal);				%* 1+ to avoid division by 0 when the variable takes only 1 value, and also to always divide by a number larger than 1 thus making IVAdj <= IV;
+%*	IVTotalAdj = IVTotalEntropyAdj * log(&nadj) / log(nvalues);		%* NOTE that we use nvalues and NOT nused because nused does not
+																	%* yet contain the number of categories used as it is being computed now;
+	IVTotalAdj = IVTotal * log(&nadj) / log(nvalues);
+
+	output _iv_freq01_;
+	if last.var then do;
+		if nmiss > 0 then
+			nvalues = nvalues - 1;		%* Decrease nvalues by one because it counts the number of distinct non-missing categories taken by the variable;
+										%* Note that nused is NOT decreased by 1 because this measures the number of categories used in the calculation
+										%* of IV and missing values ARE used for the IV;
+		%* Compute range of percent of event observed over all categories;
+		pct_row1_delta = pct_row1_max - pct_row1_min;
+		%* Compute the Entropy relative to the maximum possible entropy (which happens when all cases are distributed equally in the categories);
+		EntropyTotalRel = EntropyTotal / log(nused);
+		output &out_name;
+	end;
+
+	label 	nmiss				= "# Missing Observations"
+			nvalues 			= "# Non-missing Categories"
+			nused 				= "# Categories used in the IV Computation"
+			pct_row1_min		= 'Min of %Event'
+			pct_row1_max		= 'Max of %Event'
+			pct_row_delta		= 'Range of %Event'
+			WOE 				= "Weight of Evidence"	/* This name comes from the SAS help for the Credit Scoring node in Enterprise Miner */
+			IV 					= "Information Value"
+			IVTotal 			= "Information Value"
+			IVAdj				= "Adjusted Information Value"
+			IVTotalAdj			= "Adjusted Information Value"
+			IVEntropyAdj 		= "Entropy-adjusted Information Value"
+			IVTotalEntropyAdj 	= "Entropy-adjusted Information Value"
+			Entropy 			= "Variable Entropy"
+			EntropyTotal 		= "Variable Entropy"
+			EntropyTotalRel		= "Variable Entropy Relative to Max. Entropy";
 run;
 %* Execute output dataset options;
-data &outiv;
-	set &outiv_name;
+data &out;
+	set &out_name;
 run;
 %if &log %then %do;
-	%callmacro(getnobs, &outiv return=1, nobs nvar);
+	%callmacro(getnobs, &out return=1, nobs nvar);
 	%put;
-	%put INFORMATIONVALUE: Dataset %upcase(&outiv_name) created with &nobs observations and &nvar variables;
+	%put INFORMATIONVALUE: Dataset %upcase(&out_name) created with &nobs observations and &nvar variables;
 	%put INFORMATIONVALUE: containing the Information Value for each variable.;
 %end;
 
@@ -598,7 +696,7 @@ run;
 %* length of VAR as the maximum between the length of --Total-- and the length of VAR as coming
 %* from macro %FreqMult, in order to avoid truncation of the string --Total-- when the names of the
 %* variables are shorter than this string;
-proc contents data=_iv_freq03_ out=_iv_contents_(keep=name length) noprint;
+proc contents data=_iv_freq01_ out=_iv_contents_(keep=name length) noprint;
 run;
 data _NULL_;
 	set _iv_contents_;
@@ -606,28 +704,33 @@ data _NULL_;
 	call symput ('varlen', trim(left(length)));
 run;
 %let varlen = %sysfunc(max(%length(--Total--), &varlen));
-data &out;
+data &outtable;
+	keep var %if &bothTypes %then %do; numvalue charvalue %end; %else %do; value %end; n pcnt n0 pcnt0 n1 pcnt1 WOE IV IVAdj;
 	format var 	%if &bothTypes %then %do; numvalue charvalue %end;
-			   	%else %do; value %end; n
+			   	%else %do; value %end; n pcnt
 				%if &reference = 0 %then %do; n0 pcnt0 n1 pcnt1; %end;
 				%else %do; n1 pcnt1 n0 pcnt0; %end; %* This %IF is done so that the non-event always appears first;
-	format WOE IV 10.3;
+	format WOE IV IVAdj /*IVEntropyAdj Entropy*/ 10.3;
 	length var $&varlen;
-	set _iv_freq03_(keep=var %if &bothTypes %then %do; numvalue charvalue %end; 
+	merge 	_iv_freq01_(keep=var %if &bothTypes %then %do; numvalue charvalue %end; 
 							 %else %do; value %end; 
-						 nobs count0 pct_row0 count1 pct_row1 WOE IV IVTotal
-					rename=(count0=n0 count1=n1 
-							pct_row0=pcnt0 pct_row1=pcnt1));
+						 	 nobs count0 pct_row0 count1 pct_row1 WOE IV IVTotal IVAdj IVTotalAdj /*IVEntropyAdj IVTotalEntropyAdj Entropy*/
+						rename=(count0=n0 count1=n1 
+								pct_row0=pcnt0 pct_row1=pcnt1))
+			&out_name(keep=var nmiss nused /*Entropy rename=(Entropy=EntropyTotal)*/);
 	by var;
 	array reset(*) n0_sum n1_sum;
 	if first.var then
 		do i = 1 to dim(reset);
 			reset(i) = .;
 		end;
-	format pcnt0 pcnt1 percent7.1;
+	format pcnt pcnt0 pcnt1 percent7.1;
 	n = n0 + n1;
+	pcnt = n / (nobs + nmiss);		%* Recall: nobs comes from _FreqMult_ and it counts the number of VALID observations (i.e. non-missing). This is why we need to sum nmiss to it to compute pcnt;
 	n0_sum + n0;
 	n1_sum + n1;
+	%* Compute the IV for each group adjusted by the variable total entropy;
+%*	IVEntropyAdj = IV * (1 + EntropyTotal) / (1 + log(nused));	%* 1+ to avoid division by 0 when the variable takes only 1 value, and also to always divide by a number larger than 1 thus making IVAdj <= IV;
 	if last.var then do;
 		output;
 		var = "--Total--";
@@ -643,13 +746,17 @@ data &out;
 			value = .;
 		%end;
 
-		n = nobs;
+		n = nobs + nmiss;
+		pcnt = 1;
 		n0 = n0_sum;
 		n1 = n1_sum;
 		pcnt0 = n0 / n;
 		pcnt1 = n1 / n;
 		WOE = .;
 		IV = IVTotal;
+		IVAdj = IVTotalAdj;
+%*		IVEntropyAdj = IVTotalEntropyAdj;
+%*		Entropy = EntropyTotal;
 	end;
 	output;
 	%* Variable labels;
@@ -660,6 +767,7 @@ data &out;
 	label %if &bothTypes %then %do; numvalue %end; %else %do; value %end; = "&value value";
 	%end;
 	label 	n		= "# observations"
+			pcnt	= "% observations"
 			n0		= "# &value0"
 			n1		= "# &value1"
 			pcnt0 	= "% &value0"
@@ -676,10 +784,10 @@ data &out;
 			pcnt0 = pcntEvent
 			pcnt1 = pcntNonEvent;
 	%end;
-	drop i nobs n0_sum n1_sum IVTotal;
+*	drop i nobs nmiss nused n0_sum n1_sum IVTotal IVTotalEntropyAdj IVTotalAdj EntropyTotal;
 run;
 %if &log %then %do;
-	%let out_name = %scan(&out, 1, '(');
+	%let out_name = %scan(&outtable, 1, '(');
 	%callmacro(getnobs, &out_name return=1, nobs nvar);
 	%put INFORMATIONVALUE: Dataset %upcase(&out_name) created with &nobs observations and &nvar variables;
 	%put INFORMATIONVALUE: containing the Information Table.;
@@ -704,7 +812,7 @@ run;
 			%let cutvar = numvalue;
 		%else %do;
 			%* Check if VALUE is numeric;
-			%let dsid = %sysfunc(open(&out));
+			%let dsid = %sysfunc(open(&outtable));
 			%let varnum = %sysfunc(varnum(&dsid, VALUE));
 			%let vartype = %sysfunc(vartype(&dsid, &varnum));
 			%if %upcase(&vartype) ~= N %then %do;
@@ -716,7 +824,7 @@ run;
 			%let rc = %sysfunc(close(&dsid));
 		%end;
 		%if %quote(&cutvar) ~= %then %do;
-			%let out_name = %scan(&out, 1, '(');
+			%let out_name = %scan(&outtable, 1, '(');
 			%* The input dataset for %CreateFormatsFromCuts excludes the cases that correspond to character variables (&cutvar ~= .)
 			%* which may exist when both numeric and character variables are analyzed. Note that in that case &cutvar=numvalue
 			%* so the used condition is fine;
@@ -745,9 +853,9 @@ proc datasets nolist;
 			_iv_freq1_
 			_iv_freq01_
 			_iv_freq02_
-			_iv_freq03_
+			_iv_freq01_
 			_iv_freqmult_
-			_iv_sum03_
+			_iv_sum01_
 			_iv_target_;
 quit;
 
