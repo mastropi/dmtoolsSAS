@@ -5,9 +5,33 @@ Author: 		Daniel Mastropietro
 Description: 	Tests run on macro %InformationValue.
 */
 
-*** Test dataset taken from "Credit Scoring for Risk Managers" de Elizabeth Mays, pag. 97.
+
+/*------------------------ Generate expected results ----------------------------*/
+* Create ad-hoc datasets for testing;
+%let testmacro = InformationValue;
+%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
+libname _data "&testpath\data";		%* This test data library name should coincide with the name used by the %RunTestHarness macro when mapping the DATADIR directory;
+options fmtsearch=(WORK _data);
+
+*** Test case 0: Extreme data;
+*** One variable has all its values equal, another has all missing values;
+*** Target variable with a few missing values;
+data _data.totest_00_extreme;
+	input x_allequal x_allmissing x_ok y;
+	datalines;
+1 . 2 0
+1 . 2 .
+1 . 3 1
+1 . 3 0
+1 . 3 1
+1 . . .
+1 . . 1
+1 . . 0
+;
+
+*** Test case 1: Test dataset taken from "Credit Scoring for Risk Managers" de Elizabeth Mays, pag. 97.
 *** The values of WOE and IV are shown as a reference of what the values should be;
-data testiv;
+data _data.totest_01_maysbook;
 	input group good bad WOE IV;
 	length z $5;
 	do i = 1 to good;
@@ -48,38 +72,48 @@ data testiv;
 ;
 * The IV total value is 1.022;
 
-proc freq data=testiv;
+proc freq data=_data.totest_01_maysbook;
 	tables group*y;
 run;
 
 * Format for group to test parameter FORMAT=;
-proc format;
+proc format library=_data;
 	value group 1-8 = '1-8'
 				9-13 = '9-13'
 				14-20 = '14-20';
 run;
 
-%InformationValue(testiv, target=y, var=group, groups=20);	* IV = 1.022, IVAdj = 1.022, IVEntropyAdj = 0.256;
-* Treat the analysis variable GROUP as categorical;
-%InformationValue(testiv, target=y, var=group, groups=);	* IV = 1.022, IVAdj = 0.511 (IV adjusted to 10 groups), IVEntropyAdj = 0.256;
-%InformationValue(testiv, target=z, var=group, groups=20, event="Bad");	* IV = 1.022, IVAdj = 1.022, IVEntropyAdj = 0.256;
-%InformationValue(testiv, target=y, var=group, formats=group group., event=0);	* Default: 10 groups: IV = 0.809, IVAdj = 4.046, IVEntropyAdj = 0.539;
-%InformationValue(testiv, target=z, var=group, event="Bad", formats=group group., groups=); * No grouping: IV = 0.459, IVAdj = 1.531, IVEntropyAdj = 0.221;
-%InformationValue(testiv, target=y, var=group, value=max, outformat=_informationformats_, groups=20); * IV = 1.022, IVAdj = 1.022, IVEntropyAdj = 0.256;
-%InformationValue(testiv, target=z, var=group, value=max, outformat=_informationformats_, groups=20); * IV = 1.022, IVAdj = 1.022, IVEntropyAdj = 0.256;
-** (17/08/05) v1.00: OK;
-** (13/08/06) v1.01: OK;
-** (31/07/12) v3.00: OK;	** added the SMOOTH= parameter to compute smoothed WOE values;
-** (15/04/16) v3.02: OK;	** added the OUTFORMAT= parameter;
-** (17/05/16) v3.03: OK; 	** renamed FORMAT= parameter with FORMATS= parameter to adapt to new version 2.02 of %FreqMult;
-** (17/06/18) v4.00: OK;
+* Read the Test Harness dataset;
+%import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
 
-* Tests on SASHELP.HEART;
-%FreqMult(sashelp.heart, target=status);
-%InformationValue(sashelp.heart, target=status, var=_ALL_, groups=, out=_informationvalue1_, outtable=_informationtable1_);
-%InformationValue(sashelp.heart, target=status, var=_ALL_, groups=, out=_iv_, outtable=_it_);
-%InformationValue(sashelp.heart, target=status, var=AgeAtStart AgeCHDdiag Smoking Smoking_Status Weight_Status Weight Sex, groups=20, out=_ivadj1_, outtable=_itadj1_);
-%InformationValue(sashelp.heart, target=status, var=AgeAtDeath AgeAtStart AgeCHDdiag Height Weight Sex, groups=);
+* Run tests and save the EXPECTED results;
+options nomprint;
+%RunTestHarness(
+	&testmacro,
+	TestHarness_&testmacro,
+	library=_data,
+	checkoutput=OUT OUTWOE OUTFORMAT,
+	saveoutput=1,
+	resultsdir=&testpath\expected
+);
+/*------------------------ Generate expected results ----------------------------*/
 
-proc print data=_informationtable_;
-run;
+
+/*----------------------------- Run Test Harness --------------------------------*/
+* Setup;
+%let testmacro = InformationValue;
+%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
+libname test "&testpath";
+options fmtsearch=(WORK _data);
+
+* Read the Test Harness dataset;
+%import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
+
+%RunTestHarness(
+	&testmacro,
+	TestHarness_&testmacro,
+	checkoutput=OUT OUTWOE OUTFORMAT,
+	datadir=&testpath\data,
+	resultsdir=&testpath\expected
+);
+/*----------------------------- Run Test Harness --------------------------------*/

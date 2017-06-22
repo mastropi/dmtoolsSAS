@@ -40,3 +40,7 @@ V.3.02: 2016/04/15 (DM)
 
 V.3.03: 2016/05/17 (DM)
 	- Parameter FORMAT= renamed to FORMATS= to adapt to the new signature of version 2.02 of %FreqMult which is called from the the macro.
+
+V.4.00: 2017/06/18 (DM)
+	- Adjusted Information Value (by number of cases in each category and by a common number of groups in the analyzed variables)
+	- Missing values added for the computation of the IV.

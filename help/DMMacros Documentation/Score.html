@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %Score</h1>
-<pre>Version:                      1.00                                                                                      </pre>
+<pre>Version:                      1.01                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      19-May-2016                                                                               </pre>
-<pre>Modified:                     29-May-2016                                                                               </pre>
+<pre>Modified:                     30-Jun-2016                                                                               </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Score a new dataset based on the estimated parameters of a regression model.                                                                                          </pre>
@@ -43,6 +43,7 @@ pre {display: block}
 <pre>          /* (SCORE and SCORECHECK should have different names). */                                                            </pre>
 <pre>          responsecheck=,               /* Response variable against which the RESPONSE variable should be compared */                              </pre>
 <pre>          /* (RESPONSE and RESPONSECHECK should have different names). */                                                            </pre>
+<pre>          varcheck=,                    /* Blank-separated list of additional variables to keep in the OUTCHECK dataset. */                              </pre>
 <pre>          outcheck=,                    /* Output dataset used for the comparison, containing only matching observations. */                              </pre>
 <pre>          out=,                         /* Output dataset containing the score and response values. */                              </pre>
 <pre>          plot=1,                       /* Show plots? */                                           </pre>
@@ -102,6 +103,15 @@ pre {display: block}
 <pre>                              (e.g. sigmoid transformation of score in logistic model).                                                            </pre>
 <pre>                              default: p                                                                                </pre>
 <pre>                                                                                                                        </pre>
+<pre>- datacheck:                  Dataset containing the SCORECHECK and/or RESPONSECHECK variables                                                            </pre>
+<pre>                              against which the score and/or response variables calculated by this macro                                                            </pre>
+<pre>                              should be compared.                                                                       </pre>
+<pre>                              Cases are matched by the ID variables if given, or by observation number                                                            </pre>
+<pre>                              if no ID variables are given, in which case it is assumed that both                                                            </pre>
+<pre>                              datasets have the same number of observations.                                                            </pre>
+<pre>                              Only matching cases are compared.                                                            </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
 <pre>- scorecheck                  Score variable in the DATA or DATACHECK dataset against which the SCORE variable should                                                            </pre>
 <pre>                              be compared.                                                                              </pre>
 <pre>                              It must have a different name than the SCORE variable.                                                            </pre>
@@ -112,13 +122,12 @@ pre {display: block}
 <pre>                              It must have a different name than the RESPONSE variable.                                                            </pre>
 <pre>                              default: empty                                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- datacheck:                  Dataset containing the SCORECHECK and/or RESPONSECHECK variables                                                            </pre>
-<pre>                              against which the score and/or response variables calculated by this macro                                                            </pre>
-<pre>                              should be compared.                                                                       </pre>
-<pre>                              Cases are matched by the ID variables if given, or by observation number                                                            </pre>
-<pre>                              if no ID variables are given, in which case it is assumed that both                                                            </pre>
-<pre>                              datasets have the same number of observations.                                                            </pre>
-<pre>                              Only matching cases are compared.                                                            </pre>
+<pre>- varcheck:                   Blank-separated list of variables in the DATACHECK dataset to keep in the                                                            </pre>
+<pre>                              OUTCHECK dataset apart from the SCORECHECK and RESPONSECHECK variables.                                                            </pre>
+<pre>                              Normally these are model variables that should be analyzed when the check is                                                            </pre>
+<pre>                              not satisfactory.                                                                         </pre>
+<pre>                              This parameter only makes sense when the DATACHEK dataset is different from the                                                            </pre>
+<pre>                              input dataset to score.                                                                   </pre>
 <pre>                              default: empty                                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- outcheck:                   Output dataset containing all the variables in the DATACHECK dataset but just                                                            </pre>
@@ -162,6 +171,6 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <h3>SEE ALSO:</h3>
 <pre>- %FreqMult: to generate the distribution of the categorical variables present in the model that is needed                                                                                          </pre>
-<pre>by this macro                                                                                                           </pre>
+<pre>by this macro.                                                                                                          </pre>
 <body>
 </html>

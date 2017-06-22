@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %RenameVars</h1>
-<pre>Version:                      1.04                                                                                      </pre>
+<pre>Version:                      1.05                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      09-Sep-2005                                                                               </pre>
-<pre>Modified:                     15-Oct-2015 (previous: 19-Aug-2006) (renamed from %RenameVariables to make it compliant with other macro names)                                                            </pre>
+<pre>Modified:                     04-Aug-2016 (previous: 15-Oct-2015) (remove variables not found in input dataset)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>This macro renames variables in a dataset.                                                                                          </pre>
@@ -28,7 +28,8 @@ pre {display: block}
 <pre>          type=CSV,                     /* Type of file specified in FILE= */                              </pre>
 <pre>          old=old,                      /* Name of the variable in dataset RENAME= containing the old variable names */                              </pre>
 <pre>          new=new,                      /* Name of the variable in dataset RENAME= containing the new variable names */                              </pre>
-<pre>          norepeated=1,                 /* Whether there might be repeated names in the new variable names list */                              </pre>
+<pre>          checkrepeated=0,/* Whether to check for repeated names in the NEW variable names */                                                            </pre>
+<pre>          norepeated=,                  /* (DEPRECATED) Use CHECKREPEATED instead; norepeated=1 is equivalent to checkrepeated=0 */                              </pre>
 <pre>          notes=0,                      /* Show SAS notes in the log? */                              </pre>
 <pre>          log=1);                       /* Show messages in the log? */                              </pre>
 <pre>                                                                                                    </pre>
@@ -45,6 +46,8 @@ pre {display: block}
 <pre>                              If a variable does not have to be renamed, it can still appear in the dataset.                                                            </pre>
 <pre>                              In such cases, the new name must be either empty or the same as the current                                                            </pre>
 <pre>                              name of the variable.                                                                     </pre>
+<pre>                              Also variables that do not exist in the input dataset can appear among the old                                                            </pre>
+<pre>                              variable names. The variable is simply ignored in such case.                                                            </pre>
 <pre>                              The names of the columns containing the old (current) variable names and the                                                            </pre>
 <pre>                              new variable names are specified in parameters OLD= and NEW= respectively.                                                            </pre>
 <pre>                              See below.                                                                                </pre>
@@ -69,23 +72,26 @@ pre {display: block}
 <pre>                              variable names.                                                                           </pre>
 <pre>                              default: new                                                                              </pre>
 <pre>                                                                                                                        </pre>
-<pre>- norepeated:                 States whether there might be repeated names in the list of new variable                                                            </pre>
-<pre>                              names to be defined with the rename statement.                                                            </pre>
-<pre>                              When NOREPEATED=1, the process may take a long time if the number of variables                                                            </pre>
+<pre>- checkrepeated:Whether to check for repeated values in the list of NEW variable names.                                                                                          </pre>
+<pre>                              Possible values: 0 => Do not check for repeated names in the NEW variable names list                                                            </pre>
+<pre>                               1 => Check for repeated names in the NEW variable names list and show                                                            </pre>
+										a warning message if there are, indicating the number of repeated
+<pre>                              a warning message if there are, indicating the number of repeated                                                            </pre>
+								 		names that were found.
+<pre>                                                            names that were found.                                      </pre>
+<pre>                              WARNING: when CHECKREPEATED=1, the process may take a long time if the number of variables                                                            </pre>
 <pre>                              to be renamed is large (say larger than 50) because the check for repeated names                                                            </pre>
 <pre>                              is time consuming.                                                                        </pre>
-<pre>                              Checking for repeated names allows knowing the number of repeated names that                                                            </pre>
-<pre>                              exist among the list of new variable names.                                                            </pre>
-<pre>                              Possible values: 0 => There are no repeated names in the new variable names list                                                            </pre>
-<pre>                               1 => There might be repeated names in the new variable names list                                                            </pre>
+<pre>                              NOTE: if there are repeated values in the OLD variable names, the rename corresponding                                                            </pre>
+<pre>                              to the FIRST occurrence of the OLD variable name is taken.                                                            </pre>
 <pre>                              default: 0                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- notes:                      Show SAS notes in the log?                                                                </pre>
-<pre>                              Possible values: 0 => Yes, 1 => No                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
 <pre>                              default: 0                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- log:                        Show messages in the log?                                                                 </pre>
-<pre>                              Possible values: 0 => Yes, 1 => No                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
 <pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <h3>NOTES:</h3>
@@ -95,6 +101,9 @@ pre {display: block}
 <pre>PROC CONTENTS run on the dataset of interest and then editing this informataion in Excel                                                                                          </pre>
 <pre>to define the new variable names.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
+<pre>2.- Repeated values in the OLD variable names are removed by keeping the first occurrence                                                                                          </pre>
+<pre>that appears in the rename dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
 <pre>2.- Even if NOTES=0, SAS notes generated by the PROC DATASETS used to rename the variables                                                                                          </pre>
 <pre>are shown.                                                                                                              </pre>
 <pre>                                                                                                                        </pre>
@@ -103,6 +112,8 @@ pre {display: block}
 <pre>- %GetLibraryName                                                                                                       </pre>
 <pre>- %GetNroElements                                                                                                       </pre>
 <pre>- %Import                                                                                                               </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
 <pre>- %Puts                                                                                                                 </pre>
 <pre>- %RemoveRepeated                                                                                                       </pre>
 <pre>- %RemoveSuffix                                                                                                         </pre>

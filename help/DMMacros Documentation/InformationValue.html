@@ -8,35 +8,42 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %InformationValue</h1>
-<pre>Version:                      3.03                                                                                      </pre>
+<pre>Version:                      4.00                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      06-Jul-2005                                                                               </pre>
-<pre>Modified:                     17-May-2016 (previous: 15-Apr-2016)                                                            </pre>
+<pre>Modified:                     17-Jun-2017 (previous: 17-May-2016, 15-Apr-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>This macro computes the Information Value (IV) provided by a set of input variables w.r.t.                                                                                          </pre>
 <pre>a binary target variable.                                                                                               </pre>
-<pre>The input variables can be either categorical or continuous. In the latter case, the                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The input variables can be either categorical or continuous. In the continuous case, the                                                                                          </pre>
 <pre>input variable is categorized into the specified number of groups.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Note that ALL numeric variables are considered continuous if the GROUPS= parameter is not empty.                                                                                          </pre>
+<pre>If GROUPS= is empty, they are considered categorical.                                                                                          </pre>
+<pre>In order to analyze a set of numeric variables that include both categorical and continuous                                                                                          </pre>
+<pre>variables, the analysis should be run separately, once on the categorical variables and                                                                                          </pre>
+<pre>once for the continuous variables.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <pre>The macro optionally creates an output dataset containing formats that allow reproducing the                                                                                          </pre>
 <pre>categorization carried out by the macro on the continuous analysis variables.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
-<pre>For more details on the calculation of the Information Value see DETAILS below.                                                                                          </pre>
+<pre>For more details on the calculation of the Information Value see the DETAILS section below.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%InformationValue(                                                                                          </pre>
 <pre>          data,                         /* Input dataset. */                                        </pre>
 <pre>          target=,                      /* Dichotomous target variable. */                              </pre>
-<pre>          var=,                         /* Analysis variables (character or numeric). */                              </pre>
+<pre>          var=_ALL_,                    /* Analysis variables (character or numeric). */                              </pre>
 <pre>          event=,                       /* Event of interest. */                                    </pre>
-<pre>          groups=,                      /* Nro. of groups to use to categorize numeric variables. Leave it empty for categorical variables. */                              </pre>
-<pre>          value=,                       /* Statistic to show for each category of numeric variables. */                              </pre>
+<pre>          groups=,                      /* Nro. of groups to use to categorize numeric variables. Leave it empty if ALL analyzed variables are categorical. */                              </pre>
+<pre>          stat=,                        /* Statistic to use as representation of each category of numeric variables. */                              </pre>
 <pre>          formats=,                     /* Formats to use for each analysis variable. */                              </pre>
 <pre>          smooth=1,                     /* Whether to smooth the WOE calculation in order to avoid missing values. */                              </pre>
-<pre>          out=_InformationTable_,       /* Output dataset containing the WOE and IV for each bin of the categorized variables. */                              </pre>
-<pre>          outiv=_InformationValue_,     /* Output dataset containing the Information Value for each variable. */                              </pre>
-<pre>          outformat=,                   /* Output dataset containing format definitions corresponding to the information value bins. */                              </pre>
+<pre>          out=_InformationValue_,       /* Output dataset containing the Information Value for each variable. */                              </pre>
+<pre>          outwoe=_InformationWOE_,      /* Output dataset containing the WOE and IV for each bin of the categorized variables. */                              </pre>
+<pre>          outformat=,                   /* Output dataset containing format definitions corresponding to the WOE bins. */                              </pre>
 <pre>          notes=1,                      /* Show SAS notes in the log? */                              </pre>
 <pre>          log=1);                       /* Show messages in the log? */                              </pre>
 <pre>                                                                                                    </pre>
@@ -64,7 +71,7 @@ pre {display: block}
 <pre>                              Leave it empty if no categorization is wished. For instance, for categorical variables.                                                            </pre>
 <pre>                              default: 10                                                                               </pre>
 <pre>                                                                                                                        </pre>
-<pre>- value:                      Statistic to show for each category of numeric variables, such as the mean.                                                            </pre>
+<pre>- stat:                       Statistic to show for each category of numeric variables, such as the mean.                                                            </pre>
 <pre>                              default: empty => each category is represented by an arbitrary integer value (normally                                                            </pre>
 <pre>                              going from 1 to the number of groups, but this depends on how variable values are grouped)                                                            </pre>
 <pre>                                                                                                                        </pre>
@@ -82,28 +89,7 @@ pre {display: block}
 <pre>                              Possible values: 0 => do not smooth, 1 => smooth                                                            </pre>
 <pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
-<pre>- out:                        Output dataset containing the distribution of the target variable for each value                                                            </pre>
-<pre>                              of the variables listed in VAR.                                                            </pre>
-<pre>                              Data options can be specified as in a data= SAS option.                                                            </pre>
-<pre>                              The dataset has the following columns:                                                            </pre>
-<pre>                              - var:                        Variable name.                                              </pre>
-<pre>                              - numvalue(*):                Value taken by the numeric variables.                              </pre>
-<pre>                              - charvalue(*):               Value taken by the character variables.                              </pre>
-<pre>                              - n:                          Number of observations in the dataset with non missing values of the                              </pre>
-<pre>                              analysis variable and the target variable.                                                            </pre>
-<pre>                              - nNonEvent:                  Number of Non-Events.                                       </pre>
-<pre>                              - pcntNonEvent:               Percent of Non-Events.                                      </pre>
-<pre>                              - nEvent:                     Number of Events.                                           </pre>
-<pre>                              - pcntEvent:                  Percent of Events.                                          </pre>
-<pre>                              - WOE:                        Weight Of Evidence of the corresponding value of the analysis variable.                              </pre>
-<pre>                              - IV:                         Information Value of the analysis variable.                              </pre>
-<pre>                              (*) If all the analysis variables are character or all the analysis variables are                                                            </pre>
-<pre>                              numeric, there is only one column containing the values taken by the variables whose                                                             </pre>
-<pre>                              name is VALUE. In this case, the columns NUMVALUE and CHARVALUE are not present in                                                             </pre>
-<pre>                              the output dataset.                                                                       </pre>
-<pre>                              default: _InformationTable_                                                               </pre>
-<pre>                                                                                                                        </pre>
-<pre>- outiv:                      Output datase containing the Information Value of each variable listed in VAR.                                                            </pre>
+<pre>- out:                        Output datase containing the Information Value of each variable listed in VAR.                                                            </pre>
 <pre>                              Data options can be specified as in a data= SAS option.                                                            </pre>
 <pre>                              The dataset has the following columns:                                                            </pre>
 <pre>                              - var:                        Variable name.                                              </pre>
@@ -115,7 +101,38 @@ pre {display: block}
 <pre>                              of variable values for which the WOE is missing, which corresponds                                                            </pre>
 <pre>                              to values for which the information provided is infinite.                                                            </pre>
 <pre>                              - IV:                         Information Value of the analysis variable.                              </pre>
+<pre>                              - IVAdj:                      Adjusted Information Value based on the number of cases in each bin                              </pre>
+<pre>                              and on the number of groups that contribute to the IV.                                                            </pre>
+<pre>                              - EntropyRel:                 Entropy of the analyzed variable relative to the maximum possible entropy                              </pre>
+<pre>                              (which occurs when all categories of the analyzed variable have the same                                                            </pre>
+<pre>                              number of cases).                                                                         </pre>
 <pre>                              default: _InformationValue_                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outwoe:                     Output dataset containing the distribution of the target variable for each value                                                            </pre>
+<pre>                              of the variables listed in VAR.                                                            </pre>
+<pre>                              Data options can be specified as in a data= SAS option.                                                            </pre>
+<pre>                              The dataset has the following columns:                                                            </pre>
+<pre>                              - var:                        Variable name.                                              </pre>
+<pre>                              - numvalue(*):                Value taken by the numeric variables in the corresponding bin.                              </pre>
+<pre>                              - charvalue(*):               Value taken by the character variables in the corresponding bin.                              </pre>
+<pre>                              - n:                          Number of observations in the dataset with non missing values of the                              </pre>
+<pre>                              target variable for the corresponding bin.                                                            </pre>
+<pre>                              - pcnt:                       Proportion of observations in the dataset with non missing values of                              </pre>
+<pre>                              the target variable for the corresponding bin.                                                            </pre>
+<pre>                              - nNonEvent:                  Number of Non-Events in the corresponding bin.                              </pre>
+<pre>                              - pcntNonEvent:               Proportion of Non-Events in the corresponding bin.                              </pre>
+<pre>                              - nEvent:                     Number of Events in the corresponding bin.                              </pre>
+<pre>                              - pcntEvent:                  Proportion of Events in the corresponding bin.                              </pre>
+<pre>                              - WOE:                        Weight Of Evidence of the analysis variable by the corresponding bin.                              </pre>
+<pre>                              - IV:                         Contribution to the Information Value of the analysis variable by the                              </pre>
+<pre>                              corresponding bin.                                                                        </pre>
+<pre>                              - IVAdj:                      Contribution to the Adjusted Information Value of the analysis variable                              </pre>
+<pre>                              by the corresponding bin.                                                                 </pre>
+<pre>                              (*) If all the analysis variables are character or all the analysis variables are                                                            </pre>
+<pre>                              numeric, there is only one column containing the values taken by the variables whose                                                             </pre>
+<pre>                              name is VALUE. In this case, the columns NUMVALUE and CHARVALUE are not present in                                                             </pre>
+<pre>                              the output dataset.                                                                       </pre>
+<pre>                              default: _InformationWOE_                                                                 </pre>
 <pre>                                                                                                                        </pre>
 <pre>- ouformat:                   Output dataset containing the formats that could be applied to each input variable                                                            </pre>
 <pre>                              in order to reproduce the categorization performed by this macro.                                                            </pre>
@@ -182,12 +199,27 @@ pre {display: block}
 <pre>into which the input continuous variable is categorized,                                                                                          </pre>
 <pre>- J is the number of different values taken by the categorized variable,                                                                                          </pre>
 <pre>- P(j/b) is the proportion of cases falling into bin j when the target variable takes the value b,                                                                                          </pre>
-<pre>- WOE(j) = ln(P(j/1)/P(j/0)) is the Weight-Of-Evidence of category j w.r.t. to target value 1.d                                                                                          </pre>
+<pre>- WOE(j) = ln(P(j/1)/P(j/0)) is the Weight-Of-Evidence of category j w.r.t. to target value 1                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Note that the WOE can be interpreted as logit(P(1/j)) - logit(P(1)), i.e. the Delta Logit observed                                                                                          </pre>
+<pre>in category j w.r.t. the overall population logit.                                                                                          </pre>
+<pre>In practice the WOE is adjusted by the number of cases in the category, i.e. the weight is reduced                                                                                          </pre>
+<pre>*towards 0* by the value log(J)/ncases(j) i.e.:                                                                                          </pre>
+<pre>                              WOE_adj(j)                    = max(0, WOE(j) - log(J)/ncases(j)) if WOE(j) >= 0                              </pre>
+<pre>                              = min(0, WOE(j) + log(J)/ncases(j)) if WOE(j) < 0                                                            </pre>
+<pre>This adjustment makes it possible for categories with too few cases (for which the information                                                                                          </pre>
+<pre>provided about the target variable is unreliable) have a WOE = 0.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The IV expression can also be interpreted as follows, in terms of the event probability:                                                                                          </pre>
+<pre>                              IV = Sum{j=1 to J} { N(j)/N { [P(1/j)/P(1) - P(0/j)/P(0)] * [logit(P(1/j)) - logit(P(1)] }                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>where we observe that every term in the summation is weighted by N(j)/N, i.e. the proportion                                                                                          </pre>
+<pre>of observations in category j.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <pre>In order to avoid an undefined value of WOE(j), a smoothing factor is used by default in its                                                                                          </pre>
 <pre>computation, which is equal to smooth_factor = 0.5/(#cases in the analyzed variable), making the                                                                                          </pre>
 <pre>expression for the smoothed WOE equal to:                                                                                          </pre>
-<pre>                              Smoothed_WOE(j) = ln( (P(j/1) + smooth_factor) / (P(j/0) + smooth_factor) )                                                            </pre>
+<pre>                              WOE_smoothed(j) = ln( (P(j/1) + smooth_factor) / (P(j/0) + smooth_factor) )                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>The value 0.5 corresponds to a 0.5 adjustment done originally on the COUNTS (which is then                                                                                          </pre>
 <pre>translated to a COMMON adjustment on the probabilities by dividing by the number of analyzed cases.                                                                                           </pre>
@@ -232,9 +264,9 @@ pre {display: block}
 <pre>quasi-complete separation, which means that the variable is almost a perfect separator of the target                                                                                          </pre>
 <pre>variable.                                                                                                               </pre>
 <pre>Such variables could be identified by looking at the number of distinct values of the analysis variable                                                                                          </pre>
-<pre>that are used in the computation of the Information Value (stored in column NUSED of the OUTIV= dataset).                                                                                          </pre>
+<pre>that are used in the computation of the Information Value (stored in column NUSED of the OUT= dataset).                                                                                          </pre>
 <pre>If this value is too small with respect to the number of distinct values taken by the analysis variable                                                                                          </pre>
-<pre>(stored in column NVALUES of the OUTIV= dataset), it means that for many variable values the target value                                                                                          </pre>
+<pre>(stored in column NVALUES of the OUT= dataset), it means that for many variable values the target value                                                                                          </pre>
 <pre>is only one (as opposed to 2), giving a missing value of the WOE, which means that the information provided                                                                                          </pre>
 <pre>by that value is infinite.                                                                                              </pre>
 <body>

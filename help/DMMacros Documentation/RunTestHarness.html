@@ -8,17 +8,23 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %RunTestHarness</h1>
-<pre>Version:                      1.02                                                                                      </pre>
+<pre>Version:                      1.03                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      12-Feb-2016                                                                               </pre>
-<pre>Modified:                     20-Mar-2016 (previous: 17-Mar-2016)                                                            </pre>
+<pre>Modified:                     21-Jun-2017 (previous: 20-Mar-2016, 17-Mar-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Runs a set of tests on a given macro. The macro parameter values for each test are read                                                                                          </pre>
-<pre>from a SAS dataset containing one column per parameter to set.                                                                                          </pre>
+<pre>from a Test Harness SAS dataset containing one column per parameter to set.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
-<pre>Optionally the result of running the macro is compared to the expected result given in                                                                                          </pre>
-<pre>the input dataset.                                                                                                      </pre>
+<pre>If the tested macro returns a value, this returned value or result can be compared with                                                                                          </pre>
+<pre>the expected returned value read from the Test Harness dataset (see below).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>If the tested macro generates output datasets, they can be compared with expected outputs                                                                                          </pre>
+<pre>stored in the RESULTSDIR directory (see below).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Note that a macro can EITHER return a value OR generate output datasets. It cannot do both                                                                                          </pre>
+<pre>(unless the macro uses the FCMP feature in SAS).                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>REQUIRED PARAMETERS:</h3>
 <pre>- macro:                      Macro name to test (w.o. %)                                                               </pre>
@@ -34,7 +40,7 @@ pre {display: block}
 <pre>                              Optionally the dataset can have the following additional columns:                                                            </pre>
 <pre>                              _DESCRIPTION:                 Describes what the test case tests.                              </pre>
 <pre>                              _EXPECT:                      Describes what to expect as a result of the test.                              </pre>
-<pre>                              _RESULT:                      Indicates whether the test should be a successful ('S')                              </pre>
+<pre>                              _RESULT:                      Indicates whether the test should be a success ('S')                              </pre>
 <pre>                              or a failure ('F').                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <h3>OPTIONAL PARAMETERS:</h3>
@@ -48,14 +54,30 @@ pre {display: block}
 <pre>- testto:                     Last test number to run out of the TESTCASES list.                                                            </pre>
 <pre>                              default: number of cases to test as per parameter TESTCASES                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- checkresult:                Whether the result of the macro should be compared and checked with                                                            </pre>
-<pre>                              the expected result for the test given in column _EXPECT.                                                            </pre>
+<pre>- checkresult:                Whether the result or returned value of the macro should be compared against                                                            </pre>
+<pre>                              the expected returned value for the test given in column _EXPECT of the                                                            </pre>
+<pre>                              Test Harness dataset.                                                                     </pre>
 <pre>                              This only works when the macro returns a value, o.w. set it to 0.                                                            </pre>
 <pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
 <pre>                              default: 0                                                                                </pre>
 <pre>                                                                                                                        </pre>
-<pre>- checkoutput:                Blank-separated list of output datasets to check with reference results.                                                            </pre>
+<pre>- checkoutput:                Blank-separated list of output datasets to compare with expected outputs.                                                            </pre>
+<pre>                              These names should correspond to the PARAMETER names of the macro under test                                                            </pre>
+<pre>                              that take output dataset names as their values. Ex: OUT, OUTSTAT, etc.                                                            </pre>
+<pre>                              The comparison is carried out using PROC COMPARE where the BASE dataset is                                                            </pre>
+<pre>                              the expected output and the COMPARE dataset is the observed output.                                                            </pre>
+<pre>                              The output of PROC COMPARE is saved to a dataset whose content is only printed                                                            </pre>
+<pre>                              when it contains observations as only the differing observations are saved to                                                            </pre>
+<pre>                              that dataset.                                                                             </pre>
 <pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- saveoutput:                 Whether to save the output datasets generated by the macro and listed in                                                            </pre>
+<pre>                              the CHECKOUTPUT parameter.                                                                </pre>
+<pre>                              Set this to 1 if running the test harness for the first time and the                                                            </pre>
+<pre>                              generated outputs should be saved for future regression tests.                                                            </pre>
+<pre>                              The output datasets are saved only when CHECKRESULT=0.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- library:                    Library name to add to the name of the dataset to be used for each test                                                            </pre>
 <pre>                              as read from the DATA column in the test harness dataset passed in parameter DATA.                                                            </pre>
@@ -74,16 +96,18 @@ pre {display: block}
 <pre>- resultsdir:                 Unquoted directory name where the results datasets are located.                                                            </pre>
 <pre>                              These datasets are the datasets against which the output datasets generated                                                            </pre>
 <pre>                              by the macro and listed in CHECKOUTPUT= should be compared.                                                            </pre>
-<pre>                              There names should be the same as the name of the output datasets generated                                                            </pre>
+<pre>                              These names should be the same as the name of the output datasets generated                                                            </pre>
 <pre>                              by the macro.                                                                             </pre>
 <pre>                              default: (empty)                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CallMacro                                                                                                            </pre>
 <pre>- %DeleteTrackingMacroVars                                                                                              </pre>
 <pre>- %ExectTimeStart                                                                                                       </pre>
 <pre>- %ExecTimeStop                                                                                                         </pre>
 <pre>- %FindInList                                                                                                           </pre>
 <pre>- %FindMatch                                                                                                            </pre>
+<pre>- %GetNObs                                                                                                              </pre>
 <pre>- %GetNroElements                                                                                                       </pre>
 <pre>- %MakeList                                                                                                             </pre>
 <pre>- %MakeListFromVar                                                                                                      </pre>
@@ -91,5 +115,30 @@ pre {display: block}
 <pre>- %ResetSASOptions                                                                                                      </pre>
 <pre>- %SelectNames                                                                                                          </pre>
 <pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- Generate the expected results based on the TestHarness_&testmacro dataset:                                                                                          </pre>
+<pre>%let testmacro = EvaluationChart;                                                                                          </pre>
+<pre>%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;                                                                                          </pre>
+<pre>%RunTestHarness(                                                                                                        </pre>
+<pre>                              &testmacro,                                                                               </pre>
+<pre>                              TestHarness_&testmacro,                                                                   </pre>
+<pre>                              library=_data,                                                                            </pre>
+<pre>                              checkoutput=OUT OUTSTAT,                                                                  </pre>
+<pre>                              saveoutput=1,                                                                             </pre>
+<pre>                              resultsdir=&testpath\expected                                                             </pre>
+<pre>);                                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
+<pre>2,- Run the Test Harness unit tests defined in the TestHarness_&testmacro dataset:                                                                                          </pre>
+<pre>%let testmacro = EvaluationChart;                                                                                          </pre>
+<pre>%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;                                                                                          </pre>
+<pre>%RunTestHarness(                                                                                                        </pre>
+<pre>                              &testmacro,                                                                               </pre>
+<pre>                              TestHarness_&testmacro,                                                                   </pre>
+<pre>                              checkoutput=OUT OUTSTAT,                                                                  </pre>
+<pre>                              datadir=&testpath\data,                                                                   </pre>
+<pre>                              resultsdir=&testpath\expected                                                             </pre>
+<pre>);                                                                                                                      </pre>
+<pre>                                                                                                                        </pre>
 <body>
 </html>

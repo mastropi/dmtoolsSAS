@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %GetVarList</h1>
-<pre>Version: 2.00                                                                                                           </pre>
-<pre>Author: Daniel Mastropietro                                                                                             </pre>
-<pre>Created: 27-Dec-04                                                                                                      </pre>
-<pre>Modified: 17-Aug-06                                                                                                     </pre>
+<pre>Version:                      2.01                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      27-Dec-2004                                                                               </pre>
+<pre>Modified:                     20-Jun-2016 (previous: 17-Aug-2006)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>This macro parses a list of variables in a dataset by converting the keywords                                                                                          </pre>
@@ -22,7 +22,7 @@ pre {display: block}
 <pre>much faster.                                                                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
-<pre>%GetVarList(data, var=_ALL_, check=1, log=1);                                                                                          </pre>
+<pre>%GetVarList(data, var=_ALL_, check=0, log=1);                                                                                          </pre>
 <pre>                                                                                                    </pre>
 <h3>REQUIRED PARAMETERS:</h3>
 <pre>- data:                       Input dataset. Data options can be specified but THEY ARE IGNORED.                                                            </pre>
@@ -38,7 +38,7 @@ pre {display: block}
 <pre>                              procedure is checked for existence in the dataset. Those variables not found                                                            </pre>
 <pre>                              in the dataset are listed in the log with a WARNING message.                                                            </pre>
 <pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
-<pre>                              default: 1                                                                                </pre>
+<pre>                              default: 0                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- log:                        Show messages in the log?                                                                 </pre>
 <pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
@@ -55,7 +55,8 @@ pre {display: block}
 <pre>from macro %CheckInputParameters, where the message of existence or non-existence of variables is                                                                                          </pre>
 <pre>performed there (i.e. when calling %GetVarList from %CheckInputParameters, I don't want the macro                                                                                          </pre>
 <pre>%GetVarList to check for existence of the variables in the dataset because I want this task to be                                                                                          </pre>
-<pre>done by %CheckInputParameters, so that the appropriate messages are issued by this macro).                                                                                          </pre>
+<pre>done by %CheckInputParameters, so that the appropriate messages are issued by this macro. Therefore                                                                                          </pre>
+<pre>I call %GetVarList with CHECK=0 from within %CheckInputParameters).                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <pre>3.- If just the list of all variables in the dataset is wished, use rather %GetVarOrder which                                                                                          </pre>
 <pre>runs much faster.                                                                                                       </pre>
@@ -71,10 +72,10 @@ pre {display: block}
 <pre>- %GetVarNames                                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>EXAMPLES:</h3>
-<pre>1.- %let vars = %GetVarList(test, var=x1-x5 count: id--name);                                                                                          </pre>
+<pre>1.- %let vars = %GetVarList(test, var=x1-x5 count: id--name, check=1);                                                                                          </pre>
 <pre>The list of passed variables that exist in dataset TEST is returned and stored in macro variable VARS.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
-<pre>2.- %let vars = %GetVarList(test, var=x1-x5 count: id--name, check=0);                                                                                          </pre>
+<pre>2.- %let vars = %GetVarList(test, var=x1-x5 count: id--name);                                                                                          </pre>
 <pre>Same as above but the variables resulting from the parsing process are NOT checked for existence in                                                                                          </pre>
 <pre>dataset TEST.                                                                                                           </pre>
 <body>

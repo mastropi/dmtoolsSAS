@@ -1,8 +1,8 @@
 /* MACRO %Categorize
-Version:	1.0
+Version:	1.01
 Author:		Daniel Mastropietro
 Created:	12-Feb-2016
-Modified:	12-Feb-2016
+Modified:	18-Jun-2017 (previous: 12-Feb-2016)
 
 DESCRIPTION:
 Categorizes a set of numeric variables based on ranks (i.e. equal size binning) and optionally
@@ -21,7 +21,7 @@ USAGE:
 					*** This list should be matched one to one with the ariables in VAR.
 	varvalue=,		*** Blank-separated list of names to be used for the statistic-valued categorized variables
 					*** This list should be matched one to one with the ariables in VAR.
-	value=,			*** Statistic to use as representative of each category for the statistic-valued categorized variables
+	stat=,			*** Statistic to use as representation of each category for the statistic-valued categorized variables
 	groupsize=,		*** Number of cases wished for each group in the categorized variables
 	groups=10,		*** Number of groups to use in the categorization
 	descending=0,	*** Compute ranks on the decreasing values of the analyzed variables?
@@ -75,7 +75,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 					varcat=,
 					varvalue=,
 /*					suffix=_cat, */
-					value=mean, 
+					stat=mean,
+					value=,
 /*					both=, */
 					groupsize=,
 					groups=10,
@@ -103,7 +104,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put %quote(                        *** This list should be matched one to one with the ariables in VAR.);
 	%put varvalue= , %quote(            *** Blank-separated list of names to be used for the statistic-valued categorized variables.);
 	%put %quote(                        *** This list should be matched one to one with the ariables in VAR.);
-	%put value= , %quote(               *** Statistic to use as representative of each category for the statistic-valued categorized variables.);
+	%put stat= , %quote(                *** Statistic to use as representative of each category for the statistic-valued categorized variables.);
 	%put groupsize= , %quote(           *** Number of cases wished for each group in the categorized variables.);
 	%put groups=10 , %quote(            *** Number of groups to use in the categorization.);
 	%put descending=0 , %quote(         *** Compute ranks on the decreasing values of the analyzed variables?);
@@ -142,6 +143,13 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %local nro_vars;
 %local var_order;
 
+%*** Treat parameters VALUE= and STAT= because I do not want to show VALUE in the log (the user should use STAT, not VALUE, although they represent the same thing);
+%* Out of the two parameters, STAT has preference;
+%* Note that if both are empty, the %Means macro below will assume that the user wants to use the MEAN as statistic
+%* as representation of each category;
+%if %quote(&stat) = %then
+	%let stat = &value;
+
 %* Show input parameters;
 %if &log %then %do;
 	%put;
@@ -156,7 +164,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put CATEGORIZE: - condition = %quote(    &condition);
 	%put CATEGORIZE: - varcat = %quote(       &varcat);
 	%put CATEGORIZE: - varvalue = %quote(     &varvalue);
-	%put CATEGORIZE: - value = %quote(        &value);
+	%put CATEGORIZE: - stat = %quote(         &stat);
 	%put CATEGORIZE: - groupsize = %quote(    &groupsize);
 	%put CATEGORIZE: - groups = %quote(       &groups);
 	%put CATEGORIZE: - descending = %quote(   &descending);
@@ -317,8 +325,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 			by=&by &rankvari,
 			format=&format,
 			var=&vari,
-			stat=&value,
-			name=_value&i,		/* Name for the variable name containing the statistic specified in parameter VALUE= */
+			stat=&stat,
+			name=_value&i,		/* Name for the variable name containing the value corresponding to the statistic specified in parameter STAT= */
 			out=_cat_dat_means_,
 			log=0);
 
@@ -338,9 +346,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %* the statistic name to the variable names.
 %* Otherwise, keep the variables as specified by VARCAT and VARVALUE;
 %if %quote(&varcat) = and %quote(&varvalue) = %then %do;
-	%* Fix variable names so that the suffix (_&value) fits in;
-	%let var = %FixVarNames(&var, space=%length(_&value));
-	%let varvalue = %MakeList(&var, suffix=_&value);
+	%* Fix variable names so that the suffix (_&stat) fits in;
+	%let var = %FixVarNames(&var, space=%length(_&stat));
+	%let varvalue = %MakeList(&var, suffix=_&stat);
 %end;
 %else %if %quote(&varcat) ~= %then %do;
 	%CreateInteractions(&rankvar, with=&varcat, join=%quote(=), allinteractions=0, macrovar=_renamecat, log=0);
