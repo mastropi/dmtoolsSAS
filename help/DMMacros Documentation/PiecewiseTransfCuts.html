@@ -8,26 +8,38 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %PiecewiseTransfCuts</h1>
-<pre>Version: 1.00                                                                                                           </pre>
-<pre>Author: Daniel Mastropietro                                                                                             </pre>
-<pre>Created: 3-Jan-05                                                                                                       </pre>
-<pre>Modified: 13-Jan-05                                                                                                     </pre>
+<pre>Version:                      1.10                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      03-Jan-2005                                                                               </pre>
+<pre>Modified:                     07-Aug-2017 (previous: 13-Jan-2005)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
-<pre>Macro that finds the best cut points for a linear piecewise transformation of a continuous                                                                                          </pre>
-<pre>variable that maximizes the average R-Square (over the different pieces of the transformation)                                                                                          </pre>
-<pre>with respect to a continuous target variable.                                                                                          </pre>
+<pre>Macro that finds the best cut points for a linear piecewise transformation of ONE analysis continuous                                                                                          </pre>
+<pre>variable that maximizes the R-Square of the multi-piece regression with respect to a CONTINUOUS target variable.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The best cut points are found among the values taken by the analysis continuous variable, as considering any                                                                                          </pre>
+<pre>value in between two consecutive analysis variable values is the same as considering one of those values.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The analysis variable can take repeated values as these values are deduplicated before defining the cut values                                                                                          </pre>
+<pre>to try out.                                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>If the input dataset is appropriately prepared one can either:                                                                                          </pre>
+<pre>- Analyze several input variables using BY processing                                                                                          </pre>
+<pre>- Analyze a binary target variable                                                                                          </pre>
+<pre>See the NOTES and the EXAMPLES sections for more details.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%PiecewiseTransfCuts(                                                                                          </pre>
-<pre>          data,                                                                                     </pre>
-<pre>          target=y,                                                                                 </pre>
-<pre>          var=x,                                                                                    </pre>
-<pre>          by=,                                                                                      </pre>
-<pre>          id=,                                                                                      </pre>
-<pre>          out=_PTC_cuts_,                                                                           </pre>
-<pre>          outall=_PTC_results_,                                                                     </pre>
-<pre>          log=1);                                                                                   </pre>
+<pre>          data,                         /* Input dataset. Data options are allowed. */                              </pre>
+<pre>          target=y,                     /* Target variable (continuous) */                              </pre>
+<pre>          var=x,                        /* Analysis variable (only one allowed) */                              </pre>
+<pre>          by=,                          /* BY variables */                                          </pre>
+<pre>          ncuts=15,                     /* Number of cut values to try out to find the best cuts */                              </pre>
+<pre>          maxnpieces=3,                 /* Max number of pieces in which to try piecewise regressions (<= 3) */                              </pre>
+<pre>          minpropcases=0.10,            /* Min proportion of cases that each piece must have */                              </pre>
+<pre>          out=_PTC_cuts_,               /* Output dataset containing the best cuts found for the analysis variable for each BY variable */                              </pre>
+<pre>          outall=_PTC_results_,         /* Output dataset contaniing the R-Squared and related measures for all cut values tried */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
 <pre>                                                                                                    </pre>
 <h3>REQUIRED PARAMETERS:</h3>
 <pre>- data:                       Input dataset. Data options can be specified as in any DATA= option.                                                            </pre>
@@ -46,54 +58,72 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <pre>- by:                         List of by variables by which the analysis is performed.                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- id:                         List of ID variables identifying the analysis performed that is stored in the                                                            </pre>
-<pre>                              output datasets. It is assumed that they can take only one combination value for                                                            </pre>
-<pre>                              all the observations used in the analysis.                                                            </pre>
+<pre>- maxnpieces:                 Maximum number of pieces to try for the multi-piece linear regression.                                                            </pre>
+<pre>                              Possible values are 2 and 3.                                                              </pre>
+<pre>                              default: 3                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- minpropcases:               Minimum proportion of cases that should be present in each regression piece                                                            </pre>
+<pre>                              so as to guarantee R-Square values that are based on enough number of cases.                                                            </pre>
+<pre>                              default: 0.10                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- ncuts:                      Number of cut values to try out to find the best cuts.                                                            </pre>
+<pre>                              This number defines the step that takes from one cut value to the next and defines                                                            </pre>
+<pre>                              the approximate number of cut values to consider for the 2-piece linear regression.                                                            </pre>
+<pre>                              All the cut values are valid values of the analysis variable.                                                            </pre>
+<pre>                              default: 15                                                                               </pre>
 <pre>                                                                                                                        </pre>
 <pre>- out:                        Output dataset containing the best cuts found for each by variable combination.                                                            </pre>
 <pre>                              The output dataset has the following columns (in this order):                                                            </pre>
 <pre>                              - By variables passed in the BY= parameter.                                                            </pre>
-<pre>                              - CUT:                        Best cut value ID: it can take the values 1 or 2. Number 1 indicates                              </pre>
+<pre>                              - _CUT_:                      Best cut value ID: it can take the values 1 or 2. Number 1 indicates                              </pre>
 <pre>                              the smallest cut value found and number 2 indicates the largest                                                            </pre>
 <pre>                              cut value found. Number 2 is not present if the best cut values                                                            </pre>
 <pre>                              found may correspond to a 2-piece piecewise linear transformation.                                                            </pre>
-<pre>                              - TARGET:                     Name of the target variable used in the analysis.                              </pre>
-<pre>                              - X:                          Name of the regressor variable used in the analysis.                              </pre>
-<pre>                              - VALUE:                      Value of the best cut value found that corresponds to the cut value                              </pre>
+<pre>                              - _TARGET_:                   Name of the target variable used in the analysis.                              </pre>
+<pre>                              - _VAR_:                      Name of the regressor variable used in the analysis.                              </pre>
+<pre>                              - _VALUE_:                    Value of the best cut value found that corresponds to the cut value                              </pre>
 <pre>                              ID given in column CUT. The cut value is one of the values taken                                                            </pre>
 <pre>                              by the regressor variable.                                                                </pre>
-<pre>                              - RSQ_mean:                   Average of the R-Square's of the linear regressions in each piece.                              </pre>
-<pre>                              - RMSE_mean:Average of the Root Mean Squared Error's of the linear regressions in                                                            </pre>
-<pre>                              each piece.                                                                               </pre>
-<pre>                              - RSS_mean: Average of the Residual Sum of Square's of the linear regressions in                                                            </pre>
-<pre>                              each piece.                                                                               </pre>
-<pre>                              - All the other variables present in the input dataset except the variable                                                            </pre>
-<pre>                              passed in VAR.                                                                            </pre>
+<pre>                              - RSQ:                        R-Square of the multi-piece linear regression.                              </pre>
+<pre>                              It is computed based on the sum of the RSS over all pieces and                                                            </pre>
+<pre>                              the Corrected Sum of Squares of the target variable (CSS(Y)) as:                                                            </pre>
+<pre>                              RSQ = 1 - sum(of RSS(piece)) / CSS(Y)                                                            </pre>
+<pre>                              - RMSE:                       Root Mean Squared Error of the multi-piece linear regression.                              </pre>
+<pre>                              It is computed based on the sum of RSS over all pieces as:                                                            </pre>
+<pre>                              RMSE = sqrt( sum(of RSS(piece)) / sum(of n(piece)) )                                                            </pre>
+<pre>                              where n(piece) is the number of observations in each piece.                                                            </pre>
+<pre>                              - RSS:                        Sum of the Residual Sum of Squares over all pieces.                              </pre>
 <pre>                              default: _PTC_cuts_                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <pre>- outall:                     Output dataset containing the results for all the piecewise linear regressions                                                            </pre>
-<pre>                              tried to find the best cuts. The output dataset has the following columns:                                                            </pre>
+<pre>                              tried out to find the best cuts.                                                            </pre>
+<pre>                              It has the following columns:                                                             </pre>
 <pre>                              - By variables passed in the BY= parameter.                                                            </pre>
-<pre>                              - TARGET:                     Name of the target variable used in the analysis.                              </pre>
-<pre>                              - X:                          Name of the regressor variable used in the analysis.                              </pre>
-<pre>                              - CASE:                       ID identifying each combination of cut values analyzed to find the                              </pre>
+<pre>                              - _TARGET_:                   Name of the target variable used in the analysis.                              </pre>
+<pre>                              - _VAR_:                      Name of the regressor variable used in the analysis.                              </pre>
+<pre>                              - _CASE_:                     ID identifying each combination of cut values analyzed to find the                              </pre>
 <pre>                              best cut values.                                                                          </pre>
-<pre>                              - XIND1:                      Index of the values taken by the regressor variable for current case,                              </pre>
-<pre>                              corresponding to cut value CUT1.                                                            </pre>
-<pre>                              - CUT1:                       Smallest cut value used in current case.                              </pre>
-<pre>                              - XIND2:                      Index of the values taken by the regressor variable for current case,                              </pre>
-<pre>                              corresponding to cut value CUT2.                                                            </pre>
-<pre>                              - CUT2:                       Largest cut value used in current case.                              </pre>
-<pre>                              - RSQ_mean:                   Average of the R-Square's of the linear regressions in each piece                              </pre>
-<pre>                              for current case.                                                                         </pre>
-<pre>                              - RSQ1-RSQ3:                  R-Square of pieces 1 thru 3 for current case.                              </pre>
-<pre>                              - RMSE_mean:                  Average of the Root Mean Squared Error's of the linear regressions in                              </pre>
-<pre>                              each piece, for current case.                                                             </pre>
-<pre>                              - RMSE1-RMSE3:                Root Mean Squared Error of pieces 1 thru 3 for current case.                              </pre>
-				- RSS_mean:		Average of the Residual Sum of Square's of the linear regressions in
-<pre>                              - RSS_mean:                   Average of the Residual Sum of Square's of the linear regressions in                              </pre>
-<pre>                              each piece, for current case.                                                             </pre>
-<pre>                              - RSS1-RSS3:                  Residual Sum of Squares of pieces 1 thru 3 for current case.                              </pre>
+<pre>                              - _XRANK1_:                   Rank of the X value (among the values taken by X, the analysis variable)                              </pre>
+<pre>                              for the current case which corresponds to cut value CUT1.                                                            </pre>
+<pre>                              - _CUT1_:                     First cut value for the current case.                              </pre>
+<pre>                              - _XRANK2_:                   Rank of the X value (among the values taken by X, the analysis variable)                              </pre>
+<pre>                              for the current case which corresponds to cut value CUT1.                                                            </pre>
+<pre>                              - _CUT2_:                     Second cut value for the current case.                              </pre>
+<pre>                              - N1:                         Number of cases in piece 1 of the multi-piece linear regression.                              </pre>
+<pre>                              - N2:                         Number of cases in piece 2 of the multi-piece linear regression.                              </pre>
+<pre>                              - N3:                         Number of cases in piece 3 of the multi-piece linear regression.                              </pre>
+<pre>                              - RSQ:                        R-Square of the multi-piece linear regression computed as defined                              </pre>
+<pre>                              above when describing the OUT= parameter.                                                            </pre>
+<pre>                              - RMSE:                                                     Root Mean Squared Error of the multi-piece linear regressions computed</pre>
+<pre>                              as defined above when describing the OUT= parameter.                                                            </pre>
+<pre>                              - RSS:                        Residual Sum of Squares of the multi-piece linear regressions.                              </pre>
+<pre>                              - RSS1-RSS3:                  Residual Sum of Squares of pieces 1 thru 3.                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              NOTE that nor the R-Square values nor the RMSE values are reported for each regression                                                            </pre>
+<pre>                              piece as these values are rather misleading since the total R-Square and RMSE values                                                            </pre>
+<pre>                              are computed on the basis of the RSS values in each piece, and NOT on the R-Square/RMSE                                                            </pre>
+<pre>                              values on each piece.                                                                     </pre>
+<pre>                                                                                                                        </pre>
 <pre>                              default: _PTC_results_                                                                    </pre>
 <pre>                                                                                                                        </pre>
 <pre>- log:                        Show messages in the log?                                                                 </pre>
@@ -128,7 +158,10 @@ pre {display: block}
 <pre>%PiecewiseTransfCuts(transposed, target=y, var=value, by=var);                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CheckInputParameters                                                                                                 </pre>
 <pre>- %CreateGroupVar                                                                                                       </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
 <pre>- %GetNroElements                                                                                                       </pre>
 <pre>- %GetStat                                                                                                              </pre>
 <pre>- %MakeList                                                                                                             </pre>
@@ -138,13 +171,14 @@ pre {display: block}
 <pre>- %ResetSASOptions                                                                                                      </pre>
 <pre>- %SelectNames                                                                                                          </pre>
 <pre>- %SetSASOptions                                                                                                        </pre>
+<pre>- %ShowMacroCall                                                                                                        </pre>
 <pre>                                                                                                                        </pre>
 <h3>SEE ALSO:</h3>
 <pre>- %PiecewiseTransf                                                                                                      </pre>
 <pre>- %VariableImpact                                                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <h3>EXAMPLES:</h3>
-<pre>1.- %PiecewiseTransfCuts(test, target=earning, var=x, id=varname, out=cuts, outall=allcuts);                                                                                          </pre>
+<pre>1.- %PiecewiseTransfCuts(test, target=earning, var=x, out=cuts, outall=allcuts);                                                                                          </pre>
 <pre>This creates the output datasets CUTS and ALLCUTS from the analysis of the relationship between                                                                                          </pre>
 <pre>the continuous variable EARNING used as target variable and the continuous variable X used as                                                                                          </pre>
 <pre>regressor variable contained in dataset TEST.                                                                                          </pre>

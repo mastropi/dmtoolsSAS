@@ -47,6 +47,8 @@ LIFTCHART
 LORENZCURVE
 MEANS
 MERGE
+PIECEWISETRANSF
+PIECEWISETRANSFCUTS
 PLOTBINNED
 PLOTSURVIVAL
 SORT
@@ -155,7 +157,8 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	%quote(                     observations.);
 		%put	PartialPlots %quote(        Make partial plots to graphically assess the linearity of variables in a;
 		%put 	%quote(                     linear regression.);
-		%put	PiecewiseTransf %quote(     Perform a linear piecewise transformation on continuous variables.); 
+		%put	PiecewiseTransf* %quote(    Perform a linear piecewise transformation on continuous variables.); 
+		%put	PiecewiseTransfCuts* %quote(Find the best cuts for a linear piecewies transformation on continuous variables.); 
 		%put	QualifyVars %quote(         Automatically qualify variables into categorical or continuous.);
 		%put	Score %quote(               Compute the score of a regression model on a new dataset.);
 		%put	TestLogisticFit* %quote(    Test the fit of a logistic regression model.);
@@ -325,7 +328,8 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	PartialPlots %quote(        Make partial plots to graphically assess the linearity of variables in a;
 		%put 	%quote(                     linear regression.);
 		%put 	PlotSurvival* %quote(       Make plots of survival curves to visually check proportional hazards assumption.);
-		%put	PiecewiseTransf %quote(     Perform a linear piecewise transformation on continuous variables.); 
+		%put	PiecewiseTransf* %quote(    Perform a linear piecewise transformation on continuous variables.); 
+		%put	PiecewiseTransfCuts* %quote(Find the best cuts for a linear piecewies transformation on continuous variables.); 
 		%put 	PlotBinned* %quote(         Make 2D scatter or bubble plots of a target variable vs. binned continuous variables.);
 		%put	PrintNameList %quote(       Print a list of names in one column in the output window.);
 		%*%put	Pretty	;

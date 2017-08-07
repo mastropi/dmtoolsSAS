@@ -4,6 +4,10 @@ Created: 12-Aug-2011
 Author: Daniel Mastropietro
 SAS Version: 9.x
 
+Setup of macros:
+Use the autoexec_dmmacros.sas as a starting point for setting up either the DM macros as Autocall macros or as Compiled macros.
+The Autocall macros should be preferred in distributed systems or servers because it guarantees an easy update. The compiled macros are much more difficult to update because the sasmacr.sas7bcat file (which should be updated when updating the compiled macros) is usually in use and it is very difficult to coordinate all the users to stop using it (i.e. to exit from their SAS session, which is needed to unlock the sasmacr.sas7bcat file --and even when this is done, the sasmacr.sas7bcat file may still be locked!)
+
 Compilation of SAS Macros:
 Execute the SAS code CompileMacros.sas
 
@@ -12,7 +16,7 @@ Execute the SAS code CompileIML.sas
 
 If nothing is changed in the above two codes, their execution creates a library reference in SAS called "Macros", where the following catalog entries will be seen:
 IMLLabModelos	(containing the compiled IML modules)
-Sasmacr		(containing the compiled SAS macros)
+Sasmacr			(containing the compiled SAS macros)
 
 Note that I did not change the name of the IML catalog (to simply "IML" for example) because the name IMLLabModelos is already referenced in the macros using the compiled IML modules (e.g. %Mahalanobis).
 
@@ -26,8 +30,8 @@ See comments at the top of arimaadj.sas for more information on the changes.
 
 in Aug-2012 I have added some external macros in this folder, such as SAS2012TerryWoodfield\ForecastUtilityMacros.sas, a set of macros developed by Terry Woodfield, last updated in Mar-2012. More information at SAS2012TerryWoodfield\readme.txt.
 
-DMmacrosSAS.zip
----------------
+DMmacrosSAS-2013.zip
+--------------------
 Zip file containing the macros bundle that I submitted to Toolpool in SAS in Mar-2013. Contact in Toolpool who accepted and uploaded the submission: Loren Hodge.
 The folder contains: 
 - doc: folder containing a PDF file with the macros documentation and installation instructions (pdf file generated from 'help\SAS Compiled Macros - v201303.doc' or a similar version)

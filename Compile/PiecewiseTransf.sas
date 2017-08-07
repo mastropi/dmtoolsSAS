@@ -174,6 +174,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %MakeListFromVar
 - %ResetSASOptions
 - %SetSASOptions
+- %ShowMacroCall
 
 EXAMPLES:
 1.- %PiecewiseTransf(test, cuts=cutsDataSet, out=test_transf);

@@ -2,7 +2,7 @@
 Version:		1.01
 Author:			Daniel Mastropietro
 Created:		19-May-2016
-Modified:		30-Jun-2016
+Modified:		09-Aug-2016
 
 DESCRIPTION:
 Score a new dataset based on the estimated parameters of a regression model.
@@ -517,7 +517,7 @@ options &option_mprint;
 %if %quote(&out) ~= %then %do;
 	data &out;
 		format &id &score &response;
-		set _score_pred_(drop=_incheck _pred_diff &checkvar);
+		set _score_pred_(%if %quote(&datacheck) ~= %then %do; drop=_incheck _pred_diff &checkvar %end;);
 	run;
 %end;
 

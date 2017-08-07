@@ -1,8 +1,8 @@
 /* MACRO %FreqMult
-Version: 		2.02
+Version: 		2.03
 Author: 		Daniel Mastropietro
 Created: 		15-Oct-2004
-Modified: 		17-May-2016 (previous: 05-Aug-2015)
+Modified: 		26-Jun-2017 (previous: 17-May-2016, 05-Aug-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -28,7 +28,7 @@ USAGE:
 	options=,				*** Options for the TABLES statement.
 	missing=0,				*** Missing values are valid values?
 	transpose=0,			*** Transpose output dataset so that there is one record per variable?
-	maxlengthvalues=255,	*** Initial length to assign to the VALUES column holding the values taken by the variable
+	maxlengthvalues=1000,	*** Initial length to assign to the VALUES column holding the values taken by the variable
 							*** in the transposed output case.
 	notes=1,				*** Show SAS notes in the log?
 	log=1);					*** Show messages in the log?
@@ -80,6 +80,8 @@ OPTIONAL PARAMETERS:
 					- var:					Variable name corresponding to the frequencies shown.
 					- type:					Variable type ("character" or "numeric").
 					- values:				List of (formatted(*)) values taken by the variable separated by columns.
+											The values are sorted by decreasing percent which are shown in parenthesis
+											next to the variable's value.
 					- <target variable> if any.
 					(*) The values stored in the VALUES column are the formatted values if the
 					analysis variable has an explicit format defined.
@@ -119,6 +121,8 @@ OPTIONAL PARAMETERS:
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Callmacro
+- %ExecTimeStart
+- %ExecTimeStop
 - %FindInList
 - %GetDataOptions
 - %Getnobs
@@ -163,7 +167,7 @@ of the output dataset (instead of the original ones).
 				options=,
 				missing=0,
 				transpose=0,
-				maxlengthvalues=255,
+				maxlengthvalues=1000,
 				notes=0,
 				log=1,
 				help=0) / store des="Creates a dataset with the frequencies of a set of variables";
@@ -260,6 +264,7 @@ aplica solamente a la ultima variable analizada con el TABLES statement.
 %local varlenchk_opt;
 
 %SetSASOptions(notes=&notes);
+%ExecTimeStart;
 
 %* Show input parameters;
 %if &log %then %do;
@@ -557,7 +562,7 @@ quit;
 	%* Sort by VAR, <BY variables>, <TARGET variable>, which is needed for the transpose process;
 	%* Additionaly, the variable values are sorted by their formatted value fmtvalue;
 	proc sort data=_FreqMult_out_;
-		by var &by &target;
+		by var &by &target descending PERCENT;
 	run;
 	%* Create a single column containing all the frequency values;
 	data _FreqMult_out_;
@@ -567,7 +572,7 @@ quit;
 		format &byvarlist var type values &target;
 		set _FreqMult_out_(keep=&byvarlist var type &target
 								%if &bothTypes %then %do; charvalue numvalue %end; %else %do; value %end;
-								fmtvalue) end=lastobs;
+								fmtvalue PERCENT) end=lastobs;
 		by var &by &target;
 		length valuec values $&maxlengthvalues;	%* valuec stores the value of the variable as character, variable values stores all the values taken by the variable;
 		retain values;				%* This variable contains all the concatenated values taken by each variable;
@@ -579,6 +584,8 @@ quit;
 		if valuec = "" or valuec = "." then
 			valuec = "<Miss>";
 
+		%* Add the percent of occurrence of the value in parenthesis;
+		valuec = catx(" ", valuec, cats("(", put(PERCENT, 7.1), "%)"));
 		%* Start a new group;
 		if %MakeList(var &byvarlist &target, prefix=First., sep=or) then
 			values = valuec;
@@ -658,6 +665,7 @@ quit;
 	%put;
 %end;
 
+%ExecTimeStop;
 %ResetSASOptions;
 
 %end;	%* %if ~&error;

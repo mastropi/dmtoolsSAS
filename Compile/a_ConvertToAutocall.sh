@@ -66,7 +66,7 @@ do
 	let i+=1
 
 	FILENAME=${FILE#$SOURCEDIR/}	# Remove the SOURCEDIR from the file name
-	OUTFILENAME=$FILENAME			# Output file name is the same as input file name
+	OUTFILENAME=${FILENAME,,}		# Output file name is the input file name converted to lower case (so that the macros work in Linux!) Ref: https://askubuntu.com/questions/383352/command-to-convert-an-upper-case-string-to-lower-case)
 	echo -n Processing SAS macro $FILENAME "-->" $OUTDIR/$OUTFILENAME
 	
 	# Run AWK!

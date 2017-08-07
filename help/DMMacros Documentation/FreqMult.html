@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %FreqMult</h1>
-<pre>Version:                      2.02                                                                                      </pre>
+<pre>Version:                      2.03                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      15-Oct-2004                                                                               </pre>
-<pre>Modified:                     17-May-2016 (previous: 05-Aug-2015)                                                            </pre>
+<pre>Modified:                     26-Jun-2017 (previous: 17-May-2016, 05-Aug-2015)                                                            </pre>
 <pre>SAS Version:                  9.4                                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
@@ -38,7 +38,7 @@ pre {display: block}
 <pre>          options=,                     /* Options for the TABLES statement. */                              </pre>
 <pre>          missing=0,                    /* Missing values are valid values? */                              </pre>
 <pre>          transpose=0,                  /* Transpose output dataset so that there is one record per variable? */                              </pre>
-<pre>          maxlengthvalues=255,          /* Initial length to assign to the VALUES column holding the values taken by the variable */                              </pre>
+<pre>          maxlengthvalues=1000,         /* Initial length to assign to the VALUES column holding the values taken by the variable */                              </pre>
 <pre>          /* in the transposed output case. */                                                            </pre>
 <pre>          notes=1,                      /* Show SAS notes in the log? */                              </pre>
 <pre>          log=1);                       /* Show messages in the log? */                              </pre>
@@ -90,6 +90,8 @@ pre {display: block}
 <pre>                              - var:                        Variable name corresponding to the frequencies shown.                              </pre>
 <pre>                              - type:                       Variable type ("character" or "numeric").                              </pre>
 <pre>                              - values:                     List of (formatted(*)) values taken by the variable separated by columns.                              </pre>
+<pre>                              The values are sorted by decreasing percent which are shown in parenthesis                                                            </pre>
+<pre>                              next to the variable's value.                                                             </pre>
 <pre>                              - <target variable> if any.                                                               </pre>
 <pre>                              (*) The values stored in the VALUES column are the formatted values if the                                                            </pre>
 <pre>                              analysis variable has an explicit format defined.                                                            </pre>
@@ -129,6 +131,8 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
 <pre>- %Callmacro                                                                                                            </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
 <pre>- %FindInList                                                                                                           </pre>
 <pre>- %GetDataOptions                                                                                                       </pre>
 <pre>- %Getnobs                                                                                                              </pre>

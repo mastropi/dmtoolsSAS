@@ -1,24 +1,36 @@
 /* MACRO %PiecewiseTransfCuts
-Version: 1.00
-Author: Daniel Mastropietro
-Created: 3-Jan-05
-Modified: 13-Jan-05
+Version: 	1.10
+Author: 	Daniel Mastropietro
+Created: 	03-Jan-2005
+Modified: 	07-Aug-2017 (previous: 13-Jan-2005)
 
 DESCRIPTION:
-Macro that finds the best cut points for a linear piecewise transformation of a continuous
-variable that maximizes the average R-Square (over the different pieces of the transformation)
-with respect to a continuous target variable.
+Macro that finds the best cut points for a linear piecewise transformation of ONE analysis continuous
+variable that maximizes the R-Square of the multi-piece regression with respect to a CONTINUOUS target variable.
+
+The best cut points are found among the values taken by the analysis continuous variable, as considering any
+value in between two consecutive analysis variable values is the same as considering one of those values.
+
+The analysis variable can take repeated values as these values are deduplicated before defining the cut values
+to try out.
+
+If the input dataset is appropriately prepared one can either:
+- Analyze several input variables using BY processing
+- Analyze a binary target variable
+See the NOTES and the EXAMPLES sections for more details.
 
 USAGE:
 %PiecewiseTransfCuts(
-	data, 
-	target=y,
-	var=x,
-	by=,
-	id=,
-	out=_PTC_cuts_,
-	outall=_PTC_results_,
-	log=1);
+	data, 					*** Input dataset. Data options are allowed.
+	target=y,				*** Target variable (continuous)
+	var=x,					*** Analysis variable (only one allowed)
+	by=,					*** BY variables
+	ncuts=15,				*** Number of cut values to try out to find the best cuts
+	maxnpieces=3,			*** Max number of pieces in which to try piecewise regressions (<= 3)
+	minpropcases=0.10,		*** Min proportion of cases that each piece must have
+	out=_PTC_cuts_,			*** Output dataset containing the best cuts found for the analysis variable for each BY variable
+	outall=_PTC_results_,	*** Output dataset contaniing the R-Squared and related measures for all cut values tried
+	log=1);					*** Show messages in the log?
 
 REQUIRED PARAMETERS:
 - data:			Input dataset. Data options can be specified as in any DATA= option.
@@ -37,53 +49,72 @@ OPTIONAL PARAMETERS:
 
 - by:			List of by variables by which the analysis is performed.
 
-- id:			List of ID variables identifying the analysis performed that is stored in the
-				output datasets. It is assumed that they can take only one combination value for
-				all the observations used in the analysis.
+- maxnpieces:	Maximum number of pieces to try for the multi-piece linear regression.
+				Possible values are 2 and 3.
+				default: 3
+
+- minpropcases:	Minimum proportion of cases that should be present in each regression piece
+				so as to guarantee R-Square values that are based on enough number of cases.
+				default: 0.10
+
+- ncuts:		Number of cut values to try out to find the best cuts.
+				This number defines the step that takes from one cut value to the next and defines
+				the approximate number of cut values to consider for the 2-piece linear regression.
+				All the cut values are valid values of the analysis variable.
+				default: 15
 
 - out:			Output dataset containing the best cuts found for each by variable combination.
 				The output dataset has the following columns (in this order):
 				- By variables passed in the BY= parameter.
-				- CUT:		Best cut value ID: it can take the values 1 or 2. Number 1 indicates
+				- _CUT_:	Best cut value ID: it can take the values 1 or 2. Number 1 indicates
 							the smallest cut value found and number 2 indicates the largest
 							cut value found. Number 2 is not present if the best cut values
 							found may correspond to a 2-piece piecewise linear transformation.
-				- TARGET:	Name of the target variable used in the analysis.
-				- X:		Name of the regressor variable used in the analysis.
-				- VALUE:	Value of the best cut value found that corresponds to the cut value
+				- _TARGET_:	Name of the target variable used in the analysis.
+				- _VAR_:	Name of the regressor variable used in the analysis.
+				- _VALUE_:	Value of the best cut value found that corresponds to the cut value
 							ID given in column CUT. The cut value is one of the values taken
 							by the regressor variable.
-				- RSQ_mean:	Average of the R-Square's of the linear regressions in each piece.
-				- RMSE_mean:Average of the Root Mean Squared Error's of the linear regressions in
-							each piece.
-				- RSS_mean: Average of the Residual Sum of Square's of the linear regressions in
-							each piece.
-				- All the other variables present in the input dataset except the variable
-				passed in VAR.
+				- RSQ:		R-Square of the multi-piece linear regression.
+							It is computed based on the sum of the RSS over all pieces and
+							the Corrected Sum of Squares of the target variable (CSS(Y)) as:
+								RSQ = 1 - sum(of RSS(piece)) / CSS(Y)
+				- RMSE:		Root Mean Squared Error of the multi-piece linear regression.
+							It is computed based on the sum of RSS over all pieces as:
+								RMSE = sqrt( sum(of RSS(piece)) / sum(of n(piece)) )
+							where n(piece) is the number of observations in each piece.
+				- RSS: 		Sum of the Residual Sum of Squares over all pieces.
 				default: _PTC_cuts_
 
 - outall:		Output dataset containing the results for all the piecewise linear regressions
-				tried to find the best cuts. The output dataset has the following columns:
+				tried out to find the best cuts.
+				It has the following columns:
 				- By variables passed in the BY= parameter.
-				- TARGET:		Name of the target variable used in the analysis.
-				- X:			Name of the regressor variable used in the analysis.
-				- CASE:			ID identifying each combination of cut values analyzed to find the
+				- _TARGET_:		Name of the target variable used in the analysis.
+				- _VAR_:		Name of the regressor variable used in the analysis.
+				- _CASE_:		ID identifying each combination of cut values analyzed to find the
 								best cut values.
-				- XIND1:		Index of the values taken by the regressor variable for current case,
-								corresponding to cut value CUT1.
-				- CUT1:			Smallest cut value used in current case.
-				- XIND2:		Index of the values taken by the regressor variable for current case,
-								corresponding to cut value CUT2.
-				- CUT2:			Largest cut value used in current case.
-				- RSQ_mean:		Average of the R-Square's of the linear regressions in each piece
-								for current case.
-				- RSQ1-RSQ3:	R-Square of pieces 1 thru 3 for current case.
-				- RMSE_mean: 	Average of the Root Mean Squared Error's of the linear regressions in
-								each piece, for current case.
-				- RMSE1-RMSE3:	Root Mean Squared Error of pieces 1 thru 3 for current case.
-				- RSS_mean:  	Average of the Residual Sum of Square's of the linear regressions in
-								each piece, for current case.
-				- RSS1-RSS3:	Residual Sum of Squares of pieces 1 thru 3 for current case.
+				- _XRANK1_:		Rank of the X value (among the values taken by X, the analysis variable)
+								for the current case which corresponds to cut value CUT1.
+				- _CUT1_:		First cut value for the current case.
+				- _XRANK2_:		Rank of the X value (among the values taken by X, the analysis variable)
+								for the current case which corresponds to cut value CUT1.
+				- _CUT2_:		Second cut value for the current case.
+				- N1:			Number of cases in piece 1 of the multi-piece linear regression.
+				- N2:			Number of cases in piece 2 of the multi-piece linear regression.
+				- N3:			Number of cases in piece 3 of the multi-piece linear regression.
+				- RSQ:			R-Square of the multi-piece linear regression computed as defined
+								above when describing the OUT= parameter.
+				- RMSE:	 		Root Mean Squared Error of the multi-piece linear regressions computed
+								as defined above when describing the OUT= parameter.
+				- RSS:			Residual Sum of Squares of the multi-piece linear regressions.
+				- RSS1-RSS3:	Residual Sum of Squares of pieces 1 thru 3.
+
+				NOTE that nor the R-Square values nor the RMSE values are reported for each regression
+				piece as these values are rather misleading since the total R-Square and RMSE values
+				are computed on the basis of the RSS values in each piece, and NOT on the R-Square/RMSE
+				values on each piece.
+
 				default: _PTC_results_
 
 - log:			Show messages in the log?
@@ -118,7 +149,10 @@ Then call the macro %PiecewiseTransfCuts as follows:
 %PiecewiseTransfCuts(transposed, target=y, var=value, by=var);
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
+- %CheckInputParameters
 - %CreateGroupVar
+- %ExecTimeStart
+- %ExecTimeStop
 - %GetNroElements
 - %GetStat
 - %MakeList
@@ -128,13 +162,14 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %ResetSASOptions
 - %SelectNames
 - %SetSASOptions
+- %ShowMacroCall
 
 SEE ALSO:
 - %PiecewiseTransf
 - %VariableImpact
 
 EXAMPLES:
-1.- %PiecewiseTransfCuts(test, target=earning, var=x, id=varname, out=cuts, outall=allcuts);
+1.- %PiecewiseTransfCuts(test, target=earning, var=x, out=cuts, outall=allcuts);
 This creates the output datasets CUTS and ALLCUTS from the analysis of the relationship between
 the continuous variable EARNING used as target variable and the continuous variable X used as
 regressor variable contained in dataset TEST.
@@ -190,13 +225,37 @@ each category of a categorized continuous variable. The continuous variable need
 for this purpose, because otherwise the value of p (used in logit(p)) cannot be computed.
 */
 &rsubmit;
-%MACRO PiecewiseTransfCuts(data, target=y, var=x, by=, id=, out=_PTC_cuts_, outall=_PTC_results_, log=1)
+%MACRO PiecewiseTransfCuts(data, target=y, var=x, by=, ncuts=15, maxnpieces=3, minpropcases=0.10, out=_PTC_cuts_, outall=_PTC_results_, log=1, help=0)
 		/ store des="Finds the best cut points for a piecewise linear transformation to predict a continuous target";
-/*
-NOTE: (5/1/05) It seems that the best criterion to choose the optimal cuts is the average of
-R-Squares for all pieces (RSQ_mean).
-*/
+
+/*----- Macro to display usage -----*/
+%MACRO ShowMacroCall;
+	%put PIECEWISETRANSFCUTS: The macro call is as follows:;
+	%put %nrstr(%PiecewiseTransfCuts%();
+	%put data , (REQUIRED) %quote( *** Input dataset.);
+	%put target= , %quote(         *** Continuous Target variable.);
+	%put var= , %quote(            *** Input analysis variable used as regressor (only one allowed).);
+	%put by= , %quote(             *** List of BY variables.);
+	%put ncuts= , %quote(          *** Number of cut values to try out to find the best cuts.);
+	%put maxnpieces= , %quote(     *** Maximum number of pieces to try for the multi-piece linear regression.);
+	%put minpropcases= , %quote(   *** Minimum proportion of cases that should be present in each regression piece.);
+	%put out= , %quote(            *** Output dataset with the best cuts found.);
+	%put outall= , %quote(         *** Output dataset with the results of all cuts tried.);
+	%put log=1) %quote(            *** Show messages in the log?);
+%MEND ShowMacroCall;
+
+%if &help %then %do;
+	%ShowMacroCall;
+%end;
+%else %if ~%CheckInputParameters(data=&data, varRequired=0,
+								 otherRequired=, check=target var by,
+								 requiredParamNames=data, macro=PIECEWISETRANSFCUTS) %then %do;
+	%ShowMacroCall;
+%end;
+%else %do;
+/************************************* MACRO STARTS ******************************************/
 %SetSASOptions;
+%ExecTimeStart;
 
 %if &log %then %do;
 	%put;
@@ -204,8 +263,8 @@ R-Squares for all pieces (RSQ_mean).
 	%put;
 %end;
 
-%local obsvalues obssweep obs1 obs2 xvalues xsweep xn xmin xmax xfirst xlast first last;
-%local cut1 cut1p cut2 cut2p nro_cuts1;
+%local obsvalues obssweep obs1 obs2 xvalues xsweep xn xmin xmax xfirst xlast first last step mincases;
+%local cut1 cut1p cut2 cut2p;
 %local b bb i j case;			%* Counters;
 %local out_name outall_name;
 %local byvars;
@@ -214,8 +273,28 @@ R-Squares for all pieces (RSQ_mean).
 %* Store current value of DKROCOND option that controls warnings for DROP, KEEP and RENAME statements;
 %let dkrocond_option = %sysfunc(getoption(dkrocond));;
 
-/*------------------------------- Parsing input parameters ----------------------------------*/
-%* Read input dataset;
+%* Show input parameters;
+%if &log %then %do;
+	%put;
+	%put PIECEWISETRANSFCUTS: Macro starts;
+	%put;
+	%put PIECEWISETRANSFCUTS: Input parameters:;
+	%put PIECEWISETRANSFCUTS: - Input dataset = %quote(&data);
+	%put PIECEWISETRANSFCUTS: - target = %quote(       &target);
+	%put PIECEWISETRANSFCUTS: - var = %quote(          &var);
+	%put PIECEWISETRANSFCUTS: - by = %quote(           &by);
+	%put PIECEWISETRANSFCUTS: - ncuts = %quote(        &ncuts);
+	%put PIECEWISETRANSFCUTS: - maxnpieces = %quote(   &maxnpieces);
+	%put PIECEWISETRANSFCUTS: - minpropcases = %quote( &minpropcases);
+	%put PIECEWISETRANSFCUTS: - out = %quote(          &out);
+	%put PIECEWISETRANSFCUTS: - outall = %quote(       &outall);
+	%put PIECEWISETRANSFCUTS: - log = %quote(          &log);
+	%put;
+%end;
+
+
+/*--------------------------------- Parse input parameters ----------------------------------*/
+%*** DATA=;
 data _PTC_data_;
 	set &data;
 	_GROUPID_ = 1;		%* Used if there are no by variables, to unify the code;
@@ -231,6 +310,10 @@ run;
 	%global nro_byvar_combos;	%* Nro. of different combinations of the values of the by variables;
 	%let nro_byvar_combos = 1;
 %end;
+
+%*** MAXNPIECES=;
+%if &maxnpieces > 3 %then
+	%let maxnpieces = 3;
 /*-------------------------------------------------------------------------------------------*/
 
 %* Delete output datasets because they are used in PROC APPENDs to append the results obtained
@@ -245,7 +328,6 @@ data _PTC_data_b_;
 	set _PTC_data_ end=_lastobs_;
 	where _GROUPID_ = &b;
 	%* Observation ID;
-	_ptc_obs_ = _N_;
 	%if %quote(&by) ~= %then %do;
 	if _lastobs_ then do;
 		%do bb = 1 %to &nro_byvars;
@@ -275,7 +357,7 @@ quit;
 
 %* Compute RMSE and RSQ;
 data _PTC_rsq_all_;
-	set _PTC_reg1_(keep=RMSE RSQ rename=(RMSE=RMSE_mean RSQ=RSQ_mean));
+	set _PTC_reg1_(keep=RMSE RSQ);
 		%** Variables RMSE and RSQ are renamed to RMSE_mean and RSQ_mean because these are the
 		%** variables used in the following cases when more than one regression is performed;
 	%* Add information on independent and target variables;
@@ -285,25 +367,24 @@ data _PTC_rsq_all_;
 		&&byvar_name&bb = "&&byvar&bb";
 		%end;
 	%end;
-	length x target $32.;
-	x = "&var";
-	target = "&target";
-	%* Create variables RMSE1-RMSE3 and RSQ1-RSQ3 because they are present in the following cases
-	%* when more than one regression is performed;
-	RMSE1 = RMSE_mean;
-	RSQ1 = RSQ_mean;
-	%do k = 2 %to 3;
-		RMSE&k = .;
-		RSQ&k = .;
-	%end;
+	length _var_ _target_ $32.;
+	_var_ = "&var";
+	_target_ = "&target";
 	%* Identify case analyzed (defining the cut values used, which in this case is NO cuts);
-	case = &case;
+	_case_ = &case;
 	i = 0;
 	j = 0;
-	xind1 = .;
-	cut1 = .;
-	xind2 = .;
-	cut2 = .;
+	_xrank1_ = .;
+	_cut1_ = .;
+	%if &maxnpieces >= 3 %then %do;
+	_xrank2_ = .;
+	_cut2_ = .;
+	%end;
+	n1 = .;
+	n2 = .;
+	%if &maxnpieces >= 3 %then %do;
+	n3 = .;
+	%end;
 run;
 
 %* Compute RSS;
@@ -311,14 +392,16 @@ data _PTC_pred1_;
 	set _PTC_pred1_;
 	residual2 = residual*residual;
 run;
-%Means(_PTC_pred1_, var=residual2, id=&id, stat=sum, name=RSS, out=_PTC_rss_, log=0);
+%Means(_PTC_pred1_, var=residual2, stat=sum, name=RSS, out=_PTC_rss_, log=0);
 data _PTC_rss_all_;
-	format RSS_mean RSS1-RSS3;
-	set _PTC_rss_(rename=(RSS=RSS_mean));
+	format RSS RSS1 RSS2 %if &maxnpieces >= 3 %then %do; RSS3 %end;;
+	set _PTC_rss_;
 	%* Create RSS1-RSS3 because they are used in the following CASEs analyzed;
-	RSS1 = RSS_mean;
-	%do k = 2 %to 3;
-		RSS&k = .;	%* RSS2-RSS3 are missing because there is only one regression here;
+	RSS1 = RSS;
+	%* RSS2-RSS3 are missing because there is only one regression here;
+	RSS2 = .;
+	%if &maxnpieces >= 3 %then %do; 
+	RSS3 = .;
 	%end;
 run;
 
@@ -327,29 +410,63 @@ data _PTC_results_b_;
 	%if %quote(&by) ~= %then %do;
 	format %do bb = 1 %to &nro_byvars; &&byvar_name&bb; %end;
 	%end;
-	format &id target x case i j xind1 cut1 xind2 cut2 RSQ_mean RSQ1-RSQ3 RMSE_mean RMSE1-RMSE3;
+	format _target_ _var_ _case_ i j _cut1_ %if &maxnpieces >= 3 %then %do; _cut2_ %end;
+									_xrank1_ %if &maxnpieces >= 3 %then %do; _xrank2_ %end; 
+									n1 n2 %if &maxnpieces >= 3 %then %do; n3 %end; 
+									RSQ RMSE RSS RSS1 RSS2 %if &maxnpieces >= 3 %then %do; RSS3 %end;;
 	merge _PTC_rsq_all_ _PTC_rss_all_;
 run;
 /*-------------------------------------------------------------------------------------------*/
 
+
 /*------------------------------------- Sweep values ----------------------------------------*/
-%* Read all the values taken by the X variable into a macro variable;
-%let xvalues = %MakeListFromVar(_PTC_data_b_, var=&var, log=0);
+%* Find distinct values of the analysis variable and assign a _RANK_ to each of them so that they are used
+%* below to look for the best cuts;
+proc sql noprint;
+	create table _PTC_data_b_rank_ as
+	select &var, count(*) as n_repeats
+	from _PTC_data_b_
+	group by &var
+	order by &var;
+quit;
+data _PTC_data_b_rank_;
+	set _PTC_data_b_rank_;
+	_rank_ = _N_;
+run;
+
+%* Read all the values taken by the analysis variable into a macro variable;
+%*%let xvalues = %MakeListFromVar(_PTC_data_b_, var=&var, log=0);
+%let xvalues = %MakeListFromVar(_PTC_data_b_rank_, var=&var, log=0);
 %* Read the observation values corresponding to the X values so that these can be identified
 %* easily when merging with the input dataset in order to gather some additional information
 %* corresponding to the optimum cuts found;
-%let obsvalues = %MakeListFromVar(_PTC_data_b_, var=_ptc_obs_, log=0);
+%let obsvalues = %MakeListFromVar(_PTC_data_b_rank_ , var=_rank_, log=0);
 %let xn = %GetNroElements(&xvalues);
-%* Min and Max values of x;
-%let xmin = %scan(&xvalues, 1, ' ');
-%let xmax = %scan(&xvalues, &xn, ' ');
+
+%* Min and Max values of x based on the minimum number of cases required in each regression piece;
+%let mincases = %sysfunc(max(3, %sysfunc( floor( %sysevalf(&minpropcases*&xn) )) ));	%* 3 is the minimum possible number of cases required in each regression piece, regardless of the value of &minpropcases;
+%if &log %then
+	%put PIECEWISETRANSFCUTS: Each piece considered in the regressions will have at least &mincases cases.;
+proc sql noprint;
+	select &var into :xmin
+	from _PTC_data_b_rank_
+	where _rank_ = 1;
+
+	select &var into :xmax
+	from _PTC_data_b_rank_
+	where _rank_ = &xn;
+quit;
+
 %* First and last value of x to use in the sweep of the cut values;
 %* The values are defined so that there are enough points for the linear regression
 %* in each piece defined by the cuts;
-%let first = 3;				%* Third smallest value;
-%let last = %eval(&xn-2);	%* Third largest value;
+%let first = &mincases;
+%let last = %eval(&xn - &mincases);			%* Note the LAST case is NOT included among the possible cuts (this is to simplify the condition for the DO UNTIL loop below);
+%let step = %sysfunc(round( %sysevalf( (&last - &first) / &ncuts ) ));
 
-%* Values of X and of the X observation values on which the cuts are swept;
+%* Values of X (xsweep) and of the X observation values (obssweep) on which the cuts are swept;
+%* Note that the cuts can ONLY be values existing among the values of X, which makes sense because cutting
+%* in between two values is the same as cutting on one of the actual values taken by X;
 %let xsweep = ;
 %let obssweep = ;
 %let xfirst = ;
@@ -362,30 +479,28 @@ run;
 	%let xlast  = %scan(&xsweep, %GetNroElements(&xsweep), ' ');
 %end;
 
-%* Nro. of values on which the first cut value is swept;
-%let nro_cuts1 = %GetNroElements(&xsweep);
+%if &log %then %do;
+	%put PIECEWISETRANSFCUTS: The cut values considered for the search will be approx. &ncuts in total;
+	%put PIECEWISETRANSFCUTS: spanning the X values between &xfirst and &xlast..;
+	%put PIECEWISETRANSFCUTS: The minimum and maximum X values are %sysfunc(trim(%sysfunc(left(&xmin)))) and %sysfunc(trim(%sysfunc(left(&xmax)))).;
+%end;
 /*-------------------------------------------------------------------------------------------*/
 
 /*------------------------------------- 2 Regressions ---------------------------------------*/
 %if &log %then %do;
 	%put;
-	%if &nro_cuts1 <= 1 %then %do;
+	%if %GetNroElements(&xsweep) <= 1 %then %do;
 		%put PIECEWISETRANSFCUTS: Not enough data to perform piecewise regressions.;
-		%put PIECEWISETRANSFCUTS: Only a single regression is done.;
+		%put PIECEWISETRANSFCUTS: Only a single regression is carried out.;
 	%end;
-%end;	
-%do i = 1 %to &nro_cuts1-1;
-	%** Si se incluye el mismo cut en las dos regresiones adyacentes:
-	%** - usar &nro_cuts
-	%** - usar &cut1 abajo en el <= del WHERE del REG2;
-	%** Si NO se incluye el mismo cut en las dos regresiones adyacentes; 
-	%** - usar &nro_cuts-1
-	%** - usar &cut1p abajo en el <= del WHERE del REG2;
+%end;
 
-	%let case = %eval(&case + 1);
-	%let cut1 = %scan(&xsweep, &i, ' ');
-	%let cut1p = %scan(&xsweep, %eval(&i+1), ' ');
-	%let obs1 = %scan(&obssweep, &i, ' ');
+%let i = 1;
+%do %until (&cut1 = or &cut1 >= &xlast);		%* &cut1 can be empty when the next value to try is out of range from the values in &xsweep;
+	%let case = %eval(&case + 1);						%* Cut case number;
+	%let cut1 = %scan(&xsweep, &i, ' ');				%* Last x value to include in regression piece #1;
+	%let cut1p = %scan(&xsweep, %eval(&i+1), ' ');		%* First x value to include in regression piece #2: it is the next possible value of x following &cut1;
+	%let obs1 = %scan(&obssweep, &i, ' ');				%* Index of first observation included in regression piece #1;
 	%if &log %then %do;
 		%put PIECEWISETRANSFCUTS: Performing linear regressions in 2 pieces...;
 		%if %quote(&by) ~= %then %do;
@@ -393,16 +508,16 @@ run;
 				%put PIECEWISETRANSFCUTS: %upcase(&&byvar_name&bb) = &&byvar&bb;
 			%end;
 		%end;
-		%put PIECEWISETRANSFCUTS: Case=&case: cut = %Pretty(&cut1, roundoff=0.0001);
+		%put PIECEWISETRANSFCUTS: Case=&case: cut = %Pretty(&cut1, roundoff=0.0001) (max ~ &xlast);
 	%end;
 	proc reg data=_PTC_data_b_ outest=_PTC_reg1_ rsquare noprint;
-		where %sysevalf(0.999*&xmin) <= &var <= %sysevalf(1.001*&cut1);	%* I multiply by 1.001 because o.w. value &cut1 is not always included in the range; 
+		where %sysevalf(0.999999*&xmin) <= &var <= %sysevalf(1.000001*&cut1);	%* I multiply by 1.000001 because o.w. value &cut1 is not always included in the range; 
 		reg1: model &target = &var;
 		output out=_PTC_pred1_ predicted=fit residual=residual;
 	run;
 	quit;
 	proc reg data=_PTC_data_b_ outest=_PTC_reg2_ rsquare noprint;
-		where %sysevalf(0.999*&cut1p) <= &var <= %sysevalf(1.001*&xmax);	%* I multiply by 1.001 because o.w. value &xmax is not always included in the range;
+		where %sysevalf(0.999999*&cut1p) <= &var <= %sysevalf(1.000001*&xmax);	%* I multiply by 1.000001 because o.w. value &xmax is not always included in the range;
 		reg2: model &target = &var;
 		output out=_PTC_pred2_ predicted=fit residual=residual;
 	run;
@@ -410,19 +525,15 @@ run;
 
 	data _PTC_regall_;
 		set _PTC_reg1_ _PTC_reg2_;
-		rename 	_rmse_ = RMSE
-				_rsq_  = RSQ;
+		rename 	_edf_  = n;
 	run;
 	options dkrocond=nowarning;
-	proc transpose data=_PTC_regall_ out=_PTC_regall_rmse_(drop=_NAME_ _LABEL_) prefix=RMSE;
-		var RMSE;
-	run;
-	proc transpose data=_PTC_regall_ out=_PTC_regall_rsq_(drop=_NAME_ _LABEL_) prefix=RSQ;
-		var RSQ;
+	proc transpose data=_PTC_regall_ out=_PTC_regall_n_(drop=_NAME_ _LABEL_) prefix=n;
+		var n;
 	run;
 	options dkrocond=&dkrocond_option;
 	data _PTC_rsq_all_;
-		merge _PTC_regall_rmse_ _PTC_regall_rsq_;
+		merge _PTC_regall_n_;
 		%* Add information on independent and target variables;
 		%if %quote(&by) ~= %then %do;
 			%do bb = 1 %to &nro_byvars;
@@ -430,23 +541,20 @@ run;
 			&&byvar_name&bb = "&&byvar&bb";
 			%end;
 		%end;
-		length x target $32.;
-		x = "&var";
-		target = "&target";
-		%* Create variables RMSE3 and RSQ3 as missing (because there is no 3rd piece);
-		RMSE3 = .;
-		RSQ3 = .;
-		%* Compute sum of RMSE and sum of RSQ;
-		RMSE_mean = sum(of rmse1-rmse2) / 2;
-		RSQ_mean = sum(of rsq1-rsq2) / 2;
+		length _var_ _target_ $32.;
+		_var_ = "&var";
+		_target_ = "&target";
 		%* Identify case analyzed (defining the cut values used);
-		case = &case;
+		_case_ = &case;
 		i = &i;
 		j = .;
-		xind1 = &obs1;
-		cut1 = &cut1;
-		xind2 = .;
-		cut2 = .;
+		_xrank1_ = &obs1;
+		_cut1_ = &cut1;
+		%if &maxnpieces >= 3 %then %do;
+		_xrank2_ = .;
+		_cut2_ = .;
+		n3 = .;
+		%end;
 	run;
 
 	%* Sum of RSS;
@@ -455,26 +563,26 @@ run;
 			set _PTC_pred&k._;
 			residual2 = residual*residual;
 		run;
-		%Means(_PTC_pred&k._, var=residual2, id=&id, stat=sum, name=RSS, out=_PTC_rss&k._, log=0);
+		%Means(_PTC_pred&k._, var=residual2, stat=n sum, name=n RSS, out=_PTC_rss&k._, log=0);
 	%end;
 	data _PTC_rss_;
 		set _PTC_rss1_ _PTC_rss2_;
 	run;
 	options dkrocond=nowarning;
-	proc transpose data=_PTC_rss_ out=_PTC_rss_all_(drop=_NAME_ _LABEL_) prefix=RSS;
-		%if %quote(&id) ~= %then %do;
-		by &id;	%* Note the use of BY instead of ID: ID assumes that each value of the ID variable
-				%* occurs only once. Here, we are assuming that the ID variable has only one value
-				%* that is repeated for all observations in the input dataset;
-		%end;
+	proc transpose data=_PTC_rss_ out=_PTC_regall_n_(drop=_NAME_ _LABEL_) prefix=n;
+		var n;
+	run;
+	proc transpose data=_PTC_rss_ out=_PTC_regall_rss_(drop=_NAME_ _LABEL_) prefix=RSS;
 		var RSS;
 	run;
 	options dkrocond=&dkrocond_option;
 	data _PTC_rss_all_;
-		format RSS_mean RSS1-RSS3;
-		set _PTC_rss_all_;
+		format n1 n2 %if &maxnpieces >= 3 %then %do; n3 %end; RSS1 RSS2 %if &maxnpieces >= 3 %then %do; RSS3 %end;;
+		merge _PTC_regall_n_ _PTC_regall_rss_;
+		%if &maxnpieces >= 3 %then %do;
+		n3 = .;
 		RSS3 = .;
-		RSS_mean = sum(of RSS1-RSS2) / 2;
+		%end;
 	run;
 
 	%* Putting all measures together;
@@ -482,176 +590,246 @@ run;
 		%if %quote(&by) ~= %then %do;
 		format %do bb = 1 %to &nro_byvars; &&byvar_name&bb; %end;
 		%end;
-		format &id target x case i j xind1 cut1 xind2 cut2 RSQ_mean RSQ1-RSQ3 RMSE_mean RMSE1-RMSE3;
-		merge _PTC_rsq_all_ _PTC_rss_all_;
+		format _target_ _var_ _case_ i j _cut1_ %if &maxnpieces >= 3 %then %do; _cut2_ %end;
+										_xrank1_ %if &maxnpieces >= 3 %then %do; _xrank2_ %end;
+										n1 n2 %if &maxnpieces >= 3 %then %do; n3 %end;
+										RSQ RMSE RSS RSS1 RSS2 %if &maxnpieces >= 3 %then %do; RSS3 %end;;
+		merge 	_PTC_results_b_(where=(_var_ = "&var" and _case_ = 0) keep=_var_ _case_ RSQ RSS rename=(RSQ=RSQ0 RSS=RSS0))
+				_PTC_rsq_all_ _PTC_rss_all_;
+					%** Note that we add from _PTC_results_b_ the RSQ and RSS values for the SINGLE regression
+					%** so that we can CORRECTLY compute the RSQ for the piecewise regressions,
+					%** because for this we need to consider the Corrected Sum of Squares of Y ON THE SINGLE REGRESSION!
+					%** Otherwise the R2 of some pieces may be very low just because they are computed based on the Y scale
+					%** that is SEEN by that piece...;
+		%* Corrected Sum of Squares of Target;
+		CSSY = RSS0 / (1 - RSQ0);
+		%* RSS, RMSE and R-Square;
+		RSS = sum(of RSS1-RSS2);
+		RSQ = 1 - RSS / CSSY;
+		RMSE = sqrt( RSS / (n1 + n2) );
+		drop RSQ0 RSS0 CSSY;
 	run;
 
 	%* Append;
 	proc append base=_PTC_results_b_ data=_PTC_rsq_all_ force;
 	run;
+
+	%* Prepare for the next iteration;
+	%let i = %eval(&i + &step);
+	%let cut1 = %scan(&xsweep, &i, ' ');
 %end;
 /*-------------------------------------------------------------------------------------------*/
 
 /*------------------------------------- 3 Regressions ---------------------------------------*/
-%if &log %then
-	%put;
-%* Sweep over the cut values and do linear regressions on each piece;
-%do i = 1 %to %eval(&nro_cuts1-3);
-	%** Si se incluye el mismo cut en las dos regresiones adyacentes; 
-	%** - usar &nro_cuts-2
-	%** - usar &cut1 abajo en el <= del WHERE del REG2
-	%** - usar &cut2 abajo en el <= del WHERE del REG3;
-	%** Si NO se incluye el mismo cut en las dos regresiones adyacentes; 
-	%** - usar &nro_cuts-3
-	%** - usar &cut1p abajo en el <= del WHERE del REG2
-	%** - usar &cut2p abajo en el <= del WHERE del REG3;
- 
-	%do j = %eval(&i+3) %to %eval(&nro_cuts1-1);
-		%** Si se incluye el mismo cut en las dos regresiones adyacentes; 
-		%** - usar &i+2
-		%** - nro_cuts1
-		%** Si NO se incluye el mismo cut en las dos regresiones adyacentes; 
-		%** - usar &i+3
-		%** - nro_cuts1-1;
+%if &maxnpieces >= 3 %then %do;
+	%if &log %then
+		%put;
 
-		%let case = %eval(&case + 1);
-		%let cut1 = %scan(&xsweep, &i, ' ');
-		%let cut1p = %scan(&xsweep, %eval(&i+1), ' ');
-		%let cut2 = %scan(&xsweep, &j, ' ');
-		%let cut2p = %scan(&xsweep, %eval(&j+1), ' ');
-		%let obs1 = %scan(&obssweep, &i, ' ');
-		%let obs2 = %scan(&obssweep, &j, ' ');
+	%local xlast1 xlast2;			%* Maximum cut values to try for regression pieces #1 and #2;
+	%let xlast1 = %scan(&xsweep, %eval(&last - &mincases), ' ');
+	%let xlast2 = &xlast;
+
+	%* Check if there is enough number of points to make 3 regressions (i.e. 2 cuts);
+	%if &xlast1 < &xfirst %then %do;
 		%if &log %then %do;
-			%put PIECEWISETRANSFCUTS: Performing linear regressions in 3 pieces...;
-			%if %quote(&by) ~= %then %do;
-				%do bb = 1 %to &nro_byvars;
-					%put PIECEWISETRANSFCUTS: %upcase(&&byvar_name&bb) = &&byvar&bb;
-				%end;
-			%end;
-			%put PIECEWISETRANSFCUTS: Case=&case: cut1 = %Pretty(&cut1, roundoff=0.0001), cut2 = %Pretty(&cut2, roundoff=0.0001);
+			%put PIECEWISETRANSFCUTS: Not enough data to try 3 piecewise regressions.;
+			%put PIECEWISETRANSFCUTS: The optimization process stops.;
 		%end;
-		proc reg data=_PTC_data_b_ outest=_PTC_reg1_ rsquare noprint;
-			where %sysevalf(0.999*&xmin) <= &var <= %sysevalf(1.001*&cut1);	%* I multiply by 1.001 because o.w. value &cut1 is not always included in the range; 
-			reg1: model &target = &var;
-			output out=_PTC_pred1_ predicted=fit residual=residual;
-		run;
-		quit;
-		proc reg data=_PTC_data_b_ outest=_PTC_reg2_ rsquare noprint;
-			where %sysevalf(0.999*&cut1p) <= &var <= %sysevalf(1.001*&cut2);	%* I multiply by 1.001 because o.w. value &cut2 is not always included in the range; 
-			reg2: model &target = &var;
-			output out=_PTC_pred2_ predicted=fit residual=residual;
-		run;
-		quit;
-		proc reg data=_PTC_data_b_ outest=_PTC_reg3_ rsquare noprint;
-			where %sysevalf(0.999*&cut2p) <= &var <= %sysevalf(1.001*&xmax);	%* I multiply by 1.001 because o.w. value &xmax is not always included in the range; 
-			reg3: model &target = &var;
-			output out=_PTC_pred3_ predicted=fit residual=residual;
-		run;
-		quit;
-
-		%* Compute sum of RMSE and sum of RSQ;
-		data _PTC_regall_;
-			set _PTC_reg1_ _PTC_reg2_ _PTC_reg3_;
-			rename 	_rmse_ = RMSE
-					_rsq_  = RSQ;
-		run;
-		options dkrocond=nowarning;
-		proc transpose data=_PTC_regall_ out=_PTC_regall_rmse_(drop=_NAME_ _LABEL_) prefix=RMSE;
-			var RMSE;
-		run;
-		proc transpose data=_PTC_regall_ out=_PTC_regall_rsq_(drop=_NAME_ _LABEL_) prefix=RSQ;
-			var RSQ;
-		run;
-		options dkrocond=&dkrocond_option;
-		data _PTC_rsq_all_;
-			merge _PTC_regall_rmse_ _PTC_regall_rsq_;
-			%* Add information on independent and target variables;
-			%if %quote(&by) ~= %then %do;
-				%do bb = 1 %to &nro_byvars;
-				length &&byvar_name&bb $32.;
-				&&byvar_name&bb = "&&byvar&bb";
-				%end;
-			%end;
-			length x target $32.;
-			x = "&var";
-			target = "&target";
-			%* Compute sum of RMSE and sum of RSQ;
-			RMSE_mean = sum(of rmse1-rmse3) / 3;
-			RSQ_mean = sum(of rsq1-rsq3) / 3;
-			%* Identify case analyzed (defining the cut values used);
-			case = &case;
-			i = &i;
-			j = &j;
-			xind1 = &obs1;
-			cut1 = &cut1;
-			xind2 = &obs2;
-			cut2 = &cut2;
-		run;
-
-		%* Sum of RSS;
-		%do k = 1 %to 3;
-			data _PTC_pred&k._;
-				set _PTC_pred&k._;
-				residual2 = residual*residual;
-			run;
-			%Means(_PTC_pred&k._, var=residual2, id=&id, stat=sum, name=RSS, out=_PTC_rss&k._, log=0);
-		%end;
-		data _PTC_rss_;
-			set _PTC_rss1_ _PTC_rss2_ _PTC_rss3_;
-		run;
-		options dkrocond=nowarning;
-		proc transpose data=_PTC_rss_ out=_PTC_rss_all_(drop=_NAME_ _LABEL_) prefix=RSS;
-			%if %quote(&id) ~= %then %do;
-			by &id;	%* Note the use of BY instead of ID: ID assumes that each value of the ID
-					%* variable occurs only one. Here, we are assuming that the ID variable has
-					%* only one value that is repeated for all observations in the input dataset;
-			%end;
-			var RSS;
-		run;
-		options dkrocond=&dkrocond_option;
-		data _PTC_rss_all_;
-			format &id RSS_mean RSS1-RSS3;
-			set _PTC_rss_all_;
-			RSS_mean = sum(of RSS1-RSS3) / 3;
-		run;
-
-		%* Putting all measures together;
-		data _PTC_rsq_all_;
-			%if %quote(&by) ~= %then %do;
-			format %do bb = 1 %to &nro_byvars; &&byvar_name&bb; %end;
-			%end;
-			format &id target x case i j xind1 cut1 xind2 cut2 RSQ_mean RSQ1-RSQ3 RMSE_mean RMSE1-RMSE3;
-			merge _PTC_rsq_all_ _PTC_rss_all_;
-		run;
-
-		%* Append;
-		proc append base=_PTC_results_b_ data=_PTC_rsq_all_ force;
-		run;
 	%end;
-%end;
+	%else %do;
+		%* Sweep over the cut values and do linear regressions on each piece;
+		%let i = 1;
+		%do %until (&cut1 = or &cut1 >= &xlast1);	%* &cut1 can be empty when the next value to try is out of range from the values in &xsweep;
+		%*%do i = 1 %to %eval(&nro_cuts1-&mincases);
+			%** Si se incluye el mismo cut en las dos regresiones adyacentes; 
+			%** - usar &nro_cuts - &mincases + 1 (e.g. &nro_cuts - 2)
+			%** - usar &cut1 abajo en el <= del WHERE del REG2
+			%** - usar &cut2 abajo en el <= del WHERE del REG3;
+			%** Si NO se incluye el mismo cut en las dos regresiones adyacentes; 
+			%** - usar &nro_cuts - &mincases (e.g. &nro_cuts - 3)
+			%** - usar &cut1p abajo en el <= del WHERE del REG2
+			%** - usar &cut2p abajo en el <= del WHERE del REG3;
+
+			%* Before iterating on the second cut, check that it does not go out of range of the values in &xsweep;
+			%let j = %eval(&i + &mincases);
+			%let cut2 = %scan(&xsweep, &j, ' ');
+			%do %while (&cut2 ~= and &cut2 < &xlast2);		%* &cut2 is empty when it goes out of range. I need to check for empty because empty < any value...;
+			%*%do j = %eval(&i+&mincases) %to &nro_cuts1;
+				%** Si se incluye el mismo cut en las dos regresiones adyacentes; 
+				%** - usar &i + &mincases - 1 (e.g. &nro_cuts + 2)
+				%** - nro_cuts1
+				%** Si NO se incluye el mismo cut en las dos regresiones adyacentes; 
+				%** - usar &i + &mincases (e.g. &nro_cuts + 3)
+				%** - nro_cuts1-1;
+
+				%let case = %eval(&case + 1);
+				%let cut1 = %scan(&xsweep, &i, ' ');				%* Last cse to include in regression piece #1;
+				%let cut1p = %scan(&xsweep, %eval(&i+1), ' ');		%* First case to include in regression piece #2;
+				%let cut2 = %scan(&xsweep, &j, ' ');				%* Last case to include in regression piece #2;
+				%let cut2p = %scan(&xsweep, %eval(&j+1), ' ');		%* First case to include in regression piece #3;
+				%let obs1 = %scan(&obssweep, &i, ' ');				%* Index of first DISTINCT observation in regression piece #2;
+				%let obs2 = %scan(&obssweep, &j, ' ');				%* Index of first DISTINCT observation in regression piece #3;
+				%if &log %then %do;
+					%put PIECEWISETRANSFCUTS: Performing linear regressions in 3 pieces...;
+					%if %quote(&by) ~= %then %do;
+						%do bb = 1 %to &nro_byvars;
+							%put PIECEWISETRANSFCUTS: %upcase(&&byvar_name&bb) = &&byvar&bb;
+						%end;
+					%end;
+					%put PIECEWISETRANSFCUTS: Case=&case: cut1 = %Pretty(&cut1, roundoff=0.0001) (max ~ &xlast1), cut2 = %Pretty(&cut2, roundoff=0.0001) (max ~ &xlast2);
+				%end;
+				proc reg data=_PTC_data_b_ outest=_PTC_reg1_ rsquare noprint;
+					where %sysevalf(0.999999*&xmin) <= &var <= %sysevalf(1.000001*&cut1);	%* I multiply by 1.0000001 because o.w. value &cut1 is not always included in the range; 
+					reg1: model &target = &var;
+					output out=_PTC_pred1_ predicted=fit residual=residual;
+				run;
+				quit;
+				proc reg data=_PTC_data_b_ outest=_PTC_reg2_ rsquare noprint;
+					where %sysevalf(0.999999*&cut1p) <= &var <= %sysevalf(1.000001*&cut2);	%* I multiply by 1.000001 because o.w. value &cut2 is not always included in the range; 
+					reg2: model &target = &var;
+					output out=_PTC_pred2_ predicted=fit residual=residual;
+				run;
+				quit;
+				proc reg data=_PTC_data_b_ outest=_PTC_reg3_ rsquare noprint;
+					where %sysevalf(0.999999*&cut2p) <= &var <= %sysevalf(1.000001*&xmax);	%* I multiply by 1.000001 because o.w. value &xmax is not always included in the range; 
+					reg3: model &target = &var;
+					output out=_PTC_pred3_ predicted=fit residual=residual;
+				run;
+				quit;
+
+				%* Compute sum of RMSE and sum of RSQ;
+				data _PTC_regall_;
+					set _PTC_reg1_ _PTC_reg2_ _PTC_reg3_;
+					rename 	_edf_  = n
+/*							_rmse_ = RMSE
+							_rsq_  = RSQ*/;
+				run;
+				options dkrocond=nowarning;
+				proc transpose data=_PTC_regall_ out=_PTC_regall_n_(drop=_NAME_ _LABEL_) prefix=n;
+					var n;
+				run;
+/*
+				proc transpose data=_PTC_regall_ out=_PTC_regall_rmse_(drop=_NAME_ _LABEL_) prefix=RMSE;
+					var RMSE;
+				run;
+				proc transpose data=_PTC_regall_ out=_PTC_regall_rsq_(drop=_NAME_ _LABEL_) prefix=RSQ;
+					var RSQ;
+				run;
+*/
+				options dkrocond=&dkrocond_option;
+				data _PTC_rsq_all_;
+					merge _PTC_regall_n_ /*_PTC_regall_rmse_ _PTC_regall_rsq_*/;
+					%* Add information on independent and target variables;
+					%if %quote(&by) ~= %then %do;
+						%do bb = 1 %to &nro_byvars;
+						length &&byvar_name&bb $32.;
+						&&byvar_name&bb = "&&byvar&bb";
+						%end;
+					%end;
+					length _var_ _target_ $32.;
+					_var_ = "&var";
+					_target_ = "&target";
+					%* Identify case analyzed (defining the cut values used);
+					_case_ = &case;
+					i = &i;
+					j = &j;
+					_xrank1_ = &obs1;
+					_cut1_ = &cut1;
+					_xrank2_ = &obs2;
+					_cut2_ = &cut2;
+				run;
+
+				%* Sum of RSS;
+				%do k = 1 %to 3;
+					data _PTC_pred&k._;
+						set _PTC_pred&k._;
+						residual2 = residual*residual;
+					run;
+					%Means(_PTC_pred&k._, var=residual2, stat=n sum, name=n RSS, out=_PTC_rss&k._, log=0);
+				%end;
+				data _PTC_rss_;
+					set _PTC_rss1_ _PTC_rss2_ _PTC_rss3_;
+				run;
+				options dkrocond=nowarning;
+				proc transpose data=_PTC_rss_ out=_PTC_regall_n_(drop=_NAME_ _LABEL_) prefix=n;
+					var n;
+				run;
+				proc transpose data=_PTC_rss_ out=_PTC_regall_rss_(drop=_NAME_ _LABEL_) prefix=RSS;
+					var RSS;
+				run;
+				options dkrocond=&dkrocond_option;
+				data _PTC_rss_all_;
+					format n1 n2 n3 RSS1-RSS3;
+					merge _PTC_regall_n_ _PTC_regall_rss_;
+				run;
+
+				%* Putting all measures together;
+				data _PTC_rsq_all_;
+					%if %quote(&by) ~= %then %do;
+					format %do bb = 1 %to &nro_byvars; &&byvar_name&bb; %end;
+					%end;
+					format _target_ _var_ _case_ i j _cut1_ _cut2_ _xrank1_ _xrank2_ n1 n2 n3 RSQ RMSE RSS RSS1-RSS3;
+					merge 	_PTC_results_b_(where=(_var_ = "&var" and _case_ = 0) keep=_var_ _case_ RSQ RSS rename=(RSQ=RSQ0 RSS=RSS0))
+							_PTC_rsq_all_ _PTC_rss_all_;
+								%** Note that we add from _PTC_results_b_ the RSQ and RSS values for the SINGLE regression
+								%** so that we can CORRECTLY compute the RSQ for the piecewise regressions,
+								%** because for this we need to consider the Corrected Sum of Squares of Y ON THE SINGLE REGRESSION!
+								%** Otherwise the R2 of some pieces may be very low just because they are computed based on the Y scale
+								%** that is SEEN by that piece...;
+					%* Corrected Sum of Squares of Target;
+					CSSY = RSS0 / (1 - RSQ0);
+					%* RSS, RMSE and R-Square;
+					RSS = sum(of RSS1-RSS3);
+					RSQ = 1 - RSS / CSSY;
+					RMSE = sqrt( RSS / (n1 + n2 + n3) );
+					drop RSQ0 RSS0 CSSY;
+				run;
+
+				%* Append;
+				proc append base=_PTC_results_b_ data=_PTC_rsq_all_ force;
+				run;
+
+				%* Prepare for the next INNER iteration;
+				%let j = %eval(&j + &step);
+				%let cut2 = %scan(&xsweep, &j, ' ');
+			%end;
+
+			%* Prepare for the next OUTER iteration;
+			%let i = %eval(&i + &step);
+			%let cut1 = %scan(&xsweep, &i, ' ');
+		%end;
+	%end;	%* Check if there is enough number of points to perform 3 regressions;
+%end; %* &maxnpieces >= 3;
 /*-------------------------------------------------------------------------------------------*/
+
 
 /*---------------------------------- Choose best cuts ---------------------------------------*/
 %if &log %then %do;
 	%put;
-	%put PIECEWISETRANSFCUTS: Choosing the best cuts, based on maximizing the average R-Square...;
+	%put PIECEWISETRANSFCUTS: Choosing the best cuts, based on maximizing the Total R-Square...;
 %end;
 
-%* Keep the observation with the maximum value of RSQ_mean;
+%* Keep the observation with the maximum value of RSQ_mean on piecewise regressions (i.e. the single regression is NOT considered but is added below as reference);
 data _PTC_cuts_b_;
-	set _PTC_results_b_ end=lastobs;
-	retain RSQ_mean_max .;
-	if RSQ_mean > RSQ_mean_max then do;
-		RSQ_mean_max = RSQ_mean;
+	set _PTC_results_b_(where=(_case_>0)) end=lastobs;
+	retain RSQ_max .;
+	if RSQ > RSQ_max then do;
+		RSQ_max = RSQ;
 		output;
 	end;
-	drop RSQ_mean_max;
+	drop RSQ_max;
 run;
 %* Keep the last observation of _PTC_cuts_b_ because that is the one that contains the maximum
 %* value of RSQ_mean;
 data _PTC_cuts_b_;
 	set _PTC_cuts_b_ end=lastobs;
 	if lastobs;
+run;
+%* Add the results for the single regression to keep as reference;
+data _PTC_cuts_b_;
+	set _PTC_results_b_(in=in0 where=(_case_=0))
+		_PTC_cuts_b_;
+	if in0 then _cut_ = 0;
 run;
 
 /* OLD (3/3/05, can delete): The above method is safer than the one below, because no comparisons
@@ -673,35 +851,27 @@ data _PTC_cuts_b_;
 run;
 */
 
-data _PTC_cuts_b_(keep=%if %quote(&by) ~= %then %do; %do bb = 1 %to &nro_byvars; &&byvar_name&bb %end; %end; &id cut target x _ptc_obs_ value RSQ_mean RMSE_mean RSS_mean);
+data _PTC_cuts_b_(keep=%if %quote(&by) ~= %then %do; %do bb = 1 %to &nro_byvars; &&byvar_name&bb %end; %end; _cut_ _target_ _var_ _value_ RSQ RMSE RSS);
 	%if %quote(&by) ~= %then %do;
 	format %do bb = 1 %to &nro_byvars; &&byvar_name&bb; %end;
 	%end;
-	format &id cut target x _ptc_obs_ value RSQ_mean RMSE_mean RSS_mean;
+	format _cut_ _target_ _var_ _value_ RSQ RMSE RSS;
 	set _PTC_cuts_b_;
-	retain RSQ_mean RMSE_mean RSS_mean;
-	_ptc_obs_ = xind1;
-	cut = 1;
-	value = cut1;
+	retain RSQ RMSE RSS;
+	if _cut_ ~= 0 then do;	%* cut = 0 for the results for the SINGLE regression;
+		_cut_ = 1;
+		_value_ = _cut1_;
+	end;
 	output;
 	%* Check whether there is only one cut value and if there is more than one, check whether
 	%* the cut values are consecutive x values. If this is the case, there should be only one
 	%* cut in the piecewise transformation, and thus the second cut value is not output to the
-	%* dataset containing the cut values;
-	if j ~= . and j > i + 1 then do;
-		_ptc_obs_ = xind2;
-		cut = 2;
-		value = cut2;
+	%* dataset containing the cut values. Otherwise, output the second cut to the output dataset;
+	if _xrank2_ ~= . and _xrank2_ > _xrank1_ + 1 then do;
+		_cut_ = 2;
+		_value_ = _cut2_;
 		output;
 	end;
-run;
-
-%* Add the information coming from the input dataset to the dataset containing the best cuts;
-data _PTC_cuts_b_;
-	merge _PTC_cuts_b_(in=in1) _PTC_data_b_(in=in2 drop=&var);
-	by _ptc_obs_;
-	if in1 and in2;
-	drop _ptc_obs_ _GROUPID_;
 run;
 
 %* Append the results for the current by variable combination to the temporary output datasets;
@@ -710,16 +880,17 @@ run;
 proc append base=_PTC_results_ data=_PTC_results_b_ FORCE;
 run;
 /*-------------------------------------------------------------------------------------------*/
-%end;	%* do b;
+%end;	%* do b (BY-group processing);
+
 
 /*----------------------------------- Output datasets ---------------------------------------*/
 %if %quote(&out) ~= %then %do;
 	%let out_name = %scan(&out, 1, '(');
 	data &out;
 		set _PTC_cuts_;
-		label 	RMSE_mean = "Average Root Mean Squared Error"
-				RSQ_mean  = "Average R-Square"
-				RSS_mean  = "Average Residual Sum of Squares";
+		label 	RSQ		= "Total R-Square"
+				RMSE 	= "Total Root Mean Squared Error"
+				RSS  	= "Total Residual Sum of Squares";
 	run;
 	%if &log %then %do;
 		%put;
@@ -732,9 +903,18 @@ run;
 	options dkrocond=nowarning;
 	data &outall;
 		set _PTC_results_;
-		label 	RMSE_mean = "Average Root Mean Squared Error"
-				RSQ_mean  = "Average R-Square"
-				RSS_mean  = "Average Residual Sum of Squares";
+		label 	RSQ 	= "Total R-Square"
+				RMSE 	= "Total Root Mean Squared Error"
+				RSS  	= "Total Residual Sum of Squares"
+				RSS1	= "Sum of Squares on piece 1"
+				RSS2	= "Sum of Squares on piece 2"
+				n1		= "Number of cases in piece 1"
+				n2 		= "Number of cases in piece 2"
+				%if &maxnpieces >= 3 %then %do;
+				n3 		= "Number of cases in piece 3"
+				RSS3	= "Sum of Squares on piece 3"
+				%end;
+				;
 		drop i j _LABEL_;
 	run;
 	options dkrocond=&dkrocond_option;
@@ -750,6 +930,7 @@ proc datasets nolist;
 	delete 	_PTC_cuts_b_
 			_PTC_data_
 			_PTC_data_b_
+			_PTC_data_b_rank_
 			_PTC_pred1_
 			_PTC_pred2_
 			_PTC_pred3_
@@ -757,8 +938,8 @@ proc datasets nolist;
 			_PTC_reg2_
 			_PTC_reg3_
 			_PTC_regall_
-			_PTC_regall_rmse_
-			_PTC_regall_rsq_
+			_PTC_regall_n_
+			_PTC_regall_rss_
 			_PTC_results_b_
 			_PTC_rsq_all_
 			_PTC_rss_
@@ -780,5 +961,7 @@ quit;
 	%put;
 %end;
 
+%ExecTimeStop;
 %ResetSASOptions;
+%end; %* %if ~%CheckInputParameters;
 %MEND PiecewiseTransfCuts;
