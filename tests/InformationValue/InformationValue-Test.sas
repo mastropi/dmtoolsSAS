@@ -6,6 +6,27 @@ Description: 	Tests run on macro %InformationValue.
 */
 
 
+/*----------------------------- Run Test Harness --------------------------------*/
+* Setup;
+%let testmacro = InformationValue;
+%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
+libname test "&testpath";
+options fmtsearch=(WORK _data);
+
+* Read the Test Harness dataset;
+%import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
+
+%RunTestHarness(
+	&testmacro,
+	TestHarness_&testmacro,
+	checkoutput=OUT OUTWOE OUTFORMAT,
+	datadir=&testpath\data,
+	resultsdir=&testpath\expected
+);
+/*----------------------------- Run Test Harness --------------------------------*/
+
+
+
 /*------------------------ Generate expected results ----------------------------*/
 * Create ad-hoc datasets for testing;
 %let testmacro = InformationValue;
@@ -97,23 +118,3 @@ options nomprint;
 	resultsdir=&testpath\expected
 );
 /*------------------------ Generate expected results ----------------------------*/
-
-
-/*----------------------------- Run Test Harness --------------------------------*/
-* Setup;
-%let testmacro = InformationValue;
-%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
-libname test "&testpath";
-options fmtsearch=(WORK _data);
-
-* Read the Test Harness dataset;
-%import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
-
-%RunTestHarness(
-	&testmacro,
-	TestHarness_&testmacro,
-	checkoutput=OUT OUTWOE OUTFORMAT,
-	datadir=&testpath\data,
-	resultsdir=&testpath\expected
-);
-/*----------------------------- Run Test Harness --------------------------------*/

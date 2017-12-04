@@ -1,0 +1,9 @@
+case,data,target,var,event,groups,stat,formats,out,outwoe,outformat,_description,_expect,_result
+1,totest_01_maysbook,y,group,,20,,,totest_01_iv01,totest_01_ivwoe01,,"Mays book example, numeric target, 20 groups","Output IV, WOE",S
+2,totest_01_maysbook,y,group,,,,,totest_01_iv02,totest_01_ivwoe02,,"Mays book example, numeric target, no categorization","Output IV, WOE",S
+3,totest_01_maysbook,z,group,Bad,20,,,totest_01_iv03,totest_01_ivwoe03,,"Mays book example, character target, 20 groups","Output IV, WOE",S
+4,totest_01_maysbook,y,group,0,,,group group.,totest_01_iv04,totest_01_ivwoe04,,"Mays book example, formatted input variable, event=0","Output IV, WOE",S
+5,totest_01_maysbook,y,group,,20,max,,totest_01_iv05,totest_01_ivwoe05,totest_01_ivformat05,"Mays book example, show MAX of each group, outformats","Output IV, WOE, formats",S
+6,sashelp.heart,status,_ALL_,,,,,heart_iv01,heart_ivwoe01,,ALL variables,"Output IV, WOE",S
+7,sashelp.heart,status,AgeAtStart AgeCHDdiag Smoking Smoking_Status Weight_Status Weight Sex,,,,,heart_iv02,heart_ivwoe02,,"A few variables, some with missing values, no categorization","Output IV, WOE",S
+8,sashelp.heart,status,AgeAtStart AgeCHDdiag Smoking Smoking_Status Weight_Status Weight Sex,,20,max,,heart_iv03,heart_ivwoe03,heart_ivformat03,"A few variables, some with missing values, 20 groups, formats","Output IV, WOE, formats",S

@@ -1,5 +1,6 @@
 /* Macro to import an external file (CSV, TXT, EXCEL, DLM (delimited file)).
 Use DLM for delimited file and specify the delimiter in option DELIMITER.
+For tab separated files use the hexadecimal value '09'x.
 */
 &rsubmit;
 %MACRO import(dat , file , type=CSV, firstobs=2, sheet=, delimiter=',', guessingrows=1000) / store des="Imports an external file";
@@ -13,9 +14,7 @@ Use DLM for delimited file and specify the delimiter in option DELIMITER.
 PROC IMPORT OUT=&dat 
             DATAFILE=&file
             DBMS=&type REPLACE;
-	%if %quote(%upcase(&type)) = DLM %then %do;
 	DELIMITER=&delimiter;
-	%end;
 	%if %quote(%upcase(&type)) = CSV %then %do;
 	GUESSINGROWS=&guessingrows;
 	%end;

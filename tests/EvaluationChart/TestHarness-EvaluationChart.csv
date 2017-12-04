@@ -1,0 +1,5 @@
+case,data,target,score,by,event,model,leaf,step,groups,percentiles,chart,plot,overlay,best,pointlabels,points,legend,bands,bandtype,confidence,out,outstat,odsfile,odsfiletype,libformat,_description,_expect,_result
+1,totest_00a,y,p,,1,LR,,,,,gains,1,1,1,0,0,0,0,SIMUL,0.95,totest_00a_ec,totest_00a_ec_stat,,,,"Wrong data, only one target value, the non-event",,F
+2,totest_00b,y,p,,1,LR,,,,,gains,1,1,1,0,0,0,0,SIMUL,0.95,totest_00b_ec,totest_00b_ec_stat,,,,"Only one target value, the event",output datasets,S
+3,totest_01,y,p,,1,LR,,,,,gains,1,1,1,0,0,0,0,SIMUL,0.95,totest_01_ec,totest_01_ec_stat,,,,"Normal data, 10 cases",output datasets,S
+4,totest_02,y,p,,1,LR,,,,,gains,1,1,1,0,0,0,0,SIMUL,0.95,totest_02_ec,totest_02_ec_stat,,,,"Perfect ordering, 10 cases, 1 event",output datasets,S

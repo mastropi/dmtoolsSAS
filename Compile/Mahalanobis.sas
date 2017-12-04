@@ -1,8 +1,8 @@
 /* MACRO %Mahalanobis
-Version: 1.04
-Author: Santiago Laplagne - Daniel Mastropietro
-Created: 2-Dec-02
-Modified: 12-Aug-2011 (previous: 28-Jul-04)
+Version: 	1.04
+Author: 	Santiago Laplagne - Daniel Mastropietro
+Created: 	02-Dec-2002
+Modified: 	28-Nov-2017 (previous: 12-Aug-2011, 28-Jul-2004)
 
 DESCRIPTION:
 Calcula la distancia de Mahalanobis para todos los puntos de un dataset
@@ -286,7 +286,7 @@ run;
 		%* separado, pero no para las variables tomadas en conjunto, que es lo que se requiere
 		%* en este caso. Es decir lo que hay que hacer es eliminar TODA una observacion que
 		%* tenga missing value en al menos una de las variables de analisis;
-		%Means(_Mahalanobis_data_(where=(~%any(&_var_,=,.))), var=&_var_, out=&center, log=0);
+		%Means(_Mahalanobis_data_(where=(~%any(&_var_,=,.))), var=&_var_, stat=mean, out=&center, log=0);
 	%end;
 	%else %do;
 		%let _error_ = 1;

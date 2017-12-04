@@ -229,6 +229,13 @@ for this purpose, because otherwise the value of p (used in logit(p)) cannot be 
 &rsubmit;
 %MACRO PiecewiseTransfCuts(data, target=y, var=x, by=, ncuts=15, maxnpieces=3, minpropcases=0.10, out=_PTC_cuts_, outall=_PTC_results_, log=1, help=0)
 		/ store des="Finds the best cut points for a piecewise linear transformation to predict a continuous target";
+/* TODO:
+- (2017/08/24) Choose the cut values not in a regular grid but in a regular grid in terms of the percentiles of the input variables. The percentile values
+are chosen based on ncuts.
+- (2017/08/24) Add a weight variable so that we can weight each point by e.g. the number of values that originally gave rise to the final values considered
+in the regressions (typically this happens when analyzing a binary variable and binning the input variable to compute the logit).
+*/
+
 
 /*----- Macro to display usage -----*/
 %MACRO ShowMacroCall;

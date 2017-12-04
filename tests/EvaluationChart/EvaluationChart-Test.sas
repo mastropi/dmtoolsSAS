@@ -13,6 +13,25 @@ Notes:			The test code makes use of a test harness dataset defined in the same d
 */
 
 
+/*----------------------------- Run Test Harness --------------------------------*/
+* Setup;
+%let testmacro = EvaluationChart;
+%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
+libname test "&testpath";
+
+* Read the Test Harness dataset;
+%import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
+
+%RunTestHarness(
+	&testmacro,
+	TestHarness_&testmacro,
+	checkoutput=OUT OUTSTAT,
+	datadir=&testpath\data,
+	resultsdir=&testpath\expected
+);
+/*----------------------------- Run Test Harness --------------------------------*/
+
+
 /*------------------------ Generate expected results ----------------------------*/
 %let testmacro = EvaluationChart;
 %let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
@@ -79,22 +98,3 @@ datalines;
 	resultsdir=&testpath\expected
 );
 /*------------------------ Generate expected results ----------------------------*/
-
-
-/*----------------------------- Run Test Harness --------------------------------*/
-* Setup;
-%let testmacro = EvaluationChart;
-%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
-libname test "&testpath";
-
-* Read the Test Harness dataset;
-%import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
-
-%RunTestHarness(
-	&testmacro,
-	TestHarness_&testmacro,
-	checkoutput=OUT OUTSTAT,
-	datadir=&testpath\data,
-	resultsdir=&testpath\expected
-);
-/*----------------------------- Run Test Harness --------------------------------*/

@@ -36,3 +36,16 @@ V.1.13: 31/08/06 (DM)
 V.1.14: 2011/11/22 (DM)
 	- Added flag parameter DROPTYPEFREQ so that the user can specify whether they want to drop the _TYPE_ and _FREQ_ variables from the output dataset.
 	By default, the variables are dropped (as was the case until now), so this parameter defaults to 1.
+
+V.1.17: 2017/09/06 (DM)
+	- Renamed the OPTIONS= parameter to OPTIONSOUT= because I added a new OPTIONS= parameter used to specify options in the PROC MEANS statement. The need for this came up when computing quantiles on a very large number of cases (context: AFIP), where PROC MEANS suggests using the QMETHOD=P2 option to approximate the quantile and use much less memory.
+	(I verified using 'grep -ni "%Means" *.sas' run from a Git Bash on the macros/Compile directory that no calls to the %Means macro are done in other macros by using the older OPTIONS= parameter (now renamed to OPTIONSOUT=))
+	- Removed the creation of a copy of the input dataset (done for security reasons to not update the input dataset with e.g. dataset options like KEEP) so that we save time, especially important when processing a large amount of data.
+
+V.1.18: 2017/11/28 (DM)
+	- Defined the default value of STAT= as STAT=n nmiss mean stddev cv skewness kurtosis min p1 p5 p10 p25 p50 p75 p90 p95 p99 max.
+	The previous default value was STAT=mean but the idea is that the user calls this macro to easily create distributions of variables in a table.
+	(I verified using 'grep -ni "%Means" *.sas' run from a Git Bash on the macros/Compile directory that no calls to the %Means macro are done in other macros with no explicit specification of the STAT= parameter (there was actually one call in Mahalanobis.sas that didn't explicitly set that parameter but I simply replaced that call by adding stat=mean))
+	- Fixed a bug introduced in version v1.17 when I removed the creation of a copy of the input dataset: the sorting step when BY variables are specified was incorrectly sorting the dataset IN PLACE, which made the dataset be updated when e.g. there were KEEP variables! This is quite dangerous because the input dataset is updated in that case and there could be loss of data!!
+	- Added a new parameter SORTINPLACE=0, which optionally requests the sorting process to be done in place (in case the user wants to leverage the call to %Means to sort the dataset.
+

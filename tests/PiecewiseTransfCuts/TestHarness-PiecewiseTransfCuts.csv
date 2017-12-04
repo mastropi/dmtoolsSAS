@@ -1,0 +1,9 @@
+case,data,target,var,by,maxnpieces,minpropcases,ncuts,out,outall,_description,_expect,_result
+1,ptc_totest1,logit,edad,,3,0.1,10,ptc_cuts1,ptc_results1,Basic call with one analysis variable,,S
+2,ptc_totest2,logit,value,var,3,0.1,10,ptc_cuts2,ptc_results2,Call with BY variables,,S
+3,ptc_totest2,logit,value,var,2,0.1,10,ptc_cuts3,ptc_results3,Only two pieces considered,,S
+4,ptc_totest1,logit,edad,,3,0,7,ptc_cuts4,ptc_results4,Min. proportion of cases = 0,Example of somehow not expected results because the number of cases is too small in the first piece,S
+5,ptc_totest1(obs=10),logit,edad,,3,0,,ptc_cuts5,ptc_results5,ncuts parameter is empty,The cut step value is 1,S
+91,ptc_totest1(obs=5),logit,edad,,3,0.1,15,ptc_cuts91,ptc_results91,Extreme case,Only a single regression is carried out,S
+92,ptc_totest1(obs=6),logit,edad,,3,0.1,15,ptc_cuts92,ptc_results92,Extreme case,Only a single cut value is considered as &xfirst = &xlast (inside the macro),S
+93,ptc_totest1(obs=10),logit,edad,,3,0.1,15,ptc_cuts93,ptc_results93,Extreme case,Two cut values are considered because &xfirst < &xlast but &step is 0 (inside the macro),S
