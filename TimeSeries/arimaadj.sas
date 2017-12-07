@@ -1,7 +1,7 @@
 /* com_mac_arimaadj.sas
-Version:		V3.03
+Version:		V3.04
 Creado:			06/09/2006
-Modificado:		31-May-2012
+Modificado:		07-Dec-2017 (previous: 31-May-2012)
 Autor:			Daniel Mastropietro
 Descripcion:	Macro para ajuste de un modelo ARIMA considerando aspectos de:
 				- Analisis de stationarity (constancia en el promedio de la serie)
@@ -190,6 +190,8 @@ error				Nombre de la macro variable que se genera al finalizar la macro
 					La macro variable vale 1 si hubo un error y 0 en caso contrario.
 					Default: _error_
 execID				ID de Ejecucion. Si es vacio, se crea uno.
+notes				Mostrar notas en el log?
+					Default: 0 => No
 ===================================================================================================
 
 
@@ -326,6 +328,7 @@ V3.03		31/05/2012	DM		- ARIMA ADJUSTMENT: Added a check that the the macro varia
 								specify what selection criterion to use, either MAE, MDAE, MAPE, MDAPE.
 								This implied the addition of a new parameter called CRITERION.
 								The changes impacted the dataset _MAPE_PQMIN.
+V3.04		07/12/2017	DM		- New parameter: NOTES=0.
 ===================================================================================================
 */
 
@@ -362,7 +365,8 @@ V3.03		31/05/2012	DM		- ARIMA ADJUSTMENT: Added a check that the the macro varia
 				plot=0,
 				plotwhat=AUTO,
 				error=_error_,
-				execID=);
+				execID=,
+				notes=0);
 
 %MACRO ComputeForecast(target=, trend=0, logarithm=0, round=0, lowerbound=.);
 	%if &trend %then %do;
@@ -474,6 +478,14 @@ V3.03		31/05/2012	DM		- ARIMA ADJUSTMENT: Added a check that the the macro varia
 %local time_elapsed;
 
 %local lowerbound;			%* Lower bound for the forecasts. It depends on parameter ALLOWNEGATIVE;
+
+%let notes_option = %sysfunc(getoption(notes));
+%if &notes %then %do;
+	options notes;
+%end;
+%else %do;
+	options nonotes;
+%end;
 
 %let time_start = %sysfunc(time());
 
@@ -1774,4 +1786,6 @@ quit;
 
 %let time_end = %sysfunc(time());
 %let time_elapsed = %TimeElapsed(&time_start, &time_end, tag=Tiempo transcurrido total);
+
+options &notes_option;
 %MEND ARIMAAdj;
