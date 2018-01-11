@@ -460,7 +460,7 @@ quit;
 			%* In this case, both variables NUMVALUE and CHARVALUE should exist in the dataset so that there is no problem
 			%* when appending to the final output dataset which will contain both variables (as variables of both types are analyzed);
 			format numvalue best12.;	%* This format is to avoid showing ** when the format is not long enough for the variables value (eg 2. instead of 8.);
-			format charvalue;
+			format charvalue $&_charlength_max_..;
 			%* Define the lengths of numeric and character variables to avoid truncation;
 			length numvalue &_numlength_max_;
 			length charvalue $&_charlength_max_;

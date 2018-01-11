@@ -6,7 +6,7 @@ Modified: 		15-Feb-2016 (previous: 12-Nov-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
-Makes scatter or bubble plots of a target variable in terms of a set of binned input variables
+Makes scatter or bubble plots of a target variable in terms of a set of binned input numeric variables
 and fits a loess curve to the plot (weighted by the number of cases in each bin).
 
 USAGE:
@@ -40,7 +40,7 @@ REQUIRED PARAMETERS:
 - target:			Target variable containing the time to the event of interest.
 
 OPTIONAL PARAMETERS:
-- var:				List of input variables to analyze.
+- var:				List of numeric input variables to analyze.
 					default: _NUMERIC_
 
 - class:			List of categorical variables to analyze among those listed in VAR.
@@ -313,7 +313,7 @@ quit;
 		%put PLOTBINNED: Categorizing continuous variables...;
 %*	%Categorize(&data, by=&by, var=&var, condition=&condition, alltogether=&alltogether, groupsize=&groupsize, groups=&groups, both=0, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &class), log=0);
 	%* DM-2016/02/15: Refactored version of %Categorize (much simpler);
-	%Categorize(&data, by=&by, var=&var, condition=&condition, groupsize=&groupsize, groups=&groups, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &class), log=0);
+	%Categorize(&data, by=&by, var=&var, condition=&condition, groupsize=&groupsize, groups=&groups, value=&value, varvalue=&var, out=_PB_data_(keep=&by &target &var &class), log=&log);
 	%if &log %then
 		%put;
 %end;
@@ -324,6 +324,7 @@ quit;
 %end;
 
 %* Restate the list of variables to analyze to the original list of variables (i.e. including the categorical variables);
+%* RECALL that class variables must ALSO be NUMERIC (so we can with no problems compute the MIN and MAX values below using macro GetStat);
 %let vartype = %Rep(N, %GetNroElements(&var)) %Rep(C, %GetNroElements(&class));
 %let var = &var &class;
 %let nro_vars = %GetNroElements(&var);

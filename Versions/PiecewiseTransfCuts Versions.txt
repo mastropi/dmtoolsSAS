@@ -1,0 +1,55 @@
+%PiecewiseTransfCuts Versions: Description of the different versions
+--------------------------------------------------------------------
+Created: 07-Aug-2017
+Author: Daniel Mastropietro
+
+
+V.1.00: 2005/01/13 (DM)
+	- First version whose signature is as follows:
+	%PiecewiseTransfCuts(
+		data,					*** Input dataset. Data options are accepted.
+		target=y,				*** Target variable (continuous)
+		var=x,					*** Analysis variable (only one allowed)
+		by=,					*** BY variables
+		id=,					*** ID variables
+		ncuts=15,				*** Number of cut values to try out to find the best cuts
+		out=_PTC_cuts_,			*** Output dataset containing the best cuts found for the analysis variable for each BY variable
+		outall=_PTC_results_,	*** Output dataset contaniing the R-Squared and related measures for all cut values tried
+		log=1);					*** Show messages in the log?
+
+V.1.10: 2017/08/07 (DM)
+	- Added two new parameters:
+		- MINPROPCASES=0.15: minimum proportion of cases that should be present in each regression piece. This is introduced to overcome the problem observed at Pronto where a very high R2 obtained on a regression with very few points (say 3 to 5 points) generates an incorrect cut (e.g. the cut was age = 20 while it should be 27)
+		- NCUTS=20: number of different cut values to considered to look for the best cuts
+
+	- Replaced the calculation of macro variable &nro_cuts1 since this is now specified by the new parameter NCUTS.
+
+	- Made the calculations of macro variables &xmin and &xmax more efficient by using PROC SQL instead of the %SCAN() function.
+
+	- Removed creation of variable _ptc_obs_ since it is no longer used (now that I compute the _RANK_ variable based on the distinct values of the analysis variable in the input dataset).
+
+	- I now include in the OUTALL dataset also the result for the SINGLE regression case, so that the user can see whether doing a piecewise transformation is worth it or not.
+
+	- Added underscores ("_") to most of the variable names in the output datasets to avoid overwriting by analysis variables. This happens commonly when performing the analysis on multiple variables because this analysis usually comes in the flavor of a dataset having VAR as one of the variables which is used as BY variable (in fact such dataset is the output of the %VariableImpact macro which is suggested to be used when analyzing a binary target variable).
+
+	- MOST IMPORTANT CHANGE WHICH AFFECTS RESULTS SIGNIFICANTLY, MAKING THE CUTS IDENTIFICATION NOW CORRECT: Corrected the calculation of the R-Square and RMSE values for the multi-piece regression so that they are based on the RSS values in each piece as opposed to the average values of R-Square and RMSE on each piece which should NOT be averaged.
+	In fact, the R-Square of the multi-piece regression should be referred to the Corrected Sum of Squares of Y on the SINGLE regression, NOT on the Corrected Sum of Squares of Y in EACH piece... since we are comparing the multi-piece regression with a single regression, which is based on the whole span of the variable X.
+
+	- Following the above change in the calculation of R-Square and RMSE of the multi-piece regressions, I removed variables RSQ1-RSQ3 and RMSE1-RMSE3 from the OUTALL dataset because these values are misleading, since they do not directly have to do with the overall R-Square and RMSE of the multi-piece regression.
+
+	- Removed the ID= parameter as it doesn't make sense now that we allow repeated values in the analyzed X variable.
+
+	- Added %ShowMacroCall functionality.
+
+	- The macro signature is currently as follows:
+	%PiecewiseTransfCuts(
+		data, 					*** Input dataset
+		target=y,				*** Target variable (continuous)
+		var=x,					*** Analysis variable (only one allowed)
+		by=,					*** BY variables
+		ncuts=15,				*** Number of cut values to try out to find the best cuts
+		maxnpieces=3,			*** Max number of pieces in which to try piecewise regressions (<= 3)
+		minpropcases=0.10,		*** Min proportion of cases that each piece must have
+		out=_PTC_cuts_,			*** Output dataset containing the best cuts found for the analysis variable for each BY variable
+		outall=_PTC_results_,	*** Output dataset contaniing the R-Squared and related measures for all cut values tried
+		log=1);					*** Show messages in the log?

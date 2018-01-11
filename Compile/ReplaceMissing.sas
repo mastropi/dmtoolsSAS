@@ -15,7 +15,7 @@ Ahora esta' la macro %Set2Zero definida en el codigo macros.sas del modelo UW2.0
 
 %if ~%isNumber(&value) %then %do;
 	%* Compute the statistic specified in VALUE= for each analyzed variable;
-	%Means(&data, var=&var, stat=&value, name=&var, transpose=1, out=_rm_means_, log=0);
+	%Means(&data, var=&var, stat=&value, name=&var, transpose=1, namevar=var, out=_rm_means_, log=0);
 	%let values = %MakeListFromVar(&data, var=&value);
 %end;
 %else

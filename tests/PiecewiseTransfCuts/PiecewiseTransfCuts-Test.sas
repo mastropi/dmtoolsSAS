@@ -9,6 +9,7 @@ Notes:			The test code makes use of a test harness defined in the same directory
 
 
 /*---------------------------- Run Test Harness ---------------------------------*/
+************* WARNING: This test harness may take ~ 20 minutes to run!! **********;
 *** Version 1.0 (04-Feb-2016): where I have re-written the macro from scracth to make use of PROC RANK;
 * Setup;
 %let testmacro = PiecewiseTransfCuts;
@@ -26,6 +27,7 @@ libname test "&testpath";
 	checkoutput=out outall,
 	resultsdir=&testpath/expected
 );
+************* WARNING: This test harness may take ~ 20 minutes to run!! **********;
 /*---------------------------- Run Test Harness ---------------------------------*/
 
 

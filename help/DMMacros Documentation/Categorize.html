@@ -8,14 +8,16 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %Categorize</h1>
-<pre>Version:                      1.01                                                                                      </pre>
+<pre>Version:                      1.02                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      12-Feb-2016                                                                               </pre>
-<pre>Modified:                     18-Jun-2017 (previous: 12-Feb-2016)                                                            </pre>
+<pre>Modified:                     09-Jan-2018 (previous: 18-Jun-2017, 12-Feb-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Categorizes a set of numeric variables based on ranks (i.e. equal size binning) and optionally                                                                                          </pre>
 <pre>creates a new set of variables containing a specified statistic (like the mean) for each bin.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Missing values in the analyzed variables are categorized as missing values.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%Categorize(                                                                                          </pre>
@@ -67,7 +69,6 @@ pre {display: block}
 <pre>- %GetVarOrder                                                                                                          </pre>
 <pre>- %MakeListFromName                                                                                                     </pre>
 <pre>- %Means                                                                                                                </pre>
-<pre>- %Merge                                                                                                                </pre>
 <pre>- %ResetSASOptions                                                                                                      </pre>
 <pre>- %SetSASOptions                                                                                                        </pre>
 <body>

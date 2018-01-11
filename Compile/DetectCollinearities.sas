@@ -83,7 +83,7 @@ OPTIONAL PARAMETERS:
 				measure.
 				- if instead correlation information is given through the DATACORR parameter
 				the critersion is defined as:
-					<standardized-collinearity-measure> + <standardized-correlation>
+					"standardized-collinearity-measure" + "standardized-correlation"
 				where each standardized measure is computed by standardizing the respective
 				measures using the RANGE method of PROC STDIZE which generates standardized
 				variables with values in the [0, 1] range. The values of all the variables

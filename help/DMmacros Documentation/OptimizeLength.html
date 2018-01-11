@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%OptimizeLength</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %OptimizeLength</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      20-Apr-2016                                                                               </pre>
+<pre>Modified:                     20-Apr-2016                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Minimizes the length of integer variables based on their value range (absolute min-max values).                                                                                          </pre>
+<pre>The length string is created and stored in a global macro variable specified by the user.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>CAUTION: A variable is considered integer-valued only based on its INFORMAT with the following criteria:                                                                                          </pre>
+<pre>- the informat length should be larger than 0,                                                                                          </pre>
+<pre>- the number of decimals in the format should be 0.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Note that variables created during a data step with no explicit INFORMAT statement, the above                                                                                          </pre>
+<pre>two pieces of information are set to 0, therefore they will not be considered integer-valued                                                                                          </pre>
+<pre>variables even if their values are integer.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%OptimizeLength(data, var=_ALL_, apply=0, out=_OptimizeLength_, macrovar=lengthstr, log=1);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Options are not accepted.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- var:                        List of variables to analyze.                                                             </pre>
+<pre>                              default: _ALL_                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- apply:                      Whether to apply the LENGTH statement to the input dataset.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the variables range and the minimum accepted length.                                                            </pre>
+<pre>                              default: _OptimizeLength_                                                                 </pre>
+<pre>                                                                                                                        </pre>
+<pre>- macrovar:                   Name of the global macro variable where the LENGTH statement is stored.                                                            </pre>
+<pre>                              default: lengthstr                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %CreateInteractions                                                                                                   </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %GetVarOrder                                                                                                          </pre>
+<pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<body>
+</html>

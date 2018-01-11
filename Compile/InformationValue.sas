@@ -1,8 +1,8 @@
 /* MACRO %InformationValue
-Version: 	4.00
+Version: 	4.01
 Author: 	Daniel Mastropietro
 Created: 	06-Jul-2005
-Modified: 	17-Jun-2017 (previous: 17-May-2016, 15-Apr-2016)
+Modified: 	10-Jan-2018 (previous: 17-Jun-2017, 17-May-2016, 15-Apr-2016)
 
 DESCRIPTION:
 This macro computes the Information Value (IV) provided by a set of input variables w.r.t.
@@ -28,7 +28,8 @@ USAGE:
 	target=,					*** Dichotomous target variable.
 	var=_ALL_,					*** Analysis variables (character or numeric).
 	event=,						*** Event of interest.
-	groups=,					*** Nro. of groups to use to categorize numeric variables. Leave it empty if ALL analyzed variables are categorical.
+	groups=10,					*** Nro. of groups to use to categorize numeric variables. Leave it empty if ALL analyzed variables are categorical.
+	condition=,					*** Condition that each analysis variable should satisfy in order to be part of the grouping.
 	stat=, 						*** Statistic to use as representation of each category of numeric variables.
 	formats=,					*** Formats to use for each analysis variable.
 	smooth=1,					*** Whether to smooth the WOE calculation in order to avoid missing values.
@@ -61,6 +62,13 @@ OPTIONAL PARAMETERS:
 				Equal size groups are used.
 				Leave it empty if no categorization is wished. For instance, for categorical variables.
 				default: 10
+
+- condition:	Expression specifying a condition that each numeric variable should satisfy in order to
+				be part of the grouping process.
+				Ex:
+				condition=~=0, meaning that 0 values are not grouped, but left on their own.
+				condition=%quote(not in (0, 1)), meaning that 0 and 1 values are left on their own.
+				default: empty => all values are considered during the grouping process
 
 - stat:			Statistic to show for each category of numeric variables, such as the mean.
 				default: empty => each category is represented by an arbitrary integer value (normally
@@ -267,6 +275,7 @@ by that value is infinite.
 						var=_ALL_,
 						event=,
 						groups=10,
+						condition=,
 						stat=,
 						formats=,
 						smooth=1,
@@ -288,6 +297,7 @@ by that value is infinite.
 	%put var=_ALL_ , %quote(             *** Analysis variables.);
     %put event= , %quote(                *** Event of interest.);
     %put groups=20 , %quote(             *** Nro. of groups to use to categorize numeric variables.);
+	%put condition= , %quote(            *** Condition that each analysis variable should satisfy in order to be part of the grouping.);
     %put stat= , %quote(                 *** Statistic to show for the categories of numeric variables.);
 	%put formats= , %quote(              *** Formats to be used for selected analysis variables or target.);
 	%put smooth=1 , %quote(              *** Whether to smooth the WOE calculation in order to avoid missing values.);
@@ -328,6 +338,7 @@ by that value is infinite.
 	%put INFORMATIONVALUE: - var = %quote(          &var);
     %put INFORMATIONVALUE: - event = %quote(        &event);
     %put INFORMATIONVALUE: - groups = %quote(       &groups);
+    %put INFORMATIONVALUE: - condition = %quote(    &condition);
     %put INFORMATIONVALUE: - stat = %quote(         &stat);
 	%put INFORMATIONVALUE: - formats = %quote(      &formats);
 	%put INFORMATIONVALUE: - smooth = %quote(       &smooth);
@@ -465,12 +476,12 @@ run;
 		%* Use the same variable name for the categorized variable so that the process below is easier;
 %*		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, suffix=, log=0);
 		%* DM-2016/02/15: Refactored version of %Categorize (much simpler);
-		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, varcat=&var_num, log=0);
+		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, varcat=&var_num, condition=&condition, log=&log);
 	%end;
 	%else %do;
 		%* The categorized variable is made up of categories equal to the statistic specified in STAT=.
 		%* Use the same variable name for the categorized variable so that the process below is easier;
-		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, stat=&stat, varvalue=&var_num, log=0);
+		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, condition=&condition, stat=&stat, varvalue=&var_num, log=&log);
 	%end;
 	data _iv_data_;
 		merge 	_iv_data_(in=in1)

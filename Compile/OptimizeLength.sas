@@ -87,7 +87,7 @@ run;
 %else %do;
 	%if &log %then
 		%put OPTIMIZELENGTH: Computing MIN and MAX values for each integer variable...;
-	%Means(&data(keep=&var), var=&var4len, transpose=1, stat=min max, out=_ol_means_, log=0);
+	%Means(&data(keep=&var), var=&var4len, transpose=1, stat=min max, namevar=var, out=_ol_means_, log=0);
 
 	%if &log %then
 		%put OPTIMIZELENGTH: Computing minimum possible length...;

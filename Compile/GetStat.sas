@@ -209,7 +209,7 @@ _vari_;
 		set _GetStat_Stat_;
 		%do _i_ = 1 %to &_nro_vars_;
 			%CreateName(&_i_);
-			call symput("&_name_" , &_name_);
+			call symput("&_name_" , trim(left(&_name_)));
 			%* NOTA IMPORTANTE: las comillas DOBLES son importantes en lugar de las SIMPLES,
 			%* para que el simbolo & sea interpretado como referencia al valor de una macro variable, 
 			%* y no como un caracter mas que forma parte del nombre de la macro variable a crear;

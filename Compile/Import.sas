@@ -14,7 +14,10 @@ For tab separated files use the hexadecimal value '09'x.
 PROC IMPORT OUT=&dat 
             DATAFILE=&file
             DBMS=&type REPLACE;
+	%if %index(%upcase(%quote(&type)), EXCEL) = 0 %then %do;
+	%* Add the delimiter if the data is NOT in Excel format;
 	DELIMITER=&delimiter;
+	%end;
 	%if %quote(%upcase(&type)) = CSV %then %do;
 	GUESSINGROWS=&guessingrows;
 	%end;

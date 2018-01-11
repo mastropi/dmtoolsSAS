@@ -297,7 +297,7 @@ run;
 
 	%if %quote(&outmad) ~= %then %do;
 		%* Compute the number of outliers detected for each variable;
-		%Means(&out, var=%MakeList(&_vars_, prefix=&prefix), stat=sum n nmiss, out=_DOM_Means_, transpose=1, log=0);
+		%Means(&out, var=%MakeList(&_vars_, prefix=&prefix), stat=sum n nmiss, namevar=var, out=_DOM_Means_, transpose=1, log=0);
 		data _DOM_Means_;
 			format id;
 			set _DOM_Means_(rename=(sum=count));

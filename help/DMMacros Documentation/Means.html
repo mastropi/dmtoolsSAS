@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %Means</h1>
-<pre>Version:                      1.18                                                                                      </pre>
+<pre>Version:                      1.19                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      01-Sep-2000                                                                               </pre>
-<pre>Modified:                     28-Nov-2017 (previous: 06-Sep-2017, 24-Aug-2017, 21-Apr-2016, 04-Feb-2016)                                                            </pre>
+<pre>Modified:                     10-Jan-2018 (previous: 28-Nov-2017, 06-Sep-2017, 24-Aug-2017, 21-Apr-2016, 04-Feb-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Runs PROC MEANS with the statements and options "usually" used. The supported statements are:                                                                                          </pre>
@@ -45,9 +45,10 @@ pre {display: block}
 <pre>          out=,                         /* Output dataset */                                        </pre>
 <pre>          var=_NUMERIC_, /* Variables on which statistics are computed */                                                            </pre>
 <pre>          format=,                      /* PROC MEANS FORMAT statement */                              </pre>
-<pre>          class=,                       /* PROC MEANS CLASS statement */                              </pre>
-<pre>          by=,                          /* PROC MEANS BY statement */                               </pre>
 <pre>          id=,                          /* PROC MEANS ID statement */                               </pre>
+<pre>          by=,                          /* PROC MEANS BY statement */                               </pre>
+<pre>          class=,                       /* PROC MEANS CLASS statement */                              </pre>
+<pre>          types=,                       /* PROC MEANS TYPES statement */                              </pre>
 <pre>          stat=n nmiss mean stddev cv skewness kurtosis min p1 p5 p10 p25 p50 p75 p90 p95 p99 max,                                                            </pre>
 <pre>          /* Statistics to be computed on the variables */                                                            </pre>
 	name=,			*** Names to be used for the requested statistics
@@ -168,8 +169,8 @@ pre {display: block}
 <pre>          default: 0 (i.e. the dataset is not transposed)                                                            </pre>
 <pre>                                                                                                    </pre>
 <pre>- namevar:Name to use for the column containing the variable names in the output                                                            </pre>
-<pre>          dataset. It has no effect if parameter 'out' is empty.                                                            </pre>
-<pre>          default: var                                                                              </pre>
+<pre>          dataset when TRANSPOSE=1. It has no effect if parameter 'out' is empty.                                                            </pre>
+<pre>          default: _var_                                                                            </pre>
 <pre>                                                                                                    </pre>
 <pre>- droptypefreq:Indicates whether to drop the _TYPE_ and _FREQ_ variables from the output                                                            </pre>
 <pre>          dataset.                                                                                  </pre>

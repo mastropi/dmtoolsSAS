@@ -1,8 +1,8 @@
 /* MACRO %Means
-Version: 	1.18
+Version: 	1.19
 Author: 	Daniel Mastropietro
 Created: 	01-Sep-2000
-Modified: 	28-Nov-2017 (previous: 06-Sep-2017, 24-Aug-2017, 21-Apr-2016, 04-Feb-2016)
+Modified: 	10-Jan-2018 (previous: 28-Nov-2017, 06-Sep-2017, 24-Aug-2017, 21-Apr-2016, 04-Feb-2016)
 
 DESCRIPTION:
 Runs PROC MEANS with the statements and options "usually" used. The supported statements are:
@@ -36,9 +36,10 @@ USAGE:
 	out=, 			*** Output dataset
 	var=_NUMERIC_, *** Variables on which statistics are computed
 	format=,		*** PROC MEANS FORMAT statement
-	class=, 		*** PROC MEANS CLASS statement
-	by=, 			*** PROC MEANS BY statement
 	id=, 			*** PROC MEANS ID statement
+	by=, 			*** PROC MEANS BY statement
+	class=, 		*** PROC MEANS CLASS statement
+	types=,			*** PROC MEANS TYPES statement
 	stat=n nmiss mean stddev cv skewness kurtosis min p1 p5 p10 p25 p50 p75 p90 p95 p99 max,
 					*** Statistics to be computed on the variables
 	name=,  		*** Names to be used for the requested statistics
@@ -158,8 +159,8 @@ OPTIONAL PARAMETERS:
 				default: 0 (i.e. the dataset is not transposed)
 
 - namevar:		Name to use for the column containing the variable names in the output
-				dataset. It has no effect if parameter 'out' is empty.
-				default: var
+				dataset when TRANSPOSE=1. It has no effect if parameter 'out' is empty.
+				default: _var_
 
 - droptypefreq:	Indicates whether to drop the _TYPE_ and _FREQ_ variables from the output
 				dataset.
@@ -281,9 +282,9 @@ Ex: Computing the distribution of a set of numeric variables.
 );
 */
 &rsubmit;
-%MACRO Means(data, 	out=, var=_numeric_, format=, class=, by=, id=,
+%MACRO Means(data, 	out=, var=_numeric_, format=, id=, by=, class=, types=,
 			 stat=n nmiss mean stddev cv skewness kurtosis min p1 p5 p10 p25 p50 p75 p90 p95 p99 max, stats=, name=, names=, 
-			 prefix=, suffix=, weight=, noprint=1, nolabel=1, options=, optionsout=, transpose=0, namevar=var,
+			 prefix=, suffix=, weight=, noprint=1, nolabel=1, options=, optionsout=, transpose=0, namevar=_var_,
 			 droptypefreq=1, sortinplace=0, notes=1, log=1, help=0)
 		/ store des="Runs a PROC MEANS with added features such as transposing the output to increase readability";
 
@@ -302,9 +303,10 @@ Ex: Computing the distribution of a set of numeric variables.
 	%put var=_NUMERIC_ , %quote(        *** Analysis variables.);
 	%put out= , %quote(                 *** Output dataset.);
 	%put format= , %quote(              *** PROC MEANS FORMAT statement.);
-	%put class= , %quote(               *** PROC MEANS CLASS statement.);
-	%put by= , %quote(                  *** PROC MEANS BY statement.);
 	%put id= , %quote(                  *** PROC MEANS ID statement.);
+	%put by= , %quote(                  *** PROC MEANS BY statement.);
+	%put class= , %quote(               *** PROC MEANS CLASS statement.);
+	%put types= , %quote(               *** PROC MEANS TYPES statement.);
 	%put weight= , %quote(              *** PROC MEANS WEIGHT statement.);
 	%put stat= , %quote(                *** Statistics to be computed on the analysis variables.);
 	%put name= , %quote(                *** Names to be used for the requested statistics.);
@@ -360,7 +362,7 @@ Ex: Computing the distribution of a set of numeric variables.
 %local notes_option;
 %local nobs nvars;	%*** Number of obs. and number of vars in output dataset;
 %* Statements for the MEANS procedure;
-%local byst classst formatst idst droptypefreqst noprintst outputst statst weightst;
+%local byst classst formatst idst typesst droptypefreqst noprintst outputst statst weightst;
 
 %let notes_option = %sysfunc(getoption(notes));
 %SetSASOptions;
@@ -407,7 +409,7 @@ Ex: Computing the distribution of a set of numeric variables.
 %let byvars = %RemoveFromList(&by, descending, log=0);
 
 %*** Converting &var into a blank-separated list of variables;
-%let var = %GetVarList(&data , var=&var, log=0);
+%let var = %RemoveRepeated(%GetVarList(&data , var=&var, log=0), log=0);
 %let nro_vars = %GetNroElements(&var);
 
 %* FORMAT;
@@ -435,9 +437,11 @@ Ex: Computing the distribution of a set of numeric variables.
 
 %* CLASS;
 %let classst =;
+%let typesst =;
 %if %quote(&class) ~= %then %do;
 	%let class = %GetVarList(&data , var=&class, log=0);
 	%let classst = class &class;
+	%let typesst = types &types;
 %end;
 
 %* ID;
@@ -535,6 +539,7 @@ proc means data=&data &options &stat &noprintst;
 	&classst;
 	&idst;
 	var &var;
+	&typesst;
 	&weightst;
 	&outputst;
 run;

@@ -49,3 +49,7 @@ V.1.18: 2017/11/28 (DM)
 	- Fixed a bug introduced in version v1.17 when I removed the creation of a copy of the input dataset: the sorting step when BY variables are specified was incorrectly sorting the dataset IN PLACE, which made the dataset be updated when e.g. there were KEEP variables! This is quite dangerous because the input dataset is updated in that case and there could be loss of data!!
 	- Added a new parameter SORTINPLACE=0, which optionally requests the sorting process to be done in place (in case the user wants to leverage the call to %Means to sort the dataset.
 
+V.1.19: 2018/01/10 (DM)
+	- Two new parameters: CLASS= and TYPES= so that we can run PROC MEANS on CLASS variables (as opposed to BY variables).
+	- Changed the default value of the NAME=parameter from 'namevar' to '_var_' in order to avoid the variable containing the variable name in the ouptut dataset when TRANSPOSE=1 from being overridden by e.g. a BY variable called also 'var'!
+	I verified that any calls to the %Means macro by other macros work well with this change.
