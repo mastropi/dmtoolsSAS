@@ -2,7 +2,8 @@
 Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	09-Dec-2003
-Modified: 	28-May-2016
+Modified: 	19-Mar-2018 (note: every time a new macro is added or documentation for a macro becomes available change this date)
+			Also remember to change the date shown by the output of %Help (search for "as of").
 
 DESCRIPTION:
 Shows help on how to invoke a macro.
@@ -63,7 +64,7 @@ help is available when calling %Help(<macro-name>).
 REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 %if %quote(&macro) = %then %do;
 	%put;
-	%put %quote(                        AVAILABLE MACROS AS OF 27-Aug-2015);
+	%put %quote(                        AVAILABLE MACROS AS OF 19-Mar-2018);
 %*	%put MACROS DISPONIBLES AL 10/6/04:;
 	%if %upcase(%quote(&by)) = TOPIC %then %do;
 		%put %quote(                                  -- BY TOPIC --);
@@ -126,6 +127,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put;
 		%put GENERAL STATISTICS;
 		%put ------------------;
+		%put	Aggregate %quote(           Aggregate data on a set of BY variables computing mean and mode.);
 		%put	FreqMult* %quote(           Compute and store the frequencies of a list of variables in an output);
 		%put 	%quote(                     dataset.);
 		%put	GetStat	%quote(             Get the value of ONE specified statistic for a set of variables);
@@ -212,6 +214,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put %quote(%(An asterisk %(*%) next to the macro name indicates that help is available for the macro%));
 		%put;
 		%put A;
+		%put	Aggregate %quote(           Aggregate data on a set of BY variables computing mean and mode.);
 		%put 	All %quote(                 Establish a condition that ALL variables in a list must satisfy.);
 		%put 	Any	%quote(                 Establish a condition that AT LEAST ONE variable in a list must satisfy.);
 		%put;

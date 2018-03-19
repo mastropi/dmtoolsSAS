@@ -31,7 +31,7 @@ USAGE:
 	groups=10,					*** Nro. of groups to use to categorize numeric variables. Leave it empty if ALL analyzed variables are categorical.
 	condition=,					*** Condition that each analysis variable should satisfy in order to be part of the grouping.
 	stat=, 						*** Statistic to use as representation of each category of numeric variables.
-	formats=,					*** Formats to use for each analysis variable.
+	format=,					*** Formats to use for each analysis variable.
 	smooth=1,					*** Whether to smooth the WOE calculation in order to avoid missing values.
 	out=_InformationValue_,		*** Output dataset containing the Information Value for each variable.
 	outwoe=_InformationWOE_,	*** Output dataset containing the WOE and IV for each bin of the categorized variables.
@@ -74,7 +74,7 @@ OPTIONAL PARAMETERS:
 				default: empty => each category is represented by an arbitrary integer value (normally
 				going from 1 to the number of groups, but this depends on how variable values are grouped)
 
-- formats:		Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.
+- format:		Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.
 				This statement can be used to define groups.
 				The formats should be specified as in any FORMAT statement.
 				Ex:
@@ -250,7 +250,7 @@ phase of building a model to predict a dichotomous target variable. This measure
 the relationship between the variable and the target variable be linear, as is required by other measures
 such as the KS or Gini.
 However, the following two notes should be taken into account when computing the Information Value:
-	- Continuous variables should be analyzed in categories (using the GROUPS= parameter or the FORMATS= parameter).
+	- Continuous variables should be analyzed in categories (using the GROUPS= parameter or the FORMAT= parameter).
 	- The Information Value computation does not take into account the size of each categorical value.
 	This means that if a category is too small with respect to the number of observations in the dataset
 	and provides a lot of information about the target variable, this may not be reflected in the
@@ -277,7 +277,7 @@ by that value is infinite.
 						groups=10,
 						condition=,
 						stat=,
-						formats=,
+						format=,
 						smooth=1,
 						out=_InformationValue_,
 						outwoe=_InformationWOE_,
@@ -299,7 +299,7 @@ by that value is infinite.
     %put groups=20 , %quote(             *** Nro. of groups to use to categorize numeric variables.);
 	%put condition= , %quote(            *** Condition that each analysis variable should satisfy in order to be part of the grouping.);
     %put stat= , %quote(                 *** Statistic to show for the categories of numeric variables.);
-	%put formats= , %quote(              *** Formats to be used for selected analysis variables or target.);
+	%put format= , %quote(               *** Formats to be used for selected analysis variables or target.);
 	%put smooth=1 , %quote(              *** Whether to smooth the WOE calculation in order to avoid missing values.);
 	%put out=_InformationValue_ , %quote(*** Output dataset containing the Information Value for each analysis variable.);
 	%put outwoe=_InformationWOE_, %quote(*** Output dataset containin the WOE and IV for each bin of the categorized variables.);
@@ -340,7 +340,7 @@ by that value is infinite.
     %put INFORMATIONVALUE: - groups = %quote(       &groups);
     %put INFORMATIONVALUE: - condition = %quote(    &condition);
     %put INFORMATIONVALUE: - stat = %quote(         &stat);
-	%put INFORMATIONVALUE: - formats = %quote(      &formats);
+	%put INFORMATIONVALUE: - format = %quote(       &format);
 	%put INFORMATIONVALUE: - smooth = %quote(       &smooth);
 	%put INFORMATIONVALUE: - out = %quote(          &out);
 	%put INFORMATIONVALUE: - outwoe = %quote(       &outwoe);
@@ -503,7 +503,7 @@ run;
 %* Note that this option is required because the SPARSE option is also used (which is also needed);
 %* The MISSING=0 option just means that the NOBS column in the output dataset should count the number of
 %* non-missing values, but still missing values are stored in the output table;
-%FreqMult(_iv_data_(where=(not missing(&target))), target=&target, var=&var, formats=&formats, options=outpct SPARSE, missing=0, out=_iv_freqmult_, log=0);
+%FreqMult(_iv_data_(where=(not missing(&target))), target=&target, var=&var, format=&format, options=outpct SPARSE, missing=0, out=_iv_freqmult_, log=0);
 %* Check whether all the variables in VAR are of the same type or not;
 %if (%ExistVar(_iv_freqmult_, numvalue charvalue, log=0)) %then
 	%let bothTypes = 1;

@@ -270,7 +270,7 @@ su VIF supera el thrLarge, listarlas en orden de VIF decreciente.
 %end;
 
 %* Parse list of variables;
-%*%let var = %GetVarList(&data , var=&var, log=0);
+%let var = %RemoveRepeated(%GetVarList(&data , var=&var, log=0));
 
 %* Reading in the input dataset and creating a variable with the observation number.
 %* The observation number is used by some methods in order to compute the collinearity

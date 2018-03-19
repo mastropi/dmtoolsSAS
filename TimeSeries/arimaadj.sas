@@ -1,7 +1,7 @@
 /* com_mac_arimaadj.sas
-Version:		V3.04
+Version:		V3.05
 Creado:			06/09/2006
-Modificado:		07-Dec-2017 (previous: 31-May-2012)
+Modificado:		16-Jan-2018 (previous: 07-Dec-2017, 31-May-2012)
 Autor:			Daniel Mastropietro
 Descripcion:	Macro para ajuste de un modelo ARIMA considerando aspectos de:
 				- Analisis de stationarity (constancia en el promedio de la serie)
@@ -10,7 +10,20 @@ Descripcion:	Macro para ajuste de un modelo ARIMA considerando aspectos de:
 				- Eleccion del mejor modelo en base a la muestra de validacion
 				- Ajuste del mejor modelo y generacion del Forecast
 
-IMPROVEMENTS:	(2011/09/17)
+IMPROVEMENTS:	(2018/01/17)
+				- Seasonality Period estimation: improve the estimate of the seasonality period
+				by finding the maximum of a quadratic interpolation between the period
+				where the peak occurs an its two surrounding frequencies.
+				This is important because, without smoothing like this, only periods that are
+				MULTIPLES of the sample time can be detected... and this may be inappropriate
+				depending on the length of the series.
+				For instance, for monthly data, we may have a series of length 28 (i.e. a non-multiple
+				of 12) and the estimated period for annual seasonality will NOT be 12 but 14,
+				which is half the maximum possible detectable period of 28 months...!
+				(This problem was encountered when working with seasonality detection of PAs
+				at the ADUANA project with NAT in Jan-2018)
+
+				(2011/09/17)
 				- Currently there is no inclusion of the SEASONAL part (if any is detected)
 				in the estimation of the model. An improvement in this sense would be to
 				take into account the seasonal part to:
@@ -345,6 +358,8 @@ V3.04		07/12/2017	DM		- New parameter: NOTES=0.
 				outoutliers=,
 				outparams=,
 				outsummary=,
+				outseasonality=,
+				outspectrum=,
 				sample=Sample,
 				timeid=Fecha,
 				criterion=MAPE,
@@ -478,6 +493,8 @@ V3.04		07/12/2017	DM		- New parameter: NOTES=0.
 %local time_elapsed;
 
 %local lowerbound;			%* Lower bound for the forecasts. It depends on parameter ALLOWNEGATIVE;
+
+%local notes_option;
 
 %let notes_option = %sysfunc(getoption(notes));
 %if &notes %then %do;
@@ -1728,6 +1745,23 @@ run;
 	%put;
 	%put ARIMAADJ: Dataset %upcase(&outsummary) generado con el estado del ajuste ARIMA.;
 %end;
+
+%if %quote(&outseasonality) ~= and %sysfunc(exist(tempdata.com_&execID._seasonality)) %then %do;	
+	data &outseasonality;
+		set tempdata.com_&execID._seasonality;
+	run;
+	%put;
+	%put ARIMAADJ: Dataset %upcase(&outseasonality) generado con el SEASONALITY analysis.;
+%end;
+
+%if %quote(&outspectrum) ~= and %sysfunc(exist(tempdata.com_&execID._spectrum)) %then %do;	
+	data &outspectrum;
+		set tempdata.com_&execID._spectrum;
+	run;
+	%put;
+	%put ARIMAADJ: Dataset %upcase(&outspectrum) generado con el SPECTRUM analysis.;
+%end;
+
 
 %MACRO COMMENT;
 %* Borro datasets temporales;

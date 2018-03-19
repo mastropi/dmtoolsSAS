@@ -49,7 +49,7 @@ USAGE:
 	options=,		*** PROC MEANS statement options
 	optionsout=,	*** Additional PROC MEANS OUTPUT statement options
 	transpose=0,	*** Transpose the output dataset to have one row per variable?
-	namevar=var,	*** If transpose=1, name for the column with the variable names
+	namevar=_var_,	*** If transpose=1, name for the column with the variable names
 					*** in the output dataset
 	droptypefreq=1,	*** Drop the _TYPE_AND _FREQ_ variables from the output dataset?
 	sortinplace=1,	*** Sort the input dataset in place when there are BY variables?
@@ -95,9 +95,12 @@ OPTIONAL PARAMETERS:
 
 - format:		Format definition for the variables.
 
+- by:			List of variables to be used in the BY statement.
+
 - class:		List of variables to be used in the CLASS statement.
 
-- by:			List of variables to be used in the BY statement.
+- types:		TYPES statement identifying which analysis types of the class variables to run.
+				Ex: grp1*grp2*grp3 (assuming the class variables are grp1 grp2 grp3)
 
 - id:			List of variables to be used in the ID statement.
 
@@ -224,6 +227,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %GetVarNames
 - %SetSASOptions
 - %RemoveFromList
+- %RemoveRepeated
 - %ResetSASOptions
 
 SEE ALSO:

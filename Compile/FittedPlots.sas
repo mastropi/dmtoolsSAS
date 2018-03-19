@@ -2,10 +2,12 @@
 Version: 	1.00
 Author: 	Daniel Mastropietro
 Created: 	Aug-2003
-Modified: 	15-Feb-2016 (previous: Aug-2003)
+Modified: 	20-Jan-2018 (previous: 15-Feb-2016, previous: Aug-2003)
 
 DESCRIPTION:
-Plots fitted values and residuals vs. each predictor variable in a linear regression model.
+Plots fitted values and residuals vs. each predictor variable.
+The target variable can be continuous or binary.
+For the binary target case use the GROUPS= parameter to create bins of the analyzed numeric variables.
 
 USAGE:
 %FittedPlots(
@@ -20,7 +22,7 @@ The macro requires SAS/GRAPH.
 */
 &rsubmit;
 %MACRO FittedPlots(data , var , pred=pred , res=res, groups=) 
-	/ store des="Plots fitted values and residuals vs. predictor variables in a linear regression";
+	/ store des="Plots fitted values and residuals vs. predictor variables";
 %local i nro_vars _var_;
 
 %* Variable respuesta (dicotomica);
@@ -38,6 +40,13 @@ The macro requires SAS/GRAPH.
 	%Categorize(&data, var=&var, groups=&groups, value=mean, varvalue=&var, out=_FittedPlots_cat_(keep=&resp &pred &res &var));
 %end;
 
+%* Change the format of the target/response variable in case the target is binary 0/1
+%* in which case the average will also have a e.g. 1.0 format which prevents us from seeing its actual value in the graph;
+proc datasets nolist;
+	modify _FittedPlots_cat_;
+	format &resp 10.2;
+quit;
+
 %do i = 1 %to &nro_vars;
 	%let _var_ = %scan(&var , &i , ' ');
 
@@ -54,7 +63,7 @@ The macro requires SAS/GRAPH.
 
 	%* Plotting;
 	symbol2 interpol=join value=star;
-	title "Fitted vs. %upcase(&_var_)";
+	title "Observed and Fitted vs. %upcase(&_var_)";
 	legend value=("Observed" "Predicted");
 	%SymmetricAxis(_FittedPlots_toplot_ , var=&res , axis=vaxis);
 	proc gplot data=_FittedPlots_toplot_;

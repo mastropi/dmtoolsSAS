@@ -11,6 +11,7 @@ Description: 	Tests run on macro %InformationValue.
 %let testmacro = InformationValue;
 %let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
 libname test "&testpath";
+libname _data "&testpath\data";		%* This test data library name should coincide with the name used by the %RunTestHarness macro when mapping the DATADIR directory;
 options fmtsearch=(WORK _data);
 
 * Read the Test Harness dataset;

@@ -19,3 +19,11 @@ V.1.00: 2015/08/03 (DM)
 V.1.01: 2015/08/28 (DM)
 	- Fixed a bug where an error occurred when no variable qualified for generating the list of distinct values taken.
 	- Changed the assignment of the level variable so that character variables are ALWAYS assigned a "categorical" level.
+
+V.1.02: 2015/09/29 (DM)
+	- Did NOT record the changes done (not even in the git-commit-macros.txt file).
+
+V.1.03: 2018/02/20 (DM)
+	- Fixed a bug when counting the number of missing values of character variables. This was sometimes counted incorrectly because the NMISS() function that was used only works for NUMERIC variables. The bug was fixed by replacing the NMISS() function with a CASE WHEN missing().
+
+

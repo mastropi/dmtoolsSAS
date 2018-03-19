@@ -1,5 +1,5 @@
 /* MACRO %QualifyVars
-Version:		1.02
+Version:		1.03
 Author:			Daniel Mastropietro
 Created:		03-Aug-2015
 Modified:		29-Sep-2015 (previous: 28-Aug-2015)
@@ -137,10 +137,15 @@ proc sql;
 		%let _label_ = %GetVarAttrib(&data, &_var_, varlabel);
 		%let maxlengthlabel = %sysfunc(max(&maxlengthlabel, %length(%quote(&_label_))));
 		%let _type_ = %upcase(%GetVarType(&data, &_var_));
+		/* Variable label */
 		,"&_label_" as l&i
+		/* Variable type */
 		,%if &_type_ = C %then %do; "character" %end; %else %do; "numeric" %end; as t&i length=10
+		/* Number of distinct values */
 		,count(distinct(&_var_)) as n&i
-		,nmiss(&_var_) as m&i
+		/* Number of missing values (NOTE: do NOT use the nmiss() function because this function only applies to numeric variables) */
+		,sum(case when missing(&_var_) then 1 else 0 end) as m&i
+		/* Number of zeros */
 		%if &_type_ = N %then %do;
 		,sum(case when &_var_ = 0 then 1 else 0 end) as z&i
 		%end;

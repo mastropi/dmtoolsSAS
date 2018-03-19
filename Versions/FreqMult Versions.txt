@@ -34,3 +34,14 @@ V.2.01: 2015/08/05 (DM)
 
 V.2.02: 2016/05/17 (DM)
 	- New parameter FORMATS= which is the result of renaming parameter FORMAT=. Parameter FORMATS= now accepts different formats for different variables. We just need to pass the formats definition as in any FORMAT statement in SAS.
+
+V.2.03: 2018/01/11 (DM)
+	- Fixed a bug where I was not setting the format for the CHARVALUE column (i.e. how many characters to see) in the output dataset with the frequency table, which implied that this column may have been shown truncated in the output dataset.
+	This happened when working on the Ternium project where many analysis variables analyzed by e.g. the %InformationValue macro that calls this %FreqMult macro are of length 1 and therefore the frequency values for other variables with larger length were shown truncated.
+
+V.2.04: 2018/01/20 (DM)
+	- Renamed back the FORMATS= parameter to FORMAT= in order to comply with the name of the FORMAT statement in SAS.
+	- Added the possibility of using formats on the BY variables.
+	
+V.2.05: 2018/02/13 (DM)
+	- Fixed a bug where character values equal to '.' were shown as '<Miss>'.

@@ -1,8 +1,8 @@
 /* MACRO %FreqMult
-Version: 		2.03
+Version: 		2.05
 Author: 		Daniel Mastropietro
 Created: 		15-Oct-2004
-Modified: 		26-Jun-2017 (previous: 17-May-2016, 05-Aug-2015)
+Modified: 		20-Jan-2018 (previous: 26-Jun-2017, 17-May-2016, 05-Aug-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -23,7 +23,7 @@ USAGE:
 	target=,				*** Target variable to cross the variables VAR with.
 	var=_ALL_,				*** List of variables to analyze.
 	by=,					*** List of BY variables.
-	formats=,				*** Formats to use for selected analysis variables and/or target variable.
+	format=,				*** Formats to use for the analysis variables, the target variable and or the BY variables.
 	out=_FreqMult_,	    	*** Output dataset containing the frequencies.
 	options=,				*** Options for the TABLES statement.
 	missing=0,				*** Missing values are valid values?
@@ -43,7 +43,7 @@ OPTIONAL PARAMETERS:
 
 - by:				List of BY variables, by which the frequency analysis is done.
 
-- formats:			Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.
+- format:			Formats to use for the analysis variables, the target variable and or the BY variables.
 					This statement can be used to define groups.
 					The output dataset is sorted by the formatted values of each formatted analysis variable.
 					The formats should be specified as in any FORMAT statement.
@@ -150,7 +150,7 @@ Same as above, but missing values are now considered as valid variable values.
 In addition only the variables VAR, NUMVALUE, CHARVALUE and COUNT are kept in the output
 dataset.
 
-3.- %FreqMult(test, by=group, var=xnum ynum zchar, formats=xnum fxnum. zchar $fzchar., transpose=1, out=test_freq);
+3.- %FreqMult(test, by=group, var=xnum ynum zchar, format=xnum fxnum. zchar $fzchar., transpose=1, out=test_freq);
 This computes the frequencies of the values taken by the variables XNUM, YNUM and ZCHAR by each value
 of the BY variable GROUP and stores the results in dataset TEST_FREQ after transposing the output get
 one record per BY group and analysis variable value.
@@ -162,7 +162,7 @@ of the output dataset (instead of the original ones).
 				target=,
 				var=_ALL_,
 				by=,
-				formats=,
+				format=,
 				out=_FreqMult_,
 				options=,
 				missing=0,
@@ -184,6 +184,7 @@ aplica solamente a la ultima variable analizada con el TABLES statement.
 %* These variables are declared here because they are needed before the call to %CheckInputParameters;
 %local by_orig;			%* Temporal list of by variables including any DESCENDING keyword;
 %local byvarlist;		%* List of by variables without any DESCENDING keyword;
+%local byvari;
 %local data_options;
 %local error;
 
@@ -197,13 +198,13 @@ aplica solamente a la ultima variable analizada con el TABLES statement.
 	%put target= , %quote(              *** Target dichotomous variables.);
 	%put var=_ALL_ , %quote(            *** Analysis variables.);
 	%put by= , %quote(                  *** List of BY variables.);
-	%put formats= , %quote(             *** Formats to be used for selected analysis variables.);
+	%put format= , %quote(              *** Formats to be used for analysis, target, or BY variables.);
 	%put out=_FreqMult_ , %quote(       *** Output dataset containing the values taken by each analysis);
 	%put %quote(                        *** variables, its counts and its frequencies.);
 	%put %quote(transpose=0 ,           *** Transpose output dataset so that there is one record per variable?);
 	%put %quote(maxlengthvalues=255 ,   *** Initial length to assign to the VALUES column holding the values taken by the variable);
 	%put %quote(                        *** in the transposed output case.);
-	%put options= ,	%quote(     *** Options for the TABLES statement in PROC FREQ.);
+	%put options= ,	%quote(             *** Options for the TABLES statement in PROC FREQ.);
 	%put missing=0 , %quote(            *** Should missing values be considered as valid values?);
 	%put notes=1 , %quote(              *** Show SAS notes in the log?);
 	%put log=1) %quote(                 *** Show messages in the log?);
@@ -248,6 +249,7 @@ aplica solamente a la ultima variable analizada con el TABLES statement.
 							%* missing values should be considered in the computations;
 %*** Macro variables related to variable formats;
 %local format_target;		%* Possible format for the target variable;
+%local format_byvari;		%* Possible format for the analyzed BY variable;
 %local hasformat;			%* List of flags indicating which variables have formats defined;
 %local formati;				%* Format name to apply to each analyzed variable;
 %local pos;					%* Position of the analyzed variable &VARI in the list of formats given in &FORMAT;
@@ -276,7 +278,7 @@ aplica solamente a la ultima variable analizada con el TABLES statement.
 	%put FREQMULT: - target = %quote(           &target);
 	%put FREQMULT: - var = %quote(              &var);
     %put FREQMULT: - by = %quote(               &by);
-	%put FREQMULT: - formats = %quote(          &formats);
+	%put FREQMULT: - format = %quote(           &format);
 	%put FREQMULT: - out = %quote(              &out);
 	%put FREQMULT: - options = %quote(          &options);
 	%put FREQMULT: - missing = %quote(          &missing);
@@ -353,14 +355,28 @@ run;
 %let hasformat = ;
 proc freq data=_FreqMult_data_ noprint;
 	%* Check if the target variable has a format and if so apply it;
-	%if %quote(&target) ~= and %quote(&formats) ~= %then %do;
+	%if %quote(&target) ~= and %quote(&format) ~= %then %do;
 		%* Look for the target variable name in the list of formats;
-		%let pos = %FindInList(&formats, &target, log=0);
+		%let pos = %FindInList(&format, &target, log=0);
 		%if &pos > 0 %then %do;
 			%* Get the format name to use for the current variable from the (POS+1)-th word in &FORMAT;
 			%* Note that the format name contains the dot at the end already;
-			%let format_target = %scan(&formats, %eval(&pos+1), ' ');
+			%let format_target = %scan(&format, %eval(&pos+1), ' ');
 			format &target &format_target;
+		%end;
+	%end;
+	%* Check if the BY variables have a format and if so apply it;
+	%if %quote(&byvarlist) ~= and %quote(&format) ~= %then %do;
+		%do i = 1 %to %sysfunc(countw(&byvarlist));
+			%let byvari = %scan(&byvarlist, &i, ' ');
+			%* Look for the BY variable name in the list of formats;
+			%let pos = %FindInList(&format, &byvari, log=0);
+			%if &pos > 0 %then %do;
+				%* Get the format name to use for the current variable from the (POS+1)-th word in &FORMAT;
+				%* Note that the format name contains the dot at the end already;
+				%let format_byvari = %scan(&format, %eval(&pos+1), ' ');
+				format &byvari &format_byvari;
+			%end;
 		%end;
 	%end;
 	%* Go over each analysis variable and request a frequency table;
@@ -376,13 +392,13 @@ proc freq data=_FreqMult_data_ noprint;
 		%else
 			%let type = num;
 
-		%if %quote(&formats) ~= %then %do;
+		%if %quote(&format) ~= %then %do;
 			%* Look for the currently analyzed variable name in the list of formats;
-			%let pos = %FindInList(&formats, &vari, log=0);
+			%let pos = %FindInList(&format, &vari, log=0);
 			%if &pos > 0 %then %do;
 				%* Get the format name to use for the current variable from the (POS+1)-th word in &FORMAT;
 				%* Note that the format name contains the dot at the end already;
-				%let formati = %scan(&formats, %eval(&pos+1), ' ');
+				%let formati = %scan(&format, %eval(&pos+1), ' ');
 				format &vari &formati;
 				%let hasformat = &hasformat 1;
 			%end;
@@ -499,8 +515,8 @@ quit;
 		%* Compute the formatted value and check if the current variable VARI has a format specified;
 		%if %scan(&hasformat, &i, ' ') = 1 %then %do;
 			%* Get the format name;
-			%let pos = %FindInList(&formats, &vari, log=0);
-			%let formati = %scan(&formats, %eval(&pos+1), ' ');
+			%let pos = %FindInList(&format, &vari, log=0);
+			%let formati = %scan(&format, %eval(&pos+1), ' ');
 			fmtvalue = put(&type.value, &formati);
 		%end;
 		%else %do;
@@ -580,8 +596,11 @@ quit;
 
 		%* Read the current variable value from the formatted value;
 		%* Missing values in both character and numeric variables are replaced with <Miss>;
+		%* Note that the . value is only replaced with <Miss> for numeric variables because character variables could
+		%* take the value . ACTUALLY;
 		valuec = fmtvalue;
-		if valuec = "" or valuec = "." then
+		if 	valuec = "" and lowcase(type) = "character" or
+			valuec = "." and lowcase(type) = "numeric" then
 			valuec = "<Miss>";
 
 		%* Add the percent of occurrence of the value in parenthesis;
