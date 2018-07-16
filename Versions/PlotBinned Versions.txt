@@ -48,3 +48,13 @@ V.1.07: 2015/11/12 (DM)
 		- The graph was overwritten by new runs of the same plot. This was solved by using the time stamp (in the format yyyymmddThhmmss) as prefix to the name of the PNG file.
 		- No output datasets (OUT or OUTCORR) were generated when the analyzed variables had no labels (because the length of the LABEL variable was set to 0!)
 		- The macro failed when the LOESS fit did not work for categorical variables (because the smoothing parameter was selected as 0). Note that this was solved by treating categorical variables in a special case (i.e. by not running the LOESS, but the error can still happen if the smoothing parameter of continuous variables is chosen to be 0! --I think)
+
+V.1.08: 2016/02/15 (DM)
+	- Following the big change in the %Categorize macro (which was re-written), I removed the option of parameter ALLTOGETHER being equal to 1. The parameter was not removed but the only accepted value is 0, since the new %Categorize macro does not receive ALLTOGETHER as a paramter.
+
+V.1.09: 2018/07/16 (DM)
+	- Replaced parameter VALUE=&value with STAT=&value in the call to %Categorize because the latter parameter has precedence over the former in the %Categorize macro.
+	- In addition, the STAT= parameter now accepts several statistics to be computed.
+	- Added two new parameters:
+		- smooth=1: whether to fit a smooth curve to the data. This is added so that we can set smooth=0 when the LOESS fit fails thus generating an incomplete output dataset.
+		- ylim: common min and max values for the Y axis.

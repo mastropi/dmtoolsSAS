@@ -481,7 +481,7 @@ run;
 	%else %do;
 		%* The categorized variable is made up of categories equal to the statistic specified in STAT=.
 		%* Use the same variable name for the categorized variable so that the process below is easier;
-		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, condition=&condition, stat=&stat, varvalue=&var_num, log=&log);
+		%Categorize(_iv_data_num_, var=&var_num, groups=&groups, condition=&condition, stat=&stat, varstat=&var_num, log=&log);
 	%end;
 	data _iv_data_;
 		merge 	_iv_data_(in=in1)

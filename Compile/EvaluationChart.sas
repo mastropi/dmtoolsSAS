@@ -269,7 +269,6 @@ percentile groups defined by the last dataset listed.
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Callmacro
-- %Categorize
 - %CheckInputParameters
 - %Colors
 - %CreateInteractions

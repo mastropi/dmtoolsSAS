@@ -11,3 +11,7 @@ V.1.02: 2018/01/10 (DM)
 	- Changed the way the rank variables are analyzed to get the representative statistic to use for each category or bin. The following changes were made:
 		- In the call to the %Means macro, the rank variable was moved from the BY= parameter to the CLASS= parameter in order to avoid an SORT by the rank variable. (this was possible thanks to the new parameter CLASS in the %Means macro!)
 		- The merge between the computed statistics for each rank value and the original analyzed numeric variable is now done using indices (in order to avoid additional sorts which are time consuming!)
+
+V.1.03: 2018/07/16 (DM)
+	- New parameter SUFFIX=, so that the user can specify the suffix to use for the grouped rank variables (without having to explicitly list the names for the VARCAT= variables). It defaults to empty, which means that these variables are NOT created in the output dataset by default.
+	- STAT= parameter: it now allows for several statistics to be computed, NOT only one. This is useful when we want to store e.g. the MIN, MEAN, and MAX values of each variable.

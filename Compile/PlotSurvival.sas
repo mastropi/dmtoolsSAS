@@ -261,7 +261,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put;
 %*	%Categorize(&data, var=&varnum, groups=&groups, both=0, value=mean, varvalue=&varnum, out=_PH_data_(keep=&target &censor &varnum), log=0);
 	%* DM-2016/02/15: Refactored version of %Categorize (much simpler);
-	%Categorize(&data, var=&varnum, groups=&groups, value=mean, varvalue=&varnum, out=_PH_data_(keep=&target &censor &varnum), log=0);
+	%Categorize(&data, var=&varnum, groups=&groups, value=mean, varstat=&varnum, out=_PH_data_(keep=&target &censor &varnum), log=0);
 %end;
 
 %do i = 1 %to &nro_varnum;

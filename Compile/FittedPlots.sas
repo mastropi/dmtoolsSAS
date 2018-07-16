@@ -17,6 +17,15 @@ USAGE:
 	res=,			*** Variable containing the residual of the model fit
 	groups=)		*** If wished, number of groups in which model variables are categorized
 
+OTHER MACROS AND MODULES USED IN THIS MACRO:
+- %Categorize
+- %GetNroElements
+- %Means
+- %RemoveFromList
+- %SetSASOptions
+- %SymmetricAxis
+- %ResetSASOptions
+
 NOTES:
 The macro requires SAS/GRAPH.
 */
@@ -24,6 +33,9 @@ The macro requires SAS/GRAPH.
 %MACRO FittedPlots(data , var , pred=pred , res=res, groups=) 
 	/ store des="Plots fitted values and residuals vs. predictor variables";
 %local i nro_vars _var_;
+
+%SetSASOptions;
+%ExecTimeStart;
 
 %* Variable respuesta (dicotomica);
 %let resp = %scan(&var , 1 , ' ');
@@ -37,7 +49,7 @@ The macro requires SAS/GRAPH.
 %if %quote(&groups) ~= %then %do;
 %*	%Categorize(&data, var=&var, groups=&groups, both=0, value=mean, varvalue=&var, out=_FittedPlots_cat_(keep=&resp &pred &res &var));
 	%* DM-2016/02/15: Refactored version of %Categorize (much simpler);
-	%Categorize(&data, var=&var, groups=&groups, value=mean, varvalue=&var, out=_FittedPlots_cat_(keep=&resp &pred &res &var));
+	%Categorize(&data, var=&var, groups=&groups, value=mean, varstat=&var, out=_FittedPlots_cat_(keep=&resp &pred &res &var));
 %end;
 
 %* Change the format of the target/response variable in case the target is binary 0/1
@@ -87,4 +99,7 @@ proc datasets nolist;
 	delete 	%if %quote(&groups) ~= %then %do; _FittedPlots_cat_ %end;
 			_FittedPlots_toplot_;
 quit;
+
+%ExecTimeStop;
+%ResetSASOptions;
 %MEND FittedPlots;

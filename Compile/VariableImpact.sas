@@ -145,7 +145,7 @@ OPTIONAL PARAMETERS:
 					default: 1
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
-- %Categorize
+- %CategorizePercentiles
 - %CheckInputParameters
 - %DefineSymbols
 - %GetNroElements
@@ -157,7 +157,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %SetSASOptions
 
 SEE ALSO:
-- %Categorize
+- %CategorizePercentiles
 - %TestLogisticFit
 
 EXAMPLES:
@@ -374,7 +374,7 @@ quit;
 %if &log %then
 	%put VARIABLEIMPACT: Categorizing independent variables...;
 %if %quote(&condition) = %then %do;
-	%* DM-2016/02/15: Changed call from %Categorize to %CategorizePercentiles which holdds the
+	%* DM-2016/02/15: Changed call from %Categorize to %CategorizePercentiles which holds the
 	%* original version of the %Categorize macro before its refactoring to a much simpler version
 	%* that uses PROC RANK (and which therefore does not accept a given set of percentile values
 	%* on which the groups should be computed);
