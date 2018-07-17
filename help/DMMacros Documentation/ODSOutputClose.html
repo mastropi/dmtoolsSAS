@@ -8,7 +8,7 @@
 <pre>%* SEE ALSO: %ODSOutputOpen;                                                                                            </pre>
 <pre>&rsubmit;                                                                                                               </pre>
 <pre>%MACRO ODSOutputClose(odsfile, odsfiletype=pdf, macro=, log=0) / store des="Closes an open ODS output file";                                                                                          </pre>
-<pre>%if %quote(&odsfile) ~= %then %do;                                                                                           </pre>
+<pre>%if %quote(&odsfile) ~= and %quote(&odsfiletype) ~= %then %do;                                                                                           </pre>
 <pre>                              ods &odsfiletype close;                                                                   </pre>
 <pre>                              %if &log %then %do;                                                                       </pre>
 <pre>                              %put;                                                                                     </pre>

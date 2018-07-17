@@ -8,20 +8,23 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %GetNroElements</h1>
-<pre>Version:                      2.03                                                                                      </pre>
+<pre>Version:                      2.04                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      03-Mar-201                                                                                </pre>
-<pre>Modified:                     05-Feb-2016 (previous: 19-Sep-2003)                                                            </pre>
+<pre>Modified:                     17-Jul-2018 (previous: 05-Feb-2016, 19-Sep-2003)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Returns the number of elements in a list separated by a given separator.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The characters in the list are masked during processing using the %NRBQUOTE() function.                                                                                          </pre>
+<pre>The list can be empty in which case the returned value is 0.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%GetNroElements(list , sep=%quote( ));                                                                                          </pre>
 <pre>                                                                                                    </pre>
 <h3>REQUESTED PARAMETERS:</h3>
 <pre>- list:   A list of unquoted names separated by blanks.                                                            </pre>
-<pre>          (See example below.)                                                                      </pre>
+<pre>          (See example below)                                                                       </pre>
 <pre>                                                                                                    </pre>
 <h3>OPTIONAL PARAMETERS:</h3>
 <pre>- sep:    Separator symbol that defines the different elements                                                             </pre>

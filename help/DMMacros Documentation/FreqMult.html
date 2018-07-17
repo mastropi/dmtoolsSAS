@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %FreqMult</h1>
-<pre>Version:                      2.03                                                                                      </pre>
+<pre>Version:                      2.05                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      15-Oct-2004                                                                               </pre>
-<pre>Modified:                     26-Jun-2017 (previous: 17-May-2016, 05-Aug-2015)                                                            </pre>
+<pre>Modified:                     20-Jan-2018 (previous: 26-Jun-2017, 17-May-2016, 05-Aug-2015)                                                            </pre>
 <pre>SAS Version:                  9.4                                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
@@ -32,7 +32,7 @@ pre {display: block}
 <pre>          target=,                      /* Target variable to cross the variables VAR with. */                              </pre>
 <pre>          var=_ALL_,                    /* List of variables to analyze. */                              </pre>
 <pre>          by=,                          /* List of BY variables. */                                 </pre>
-<pre>          formats=,                     /* Formats to use for selected analysis variables and/or target variable. */                              </pre>
+<pre>          format=,                      /* Formats to use for the analysis variables, the target variable and or the BY variables. */                              </pre>
 	out=_FreqMult_,			*** Output dataset containing the frequencies.
 <pre>          out=_FreqMult_,               /* Output dataset containing the frequencies. */                              </pre>
 <pre>          options=,                     /* Options for the TABLES statement. */                              </pre>
@@ -53,7 +53,7 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <pre>- by:                         List of BY variables, by which the frequency analysis is done.                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- formats:                    Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.                                                            </pre>
+<pre>- format:                     Formats to use for the analysis variables, the target variable and or the BY variables.                                                            </pre>
 <pre>                              This statement can be used to define groups.                                                            </pre>
 <pre>                              The output dataset is sorted by the formatted values of each formatted analysis variable.                                                            </pre>
 <pre>                              The formats should be specified as in any FORMAT statement.                                                            </pre>
@@ -160,7 +160,7 @@ pre {display: block}
 <pre>In addition only the variables VAR, NUMVALUE, CHARVALUE and COUNT are kept in the output                                                                                          </pre>
 <pre>dataset.                                                                                                                </pre>
 <pre>                                                                                                                        </pre>
-<pre>3.- %FreqMult(test, by=group, var=xnum ynum zchar, formats=xnum fxnum. zchar $fzchar., transpose=1, out=test_freq);                                                                                          </pre>
+<pre>3.- %FreqMult(test, by=group, var=xnum ynum zchar, format=xnum fxnum. zchar $fzchar., transpose=1, out=test_freq);                                                                                          </pre>
 <pre>This computes the frequencies of the values taken by the variables XNUM, YNUM and ZCHAR by each value                                                                                          </pre>
 <pre>of the BY variable GROUP and stores the results in dataset TEST_FREQ after transposing the output get                                                                                          </pre>
 <pre>one record per BY group and analysis variable value.                                                                                          </pre>

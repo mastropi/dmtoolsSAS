@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %InformationValue</h1>
-<pre>Version:                      4.00                                                                                      </pre>
+<pre>Version:                      4.01                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      06-Jul-2005                                                                               </pre>
-<pre>Modified:                     17-Jun-2017 (previous: 17-May-2016, 15-Apr-2016)                                                            </pre>
+<pre>Modified:                     10-Jan-2018 (previous: 17-Jun-2017, 17-May-2016, 15-Apr-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>This macro computes the Information Value (IV) provided by a set of input variables w.r.t.                                                                                          </pre>
@@ -38,8 +38,9 @@ pre {display: block}
 <pre>          var=_ALL_,                    /* Analysis variables (character or numeric). */                              </pre>
 <pre>          event=,                       /* Event of interest. */                                    </pre>
 <pre>          groups=10,                    /* Nro. of groups to use to categorize numeric variables. Leave it empty if ALL analyzed variables are categorical. */                              </pre>
+<pre>          condition=,                   /* Condition that each analysis variable should satisfy in order to be part of the grouping. */                              </pre>
 <pre>          stat=,                        /* Statistic to use as representation of each category of numeric variables. */                              </pre>
-<pre>          formats=,                     /* Formats to use for each analysis variable. */                              </pre>
+<pre>          format=,                      /* Formats to use for each analysis variable. */                              </pre>
 <pre>          smooth=1,                     /* Whether to smooth the WOE calculation in order to avoid missing values. */                              </pre>
 <pre>          out=_InformationValue_,       /* Output dataset containing the Information Value for each variable. */                              </pre>
 <pre>          outwoe=_InformationWOE_,      /* Output dataset containing the WOE and IV for each bin of the categorized variables. */                              </pre>
@@ -71,11 +72,18 @@ pre {display: block}
 <pre>                              Leave it empty if no categorization is wished. For instance, for categorical variables.                                                            </pre>
 <pre>                              default: 10                                                                               </pre>
 <pre>                                                                                                                        </pre>
+<pre>- condition:                  Expression specifying a condition that each numeric variable should satisfy in order to                                                            </pre>
+<pre>                              be part of the grouping process.                                                            </pre>
+<pre>                              Ex:                                                                                       </pre>
+<pre>                              condition=~=0, meaning that 0 values are not grouped, but left on their own.                                                            </pre>
+<pre>                              condition=%quote(not in (0, 1)), meaning that 0 and 1 values are left on their own.                                                            </pre>
+<pre>                              default: empty => all values are considered during the grouping process                                                            </pre>
+<pre>                                                                                                                        </pre>
 <pre>- stat:                       Statistic to show for each category of numeric variables, such as the mean.                                                            </pre>
 <pre>                              default: empty => each category is represented by an arbitrary integer value (normally                                                            </pre>
 <pre>                              going from 1 to the number of groups, but this depends on how variable values are grouped)                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- formats:                    Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.                                                            </pre>
+<pre>- format:                     Formats to use for selected analysis variables listed in VAR and/or for the TARGET variable.                                                            </pre>
 <pre>                              This statement can be used to define groups.                                                            </pre>
 <pre>                              The formats should be specified as in any FORMAT statement.                                                            </pre>
 <pre>                              Ex:                                                                                       </pre>
@@ -251,7 +259,7 @@ pre {display: block}
 <pre>the relationship between the variable and the target variable be linear, as is required by other measures                                                                                          </pre>
 <pre>such as the KS or Gini.                                                                                                 </pre>
 <pre>However, the following two notes should be taken into account when computing the Information Value:                                                                                          </pre>
-<pre>                              - Continuous variables should be analyzed in categories (using the GROUPS= parameter or the FORMATS= parameter).                                                            </pre>
+<pre>                              - Continuous variables should be analyzed in categories (using the GROUPS= parameter or the FORMAT= parameter).                                                            </pre>
 <pre>                              - The Information Value computation does not take into account the size of each categorical value.                                                            </pre>
 <pre>                              This means that if a category is too small with respect to the number of observations in the dataset                                                            </pre>
 <pre>                              and provides a lot of information about the target variable, this may not be reflected in the                                                            </pre>

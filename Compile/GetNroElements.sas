@@ -1,18 +1,21 @@
 /* MACRO %GetNroElements
-Version: 	2.03
+Version: 	2.04
 Author: 	Daniel Mastropietro
 Created: 	03-Mar-201
-Modified: 	05-Feb-2016 (previous: 19-Sep-2003)
+Modified: 	17-Jul-2018 (previous: 05-Feb-2016, 19-Sep-2003)
 
 DESCRIPTION:
 Returns the number of elements in a list separated by a given separator.
+
+The characters in the list are masked during processing using the %NRBQUOTE() function.
+The list can be empty in which case the returned value is 0.
 
 USAGE:
 %GetNroElements(list , sep=%quote( ));
 
 REQUESTED PARAMETERS:
 - list:			A list of unquoted names separated by blanks.
-				(See example below.)
+				(See example below)
 
 OPTIONAL PARAMETERS:
 - sep:			Separator symbol that defines the different elements 
@@ -71,41 +74,45 @@ A , , B , C	(sep=,)	4 --> because a blank space between separators is counted.
 %local indsep indrest;
 %local isblanksep;
 
-%let isblanksep = %length(%sysfunc(compress(%quote(&sep)))) = 0;
+%if %nrbquote(&list) = %then
+	%let nro_elements = 0;
+%else %do;
+	%let isblanksep = %length(%sysfunc(compress(%quote(&sep)))) = 0;
 
-%let i = 0;
-/*%do %until((&element =) and %eval( %length(%sysfunc(compress(%quote(&element)))) - %length(%sysfunc(compbl(%quote(&element)))) ) = 0); */
-%** The above was an intent of solving the problem when there are blanks between the separators
-in &sep, but it did not work;
-%*%do %until(%length(%quote(&element)) = 0);
-%do %until(&indsep = 0 or &indsep = &indrest);	%* indsep = indrest happens when the last character in the list is the separator;
-	%** (31/1/05) I changed %quote(&element) = to %length(%quote(&element)) = 0 because
-	%** in the previous version, when &element is a very large number (say 838289384929)
-	%** SAS gives an OVERFLOW error!!!!;
-	%let element = %scan(%quote(&list) , 1 , %quote(&sep));
-	%let indsep = %index(%quote(&list), %quote(&sep));
-	%if &indsep > 1 %then
-		%* Only increase the count of elements if the separator is NOT the first element in the list of names!;
-		%let i = %eval(&i + 1);
-	%if &indsep > 0 %then %do;	%* indsep = 0 when SEP was not found in LIST;
-		%* Subset the list for the next iteration by eliminating all that is to the left of the separator found up to and including the separator;
-		%let indrest = %sysfunc( min(&indsep+1, %length(&list)) );	%* With the MIN function make sure that the first index of the rest of the list does not go beyond the current list length;
-		%let list = %quote(%substr(%quote(&list), &indrest));	%* Note the use of %QUOTE in order to keep any white spaces if they exist.
-																%* This is important when the separator is non-blank in which case white spaces
-																%* should be considered as valid element values.
-																%* Ex: %quote( | b | c | ) --> the first and last blanks are valid element values!;
+	%let i = 0;
+	/*%do %until((&element =) and %eval( %length(%sysfunc(compress(%quote(&element)))) - %length(%sysfunc(compbl(%quote(&element)))) ) = 0); */
+	%** The above was an intent of solving the problem when there are blanks between the separators
+	in &sep, but it did not work;
+	%*%do %until(%length(%quote(&element)) = 0);
+	%do %until(&indsep = 0 or &indsep = &indrest);	%* indsep = indrest happens when the last character in the list is the separator;
+		%** (31/1/05) I changed %quote(&element) = to %length(%quote(&element)) = 0 because
+		%** in the previous version, when &element is a very large number (say 838289384929)
+		%** SAS gives an OVERFLOW error!!!!;
+		%let element = %scan(%nrbquote(&list) , 1 , %quote(&sep));
+		%let indsep = %index(%nrbquote(&list), %quote(&sep));
+		%if &indsep > 1 %then
+			%* Only increase the count of elements if the separator is NOT the first element in the list of names!;
+			%let i = %eval(&i + 1);
+		%if &indsep > 0 %then %do;	%* indsep = 0 when SEP was not found in LIST;
+			%* Subset the list for the next iteration by eliminating all that is to the left of the separator found up to and including the separator;
+			%let indrest = %sysfunc( min(&indsep+1, %length(%nrbquote(&list))) );	%* With the MIN function make sure that the first index of the rest of the list does not go beyond the current list length;
+			%let list = %quote(%substr(%nrbquote(&list), &indrest));	%* Note the use of %QUOTE in order to keep any white spaces if they exist.
+																	%* This is important when the separator is non-blank in which case white spaces
+																	%* should be considered as valid element values.
+																	%* Ex: %quote( | b | c | ) --> the first and last blanks are valid element values!;
+		%end;
 	%end;
-%end;
-%*%let nro_elements = %eval(&i - 1);
+	%*%let nro_elements = %eval(&i - 1);
 
-%* Check the last value of LIST to see if there is one more element to count. This is the case when either:
-%* - the separator is NON-BLANK and the list has length larger than 0 and is not equal to the separator.
-%* - the separator is BLANK and the list has length larger than 0 ***after eliminating all white spaces*** (with COMPRESS());
-%if ~&isblanksep and %length(%quote(&list)) > 0 and %quote(&list) ~= %quote(&sep) or
-	 &isblanksep and %length(%sysfunc(compress(%quote(&list)))) > 0 %then
-	%let nro_elements = %eval(&i + 1);
-%else
-	%let nro_elements = &i;
+	%* Check the last value of LIST to see if there is one more element to count. This is the case when either:
+	%* - the separator is NON-BLANK and the list has length larger than 0 and is not equal to the separator.
+	%* - the separator is BLANK and the list has length larger than 0 ***after eliminating all white spaces*** (with COMPRESS());
+	%if ~&isblanksep and %length(%nrbquote(&list)) > 0 and %nrbquote(&list) ~= %quote(&sep) or
+		 &isblanksep and %length(%sysfunc(compress(%nrbquote(&list)))) > 0 %then
+		%let nro_elements = %eval(&i + 1);
+	%else
+		%let nro_elements = &i;
+%end;
 
 &nro_elements
 %MEND GetNroElements;

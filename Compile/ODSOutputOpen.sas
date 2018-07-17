@@ -5,7 +5,7 @@
 %* SEE ALSO: %ODSOutputClose;
 &rsubmit;
 %MACRO ODSOutputOpen(odspath, odsfile, odsfiletype=pdf, macro=, log=0) / store des="Opens an ODS output file for writing";
-%if %quote(&odsfile) ~= %then %do;
+%if %quote(&odsfile) ~= and %quote(&odsfiletype) ~= %then %do;
 	%if %upcase(%quote(&odsfiletype)) = HTML and %quote(&odspath) ~= %then %do;
 		%* This distinction of HTML output is necessary because this is the only format that accepts the PATH= option...;
 		%* (the reason being that the HTML output stores graphs in separate files (e.g. PNG files that are linked to the HTML output);

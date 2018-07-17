@@ -119,7 +119,9 @@ OPTIONAL PARAMETERS:
 					- CORR: Weighted (by N) correlation between binned values and predicted LOESS values
 					- CORR_ADJ: Normalized weighted correlation by the target variable range
 					- TARGET_RANGE: Target variable range in the original data
-					default: no output dataset is created
+					This dataset is ONLY created when SMOOTH=1, which requests the LOESS fit to be computed,
+					an essential part of the computation of the correlation measure stored in the OUTCORR= dataset.
+					default: (empty), i.e. no output dataset is created
 
 - bubble:			Whether to generate a bubble plot instead of a scatter plot.
 					default: 1
@@ -384,7 +386,6 @@ quit;
 	%* ;
 	%let varstat = ;
 	%do i = 1 %to %GetNroElements(&var2categorize);
-		%put i=&i;
 		%let vari = %scan(&var2categorize, &i);
 		%let vari = %FixVarNames(&vari, space=%eval(&statlenmax+1));	%* +1 because the suffix that will be added now is of the form _<stat>;
 		%let varstat = &varstat %MakeList(&stat, prefix=&vari._, log=0);
@@ -758,7 +759,7 @@ quit;
 %symdel _TARGET_MIN_ _TARGET_MAX_;
 %if &xaxisorig or &yaxisorig %then
 	%symdel %MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MIN) %MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MAX);
-%if %quote(&outcorr) ~= %then
+%if %quote(&outcorr) ~= and &smooth %then
 	%symdel _TARGET_RANGE_;
 
 %if &log %then %do;

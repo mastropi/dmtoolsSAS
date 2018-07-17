@@ -24,9 +24,11 @@ pre {display: block}
 <pre>(i.e. categorization at specified percentiles values).                                                                                          </pre>
 <pre>The other two options are handled by PROC RANK with no problems.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
-<pre>************                                                                                                            </pre>
-<pre>*** HOWEVER: Be careful that the macro may not give correct results after adding the BY= parameter (as of Feb-2016) ***                                                                                          </pre>
-<pre>************                                                                                                            </pre>
+<pre>***********************************************************************                                                                                          </pre>
+<pre>*** HOWEVER: Be careful that the macro may not give correct results***                                                                                       </pre>
+<pre>*** after adding the BY= parameter (as of Feb-2016) ***                                                                                       </pre>
+<pre>*** Use the %Categorize macro instead for this scenario.***                                                                                       </pre>
+<pre>***********************************************************************                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%CategorizePercentiles(                                                                                          </pre>
@@ -125,7 +127,8 @@ pre {display: block}
 <pre>                              in the VAR parameter. If the number of variables specified in the VARCAT                                                            </pre>
 <pre>                              parameter is smaller than the number of variables given in the VAR parameter,                                                            </pre>
 <pre>                              then the SUFFIX value is used to construct the categorized variable names                                                            </pre>
-<pre>                              for the remaining variables listed in VAR not matching a name in VARCAT.                                                            </pre>
+<pre>                              for the remaining variables listed in VAR not matching a name in VARCAT                                                            </pre>
+<pre>                              where the match is done by comparing the variable names in their given order.                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- varvalue:                   List of names to be used for the statistic-valued categorized variables to                                                            </pre>
 <pre>                              be matched one-to-one with the names listed in the VAR parameter.                                                            </pre>

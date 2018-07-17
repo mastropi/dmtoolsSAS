@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %PlotBinned</h1>
-<pre>Version:                      1.08                                                                                      </pre>
+<pre>Version:                      1.09                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      13-Aug-2015                                                                               </pre>
-<pre>Modified:                     15-Feb-2016 (previous: 12-Nov-2015)                                                            </pre>
+<pre>Modified:                     16-Jul-2018 (previous: 15-Feb-2016, 12-Nov-2015)                                                            </pre>
 <pre>SAS Version:                  9.4                                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
@@ -30,13 +30,16 @@ pre {display: block}
 <pre>          alltogether=0,                /* Whether the let-alone values should be put into the same bin (ONLY 0 is accepted) */                              </pre>
 <pre>          groupsize=,                   /* Nro. of cases each group should contain when categorizing continuous variables. */                              </pre>
 <pre>          groups=20,                    /* Nro. of groups to use in the categorization of continuous variables. */                              </pre>
-<pre>          value=mean,                   /* Name of the statistic for both the input and target variable in each bin. */                              </pre>
+<pre>          stat=mean,                    /* Names of the statistics to compute on the input variables for each bin. */                              </pre>
+<pre>          value=mean,                   /* Name of the statistic to aggregate the target variable on each bin. */                              </pre>
 <pre>          plot=1,                       /* Whether to generate the binned plots. */                              </pre>
 <pre>          out=,                         /* Output dataset with the data needed to reproduce the plots. */                              </pre>
 <pre>          outcorr=,                     /* Output dataset containing the correlation between the binned vs. predicted LOESS values. */                              </pre>
 <pre>          bubble=1,                     /* Whether to generate a bubble plot instead of a scatter plot. */                              </pre>
+<pre>          smooth=1,                     /* Whether to fit a smooth curve to the points (LOESS fit).); */                              </pre>
 <pre>          xaxisorig=0,                  /* Whether to use the original input variable range on the X axis. */                              </pre>
 <pre>          yaxisorig=1,                  /* Whether to use the original target variable range on the Y axis. */                              </pre>
+<pre>          ylim=,                        /* Min and max values for the Y axis in the plot. */                              </pre>
 <pre>          odspath=,                     /* Quoted name of the path where all generated files should be saved. */                              </pre>
 <pre>          odsfile=,                     /* Quoted name of the file where the plots are saved. */                              </pre>
 <pre>          odsfiletype=pdf,              /* Type of the file specified in ODSFILE or output format. */                              </pre>
@@ -91,8 +94,11 @@ pre {display: block}
 <pre>- groups:                     Number of groups in which to categorize continuous variables for the plot.                                                            </pre>
 <pre>                              default: 20                                                                               </pre>
 <pre>                                                                                                                        </pre>
-<pre>- value:                      Name of the statistic for both the input and target variable to use as                                                             </pre>
-<pre>                              representation of each bin.                                                               </pre>
+<pre>- stat                        Names of the statistics to compute on each input variables for each bin.                                                            </pre>
+<pre>                              The first statistic listed is the one used for any requested plots.                                                            </pre>
+<pre>                              default: mean                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- value:                      Name of the statistic to aggregate the target variable on each bin.                                                            </pre>
 <pre>                              default: mean                                                                             </pre>
 <pre>                                                                                                                        </pre>
 <pre>- plot:                       Whether to generate the binned plots or just the output dataset                                                            </pre>
@@ -104,8 +110,12 @@ pre {display: block}
 <pre>                              Data options can be specified as in a data= SAS option.                                                            </pre>
 <pre>                              The dataset contains the following columns:                                                            </pre>
 <pre>                              - VAR: Input variable name                                                                </pre>
-<pre>                              - VALUE: Value representing each bin                                                            </pre>
+<pre>                              - LABEL: Label of the input variable                                                            </pre>
+<pre>                              - INDEX: Index of each bin of the input variable                                                            </pre>
 <pre>                              - NOBS: Number of cases in each bin                                                            </pre>
+<pre>                              - VALUE: Value representing each bin in the plots                                                            </pre>
+<pre>                              - <STAT>: ALL statistics requested for the analyzed input variables.                                                            </pre>
+<pre>                              There are as many <STAT> columns as the number of requested statistics in parameter STAT=.                                                            </pre>
 <pre>                              - <TARGET>: Value of the target variable in each bin                                                            </pre>
 <pre>                              - FIT_LOESS_LOW: Lower limit of the 95% confidence interval for the predicted value                                                            </pre>
 <pre>                              - FIT_LOESS: LOESS fit in each bin                                                            </pre>
@@ -121,16 +131,29 @@ pre {display: block}
 <pre>                              - CORR: Weighted (by N) correlation between binned values and predicted LOESS values                                                            </pre>
 <pre>                              - CORR_ADJ: Normalized weighted correlation by the target variable range                                                            </pre>
 <pre>                              - TARGET_RANGE: Target variable range in the original data                                                            </pre>
-<pre>                              default: no output dataset is created                                                            </pre>
+<pre>                              This dataset is ONLY created when SMOOTH=1, which requests the LOESS fit to be computed,                                                            </pre>
+<pre>                              an essential part of the computation of the correlation measure stored in the OUTCORR= dataset.                                                            </pre>
+<pre>                              default: (empty), i.e. no output dataset is created                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- bubble                      Whether to generate a bubble plot instead of a scatter plot.                                                            </pre>
+<pre>- bubble:                     Whether to generate a bubble plot instead of a scatter plot.                                                            </pre>
 <pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
-<pre>- xaxisorig                   Whether to use the original input variable range on the X axis.                                                            </pre>
+<pre>- smooth:                     Whether to fit a smooth curve to the points (LOESS fit).                                                            </pre>
+<pre>                              Set this parameter to 0 if the loess fit generates an error and the output dataset                                                            </pre>
+<pre>                              is incomplete (this may happen in cases of erratic relationship between                                                            </pre>
+<pre>                              the currently analyzed x variable and the target).                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- xaxisorig:                  Whether to use the original input variable range on the X axis.                                                            </pre>
 <pre>                              default: 0                                                                                </pre>
 <pre>                                                                                                                        </pre>
-<pre>- yaxisorig                   Whether to use the original target variable range on the Y axis.                                                            </pre>
+<pre>- yaxisorig:                  Whether to use the original target variable range on the Y axis.                                                            </pre>
 <pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- ylim:                       Min and max values to use for ALL vertical axes (separated by a blank).                                                            </pre>
+<pre>                              It should contain exactly 2 values, if not the default behaviour based                                                            </pre>
+<pre>                              on the value of YAXISORIG is used.                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <pre>- odspath:                    Quoted name of the path containing the files where plots should be saved.                                                            </pre>
 <pre>                              This is only valid for HTML output.                                                            </pre>
@@ -156,13 +179,16 @@ pre {display: block}
 <pre>- %Categorize                                                                                                           </pre>
 <pre>- %ExecTimeStart                                                                                                        </pre>
 <pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %FixVarNames                                                                                                          </pre>
 <pre>- %GetNroElements                                                                                                       </pre>
 <pre>- %GetVarLabel                                                                                                          </pre>
 <pre>- %MakeListFromName                                                                                                     </pre>
 <pre>- %MakeListFromVar                                                                                                      </pre>
+<pre>- %Means                                                                                                                </pre>
 <pre>- %RemoveFromList                                                                                                       </pre>
 <pre>- %Rep                                                                                                                  </pre>
 <pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SelectNames                                                                                                          </pre>
 <pre>- %SetSASOptions                                                                                                        </pre>
 <body>
 </html>

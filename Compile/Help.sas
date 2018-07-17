@@ -82,7 +82,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put;
 		%put DATA MANIPULATION;
 		%put -----------------;
-		%put 	Categorize*	%quote(         Categorize a set of variables based on ranks.);
+		%put 	Categorize*	%quote(         Categorize a set of variables based on group ranks.);
 		%put 	CategorizePercentiles*%quote(Categorize a set of variables based on percentile values.);
 		%put	Center*	%quote(             Center and optionally standardize a set of variables.);
 		%put	CheckRepeated %quote(       Check the existence of observations with repeated key values in a dataset);
@@ -222,7 +222,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put 	Boxcox*	%quote(             Box-Cox transformation (for distribution normalization).);
 		%put;
 		%put C;
-		%put 	Categorize*	%quote(         Categorize a set of variables based on ranks.);
+		%put 	Categorize*	%quote(         Categorize a set of variables based on group ranks.);
 		%put 	CategorizePercentiles*%quote(Categorize a set of variables based on percentile values.);
 		%put	Center*	%quote(             Center and optionally standardize a set of variables.);
 		%*%put	CheckInputParameters	;

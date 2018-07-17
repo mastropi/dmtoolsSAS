@@ -5,7 +5,7 @@
 %* SEE ALSO: %ODSOutputOpen;
 &rsubmit;
 %MACRO ODSOutputClose(odsfile, odsfiletype=pdf, macro=, log=0) / store des="Closes an open ODS output file";
-%if %quote(&odsfile) ~= %then %do; 
+%if %quote(&odsfile) ~= and %quote(&odsfiletype) ~= %then %do; 
 	ods &odsfiletype close;
 	%if &log %then %do;
 		%put;

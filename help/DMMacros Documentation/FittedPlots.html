@@ -11,10 +11,12 @@ pre {display: block}
 <pre>Version:                      1.00                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      Aug-2003                                                                                  </pre>
-<pre>Modified:                     15-Feb-2016 (previous: Aug-2003)                                                            </pre>
+<pre>Modified:                     20-Jan-2018 (previous: 15-Feb-2016, previous: Aug-2003)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
-<pre>Plots fitted values and residuals vs. each predictor variable in a linear regression model.                                                                                          </pre>
+<pre>Plots fitted values and residuals vs. each predictor variable.                                                                                          </pre>
+<pre>The target variable can be continuous or binary.                                                                                          </pre>
+<pre>For the binary target case use the GROUPS= parameter to create bins of the analyzed numeric variables.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%FittedPlots(                                                                                          </pre>
@@ -23,6 +25,15 @@ pre {display: block}
 <pre>          pred=,                        /* Variable containing the values predicted or fitted by the model */                              </pre>
 <pre>          res=,                         /* Variable containing the residual of the model fit */                              </pre>
 <pre>          groups=)                      /* If wished, number of groups in which model variables are categorized */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Categorize                                                                                          </pre>
+<pre>- %GetNroElements                                                                                          </pre>
+<pre>- %Means                                                                                            </pre>
+<pre>- %RemoveFromList                                                                                          </pre>
+<pre>- %SetSASOptions                                                                                          </pre>
+<pre>- %SymmetricAxis                                                                                          </pre>
+<pre>- %ResetSASOptions                                                                                          </pre>
 <pre>                                                                                                    </pre>
 <h3>NOTES:</h3>
 <pre>The macro requires SAS/GRAPH.                                                                                          </pre>

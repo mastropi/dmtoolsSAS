@@ -1,8 +1,8 @@
 /* MACRO %RunTestHarness
-Version:	1.04
+Version:	1.05
 Author:		Daniel Mastropietro
 Created:	12-Feb-2016
-Modified:	09-Jan-2018 (previous: 21-Jun-2017, 20-Mar-2016, 17-Mar-2016)
+Modified:	18-Jul-2018 (previous: 09-Jan-2018, 21-Jun-2017, 20-Mar-2016, 17-Mar-2016)
 
 DESCRIPTION:
 Runs a set of tests on a given macro. The macro parameter values for each test are read
@@ -277,7 +277,7 @@ run;
 		%let testcaseList = %SelectNames(&testcaseList, %sysfunc(max(1, &testfrom)), &nro_tests);
 	/*-------------------------------- Parse input parameters -----------------------------------*/
 
-	%*** Go over the selected cases, prepare the maco signature of the test and run the test;
+	%*** Go over the selected cases, prepare the macro signature of the test and run the test;
 	%let nro_tests = %GetNroElements(&testcaseList);
 	%put The following &nro_tests test cases will be run: &testcaseList;
 	%* Initialize variables;
@@ -320,9 +320,10 @@ run;
 			%* If the value is missing (.) set it to blank (this happens for numeric parameters);
 			%if %quote(&paramvalue) = . %then
 				%let paramvalue = ;
-/*			%else %if &paramname = condition and %quote(&paramvalue) ~= %then*/
-/*				%* Enclose the parameter value in %QUOTE when it accepts more complicated values such as an expression;*/
-/*				%let paramvalue = %nrstr(%quote)(&paramvalue);*/
+			%else %if %index(%quote(&paramvalue), %quote(,)) %then
+				%* Enclose the parameter value in %QUOTE when the parameter value contains a comma to separate e.g. values
+				%* (e.g. this may happen in parameter ValuesLetAlone in %PlotBinned macro);
+				%let paramvalue = %quote(&paramvalue);
 
 			%* Add the library name passed in parameter LIBRARY to the dataset name used for testing when paramname=DATA;
 			%if %upcase(&paramname) = DATA and %quote(&paramvalue) ~= and %quote(&library) ~= %then %do;

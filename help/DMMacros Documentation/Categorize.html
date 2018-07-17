@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %Categorize</h1>
-<pre>Version:                      1.02                                                                                      </pre>
+<pre>Version:                      1.03                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      12-Feb-2016                                                                               </pre>
-<pre>Modified:                     09-Jan-2018 (previous: 18-Jun-2017, 12-Feb-2016)                                                            </pre>
+<pre>Modified:                     16-Jul-2018 (previous: 09-Jan-2018, 18-Jun-2017, 12-Feb-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Categorizes a set of numeric variables based on ranks (i.e. equal size binning) and optionally                                                                                          </pre>
@@ -29,10 +29,12 @@ pre {display: block}
 <pre>          condition=,                   /* Condition that each analysis variable should satisfy in order for the */                              </pre>
 <pre>          /* case to be included in the categorization process */                                                            </pre>
 <pre>          varcat=,                      /* Blank-separated list of names to be used for the rank variables. */                              </pre>
-<pre>          /* This list should be matched one to one with the ariables in VAR. */                                                            </pre>
-<pre>          varvalue=,                    /* Blank-separated list of names to be used for the statistic-valued categorized variables */                              </pre>
-<pre>          /* This list should be matched one to one with the ariables in VAR. */                                                            </pre>
-<pre>          stat=,                        /* Statistic to use as representation of each category for the statistic-valued categorized variables */                              </pre>
+<pre>          /* This list should be matched one to one with the variables in VAR. */                                                            </pre>
+<pre>          varstat=,                     /* Blank-separated list of names to be used for the statistic-valued categorized variables */                              </pre>
+<pre>          /* This list should contain as many names as the number of variables in VAR times the number of statistics in STAT. */                                                            </pre>
+	suffix=,		 	*** Suffix to use for the rank variables.
+<pre>          suffix=,                                                    /* Suffix to use for the rank variables. */</pre>
+<pre>          stat=mean,                    /* Statistics to compute for each category that generates a set of statistic-valued categorized variables */                              </pre>
 <pre>          groupsize=,                   /* Number of cases wished for each group in the categorized variables */                              </pre>
 <pre>          groups=10,                    /* Number of groups to use in the categorization */                              </pre>
 <pre>          descending=0,                 /* Compute ranks on the decreasing values of the analyzed variables? */                              </pre>
@@ -46,7 +48,7 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <h3>OPTIONAL PARAMETERS:</h3>
 <pre>- var:                        Blank-separated list of numeric variables to categorize.                                                            </pre>
-<pre>                              default=_NUMERIC_                                                                         </pre>
+<pre>                              default: _NUMERIC_ (i.e. all numeric variables)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- by:                         Blank-separated list of BY variables by which the categorization                                                            </pre>
 <pre>                              is carried out.                                                                           </pre>
@@ -57,6 +59,90 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <pre>- id:                         ID variable to keep in the output dataset when ADDVARS=0.                                                            </pre>
 <pre>                              default: (Empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- condition:                  Condition to be applied to each variable being categorized in order                                                            </pre>
+<pre>                              to be included in the categorization process.                                                            </pre>
+<pre>                              It should be given in form of a right-hand side expression of a                                                            </pre>
+<pre>                              WHERE condition expression.                                                               </pre>
+<pre>                              Ex: ~= 0                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varcat:                     List of names to use for the rank variables, i.e. for the variables storing                                                            </pre>
+<pre>                              the group rank for each analyzed variable.                                                            </pre>
+<pre>                              The lowest possible rank is 1, unless there are cases for the variable                                                            </pre>
+<pre>                              satisfying the CONDITION= condition, in which case the lowest value is -1                                                            </pre>
+<pre>                              which represents the bin for the cases satisfying such condition.                                                            </pre>
+<pre>                              (note that the lowest rank generated by PROC RANK is 0, not 1 as is the case here).                                                            </pre>
+<pre>                              The rank for missing values is missing.                                                            </pre>
+<pre>                              default: (empty) (i.e. no rank variables are requested in the output)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varstat:                    List of names to be used for the statistic-valued categorized variables.                                                            </pre>
+<pre>                              The number of names specified should equal the number of variables specified                                                            </pre>
+<pre>                              in the VAR= parameter times the number of statistics specified in the STAT=                                                            </pre>
+<pre>                              parameter.                                                                                </pre>
+<pre>                              The given names should be grouped by variable listed in VAR= and sorted                                                            </pre>
+<pre>                              by the statistics specified in STAT=.                                                            </pre>
+<pre>                              Example, if:                                                                              </pre>
+<pre>                              VAR=x y                                                                                   </pre>
+<pre>                              STAT=mean min max                                                                         </pre>
+<pre>                              then the variable names ordering in varstat should be given as:                                                            </pre>
+<pre>                              VARSTAT=x_mean x_min x_max x_kurtosisy_mean y_min y_max y_kurtosis                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              If no value is specified for this parameter, the statistic-valued variable                                                            </pre>
+<pre>                              names are constructed automatically as explained under the entry for                                                            </pre>
+<pre>                              parameter STAT= below.                                                                    </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- suffix:                     Suffix to add to the analyzed variable names for the rank variables                                                            </pre>
+<pre>                              (whenever these are requested via VARCAT=).                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- stat:                       Names of the statistics to use to compute the statistic-valued categorized variables.                                                            </pre>
+<pre>                              Any statistic keyword valid in PROC MEANS is accepted                                                            </pre>
+<pre>                              (e.g. mean, median, kurtosis, etc.).                                                            </pre>
+<pre>                              When VARSTAT= is empty the statistic-valued variable names are constructed                                                            </pre>
+<pre>                              automatically by adding the suffix containing the statistic name, as in                                                            </pre>
+<pre>                              e.g. x_mean.                                                                              </pre>
+<pre>                              The variable names in this case are fixed so that they are not longer                                                            </pre>
+<pre>                              than 32 characters. The fix is done by truncating the original variable                                                            </pre>
+<pre>                              names so that the name obtained by attaching the longest statistic name                                                            </pre>
+<pre>                              to it (thus making the root for each new variable name the same for all                                                            </pre>
+<pre>                              statistics --in the above example, the longest statistic that defines the                                                            </pre>
+<pre>                              original variable name truncation is "kurtosis").                                                            </pre>
+<pre>                              *** NOTE HOWEVER that during this fix there is NO CHECK OF NAME COLLISIONS                                                            </pre>
+<pre>                              resulting from the truncation of the original variable names. ***                                                            </pre>
+<pre>                              The macro %FixVarNames is called to perform the output name fix.                                                            </pre>
+<pre>                              default: mean                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- groupsize:                  Wished size of each group or bin.                                                            </pre>
+<pre>                              This option has priority over parameter GROUPS=.                                                            </pre>
+<pre>                              When this parameter is given, the number of groups is set to the integer                                                            </pre>
+<pre>                              truncation of the operation #obs / GROUPSIZE, where #obs is the number                                                            </pre>
+<pre>                              of observations in the input dataset after the application of any                                                            </pre>
+<pre>                              dataset option (such as a WHERE condition). Note that the number of groups                                                            </pre>
+<pre>                              is NOT affected by any conditions specified in the CONDITION= parameter.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- groups:                     Number of groups into which the variables should be categorized.                                                            </pre>
+<pre>                              This is the GROUPS= option of PROC RANK that is used to categorize the variables.                                                            </pre>
+<pre>                              default: 10                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- descending:                 Whether to use the DESCENDING keyword when computing the rank variables.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the categorized variables as specified by the                                                            </pre>
+<pre>                              VARCAT=, VARSTAT=, SUFFIX=, and STAT= parameters.                                                            </pre>
+<pre>                              When empty, the categorized variables are added to the input dataset                                                            </pre>
+<pre>                              (i.e. parameter ADDVARS is also set to 1).                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- addvars:                    Whether the categorized variables should be added to the input dataset.                                                            </pre>
+<pre>                              This is the case when OUT= is empty.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
 <pre>- %Callmacro                                                                                                            </pre>

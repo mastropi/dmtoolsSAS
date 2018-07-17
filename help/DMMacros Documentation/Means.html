@@ -59,7 +59,7 @@ pre {display: block}
 <pre>          options=,                     /* PROC MEANS statement options */                              </pre>
 <pre>          optionsout=,                  /* Additional PROC MEANS OUTPUT statement options */                              </pre>
 <pre>          transpose=0,                  /* Transpose the output dataset to have one row per variable? */                              </pre>
-<pre>          namevar=var,                  /* If transpose=1, name for the column with the variable names */                              </pre>
+<pre>          namevar=_var_,                /* If transpose=1, name for the column with the variable names */                              </pre>
 <pre>          /* in the output dataset */                                                               </pre>
 <pre>          droptypefreq=1,               /* Drop the _TYPE_AND _FREQ_ variables from the output dataset? */                              </pre>
 <pre>          sortinplace=1,                /* Sort the input dataset in place when there are BY variables? */                              </pre>
@@ -105,9 +105,12 @@ pre {display: block}
 <pre>                                                                                                    </pre>
 <pre>- format: Format definition for the variables.                                                            </pre>
 <pre>                                                                                                    </pre>
+<pre>- by:     List of variables to be used in the BY statement.                                                            </pre>
+<pre>                                                                                                    </pre>
 <pre>- class:  List of variables to be used in the CLASS statement.                                                            </pre>
 <pre>                                                                                                    </pre>
-<pre>- by:     List of variables to be used in the BY statement.                                                            </pre>
+<pre>- types:  TYPES statement identifying which analysis types of the class variables to run.                                                            </pre>
+<pre>          Ex: grp1*grp2*grp3 (assuming the class variables are grp1 grp2 grp3)                                                            </pre>
 <pre>                                                                                                    </pre>
 <pre>- id:     List of variables to be used in the ID statement.                                                            </pre>
 <pre>                                                                                                    </pre>
@@ -234,6 +237,7 @@ pre {display: block}
 <pre>- %GetVarNames                                                                                          </pre>
 <pre>- %SetSASOptions                                                                                          </pre>
 <pre>- %RemoveFromList                                                                                          </pre>
+<pre>- %RemoveRepeated                                                                                          </pre>
 <pre>- %ResetSASOptions                                                                                          </pre>
 <pre>                                                                                                    </pre>
 <h3>SEE ALSO:</h3>

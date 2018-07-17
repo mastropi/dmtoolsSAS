@@ -15,9 +15,11 @@ as this procedure cannot handle the second option for categorization listed abov
 (i.e. categorization at specified percentiles values).
 The other two options are handled by PROC RANK with no problems.
 
-************
-*** HOWEVER: Be careful that the macro may not give correct results after adding the BY= parameter (as of Feb-2016) ***
-************
+***********************************************************************
+*** HOWEVER: Be careful that the macro may not give correct results	***
+*** after adding the BY= parameter (as of Feb-2016) 				***
+*** Use the %Categorize macro instead for this scenario.			***
+***********************************************************************
 
 USAGE:
 %CategorizePercentiles(
@@ -116,7 +118,8 @@ OPTIONAL PARAMETERS:
 				in the VAR parameter. If the number of variables specified in the VARCAT
 				parameter is smaller than the number of variables given in the VAR parameter,
 				then the SUFFIX value is used to construct the categorized variable names
-				for the remaining variables listed in VAR not matching a name in VARCAT.
+				for the remaining variables listed in VAR not matching a name in VARCAT
+				where the match is done by comparing the variable names in their given order.
 
 - varvalue:		List of names to be used for the statistic-valued categorized variables to
 				be matched one-to-one with the names listed in the VAR parameter.

@@ -1,5 +1,71 @@
-/*
+/* MACRO %Aggregate
+Version:	1.00
+Author:		Daniel Mastropietro
+Created:	19-Mar-2018
+Modified:	19-Mar-2018
 
+DESCRIPTION:
+Aggregates data on a set of BY variables computing a specified statistic
+for continuous variables and the mode for categorical variables.
+
+The computation of the mode on categorical variables is the most added value
+of this macro, since it deals with both numeric and character variables
+and it computes the mode which is not a straighforward quantity to compute.
+
+Finally, all the information is put together into one dataset, preserving
+the original variable names.
+
+USAGE:
+%Aggregate(
+	data, 			*** Input dataset. Dataset options are allowed.
+	by=,			*** Blank-separated list of BY variables.
+	varnum=,		*** Blank-separated list of continuous numeric variables.
+	varclass=,		*** Blank-separated list of categorical variables.
+	format=,		*** Content of the format statement to use during the aggregation.
+	stat=mean,		*** Statistic to compute for each continuous variable during the aggregation.
+	missing=1, 		*** Whether to consider missing as a valid value for the categorical variables during the aggregation.
+	out=,			*** Output dataset with the result of the aggregation.
+	log=1);			*** Show messages in the log?
+
+
+REQUIRED PARAMETERS:
+- data:				Input dataset. Dataset options are allowed.
+
+OPTIONAL PARAMETERS:
+- by:				Blank-separated list of BY variables by which the categorization
+					is carried out.
+					default: (empty)
+
+- varnum:			Blank-separated list of continuous numeric variables to aggregate.
+					Either this or VARCLASS should be non-empty if some aggregation is to be done.
+					default: (empty) (i.e. all numeric variables are aggregated)
+
+- varclass:			Blank-separated list of categorical variables to aggregate.
+					Either this or VARNUM should be non-empty if some aggregation is to be done.
+					default: (empty)
+
+- format:			Formats to use during the aggregation.
+					They should be specified as in any FORMAT statement and they could
+					affect any of the variables involved in the aggregation (e.g. the BY
+					variables, the continuous variables, or the categorical variables).
+					default: (empty)
+
+- missing:			Whether to consider missing as a valid value for the categorical variables
+					during the aggregation.
+					Possible values: 0 => No, 1 => Yes.
+					default: 1
+
+- out:				Output dataset containing the result of the aggregation for both the
+					continuous and the categorical variables.
+					There is one record per BY variable combination.
+					The original variable names are preserved in this aggregated dataset, since
+					no information about the statistic computed on the continuous variables
+					is added to the variable names.
+					default: _AGGREGATE_OUT
+
+- log:				Show messages in the log?
+					Possible values: 0 => No, 1 => Yes.
+					default: 1
 
 OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %ExecTimeStart
@@ -10,10 +76,17 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Puts
 - %ResetSASOptions
 - %SetSASOptions
+
+APPLICATIONS:
+Aggregate transaction data about clients BY client in order to get a client profile
+with their average information on continuous variables and their most common value
+for categorical variables. The latter is the most added value of this macro, since
+it deals both numeric and character categorical variables and it computes the
+mode which is not a straighforward quantity to compute.
 */
 
 
-%MACRO Aggregate(data, by=, varnum=, varclass=, format=, stat=mean, missing=1, out=, log=1)
+%MACRO Aggregate(data, by=, varnum=, varclass=, format=, stat=mean, missing=1, out=_aggregate_out, log=1)
 	/ store des="Aggregates data on a set of BY variables computing the mean for continuous variables and the mode for categorical variables";
 
 %local byst;		%* BY statement;
@@ -24,7 +97,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %SetSASOptions;
 %ExecTimeStart;
 
-/* ----------------------- Parse input parameters ----------------------------*/
+/*----------------------- Parse input parameters ----------------------------*/
 %*** VARNUM, VARCLASS;
 %let nro_varnum = 0;
 %let nro_varclass = 0;
@@ -36,7 +109,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%let varclass = %GetVarList(&data, var=&varclass);
 	%let nro_varclass = %sysfunc(countw(&varclass));
 %end;
-%* CHeck if any variable was passed;
+%* Check if any variable was passed;
 %if %quote(&varnum) = and %quote(&varclass) = %then %do;
 	%if &log %then %do;
 		%put;
@@ -54,7 +127,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%let byst = by &by;
 	%let bylist = %MakeList(&by, sep=%quote(,));
 %end;
-/* ----------------------- Parse input parameters ----------------------------*/
+/*----------------------- Parse input parameters ----------------------------*/
 
 
 %*** Aggregation of continuous variables;
@@ -166,7 +239,14 @@ run;
 %end;
 
 proc datasets nolist;
-	delete _aggregate_:;
+	delete 	_aggregate_freq
+			_aggregate_means
+			_aggregate_modes
+			_aggregate_mode_num
+			_aggregate_mode_num_t
+			_aggregate_mode_char
+			_aggregate_mode_char_t
+	;
 quit;
 
 %ExecTimeStop;
