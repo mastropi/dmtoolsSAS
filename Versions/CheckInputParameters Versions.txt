@@ -19,5 +19,9 @@ V.1.02: 14/10/04 (DM)
 V.1.03: 23/11/04 (DM)
 	- Se agrego' el parametro CHECK=, en donde se pueden listar los parametros que contienen variables cuya existencia en todos los datasets pasados debe ser checkeada. Esto es util por ejemplo para los parametros tipo BY=, ID=, etc.
 	
-V.2.00: 17/08/06 (DM)
+V.1.04: 17/08/06 (DM)
 	- Se hace el parsing de las variables pasadas en VAR= y de las variables especificadas en los parametros listados en CHECK= por medio de la llamada a %GetVarList (la cual desde la version 2.00 hace el parsing de double hyphen strings y de colon expressions).
+
+V.1.05: 25/07/18 (DM)
+	- Ya no ocurre el error con la macro %GetNroElements cuando el parámetro DATA contiene opciones que llevan coma (ej. WHERE A in (1, 2)). Este problema se resolvió modificando el separador entre los valores de los parámetros a chequear por %CheckRequiredParameters, entre los cuales está el parámetro DATA.
+

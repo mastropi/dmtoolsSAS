@@ -8,7 +8,7 @@ Notes:			The test code makes use of a test harness defined in the same directory
 
 * Setup;
 %let testmacro = FixVarNames;
-%let testpath = E:\SAS\Macros\DMMacros\tests\&testmacro;
+%let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
 libname test "&testpath";
 
 * Read the Test Harness dataset;

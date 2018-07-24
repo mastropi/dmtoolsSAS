@@ -1,8 +1,8 @@
 /* MACRO %PlotBinned
-Version: 		1.09
+Version: 		1.10
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		16-Jul-2018 (previous: 15-Feb-2016, 12-Nov-2015)
+Modified: 		25-Jul-2018 (previous: 16-Jul-2018, 15-Feb-2016, 12-Nov-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
@@ -241,11 +241,11 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %if &help %then %do;
 	%ShowMacroCall;
 %end;
-/* THE FOLLOWING CHECK DOES NOT WORK WHEN THE INPUT DATASET HAS DATA OPTIONS! as it says that parameter DATA was not passed... WHY?? */
-/*%else %if ~%CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&target), requiredParamNames=data target=, check=target class, macro=PLOTBINNED) %then %do;*/
-/*	%ShowMacroCall;*/
-/*%end;*/
-/*%else %do;*/
+%else %if ~%CheckInputParameters(data=&data , var=&var, otherRequired=&target,
+						  		requiredParamNames=data target=, check=by target var class, macro=PLOTBINNED) %then %do;
+	%ShowMacroCall;
+%end;
+%else %do;
 /************************************* MACRO STARTS ******************************************/
 %local datetime;		%* Execution datetime in the form yyyymmddThhmmss to be used in the image PNG file name;
 %local bystr;
@@ -475,6 +475,7 @@ quit;
 		format &by;
 		%end;
 		length var $32 label $500;	%* Use 500 as label length to be kind of safe that we do not truncate any labels;
+		length &vari 8;				%* This is added so that there is no WARNING of different lengths when appending the dataset with PROC APPEND;
 		set _PB_means_;
 		retain index;
 
@@ -560,11 +561,6 @@ quit;
 	run;
 	
 	%if &plot %then %do;
-		%if ~&yaxisorig %then %do;
-			%* Read the min and max of the target variable from the aggregated data;
-			%GetStat(_PB_means_, var=&target, stat=min, name=_TARGET_MIN_, log=0);
-			%GetStat(_PB_means_, var=&target, stat=max, name=_TARGET_MAX_, log=0);
-		%end;
 		ods proclabel="%upcase(&VARI)";	%* This adds a title to each entry in an e.g. PDF file that helps in browsing;
 		ods graphics / imagename="&datetime-&imagerootname-&target-&i-&vari" reset=index;	%* This generates the image file with the name specified in the IMAGENAME= option;
 		title "Bin plot of %upcase(&TARGET) vs. %upcase(&vari)";
@@ -606,7 +602,7 @@ quit;
 			%* Set the vertical axis limits specified by the user;
 			yaxis min=%scan(&ylim, 1, ' ') max=%scan(&ylim, 2, ' ');
 			%end;
-			%else %do;
+			%else %if &yaxisorig %then %do;
 			%* Set common vertical axis limits;
 			yaxis min=&_TARGET_MIN_ max=&_TARGET_MAX_;
 			%end;
@@ -643,7 +639,7 @@ quit;
 
 		format index nobs;
 		format value &stat BEST8.;	%* This format is to make sure that values are not shown as integer values when there are integer-valued analysis variables;
-		format &target;
+		format &target best32.;		%* This is to avoid seeing the target value as e.g. 0 when the target is binary and its format is to show no decimal digits...;
 		%if &smooth %then %do;
 		format fit_loess_low fit_loess fit_loess_upp;
 		%end;
@@ -756,9 +752,10 @@ proc datasets nolist;
 quit;
 
 %* Delete global macro variables created here;
-%symdel _TARGET_MIN_ _TARGET_MAX_;
-%if &xaxisorig or &yaxisorig %then
+%if &xaxisorig or &yaxisorig %then %do;
+	%symdel _TARGET_MIN_ _TARGET_MAX_;
 	%symdel %MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MIN) %MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MAX);
+%end;
 %if %quote(&outcorr) ~= and &smooth %then
 	%symdel _TARGET_RANGE_;
 
@@ -771,5 +768,5 @@ quit;
 %ExecTimeStop;
 %ResetSASOptions;
 
-/*%end;*/
+%end;
 %MEND PlotBinned;

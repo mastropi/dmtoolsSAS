@@ -1,8 +1,8 @@
 /* MACRO %CheckInputParameters
-Version: 1.04
-Author: Daniel Mastropietro
-Created: 22-Sep-03
-Modified: 17-Aug-06
+Version: 	1.05
+Author: 	Daniel Mastropietro
+Created: 	22-Sep-03
+Modified: 	24-Jul-2018 (previous: 17-Aug-2006)
 
 DESCRIPTION:
 Checks if a set of parameters passed to a macro is correct.
@@ -39,6 +39,12 @@ OPTIONAL PARAMETERS:
 						In any case, any data options passed when a single dataset is
 						listed in DATA= are IGNORED.
 						***************************************************************
+						ALSO: If there are data options they should NOT contain the PIPE (|)
+						operator, because this parameter is almost always required when
+						running a macro, and the macro %CheckRequiredParameters that is
+						called to check the required parameters receives the parameter
+						values to check separated by a pipe (NOT by a comma, to avoid
+						problems with expressions such as 'WHERE A IN (1, 2)'.
 
 - var:					Content of the var= parameter as appears in the macro call.
 						The following valid SAS specification of variables is allowed:
@@ -53,9 +59,9 @@ OPTIONAL PARAMETERS:
 						requires the search of the variables in the dataset.
 
 - otherRequired:		Content of other required parameters. The content
-						of different required parameters should be separated by a comma
-						with NO SPACE between the comma and the parameter values.
-						The comma is used to distinguish what values correspond to which
+						of different required parameters should be separated by a PIPE (|)
+						with NO SPACE between the pipe and the parameter values.
+						The pipe is used to distinguish what values correspond to which
 						parameter. See examples below.
 
 - requiredParamNames:	Blank-separated list of the required parameter names.
@@ -158,7 +164,7 @@ where the macro name (TEST) is displayed at the beginning of the message.
 2.- Suppose that in the above macro %Test, both stat= and name= are required parameters, but
 var= is not a required parameter.
 At the beginning of %Test, use the following call to %CheckInputParameters:
-%if %CheckInputParameters(data=&data , otherRequired=%quote(&stat,&name) ,
+%if %CheckInputParameters(data=&data , otherRequired=%quote(&stat|&name) ,
 						  requiredParamNames=data stat= name= , macro=test)
 %then %do;
 <Macro-code>
@@ -179,7 +185,7 @@ At the beginning of %Test, use the following call to %CheckInputParameters:
 variables. Therefore, the existence of the by variables needs to be checked for existence
 in the input dataset. To check this, use parameter CHECK= when calling %CheckInputParameters
 as follows:
-%if %CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&stat,&name) ,
+%if %CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&stat|&name) ,
 						  requiredParamNames=data stat= name= , check=by, macro=test)
 %then %do;
 <Macro-code>
@@ -209,20 +215,25 @@ and it creates problems in an %if, %put, etc statement from where this macro was
 %let ok = 1;
 
 %*** Checks required parameters;
-%* Comma separated list of required parameter values that must be checked as for
-%* whether they were passed or not to the macro;
+%* Pipe (|) separated list of required parameter values that must be checked as for
+%* whether they were passed or not to the macro.
+%* Note that we use the pipe and not comma for instance, because
+%* the &data value may contain commas as in WHERE A IN (1, 3), and this generates
+%* problems with the %GetNroElements macro;
+%* On the contrary, the pipe should not occur, as long as the OR operator is used as OR
+%* and NOT as |... so the user should NOT use the | operator in options of the input dataset;
 %let requiredParamValues = &otherRequired;
 %* if data= is a required parameter by the macro;
 %if &dataRequired %then
-	%let requiredParamValues = &requiredParamValues.,&data;
+	%let requiredParamValues = &requiredParamValues.|&data;
 %* if var= is a required parameter by the macro;
 %if &varRequired %then
-	%let requiredParamValues = &requiredParamValues.,&var;
+	%let requiredParamValues = &requiredParamValues.|&var;
 %* Number of required parameters;
 %let nro_paramNames = %GetNroElements(%quote(&requiredParamNames));
 %* Checks if required parameters were passed;
 %if &nro_paramNames > 0 %then %do;
-	%if ~%CheckRequiredParameters(%quote(&requiredParamValues) , &nro_paramNames) %then %do;
+	%if ~%CheckRequiredParameters(%quote(&requiredParamValues) , &nro_paramNames, sep=|) %then %do;
 		%PrintRequiredParameterMissing(%quote(&requiredParamNames) , macro=&macro)
 		%let ok = 0;
 	%end;

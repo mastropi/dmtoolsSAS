@@ -1,0 +1,11 @@
+case,data,by,varnum,varclass,format,stat,missing,out,_description,_expect,_result
+1,test.totest,,x y,turno grp,,mean,1,totest_agg_01,Basic call,Aggregated dataset with 1 record containing the mean of continuous variables and the mode of categorical variables.,S
+2,test.totest,id,x y,turno grp,,max,1,totest_agg_02,"BY variable, non-default statistic",Aggregated dataset with as many records as BY variable values with the max of continuous variables and the mode of categorical variables.,S
+3,test.totest,id fecha,x y,turno grp,,mean,1,totest_agg_03,BY variables,Aggregated dataset with as many records as BY variable combinations with the mean of continuous variables and the mode of categorical variables.,S
+4,test.totest,id fecha,x y,turno grp,fecha weekv6.,mean,1,totest_agg_04,"BY variables, format on one variable",Aggregated dataset with as many records as BY variable combinations with the mean of continuous variables and the mode of categorical variables. The second BY variable should be grouped by week.,S
+5,test.totest,id fecha,x y,turno grp,fecha monyy7.,median,1,totest_agg_05,"BY variables, format on one variable, median statisic",Aggregated dataset with as many records as BY variable combinations with the median of continuous variables and the mode of categorical variables. The second BY variable should be grouped by month.,S
+6,test.totest,id fecha,x y,,fecha monyy7.,median,1,totest_agg_06,"BY variables, only varnum variables",Aggregated dataset with as many records as BY variable combinations with the median of continuous variables. The second BY variable should be grouped by month.,S
+7,test.totest,id fecha,,turno grp,fecha monyy7.,,1,totest_agg_07,"BY variables, only varclass variables",Aggregated dataset with as many records as BY variable combinations with the mode of categorical variables. The second BY variable should be grouped by month.,S
+8,test.totest,,x y,,fecha monyy7.,median,1,totest_agg_08,Only varnum variables,Aggregated dataset with 1 record containing the mean of continuous variables.,S
+9,test.totest,,,turno grp,fecha monyy7.,,1,totest_agg_09,Only varclass variables,Aggregated dataset with 1 record containing the mode of categorical variables.,S
+10,test.totest,,,,,,,totest_agg_10,No analysis variable,No dataset as there are no variables to analyze!,F

@@ -1,30 +1,42 @@
-/* PlotBinned-Test.sas
-Created: 		18-Jul-2018
-Modified:		18-Jul-2018
+/* Aggregate-Test.sas
+Created: 		20-Jul-2018
+Modified:		20-Jul-2018
 Author: 		Daniel Mastropietro
-Description: 	Tests run on macro %PlotBinned
+Description: 	Tests run on macro %Aggregate
 Dependencies:	%RunTestHarness macro
 Notes:			The test code makes use of a test harness defined in the same directory.
-				Test dataset source: ScoGMas-2015 at Pronto
-					data toplot;
-						set scomast.master_pvp01_s2(keep=
-							A_ID
-							A_MES
-							B_TARGET_DQ90_12M
-							B_FUT_MESES_HASTA_CANCELADO
-							C_CR_CRITERIO_INCL_GENERAL
-							E_CR_NR_OTORG
-							V_CR_PROB_MORA_REF
-							V_CR_CUOTA);
-						where A_MES in (1, 2, 3);
-						if _N_ <= 1000;
+				Test data generation code:
+					data totest;
+						infile datalines delimiter="," dsd missover;
+						length id $10;
+						input id $ fecha turno $ x y grp;
+						length y 3;
+						informat fecha date9.;
+						format fecha date9.;
+						datalines;
+					A,01jan2017,N,3.2,1,5
+					A,02jan2017,N,3.5,1,.
+					A,03jan2017,M,8,0,4
+					B,20May2017,M,.,0,.
+					B,21May2017,N,9,0,4
+					B,27may2017,T,3.1,0,3
+					B,27may2017,N,0.0,1,4
+					C,27may2017,T,1.2,1,3
+					C,04Jun2017,T,4.5,0,3
+					C,05Jun2017,T,8.1,0,2
+					;
+
+					* Then copy the dataset just created;o
+					libname data "E:\Daniel\SAS\Macros\tests\Aggregate\data";
+					proc copy in=work out=data;
+						select totest;
 					run;
 */
 
 
 /*---------------------------- Run Test Harness ---------------------------------*/
 * Setup;
-%let testmacro = PlotBinned;
+%let testmacro = Aggregate;
 %let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
 libname test "&testpath";
 
@@ -36,7 +48,7 @@ libname test "&testpath";
 	&testmacro,
 	TestHarness_&testmacro,
 	library=test,
-	checkoutput=out outcorr,
+	checkoutput=out,
 	resultsdir=&testpath/expected
 );
 /*---------------------------- Run Test Harness ---------------------------------*/
@@ -45,10 +57,9 @@ libname test "&testpath";
 
 /*------------------------ Generate expected results ----------------------------*/
 * Setup;
-%let testmacro = PlotBinned;
+%let testmacro = Aggregate;
 %let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
 libname test "&testpath";
-libname expected "&testpath/expected";
 
 * Read the Test Harness dataset;
 %import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
@@ -57,7 +68,7 @@ libname expected "&testpath/expected";
 	&testmacro,
 	TestHarness_&testmacro,
 	library=test,
-	checkoutput=out outcorr,
+	checkoutput=out,
 	saveoutput=1,
 	resultsdir=&testpath/expected
 );

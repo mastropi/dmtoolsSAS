@@ -1,4 +1,4 @@
-case,data,target,var,event,groups,stat,formats,out,outwoe,outformat,_description,_expect,_result
+case,data,target,var,event,groups,stat,format,out,outwoe,outformat,_description,_expect,_result
 1,totest_01_maysbook,y,group,,20,,,totest_01_iv01,totest_01_ivwoe01,,"Mays book example, numeric target, 20 groups","Output IV, WOE",S
 2,totest_01_maysbook,y,group,,,,,totest_01_iv02,totest_01_ivwoe02,,"Mays book example, numeric target, no categorization","Output IV, WOE",S
 3,totest_01_maysbook,z,group,Bad,20,,,totest_01_iv03,totest_01_ivwoe03,,"Mays book example, character target, 20 groups","Output IV, WOE",S

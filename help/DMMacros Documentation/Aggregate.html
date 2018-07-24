@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Aggregate</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Aggregate</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      19-Mar-2018                                                                               </pre>
+<pre>Modified:                     19-Mar-2018                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Aggregates data on a set of BY variables computing a specified statistic                                                                                          </pre>
+<pre>for continuous variables and the mode for categorical variables.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The computation of the mode on categorical variables is the most added value                                                                                          </pre>
+<pre>of this macro, since it deals with both numeric and character variables                                                                                          </pre>
+<pre>and it computes the mode which is not a straighforward quantity to compute.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Finally, all the information is put together into one dataset, preserving                                                                                          </pre>
+<pre>the original variable names.                                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Aggregate(                                                                                          </pre>
+<pre>          data,                         /* Input dataset. Dataset options are allowed. */                              </pre>
+<pre>          by=,                          /* Blank-separated list of BY variables. */                              </pre>
+<pre>          varnum=,                      /* Blank-separated list of continuous numeric variables. */                              </pre>
+<pre>          varclass=,                    /* Blank-separated list of categorical variables. */                              </pre>
+<pre>          format=,                      /* Content of the format statement to use during the aggregation. */                              </pre>
+<pre>          stat=mean,                    /* Statistic to compute for each continuous variable during the aggregation. */                              </pre>
+<pre>          missing=1,                    /* Whether to consider missing as a valid value for the categorical variables during the aggregation. */                              </pre>
+<pre>          out=,                         /* Output dataset with the result of the aggregation. */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- data:                       Input dataset. Dataset options are allowed.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- by:                         Blank-separated list of BY variables by which the categorization                                                            </pre>
+<pre>                              is carried out.                                                                           </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varnum:                     Blank-separated list of continuous numeric variables to aggregate.                                                            </pre>
+<pre>                              Either this or VARCLASS should be non-empty if some aggregation is to be done.                                                            </pre>
+<pre>                              default: (empty) (i.e. all numeric variables are aggregated)                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varclass:                   Blank-separated list of categorical variables to aggregate.                                                            </pre>
+<pre>                              Either this or VARNUM should be non-empty if some aggregation is to be done.                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- format:                     Formats to use during the aggregation.                                                            </pre>
+<pre>                              They should be specified as in any FORMAT statement and they could                                                            </pre>
+<pre>                              affect any of the variables involved in the aggregation (e.g. the BY                                                            </pre>
+<pre>                              variables, the continuous variables, or the categorical variables).                                                            </pre>
+<pre>                              default: (empty)                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>- missing:                    Whether to consider missing as a valid value for the categorical variables                                                            </pre>
+<pre>                              during the aggregation.                                                                   </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the result of the aggregation for both the                                                            </pre>
+<pre>                              continuous and the categorical variables.                                                            </pre>
+<pre>                              There is one record per BY variable combination.                                                            </pre>
+<pre>                              The original variable names are preserved in this aggregated dataset, since                                                            </pre>
+<pre>                              no information about the statistic computed on the continuous variables                                                            </pre>
+<pre>                              is added to the variable names.                                                            </pre>
+<pre>                              default: _AGGREGATE_OUT                                                                   </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %FreqMult                                                                                                             </pre>
+<pre>- %GetVarList                                                                                                           </pre>
+<pre>- %Means                                                                                                                </pre>
+<pre>- %Puts                                                                                                                 </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>Aggregate transaction data about clients BY client in order to get a client profile                                                                                          </pre>
+<pre>with their average information on continuous variables and their most common value                                                                                          </pre>
+<pre>for categorical variables. The latter is the most added value of this macro, since                                                                                          </pre>
+<pre>it deals both numeric and character categorical variables and it computes the                                                                                          </pre>
+<pre>mode which is not a straighforward quantity to compute.                                                                                          </pre>
+<body>
+</html>

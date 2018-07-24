@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %CheckInputParameters</h1>
-<pre>Version: 1.04                                                                                                           </pre>
-<pre>Author: Daniel Mastropietro                                                                                             </pre>
-<pre>Created: 22-Sep-03                                                                                                      </pre>
-<pre>Modified: 17-Aug-06                                                                                                     </pre>
+<pre>Version:                      1.05                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      22-Sep-03                                                                                 </pre>
+<pre>Modified:                     24-Jul-2018 (previous: 17-Aug-2006)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Checks if a set of parameters passed to a macro is correct.                                                                                          </pre>
@@ -48,6 +48,12 @@ pre {display: block}
 <pre>                              In any case, any data options passed when a single dataset is                                                            </pre>
 <pre>                              listed in DATA= are IGNORED.                                                              </pre>
 <pre>                              ***************************************************************                                                            </pre>
+<pre>                              ALSO: If there are data options they should NOT contain the PIPE (|)                                                            </pre>
+<pre>                              operator, because this parameter is almost always required when                                                            </pre>
+<pre>                              running a macro, and the macro %CheckRequiredParameters that is                                                            </pre>
+<pre>                              called to check the required parameters receives the parameter                                                            </pre>
+<pre>                              values to check separated by a pipe (NOT by a comma, to avoid                                                            </pre>
+<pre>                              problems with expressions such as 'WHERE A IN (1, 2)'.                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- var:                        Content of the var= parameter as appears in the macro call.                                                            </pre>
 <pre>                              The following valid SAS specification of variables is allowed:                                                            </pre>
@@ -62,9 +68,9 @@ pre {display: block}
 <pre>                              requires the search of the variables in the dataset.                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- otherRequired:              Content of other required parameters. The content                                                            </pre>
-<pre>                              of different required parameters should be separated by a comma                                                            </pre>
-<pre>                              with NO SPACE between the comma and the parameter values.                                                            </pre>
-<pre>                              The comma is used to distinguish what values correspond to which                                                            </pre>
+<pre>                              of different required parameters should be separated by a PIPE (|)                                                            </pre>
+<pre>                              with NO SPACE between the pipe and the parameter values.                                                            </pre>
+<pre>                              The pipe is used to distinguish what values correspond to which                                                            </pre>
 <pre>                              parameter. See examples below.                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- requiredParamNames:         Blank-separated list of the required parameter names.                                                            </pre>
@@ -167,7 +173,7 @@ pre {display: block}
 <pre>2.- Suppose that in the above macro %Test, both stat= and name= are required parameters, but                                                                                          </pre>
 <pre>var= is not a required parameter.                                                                                          </pre>
 <pre>At the beginning of %Test, use the following call to %CheckInputParameters:                                                                                          </pre>
-<pre>%if %CheckInputParameters(data=&data , otherRequired=%quote(&stat,&name) ,                                                                                          </pre>
+<pre>%if %CheckInputParameters(data=&data , otherRequired=%quote(&stat|&name) ,                                                                                          </pre>
 							requiredParamNames=data stat= name= , macro=test)
 <pre>                              requiredParamNames=data stat= name= , macro=test)                                                            </pre>
 <pre>%then %do;                                                                                                              </pre>
@@ -189,7 +195,7 @@ pre {display: block}
 <pre>variables. Therefore, the existence of the by variables needs to be checked for existence                                                                                          </pre>
 <pre>in the input dataset. To check this, use parameter CHECK= when calling %CheckInputParameters                                                                                          </pre>
 <pre>as follows:                                                                                                             </pre>
-<pre>%if %CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&stat,&name) ,                                                                                          </pre>
+<pre>%if %CheckInputParameters(data=&data , var=&var, otherRequired=%quote(&stat|&name) ,                                                                                          </pre>
 							requiredParamNames=data stat= name= , check=by, macro=test)
 <pre>                              requiredParamNames=data stat= name= , check=by, macro=test)                                                            </pre>
 <pre>%then %do;                                                                                                              </pre>

@@ -56,19 +56,19 @@ title "Test 5B: Target variable";
 %FreqMult(_fm_test_, target=c, var=x y, out=_fm_test_freq, transpose=1); proc print data=_fm_test_freq; run;
 
 * Formats;
-title "Test 1AF: Three mixed variables (formats on two)";
-%FreqMult(_fm_test_, var=x y c, formats=x xx. c $cc., out=_fm_test_freq); proc print data=_fm_test_freq; run;
-title "Test 3AF: Two mixed variables, by numeric variable (missing=1) with formats in BY variable and analysis variable";
-%FreqMult(_fm_test_, var=c y, by=x, formats=x xx. c $cc., out=_fm_test_freq, missing=1); proc print data=_fm_test_freq; run;
+title "Test 1AF: Three mixed variables (format on two)";
+%FreqMult(_fm_test_, var=x y c, format=x xx. c $cc., out=_fm_test_freq); proc print data=_fm_test_freq; run;
+title "Test 3AF: Two mixed variables, by numeric variable (missing=1) with format in BY variable and analysis variable";
+%FreqMult(_fm_test_, var=c y, by=x, format=x xx. c $cc., out=_fm_test_freq, missing=1); proc print data=_fm_test_freq; run;
 title "Test 5AF: Target variable with format";
-%FreqMult(_fm_test_, target=c, var=x y, formats=c $cc., out=_fm_test_freq); proc print data=_fm_test_freq; run;
+%FreqMult(_fm_test_, target=c, var=x y, format=c $cc., out=_fm_test_freq); proc print data=_fm_test_freq; run;
 title "Test 5AFM: Target variable with format (missing=1)";
-%FreqMult(_fm_test_, target=c, var=x y, formats=c $cc., missing=1, out=_fm_test_freq); proc print data=_fm_test_freq; run;
+%FreqMult(_fm_test_, target=c, var=x y, format=c $cc., missing=1, out=_fm_test_freq); proc print data=_fm_test_freq; run;
 
-title "Test 1BF: Three mixed variables (transposed, formats on two)";
-%FreqMult(_fm_test_, var=x y c, formats=x xx. c $cc., transpose=1, out=_fm_test_freq); proc print data=_fm_test_freq; run;
+title "Test 1BF: Three mixed variables (transposed, format on two)";
+%FreqMult(_fm_test_, var=x y c, format=x xx. c $cc., transpose=1, out=_fm_test_freq); proc print data=_fm_test_freq; run;
 title "Test 5BFM: Target variable with format (missing=1)";
-%FreqMult(_fm_test_, target=c, var=x y, formats=c $cc., transpose=1, missing=1, out=_fm_test_freq); proc print data=_fm_test_freq; run;
+%FreqMult(_fm_test_, target=c, var=x y, format=c $cc., transpose=1, missing=1, out=_fm_test_freq); proc print data=_fm_test_freq; run;
 title;
 
 proc datasets nolist;

@@ -93,11 +93,22 @@ mode which is not a straighforward quantity to compute.
 %local bylist;		%* List of BY variables used in SQL statements;
 %local nro_varnum;
 %local nro_varclass;
+%local error;
 
 %SetSASOptions;
 %ExecTimeStart;
 
+%let error = 0;
+
 /*----------------------- Parse input parameters ----------------------------*/
+%*** BY;
+%let byst = ;
+%let bylist = ;
+%if %quote(&by) ~= %then %do;
+	%let byst = by &by;
+	%let bylist = %MakeList(&by, sep=%quote(,));
+%end;
+
 %*** VARNUM, VARCLASS;
 %let nro_varnum = 0;
 %let nro_varclass = 0;
@@ -117,18 +128,11 @@ mode which is not a straighforward quantity to compute.
 		%put AGGREGATE: Either the VARNUM= or VARCLASS= parameters need to be non-empty.;
 		%put AGGREGATE: The macro stops.;
 	%end;
-	%abort cancel;
-%end;
-
-%*** BY;
-%let byst = ;
-%let bylist = ;
-%if %quote(&by) ~= %then %do;
-	%let byst = by &by;
-	%let bylist = %MakeList(&by, sep=%quote(,));
+	%let error = 1;
 %end;
 /*----------------------- Parse input parameters ----------------------------*/
 
+%if ~&error %then %do;
 
 %*** Aggregation of continuous variables;
 %if %quote(&varnum) ~= %then %do;
@@ -249,63 +253,9 @@ proc datasets nolist;
 	;
 quit;
 
+%end;	%* %if ~&error;
+
 %ExecTimeStop;
 %ResetSASOptions;
 
 %MEND Aggregate;
-
-/*
-data totest;
-	infile datalines delimiter="," dsd missover;
-	length id $10;
-	input id $ fecha turno $ x y grp;
-	length y 3;
-	informat fecha date9.;
-	format fecha date9.;
-	datalines;
-A,01jan2017,N,3.2,1,5
-A,02jan2017,N,3.5,1,.
-A,03jan2017,M,8,0,4
-B,20May2017,M,.,0,.
-B,21May2017,N,9,0,4
-B,27may2017,T,3.1,0,3
-B,27may2017,N,0.0,1,4
-C,27may2017,T,1.2,1,3
-C,04Jun2017,T,4.5,0,3
-C,05Jun2017,T,8.1,0,2
-;
-
-
-* NO grouping (no BY variables);
-%Aggregate(totest, varnum=x y, varclass=turno grp, stat=mean, missing=1, out=totest_agg01);
-* One single BY variable with STAT = max;
-%Aggregate(totest, by=id, varnum=x y, varclass=turno grp, stat=max, missing=1, out=totest_agg02);
-* Group by ID, DATE;
-%Aggregate(totest, by=id fecha, varnum=x y, varclass=turno grp, stat=mean, missing=1, out=totest_agg03);
-* Group by ID, WEEK;
-%Aggregate(totest, by=id fecha, format=fecha weekv6., varnum=x y, varclass=turno grp, stat=mean, missing=1, out=totest_agg04);
-* Group by ID, MONTH, with stat=median;
-%Aggregate(totest, by=id fecha, format=fecha monyy7., varnum=x y, varclass=turno grp, stat=median, missing=1, out=totest_agg05);
-* Only VARNUM variables;
-%Aggregate(totest, by=id fecha, format=fecha monyy7., varnum=x y, stat=median, missing=1, out=totest_agg06);
-* Only VARCLASS variables;
-%Aggregate(totest, by=id fecha, format=fecha monyy7., varclass=turno grp, missing=1, out=totest_agg07);
-* Only VARNUM variables, NO BY variables;
-%Aggregate(totest, format=fecha monyy7., varnum=x y, stat=median, missing=1, out=totest_agg08);
-* Only VARCLASS variables, NO BY variables;
-%Aggregate(totest, format=fecha monyy7., varclass=turno grp, missing=1, out=totest_agg09);
-%* No analysis variables --> a messages should be written in the log stating that no analysis can be done;
-%Aggregate(totest);
-*/
-
-/*
-libname data "E:\Daniel\SAS\Macros\tests\Aggregate\data";
-proc copy in=work out=data;
-	select totest;
-run;
-
-libname expect "E:\Daniel\SAS\Macros\tests\Aggregate\expected";
-proc copy in=work out=expect;
-	select totest_agg:;
-run;
-*/
