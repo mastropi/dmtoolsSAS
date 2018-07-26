@@ -8,15 +8,19 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %PlotBinned</h1>
-<pre>Version:                      1.10                                                                                      </pre>
+<pre>Version:                      2.0                                                                                       </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      13-Aug-2015                                                                               </pre>
-<pre>Modified:                     25-Jul-2018 (previous: 16-Jul-2018, 15-Feb-2016, 12-Nov-2015)                                                            </pre>
+<pre>Modified:                     26-Jul-2018 (previous: 25-Jul-2018, 16-Jul-2018, 15-Feb-2016, 12-Nov-2015)                                                            </pre>
 <pre>SAS Version:                  9.4                                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
-<pre>Makes scatter or bubble plots of a target variable in terms of a set of binned input numeric variables                                                                                          </pre>
-<pre>and fits a loess curve to the plot (weighted by the number of cases in each bin).                                                                                          </pre>
+<pre>Makes scatter or bubble plots of a target variable in terms of a set of categorical and/or                                                                                          </pre>
+<pre>continuous variables, where continuous variables are binned prior to plotting.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Optionally a LOESS curve is fit to the plot of continuous variables (weighted by the number of cases in each bin).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>Character variables are also accepted and they are automatically treated as categorical.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%PlotBinned(                                                                                          </pre>
@@ -26,8 +30,8 @@ pre {display: block}
 <pre>          class=,                       /* List of categorical input variables among those listed in VAR. */                              </pre>
 <pre>          by=,                          /* BY variables. */                                         </pre>
 <pre>          datavartype=,                 /* Dataset containing the type or level of the variables listed in VAR. */                              </pre>
-<pre>          valuesLetAlone=,              /* List of values taken by the analyzed variable to treat as separate bins. */                              </pre>
-<pre>          alltogether=0,                /* Whether the let-alone values should be put into the same bin (ONLY 0 is accepted) */                              </pre>
+<pre>          valuesLetAlone=,              /* List of values taken by the input continuous variable to treat as separate bins. */                              </pre>
+<pre>          alltogether=1,                /* Whether the let-alone values should be put into the same bin (ONLY 1 is accepted) */                              </pre>
 <pre>          groupsize=,                   /* Nro. of cases each group should contain when categorizing continuous variables. */                              </pre>
 <pre>          groups=20,                    /* Nro. of groups to use in the categorization of continuous variables. */                              </pre>
 <pre>          stat=mean,                    /* Names of the statistics to compute on the input variables for each bin. */                              </pre>
@@ -52,10 +56,16 @@ pre {display: block}
 <pre>- target:                     Target variable containing the time to the event of interest.                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>OPTIONAL PARAMETERS:</h3>
-<pre>- var:                        List of numeric input variables to analyze.                                                            </pre>
+<pre>- var:                        List of input variables to analyze.                                                            </pre>
+<pre>                              Variables can be either character or numeric.                                                            </pre>
+<pre>                              Character variables are automatically treated as categorical.                                                            </pre>
+<pre>                              It may or may not include the categorical variables listed in CLASS=.                                                            </pre>
+<pre>                              The list may NOT contain the variable specified in TARGET=.                                                            </pre>
 <pre>                              default: _NUMERIC_                                                                        </pre>
 <pre>                                                                                                                        </pre>
 <pre>- class:                      List of categorical variables to analyze among those listed in VAR.                                                            </pre>
+<pre>                              It may or may not include the character variables.                                                            </pre>
+<pre>                              The list may NOT contain the variable specified in TARGET=.                                                            </pre>
 <pre>                              default: empty                                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- by:                         BY variables.                                                                             </pre>
@@ -69,23 +79,24 @@ pre {display: block}
 <pre>                              Typically this dataset is created by the %QualifyVars macro.                                                            </pre>
 <pre>                              default: empty                                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- valuesLetAlone:             List of values taken by the analyzed variable to treat as separate bins.                                                            </pre>
+<pre>- valuesLetAlone:             List of values taken by the input continuous variable to treat as separate bins.                                                            </pre>
 <pre>                              The values should be separated by commas.                                                            </pre>
 <pre>                              Ex: valuesLetAlone=%quote(0, 1)                                                            </pre>
 <pre>                              default: empty                                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- alltogether                 Whether the let-alone values listed in VALUESLETALONE= should be put into the same bin.                                                            </pre>
-<pre>                              Possible values: 0 => No (put each value into a separate bin)                                                            </pre>
+<pre>                              Possible values:                                                                          </pre>
+<pre>                              (--- NO LONGER VALID ---)                                                                 </pre>
+<pre>                              0 => No (put each value into a separate bin)                                                            </pre>
 <pre>                              (--- NO LONGER VALID ---)                                                                 </pre>
 <pre>                               1 => Yes (put all let-alone values into the same bin. In this case                                                            </pre>
-											the representative value of the bin will be based on the
+							the representative value of the bin will be based on the
 <pre>                              the representative value of the bin will be based on the                                                            </pre>
-											statistic specified in VALUE= weighted by the number of
+							statistic specified in VALUE= weighted by the number of
 <pre>                              statistic specified in VALUE= weighted by the number of                                                            </pre>
-											cases in each value to let alone
+							cases in each value to let alone
 <pre>                              cases in each value to let alone                                                            </pre>
-<pre>                              (--- NO LONGER VALID ---)                                                                 </pre>
-<pre>                              default: 0                                                                                </pre>
+<pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- groupsize:                  Number of cases each group or bin should contain.                                                            </pre>
 <pre>                              This option overrides the GROUPS parameter.                                                            </pre>
@@ -111,15 +122,20 @@ pre {display: block}
 <pre>                              The dataset contains the following columns:                                                            </pre>
 <pre>                              - VAR: Input variable name                                                                </pre>
 <pre>                              - LABEL: Label of the input variable                                                            </pre>
+<pre>                              - TYPE: Type of the analyzed variable (categorical or continuous)                                                            </pre>
 <pre>                              - INDEX: Index of each bin of the input variable                                                            </pre>
 <pre>                              - NOBS: Number of cases in each bin                                                            </pre>
+<pre>                              - VALUECHAR: (if character variables are analyzed) Value of the analyzed character variables                                                            </pre>
 <pre>                              - VALUE: Value representing each bin in the plots                                                            </pre>
 <pre>                              - <STAT>: ALL statistics requested for the analyzed input variables.                                                            </pre>
 <pre>                              There are as many <STAT> columns as the number of requested statistics in parameter STAT=.                                                            </pre>
 <pre>                              - <TARGET>: Value of the target variable in each bin                                                            </pre>
-<pre>                              - FIT_LOESS_LOW: Lower limit of the 95% confidence interval for the predicted value                                                            </pre>
-<pre>                              - FIT_LOESS: LOESS fit in each bin                                                            </pre>
-<pre>                              - FIT_LOESS_UPP: Upper limit of the 95% confidence interval for the predicted value                                                            </pre>
+<pre>                              - FIT_LOESS_LOW: (when SMOOTH=1) Lower limit of the 95% confidence interval for the predicted value                                                            </pre>
+<pre>                              - FIT_LOESS: (when SMOOTH=1) LOESS fit in each bin                                                            </pre>
+<pre>                              - FIT_LOESS_UPP: (when SMOOTH=1) Upper limit of the 95% confidence interval for the predicted value                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              Rows are sorted by TYPE, VAR, BY variables, and INDEX.                                                            </pre>
+<pre>                                                                                                                        </pre>
 <pre>                              default: no output dataset is created                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- outcorr:                    Output dataset containing the correlation between binned values and                                                            </pre>
@@ -131,17 +147,23 @@ pre {display: block}
 <pre>                              - CORR: Weighted (by N) correlation between binned values and predicted LOESS values                                                            </pre>
 <pre>                              - CORR_ADJ: Normalized weighted correlation by the target variable range                                                            </pre>
 <pre>                              - TARGET_RANGE: Target variable range in the original data                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              Rows are sorted by BY variables and decreasing value of CORR_ADJ.                                                            </pre>
+<pre>                                                                                                                        </pre>
 <pre>                              This dataset is ONLY created when SMOOTH=1, which requests the LOESS fit to be computed,                                                            </pre>
 <pre>                              an essential part of the computation of the correlation measure stored in the OUTCORR= dataset.                                                            </pre>
+<pre>                                                                                                                        </pre>
 <pre>                              default: (empty), i.e. no output dataset is created                                                            </pre>
 <pre>                                                                                                                        </pre>
 <pre>- bubble:                     Whether to generate a bubble plot instead of a scatter plot.                                                            </pre>
 <pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- smooth:                     Whether to fit a smooth curve to the points (LOESS fit).                                                            </pre>
+<pre>                              Note that the LOESS fit does NOT always work... it may fail when                                                            </pre>
+<pre>                              an erratic relationship between the analyzed variable and the target exists.                                                            </pre>
 <pre>                              Set this parameter to 0 if the loess fit generates an error and the output dataset                                                            </pre>
-<pre>                              is incomplete (this may happen in cases of erratic relationship between                                                            </pre>
-<pre>                              the currently analyzed x variable and the target).                                                            </pre>
+<pre>                              is incomplete (i.e. it doesn't contain the information for the variables                                                            </pre>
+<pre>                              whose LOESS fit failed).                                                                  </pre>
 <pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- xaxisorig:                  Whether to use the original input variable range on the X axis.                                                            </pre>
@@ -181,7 +203,9 @@ pre {display: block}
 <pre>- %ExecTimeStop                                                                                                         </pre>
 <pre>- %FixVarNames                                                                                                          </pre>
 <pre>- %GetNroElements                                                                                                       </pre>
+<pre>- %GetVarAttrib                                                                                                         </pre>
 <pre>- %GetVarLabel                                                                                                          </pre>
+<pre>- %GetVarType                                                                                                           </pre>
 <pre>- %MakeListFromName                                                                                                     </pre>
 <pre>- %MakeListFromVar                                                                                                      </pre>
 <pre>- %Means                                                                                                                </pre>
@@ -190,5 +214,30 @@ pre {display: block}
 <pre>- %ResetSASOptions                                                                                                      </pre>
 <pre>- %SelectNames                                                                                                          </pre>
 <pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- Request multiple statistics for the analysis variables.                                                                                          </pre>
+<pre>There are two categorical variables: grp1 and grp2                                                                                          </pre>
+<pre>The other variables, x and z, will be treated as continuous as long as they are numeric,                                                                                          </pre>
+<pre>otherwise they will be treated as categorical.                                                                                          </pre>
+<pre>Two output datasets are generated: TEST_PB which contains the plotted data and                                                                                          </pre>
+<pre>TEST_PBCORR which contains the correlation between the                                                                                           </pre>
+<pre>%PlotBinned(test, target=y, class=grp1 grp2, var=grp1 grp2 x z,                                                                                          </pre>
+<pre>                              stat=mean min max skew,                                                                   </pre>
+<pre>                              out=test_pb, outcorr=test_pbcorr);                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- Do NOT fit a LOESS smoothing and request the MEDIAN aggregation for the target variable.                                                                                          </pre>
+<pre>(so that the output dataset will always contain all the analysis variables                                                                                          </pre>
+<pre>--which may not be the case otherwise because the LOESS fit may fail)                                                                                          </pre>
+<pre>In this case the OUTCORR= dataset is NOT generated (even if requested).                                                                                          </pre>
+<pre>The categorical variables are ONLY specified in the CLASS= parameter and                                                                                          </pre>
+<pre>this is enough.                                                                                                         </pre>
+<pre>The number of groups/bins used for the continuous variables is now set to 16.                                                                                          </pre>
+<pre>X-axis limits are set to the new limits after binning.                                                                                          </pre>
+<pre>Y-axis limits are ALL set to the specified YLIM= limits.                                                                                          </pre>
+<pre>%PlotBinned(test, target=y, class=grp1 grp2, var=x z,                                                                                          </pre>
+<pre>                              stat=mean, value=median, groups=16,                                                            </pre>
+<pre>                              plot=1, smooth=0, xaxisorig=0, ylim=0 0.7,                                                            </pre>
+<pre>                              out=test_pb);                                                                             </pre>
 <body>
 </html>

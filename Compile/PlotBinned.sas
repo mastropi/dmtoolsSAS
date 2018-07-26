@@ -1,13 +1,17 @@
 /* MACRO %PlotBinned
-Version: 		1.10
+Version: 		2.0
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
-Modified: 		25-Jul-2018 (previous: 16-Jul-2018, 15-Feb-2016, 12-Nov-2015)
+Modified: 		26-Jul-2018 (previous: 25-Jul-2018, 16-Jul-2018, 15-Feb-2016, 12-Nov-2015)
 SAS Version:	9.4
 
 DESCRIPTION:
-Makes scatter or bubble plots of a target variable in terms of a set of binned input numeric variables
-and fits a loess curve to the plot (weighted by the number of cases in each bin).
+Makes scatter or bubble plots of a target variable in terms of a set of categorical and/or
+continuous variables, where continuous variables are binned prior to plotting.
+
+Optionally a LOESS curve is fit to the plot of continuous variables (weighted by the number of cases in each bin).
+
+Character variables are also accepted and they are automatically treated as categorical.
 
 USAGE:
 %PlotBinned(
@@ -17,8 +21,8 @@ USAGE:
 	class=, 					*** List of categorical input variables among those listed in VAR.
 	by=,						*** BY variables.
 	datavartype=,				*** Dataset containing the type or level of the variables listed in VAR.
-	valuesLetAlone=,			*** List of values taken by the analyzed variable to treat as separate bins.
-	alltogether=0,				*** Whether the let-alone values should be put into the same bin (ONLY 0 is accepted)
+	valuesLetAlone=,			*** List of values taken by the input continuous variable to treat as separate bins.
+	alltogether=1,				*** Whether the let-alone values should be put into the same bin (ONLY 1 is accepted)
 	groupsize=,					*** Nro. of cases each group should contain when categorizing continuous variables.
 	groups=20,					*** Nro. of groups to use in the categorization of continuous variables.
 	stat=mean,					*** Names of the statistics to compute on the input variables for each bin.
@@ -43,10 +47,16 @@ REQUIRED PARAMETERS:
 - target:			Target variable containing the time to the event of interest.
 
 OPTIONAL PARAMETERS:
-- var:				List of numeric input variables to analyze.
+- var:				List of input variables to analyze.
+					Variables can be either character or numeric.
+					Character variables are automatically treated as categorical.
+					It may or may not include the categorical variables listed in CLASS=.
+					The list may NOT contain the variable specified in TARGET=.
 					default: _NUMERIC_
 
 - class:			List of categorical variables to analyze among those listed in VAR.
+					It may or may not include the character variables.
+					The list may NOT contain the variable specified in TARGET=.
 					default: empty
 
 - by:				BY variables.
@@ -60,20 +70,21 @@ OPTIONAL PARAMETERS:
 					Typically this dataset is created by the %QualifyVars macro.
 					default: empty
 
-- valuesLetAlone:	List of values taken by the analyzed variable to treat as separate bins.
+- valuesLetAlone:	List of values taken by the input continuous variable to treat as separate bins.
 					The values should be separated by commas.
 					Ex: valuesLetAlone=%quote(0, 1)
 					default: empty
 
 - alltogether		Whether the let-alone values listed in VALUESLETALONE= should be put into the same bin.
-					Possible values: 0 => No (put each value into a separate bin)
-								(--- NO LONGER VALID ---)
-									 1 => Yes (put all let-alone values into the same bin. In this case
-										  the representative value of the bin will be based on the
-										  statistic specified in VALUE= weighted by the number of
-										  cases in each value to let alone
-								(--- NO LONGER VALID ---)
-					default: 0
+					Possible values: 
+					(--- NO LONGER VALID ---)
+					0 => No (put each value into a separate bin)
+					(--- NO LONGER VALID ---)
+					 1 => Yes (put all let-alone values into the same bin. In this case
+						  the representative value of the bin will be based on the
+						  statistic specified in VALUE= weighted by the number of
+						  cases in each value to let alone
+					default: 1
 
 - groupsize:		Number of cases each group or bin should contain.
 					This option overrides the GROUPS parameter.
@@ -99,15 +110,20 @@ OPTIONAL PARAMETERS:
 					The dataset contains the following columns:
 					- VAR: Input variable name
 					- LABEL: Label of the input variable
+					- TYPE: Type of the analyzed variable (categorical or continuous)
 					- INDEX: Index of each bin of the input variable
 					- NOBS: Number of cases in each bin
+					- VALUECHAR: (if character variables are analyzed) Value of the analyzed character variables
 					- VALUE: Value representing each bin in the plots
 					- <STAT>: ALL statistics requested for the analyzed input variables.
 					There are as many <STAT> columns as the number of requested statistics in parameter STAT=.
 					- <TARGET>: Value of the target variable in each bin
-					- FIT_LOESS_LOW: Lower limit of the 95% confidence interval for the predicted value
-					- FIT_LOESS: LOESS fit in each bin
-					- FIT_LOESS_UPP: Upper limit of the 95% confidence interval for the predicted value
+					- FIT_LOESS_LOW: (when SMOOTH=1) Lower limit of the 95% confidence interval for the predicted value
+					- FIT_LOESS: (when SMOOTH=1) LOESS fit in each bin
+					- FIT_LOESS_UPP: (when SMOOTH=1) Upper limit of the 95% confidence interval for the predicted value
+
+					Rows are sorted by TYPE, VAR, BY variables, and INDEX.
+
 					default: no output dataset is created
 
 - outcorr:			Output dataset containing the correlation between binned values and
@@ -119,17 +135,23 @@ OPTIONAL PARAMETERS:
 					- CORR: Weighted (by N) correlation between binned values and predicted LOESS values
 					- CORR_ADJ: Normalized weighted correlation by the target variable range
 					- TARGET_RANGE: Target variable range in the original data
+
+					Rows are sorted by BY variables and decreasing value of CORR_ADJ.
+
 					This dataset is ONLY created when SMOOTH=1, which requests the LOESS fit to be computed,
 					an essential part of the computation of the correlation measure stored in the OUTCORR= dataset.
+
 					default: (empty), i.e. no output dataset is created
 
 - bubble:			Whether to generate a bubble plot instead of a scatter plot.
 					default: 1
 
 - smooth:			Whether to fit a smooth curve to the points (LOESS fit).
+					Note that the LOESS fit does NOT always work... it may fail when
+					an erratic relationship between the analyzed variable and the target exists.
 					Set this parameter to 0 if the loess fit generates an error and the output dataset
-					is incomplete (this may happen in cases of erratic relationship between
-					the currently analyzed x variable and the target).
+					is incomplete (i.e. it doesn't contain the information for the variables
+					whose LOESS fit failed).
 					default: 1
 
 - xaxisorig:		Whether to use the original input variable range on the X axis.
@@ -169,7 +191,9 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %ExecTimeStop
 - %FixVarNames
 - %GetNroElements
+- %GetVarAttrib
 - %GetVarLabel
+- %GetVarType
 - %MakeListFromName
 - %MakeListFromVar
 - %Means
@@ -178,6 +202,31 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %ResetSASOptions
 - %SelectNames
 - %SetSASOptions
+
+EXAMPLES:
+1.- Request multiple statistics for the analysis variables.
+There are two categorical variables: grp1 and grp2
+The other variables, x and z, will be treated as continuous as long as they are numeric,
+otherwise they will be treated as categorical.
+Two output datasets are generated: TEST_PB which contains the plotted data and
+TEST_PBCORR which contains the correlation between the 
+%PlotBinned(test, target=y, class=grp1 grp2, var=grp1 grp2 x z,
+	stat=mean min max skew,
+	out=test_pb, outcorr=test_pbcorr);
+
+2.- Do NOT fit a LOESS smoothing and request the MEDIAN aggregation for the target variable.
+(so that the output dataset will always contain all the analysis variables
+--which may not be the case otherwise because the LOESS fit may fail)
+In this case the OUTCORR= dataset is NOT generated (even if requested).
+The categorical variables are ONLY specified in the CLASS= parameter and
+this is enough.
+The number of groups/bins used for the continuous variables is now set to 16.
+X-axis limits are set to the new limits after binning.
+Y-axis limits are ALL set to the specified YLIM= limits.
+%PlotBinned(test, target=y, class=grp1 grp2, var=x z,
+	stat=mean, value=median, groups=16,
+	plot=1, smooth=0, xaxisorig=0, ylim=0 0.7,
+	out=test_pb);
 */
 &rsubmit;
 %MACRO PlotBinned(
@@ -254,6 +303,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %local nro_vars;
 %local nro_stats;
 %local var2categorize;
+%local var2categorize_counter;
 %local varlist;
 %local vartype;
 %local condition;
@@ -261,12 +311,19 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %local labeli;
 %local vari;
 %local vartypei;
+%local varvaluetypei;
+%local varcharleni;
+%local maxvarcharlen;
 %local nobs nvars;
 %local stat_to_use_in_plots;		%* First statistic requested in parameter STAT= which is the input variable aggregation to be used for the plots;
 %local varid;			%* Variables that are used as ID variables in the %Means call when computing the aggregate statistics for the target variable. Its value depends on whether the analysis variable is categorical (C) or continuous (N);
 %local varstat;			%* ALL the variable names followed by the computed statistics (e.g. x_min x_mean x_max   y_min y_mean y_max);
 %local varstati;		%* The variable name followed by the computed statistics (e.g. x_min x_mean x_max);
 %local varstati_to_use_in_plots;
+
+%* Constants;
+%local MAXVARCHARLEN_ACCEPTED;
+%let MAXVARCHARLEN_ACCEPTED = 200;
 
 %* Show input parameters;
 %if &log %then %do;
@@ -334,7 +391,15 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 %end;
 
 %*** CLASS=;
-%* Create the list of variables to categorize by removing categorical variables from VAR;
+%* Create the final list of categorical variables (i.e. we need to add variables not listed originally
+%* in the CLASS= parameter which are CHARACTER variables);
+%do i = 1 %to %GetNroElements(&var);
+	%let vari = %scan(&var, &i , ' ');
+	%let varvaluetypei = %upcase(%GetVarType(&data, &vari));
+	%if &varvaluetypei = C and ~%FindInList(&class, &vari, log=0) %then
+		%let class = &class &vari;
+%end;
+%* Now create the list of variables to categorize by removing the categorical variables from VAR;
 %if %quote(&class) ~= %then
 	%let var2categorize = %RemoveFromList(&var, &class, log=0);
 %else
@@ -419,8 +484,12 @@ quit;
 	%* Read the MIN and MAX values of the input and target variables from the original data;
 	%* Note that I store the MIN and MAX of the input variables into macro variables named _VAR1_MIN, _VAR2_MIN, etc.
 	%* in order to avoid problems with too long names (the limit of 32 characters also applies to the macro variable names!!);
-	%GetStat(_PB_data_, var=&var &target, stat=min, name=%MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MIN) _TARGET_MIN_, log=0);
-	%GetStat(_PB_data_, var=&var &target, stat=max, name=%MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MAX) _TARGET_MAX_, log=0);
+	%local nro_vars2categorize;
+	%let nro_vars2categorize = %GetNroElements(&var2categorize);
+	%* Note that the statistics are computed on the ORIGINAL dataset, NOT on the local dataset _PB_DATA_ because
+	%* this dataset already contains the categorized variables (which go from 1 to #bins);
+	%GetStat(&data, var=&var2categorize &target, stat=min, name=%MakeListFromName(_VAR, start=1, stop=&nro_vars2categorize, step=1, suffix=_MIN) _TARGET_MIN_, log=0);
+	%GetStat(&data, var=&var2categorize &target, stat=max, name=%MakeListFromName(_VAR, start=1, stop=&nro_vars2categorize, step=1, suffix=_MAX) _TARGET_MAX_, log=0);
 %end;
 
 %* Get execution datetime to name the PNG files containing the graphical output
@@ -430,11 +499,27 @@ quit;
 
 %*** Iterate on each input variable;
 %let maxlengthlabel = 0;
+%let maxvarcharlen = 0;
+%let AtLeastOneCharVariable = 0;
+%let AtLeastOneNumVariable = 0;
+%let var2categorize_counter = 0;
 %do i = 1 %to &nro_vars;
 	%let vari = %scan(&var, &i , ' ');
-	%let vartypei = %scan(&vartype, &i, ' ');	%* Variable type: Categorical (C) or Continuous (N) (NOT Character or Numeric) as I define the vartypes myself above;
+	%let vartypei = %scan(&vartype, &i, ' ');						%* Variable type: Categorical (C) or Continuous (N), as defined by the code above;
+	%let varvaluetypei = %upcase(%GetVarType(_PB_data_, &vari));	%* Variable value type: character or numeric;
 
 	%* Check the variable type (categorical or continuous);
+	%if &varvaluetypei = C %then %do;
+		%* Variables are categorical when they are character-valued;
+		%let vartypei = C;
+		%let AtLeastOneCharVariable = 1;
+		%* Read the variable length (so that we can adjust the length of the column in the output dataset (valuechar)
+		%* that holds the values of the character variables to its minimum possible length);
+		%let varcharleni = %GetVarAttrib(_PB_data_, &vari, varlen);
+		%let maxvarcharlen = %sysfunc(max(&maxvarcharlen, &varcharleni));
+	%end;
+	%else
+		%let AtLeastOneNumVariable = 1;
 	%if &vartypei = C %then %do;
 		%* CATEGORICAL VARIABLES: Use the original variable value as representative of each bin;
 		%let varstati = &vari;
@@ -449,7 +534,8 @@ quit;
 		%* x_mean x_min x_max
 		%* y_mean y_min y_max
 		%* This is guaranteed by how we construct the list above before calling the %Categorize macro;
-		%let varstati = %SelectNames(&varstat, %eval((&i-1)*&nro_stats + 1), %eval(&i*&nro_stats));
+		%let var2categorize_counter = %eval(&var2categorize_counter + 1);
+		%let varstati = %SelectNames(&varstat, %eval((&var2categorize_counter-1)*&nro_stats + 1), %eval(&var2categorize_counter*&nro_stats));
 		%let varstati_to_use_in_plots = %scan(&varstati, 1);	%* The first listed statistic is used in plots;
 		%let varid = &varstati;
 	%end;
@@ -460,13 +546,14 @@ quit;
 			%put PLOTBINNED: Computing plot of %upcase(&target) vs. binned (continuous) variable &i of &nro_vars: %upcase(&vari);
 	%end;
 
-	%* Compute the statistic requested in parameter VALUE= on the TARGTE variable by each bin of the analyzed input variable; 
+	%* Compute the statistic requested in parameter VALUE= on the TARGET variable by each bin of the analyzed input variable; 
 	%Means(_PB_data_, by=&by &vari, id=&varid, var=&target, stat=&value n, name=&target nobs, out=_PB_means_, log=0);
 
 	%* Read the variable label;
 	%let labeli = %GetVarLabel(&data, &vari);
 	%let maxlengthlabel = %sysfunc(max(&maxlengthlabel, %length(%quote(&labeli))));
 
+	%*** MAIN STEP NEEDED TO PREPARE THE OUTPUT DATASET;
 	%* Add the information of the analyzed variable to the output dataset generated by PROC MEANS
 	%* This implies adding the variable name and label, and new columns whose name is the same
 	%* for all analyzed variables (such as INDEX which indexes each bin of the categorized analyzed variable);
@@ -475,7 +562,15 @@ quit;
 		format &by;
 		%end;
 		length var $32 label $500;	%* Use 500 as label length to be kind of safe that we do not truncate any labels;
-		length &vari 8;				%* This is added so that there is no WARNING of different lengths when appending the dataset with PROC APPEND;
+		length type $15;
+		%if &varvaluetypei = C %then %do;
+		%* This is to leave enough room for the value of character-valued variables in the output dataset;
+		length &vari $&MAXVARCHARLEN_ACCEPTED;
+		format &vari $&MAXVARCHARLEN_ACCEPTED..;	%* Need to also change the FORMAT, o.w. we get a WARNING in the PROC APPEND;
+		%end;
+		%else %do;
+		length &vari 8;							%* This is to avoid the WARNING message of different lengths when appending the dataset with PROC APPEND;
+		%end;
 		set _PB_means_;
 		retain index;
 
@@ -488,6 +583,7 @@ quit;
 
 		%if &vartypei = C %then %do;
 		%* CATEGORICAL VARIABLE: The variable indexing each bin (1, 2, 3, ...) is constructed here (as &VARI contains the original categorical value);
+		type = "categorical";
 		index + 1;
 			%if %quote(&var2categorize) ~= %then %do;
 			%* Add the statistics requested for the continuous variables in the output dataset if there are continuous variables analyzed
@@ -496,11 +592,28 @@ quit;
 					%scan(&stat, &s) = .;
 				%end;
 			%end;
+
+			%* For character variables, add the VALUE column that is used AT THE END to store the value for numeric variables;
+			%* This is done so that the PROC APPEND works;
+			%if &varvaluetypei = C %then %do;
+			length value 8;
+			value = .;
+			%end;
 		%end;
 		%else %do;
 		%* CONTINUOUS VARIABLE: The variable indexing each bin (1, 2, 3, ...) comes from the categorized variable VARCAT generated by %Categorize;
+		type = "continuous";
 		index = &vari;
 		%end;
+
+		%* For numeric variables, add the VALUECHAR column that is used AT THE END to store the value for character variables;
+		%* This is done so that the PROC APPEND works;
+		%if &varvaluetypei = N %then %do;
+		length valuechar $&MAXVARCHARLEN_ACCEPTED;
+		format valuechar $&MAXVARCHARLEN_ACCEPTED..;
+		valuechar = " ";
+		%end;
+
 		var = "&vari";
 		label = "%quote(&labeli)";
 	run;
@@ -512,15 +625,15 @@ quit;
 				%* NOTE: we still store the representative value for each bin as &VARI and NOT as VALUE
 				%* (which is the column name used finally in the output dataset) because we need the name
 				%* of the original variable so that they are shown in the plot below (and also to be consistent
-				%* and not have problems with the case of continuous variables);
-				keep &by var label index &vari &stat nobs &target fit_loess fit_loess_low fit_loess_upp;
+				%* and not have problems with the case of continuous variables --dealt with below);
+%*				keep &by var label index &vari value &stat nobs &target fit_loess fit_loess_low fit_loess_upp;
 				set _PB_means_;
 				fit_loess = &target;
 				fit_loess_low = .;
 				fit_loess_upp = .;
 			run;
 		%end;
-		%else %do;
+		%else %if &vartypei = N %then %do;
 			ods exclude all;	%* Avoid showing any output in any of the active outputs;
 			proc loess data=_PB_means_ plots=none;
 				%* NOTE: The options of the MODEL statement request to do a global search for the best smoothing parameter
@@ -534,7 +647,8 @@ quit;
 				&bystr;
 				model &target = &varstati_to_use_in_plots /* / select=aicc(global)*/;
 				weight nobs;
-				output 	out=_PB_means_(keep=&by var label index &vari &varstati nobs &target fit_loess fit_loess_low fit_loess_upp)
+				output 	out=_PB_means_/*(keep=&by var label index &vari &varstati nobs &target fit_loess fit_loess_low fit_loess_upp)*/
+									(drop=SmoothingParameter DepVar Obs) /* Drop variables created by PROC LOESS */
 						predicted=fit_loess LCLM=fit_loess_low UCLM=fit_loess_upp;
 			run;
 			ods exclude none;
@@ -557,33 +671,79 @@ quit;
 		%symdel renamestr;
 	%end;
 	%* Append the plotted data to the output dataset;
-	proc append base=_PB_out_ data=_PB_means_(rename=(&vari=value));
+	proc append base=_PB_out_ data=_PB_means_(rename=(%if &varvaluetypei = C %then %do; &vari=valuechar %end; %else %do; &vari=value %end;)) FORCE;
 	run;
 	
 	%if &plot %then %do;
 		ods proclabel="%upcase(&VARI)";	%* This adds a title to each entry in an e.g. PDF file that helps in browsing;
 		ods graphics / imagename="&datetime-&imagerootname-&target-&i-&vari" reset=index;	%* This generates the image file with the name specified in the IMAGENAME= option;
 		title "Bin plot of %upcase(&TARGET) vs. %upcase(&vari)";
+
+		%* Define the variable to plot on the X axis;
+		%* (for categorical variables the X variable is chosen as the INDEX variable
+		%* so that MISSING values are also shown in the plot!);
+		%local xvar;
+		%if &vartypei = C %then %do;
+			%* Create a CHARACTER variable in the data to plot that contains the value of the
+			%* original variable where MISSING values have been replaced with the word -Miss-;
+			%* This is done so THAT missing values are also shown in the plot!;
+			%* NOTE that we CANNOT use the INDEX variable as the variable plotted on the X axis
+			%* for two reasonss:
+			%* - The value labels shown on the X axis will be 1, 2, 3... i.e. they will NOT convey
+			%* the actual value of the analyzed variable.
+			%* - MORE IMPORTANTLY, when BY variables were passed, the INDEX value may DIFFER
+			%* for each BY group! So the values 1, 2, 3... may NOT represent the same value
+			%* of the original analyzed variable!
+			%* ;
+			data _PB_means_;
+				set _PB_means_;
+				length _xvar2plot $&MAXVARCHARLEN_ACCEPTED;
+
+				%* Copy the variable, which depends on its type;
+				%if &varvaluetypei = C %then %do;
+				_xvar2plot = &vari;
+				%end;
+				%else %do;
+				%* Convert the numeric value of the categorical variable to character;
+				%* so that missing values can be shown on the plot;
+				_xvar2plot = trim(left(put(&vari, BEST8.)));
+				%end;
+
+				%* Replace the missing values with -Miss-;
+				%* Note that we use a starting character for this (-) that is smaller than any digit in ASCII code
+				%* so that the missing value appears on the left and does not make lines look awkward in the SERIES plot;
+				if missing(&vari) then
+					_xvar2plot = "-Miss-";	%* Note that there is no problem with the LENGTH of variable &vari because it has been set to &MAXVARCHARLEN_ACCEPTED (typically $200);
+			run;
+			%let xvar = _xvar2plot;
+		%end;
+		%else
+			%let xvar = &vari;
+		%*** NOTE that the BUBBLE, SCATTER and SERIES plots also work with CHARACTER variables!;
+		%*** The only plot used here that does NOT work with character variables is the LOESS plot;
 		proc sgplot data=_PB_means_;
 			%*** BUBBLE or SCATTER;
 			%if &bubble %then %do;
-			bubble x=&vari y=&target size=nobs / %if %quote(&by) ~= %then %do; group=&by %end;
+			bubble x=&xvar y=&target size=nobs / %if %quote(&by) ~= %then %do; group=&by %end;
 												  datalabel=nobs;
 			%end;
 			%else %do;
-			scatter x=&vari y=&target / %if %quote(&by) ~= %then %do; group=&by %end;
+			scatter x=&xvar y=&target / %if %quote(&by) ~= %then %do; group=&by %end;
 										 datalabel=nobs markerattrs=(symbol=CircleFilled);
 			%end;
 
-			%*** CATEGORICAL or CONTINUOUS;
+			%*** CATEGORICAL (join point with lines) or CONTINUOUS (smooth or do not show any lines);
 			%if &vartypei = C %then %do;
 			%* Linear interpolation for categorical variables;
-			series x=&vari y=&target / %if %quote(&by) ~= %then %do; group=&by %end;
+			series x=&xvar y=&target / %if %quote(&by) ~= %then %do; group=&by %end;
 										%else %do; lineattrs=(color="red") %end;		;
 			%end;
 			%else %if &smooth %then %do;
 			%* LOESS curve for continuous variables;
-			loess x=&vari y=&target  / %if %quote(&by) ~= %then %do; group=&by %end;
+			%* Note that CHARACTER variables cannot reach this point
+			%* because they have &vartypei set to C (i.e. categorical variable,
+			%* which is tested on the above %IF);
+			loess x=&xvar y=&target  / %if %quote(&by) ~= %then %do; group=&by %end;
 										%else %do;
 											lineattrs=(color="red")
 											CLM clmattrs=(clmfillattrs=(color="light grayish red")) clmtransparency=0.7
@@ -594,9 +754,16 @@ quit;
 			%end;
 
 			%*** AXIS LIMITS;
-			%* Set horizontal axis to reflect the original input variable scale;
-			%if &xaxisorig %then %do;
-			xaxis min=&&&_var&i._MIN max=&&&_var&i._MAX;
+			%* Set horizontal axis to reflect the original input variable scale
+			%* (for continuous variables only --for categorical variables the limits are already the original ones!);
+			%if &vartypei = C %then %do;
+			xaxis label="%upcase(&VARI)" discreteorder=data;
+				%** NOTE: Most of the times DISCRETEORDER=data will place the missing value -Miss- as first value on the left...
+				%** HOWEVER, this is NOT the case when there are BY variables and the first BY variable combination
+				%** does NOT have a missing value of the analyzed variable!;
+			%end;
+			%else %if &xaxisorig %then %do;
+			xaxis min=&&&_var&var2categorize_counter._MIN max=&&&_var&var2categorize_counter._MAX;
 			%end;
 			%if %quote(&ylim) ~= and %GetNroElements(%quote(&ylim)) = 2 %then %do;
 			%* Set the vertical axis limits specified by the user;
@@ -617,7 +784,12 @@ quit;
 %end;
 
 %if %quote(&out) ~= %then %do;
-	data &out;
+	%* Set the VARLENCHK option to NOWARN so that there are no warning messages
+	%* when reducing the length of the VALUECHAR column and the LABEL column to their possible minima;
+	%local varlenchk_opt;
+	%let varlenchk_opt = %sysfunc(getoption(varlenchk));
+	options varlenchk=nowarn;
+	data &out;		%* This step should NOT replace the _PB_out_ dataset because the latter is used to construct the OUTCORR= dataset below;
 		%if %quote(&by) ~= %then %do;
 		format &by;
 		%end;
@@ -629,31 +801,62 @@ quit;
 		%* Otherwise, we would set a length of 0 which gives an error);
 		format label $&maxlengthlabel..;
 		length label $&maxlengthlabel;
-		%* Set the final length of the label variable;
-		length label $&maxlengthlabel;
 		%end;
 		%else %do;
 		%* Drop the LABEL variable when there are no variables with labels;
 		drop label;
 		%end;
 
-		format index nobs;
-		format value &stat BEST8.;	%* This format is to make sure that values are not shown as integer values when there are integer-valued analysis variables;
-		format &target best32.;		%* This is to avoid seeing the target value as e.g. 0 when the target is binary and its format is to show no decimal digits...;
-		%if &smooth %then %do;
+		format type index nobs;
+
+		%* Check if any character or numeric variables have been analyzed;
+		%if &AtLeastOneCharVariable %then %do;
+		length valuechar $&maxvarcharlen;
+		%end;
+		%else %do;
+		drop valuechar;
+		%end;
+
+		%if &AtLeastOneNumVariable %then %do;
+		format value BEST8.;
+		%end;
+		%else %do;
+		drop value;
+		%end;
+
+		%* Statistics computed on the continuous variables;
+		%if %quote(&var2categorize) ~= %then %do;
+			%* Add the statistics requested for the continuous variables in the output dataset if there are continuous variables analyzed
+			%* (this is to avoid a WARNING when doing the PROC APPEND below);
+		format &stat BEST8.;	%* This format is to make sure that values are not shown as integer values when there are integer-valued analysis variables;
+		%end;
+
+		%* Target variable;
+		format &target BEST8.;	%* This is to avoid seeing the target value as e.g. 0 when the target is binary and its format is to show no decimal digits...;
+
+		%* LOESS fit variables;
+		%if &smooth and &AtLeastOneNumVariable %then %do;
 		format fit_loess_low fit_loess fit_loess_upp;
 		%end;
 
 		set _PB_out_;
 		label 	/*&stat = " "*/
-				nobs = " "
-		%if &smooth %then %do;
+				type = "Variable Type"
+				nobs = "Number of non-missing Target Values in Bin"
+		%if &smooth and &AtLeastOneNumVariable %then %do;
 				fit_loess_low = "Lower Limit of 95% Confidence Band for Loess Fit"
 				fit_loess = "Weighted Loess Fit"
 				fit_loess_upp = "Upper Limit of 95% Confidence Band for Loess Fit"
 		%end;
 			;
 	run;
+	options varlenchk=&varlenchk_opt;
+
+	%* Sort variables by TYPE/VAR/BY (as we are interested in looking the results for EACH variable all together --and by BY variables within);
+	proc sort data=&out;
+		by type var &by index;
+	run;
+
 	%if &log %then %do;
 		%callmacro(getnobs, _PB_out_ return=1, nobs nvars);
 		%put;
@@ -663,26 +866,26 @@ quit;
 %end;
 
 %*** Output dataset containing the correlation between the observed binned values and the predicted LOESS values;
-%if %quote(&outcorr) ~= and &smooth %then %do;
+%if %quote(&outcorr) ~= and &smooth and &AtLeastOneNumVariable %then %do;
 	%* Compute the range of the target variable in the original data to be used for the normalized correlation calculation
 	%* which can be used as a measure of predictive power of the target by each input variable;
 	%GetStat(_PB_data_, var=&target, stat=range, name=_TARGET_RANGE_, log=0);
 
 	%*** Compute the correlation between the observed and predicted LOESS values;
 	proc sort data=_PB_out_;
-		by &by var &stat_to_use_in_plots;
+		by &by var label type &stat_to_use_in_plots;
 	run;
 	proc corr data=_PB_out_ out=_PB_corr_ noprint;
-		by &by var label;
+		by &by var label type;
 		var &target;
 		with fit_loess;
 		%* Use the same weight as for the LOESS fit;
 		weight nobs;
 	run;
 	%* Transpose;
-	proc transpose data=_PB_corr_ out=_PB_corr_(keep=&by var label n corr);
+	proc transpose data=_PB_corr_ out=_PB_corr_(keep=&by var label type n corr);
 		where _TYPE_ in ("N", "CORR");
-		by &by var label;
+		by &by var label type;
 		id _TYPE_;
 		var &target;
 	run;
@@ -695,6 +898,9 @@ quit;
 		var &target;
 		output out=_PB_range_ range=range;
 	run;
+
+	%* Output correlation dataset;
+	options varlenchk=nowarn;
 	data _PB_corr_;
 		%if %quote(&by) ~= %then %do;
 		format &by;
@@ -713,6 +919,7 @@ quit;
 		drop label;
 		%end;
 
+		format type;
 		format n corr corr_adj target_range;
 		format target_range_rel percent7.1;
 		merge 	_PB_corr_
@@ -720,12 +927,15 @@ quit;
 		by &by var;
 		target_range_rel = target_range / &_TARGET_RANGE_;
 		corr_adj = corr * target_range_rel;
-		label 	n = "Number of bins"
+		label 	type = "Variable Type"
+				n = "Number of bins"
 				target_range = "Range of target variable"
 				target_range_rel = "Relative range of target variable (input data range = %sysfunc(putn(&_TARGET_RANGE_, best8.)))"
 				corr = "Weighted correlation between observed binned values and predicted LOESS values"
 				corr_adj = "Weighted correlation normalized by the spanned target range";
 	run;
+	options varlenchk=&varlenchk_opt;
+
 	proc sort data=_PB_corr_ out=&outcorr;
 		by &by descending corr_adj;
 	run;
@@ -754,9 +964,9 @@ quit;
 %* Delete global macro variables created here;
 %if &xaxisorig or &yaxisorig %then %do;
 	%symdel _TARGET_MIN_ _TARGET_MAX_;
-	%symdel %MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MIN) %MakeListFromName(_VAR, start=1, stop=&nro_vars, step=1, suffix=_MAX);
+	%symdel %MakeListFromName(_VAR, start=1, stop=&nro_vars2categorize, step=1, suffix=_MIN) %MakeListFromName(_VAR, start=1, stop=&nro_vars2categorize, step=1, suffix=_MAX);
 %end;
-%if %quote(&outcorr) ~= and &smooth %then
+%if %quote(&outcorr) ~= and &smooth and &AtLeastOneNumVariable %then
 	%symdel _TARGET_RANGE_;
 
 %if &log %then %do;
