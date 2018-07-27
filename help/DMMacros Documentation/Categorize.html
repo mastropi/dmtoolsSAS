@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %Categorize</h1>
-<pre>Version:                      1.03                                                                                      </pre>
+<pre>Version:                      2.00                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      12-Feb-2016                                                                               </pre>
-<pre>Modified:                     16-Jul-2018 (previous: 09-Jan-2018, 18-Jun-2017, 12-Feb-2016)                                                            </pre>
+<pre>Modified:                     27-Jul-2018 (previous: 16-Jul-2018, 09-Jan-2018, 18-Jun-2017, 12-Feb-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Categorizes a set of numeric variables based on ranks (i.e. equal size binning) and optionally                                                                                          </pre>
@@ -21,24 +21,25 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
 <pre>%Categorize(                                                                                          </pre>
-<pre>          data,                         /* Input dataset. Dataset options are allowed */                              </pre>
-<pre>          var=_NUMERIC_,                /* Blank-separated list of variables to categorize */                              </pre>
-<pre>          by=,                          /* Blank-separated list of BY variables */                              </pre>
-<pre>          format=,                      /* Content of the format statement to use in PROC RANK */                              </pre>
-<pre>          id=,                          /* Blank-separated list of ID variables to keep in the output dataset */                              </pre>
+<pre>          data,                         /* Input dataset. Dataset options are allowed. */                              </pre>
+<pre>          var=_NUMERIC_,                /* Blank-separated list of variables to categorize. */                              </pre>
+<pre>          by=,                          /* Blank-separated list of BY variables. */                              </pre>
+<pre>          format=,                      /* Content of the format statement to use in PROC RANK. */                              </pre>
+<pre>          id=,                          /* Blank-separated list of ID variables to keep in the output dataset. */                              </pre>
 <pre>          condition=,                   /* Condition that each analysis variable should satisfy in order for the */                              </pre>
-<pre>          /* case to be included in the categorization process */                                                            </pre>
+<pre>          /* case to be included in the categorization process. */                                                            </pre>
+<pre>          alltogether=0,                /* Whether the values excluded by CONDITION= should be put all together into one bin. */                              </pre>
 <pre>          varcat=,                      /* Blank-separated list of names to be used for the rank variables. */                              </pre>
 <pre>          /* This list should be matched one to one with the variables in VAR. */                                                            </pre>
-<pre>          varstat=,                     /* Blank-separated list of names to be used for the statistic-valued categorized variables */                              </pre>
+<pre>          varstat=,                     /* Blank-separated list of names to be used for the statistic-valued categorized variables. */                              </pre>
 <pre>          /* This list should contain as many names as the number of variables in VAR times the number of statistics in STAT. */                                                            </pre>
 	suffix=,		 	*** Suffix to use for the rank variables.
 <pre>          suffix=,                                                    /* Suffix to use for the rank variables. */</pre>
-<pre>          stat=mean,                    /* Statistics to compute for each category that generates a set of statistic-valued categorized variables */                              </pre>
-<pre>          groupsize=,                   /* Number of cases wished for each group in the categorized variables */                              </pre>
-<pre>          groups=10,                    /* Number of groups to use in the categorization */                              </pre>
+<pre>          stat=mean,                    /* Statistics to compute for each category that generates a set of statistic-valued categorized variables. */                              </pre>
+<pre>          groupsize=,                   /* Number of cases wished for each group in the categorized variables. */                              </pre>
+<pre>          groups=10,                    /* Number of groups to use in the categorization. */                              </pre>
 <pre>          descending=0,                 /* Compute ranks on the decreasing values of the analyzed variables? */                              </pre>
-<pre>          out=,                         /* Output dataset with the categorized variables */                              </pre>
+<pre>          out=,                         /* Output dataset with the categorized variables. */                              </pre>
 <pre>          addvars=1,                    /* Add categorized variables to the variables present in the input dataset? */                              </pre>
 <pre>          log=1);                       /* Show messages in the log? */                              </pre>
 <pre>                                                                                                    </pre>
@@ -65,6 +66,21 @@ pre {display: block}
 <pre>                              It should be given in form of a right-hand side expression of a                                                            </pre>
 <pre>                              WHERE condition expression.                                                               </pre>
 <pre>                              Ex: ~= 0                                                                                  </pre>
+<pre>                                                                                                                        </pre>
+<pre>- alltogether:                Whether the values excluded from the categorization (because of CONDITION=)                                                            </pre>
+<pre>                              should be grouped all together into one bin or left in their own bin                                                            </pre>
+<pre>                              identified by their original value.                                                            </pre>
+<pre>                              When ALLTOGETHER=1 and statistic-valued categorized variables are                                                            </pre>
+<pre>                              requested with the STAT= parameter, the representative value stored for                                                            </pre>
+<pre>                              the single group containing ALL the excluded values takes into account                                                            </pre>
+<pre>                              the possibly different NUMBER OF CASES where the input variable takes                                                            </pre>
+<pre>                              each of the different excluded values.                                                            </pre>
+<pre>                              For example, if STAT=mean, then the representative value stored in the                                                            </pre>
+<pre>                              statistic-valued categorized variable is the mean of the excluded cases,                                                            </pre>
+<pre>                              which is equivalent to computing the WEIGHTED average of each excluded                                                            </pre>
+<pre>                              value (i.e. weighted by the number of cases where the input variable takes                                                            </pre>
+<pre>                              each of the excluded values).                                                             </pre>
+<pre>                              default: 0                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- varcat:                     List of names to use for the rank variables, i.e. for the variables storing                                                            </pre>
 <pre>                              the group rank for each analyzed variable.                                                            </pre>
@@ -157,5 +173,26 @@ pre {display: block}
 <pre>- %Means                                                                                                                </pre>
 <pre>- %ResetSASOptions                                                                                                      </pre>
 <pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>EXAMPLES:</h3>
+<pre>1.- %Categorize(test, var=x z);                                                                                          </pre>
+<pre>Variables x and z are categorized in 10 approximately equal-sized groups/bins and for each                                                                                          </pre>
+<pre>bin the MEAN value of each variable is computed.                                                                                          </pre>
+<pre>The new variables are named X_MEAN Z_MEAN and are added to the input dataset.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>2.- %Categorize(test, by=mth grp, var=x z, stat=mean min max std, condition=~=0, out=test_cat);                                                                                          </pre>
+<pre>Variables x and z are categorized in 20 approximately equal-sized groups/bins                                                                                          </pre>
+<pre>where the categorization is run by BY variables MTH GRP, and on all the cases whose values                                                                                          </pre>
+<pre>are different from 0.                                                                                                   </pre>
+<pre>For each bin the MEAN, MIN, MAX, and Standard Deviation statistics are computed for each variable.                                                                                          </pre>
+<pre>The new variables are named by adding the suffix with the requested statistic name to the analyzed                                                                                          </pre>
+<pre>variable names (e.g. X_MEAN X_MIN, etc.) and are added to the input dataset and stored                                                                                          </pre>
+<pre>in output dataset TEST_CAT.                                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- %Categorize(test, by=mth grp, var=x z, stat=mean min max std,                                                                                          </pre>
+<pre>                              condition=%quote(not in (0,1)),                                                            </pre>
+<pre>                              out=test_cat);                                                                            </pre>
+<pre>Same as example (2) but now the excluded values are 0 and 1 and they are left alone on their                                                                                          </pre>
+<pre>own bin. If it is wished to put these excluded values into the same bin, use ALLTOGETHER=1.                                                                                          </pre>
 <body>
 </html>

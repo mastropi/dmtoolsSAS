@@ -1,15 +1,18 @@
 /* MACRO %FindMatch
-Version: 1.02
-Author: Daniel Mastropietro
-Created: 20-Oct-04
-Modified: 3-Oct-05
+Version: 	2.0
+Author: 	Daniel Mastropietro
+Created: 	20-Oct-04
+Modified: 	27-Jul-2018 (previous: 03-Oct-2005)
 
 DESCRIPTION:
 Finds a keyword in a blank-separated list of names and returns the names containing it.
 The macro function %INDEX is used to search for the keyword in each name in the list.
 The search for the keyword is NOT case sensitive.
 
-A comma is not allowed as part of the LIST= nor KEY= values as %INDEX interprets it as
+Parentheses in the list of names to search on (LIST=), in the key values (KEY=)
+or in the NOT= are allowed (they are masked by calling the macro %MaskParentheses). 
+
+On the contrary, a comma is not allowed as part of the LIST= nor KEY= values as %INDEX interprets it as
 separator of input parameters...
 
 USAGE:
@@ -56,6 +59,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 SEE ALSO:
 - %FindInList
 - %InsertInList
+- %MaskParentheses
 - %RemoveFromList
 - %RemoveRepeated
 - %SelectName
@@ -109,10 +113,15 @@ unificar el proceso en una macro y que ambas macros (%FindMatch y %SelectVar) la
 %if %quote(%upcase(&key)) = %quote(%upcase(&replacement)) %then
 	%let replacement = !;
 
+%* Prepare the search for KEY in LIST by masking any OPEN and CLOSE parentheses that occur in them and on NOT= as well;
+%let list = %MaskParentheses(%nrbquote(&list));
+%let key = %MaskParentheses(%nrbquote(&key));
+%let not = %MaskParentheses(%nrbquote(&not));
+
 %let nro_names = %GetNroElements(%quote(&list));
 %let matchlist = ;
 %do i = 1 %to &nro_names;
-	%let name = %scan(%quote(&list), &i, ' ');
+	%let name = %scan(%nrbquote(&list), &i, ' ');
 
 	%* Initialize boolean variables stating whether KEY is found and if it is found 
 	%* at POSNOT position, and whether NOT keyword is found and if it is found at
@@ -138,7 +147,9 @@ unificar el proceso en una macro y que ambas macros (%FindMatch y %SelectVar) la
 		%let _notPos_ = &notPos;
 
 	%*** Search for KEY in name;
-	%let position = %index(%upcase(%quote(&name)), %upcase(%quote(&key)));
+	%* NOTE: It is important to FIRST do the %UPCASE() and THEN the %NRBQUOTE(), o.w.
+	%* we would need to do again the %NRBQUOTE() on the %UPCASE() result!;
+	%let position = %index(%nrbquote(%upcase(&name)), %nrbquote(%upcase(&key)));
 	%if &position > 0 %then %do;
 		%let found = 1;
 		%let posBool = 1;
@@ -157,7 +168,9 @@ unificar el proceso en una macro y que ambas macros (%FindMatch y %SelectVar) la
 												&_position_,
 												&replacement
 							 				   );
-				%let _position_ = %index(%upcase(%quote(&searchname)), %upcase(%quote(&key)));
+				%* NOTE: It is important to FIRST do the %UPCASE() and THEN the %NRBQUOTE(), o.w.
+				%* we would need to do again the %NRBQUOTE() on the %UPCASE() result!;
+				%let _position_ = %index(%nrbquote(%upcase(&searchname)), %nrbquote(%upcase(&key)));
 			%end;
 			%if &_position_ ~= &_pos_ %then
 				%let posBool = 0;	%* State that KEY was not found since it was not found at
@@ -179,7 +192,7 @@ unificar el proceso en una macro y que ambas macros (%FindMatch y %SelectVar) la
 												&_position_,
 												&replacement
 							 				   );
-				%let _position_ = %index(%upcase(%quote(&searchname)), %upcase(%quote(&key)));
+				%let _position_ = %index(%nrbquote(%upcase(&searchname)), %nrbquote(%upcase(&key)));
 			%end;
 			%if &_position_ = &_posNot_ %then
 				%let posNotBool = 1;
@@ -187,7 +200,7 @@ unificar el proceso en una macro y que ambas macros (%FindMatch y %SelectVar) la
 	%end;
 	%*** Search for NOT keyword in name;
 	%if %quote(&not) ~= %then %do;
-		%let positionNot = %index(%upcase(%quote(&name)), %upcase(%quote(&not)));
+		%let positionNot = %index(%nrbquote(%upcase(&name)), %nrbquote(%upcase(&not)));
 		%* Search for NOT keyword occurring at position NOTPOS, because only when this
 		%* happens should the match not be considered as a match;
 		%if &positionNot > 0 %then %do;
@@ -207,7 +220,7 @@ unificar el proceso en una macro y que ambas macros (%FindMatch y %SelectVar) la
 													&_positionNot_, 
 													&replacement
 											 	   );
-					%let _positionNot_ = %index(%upcase(%quote(&searchname)), %upcase(%quote(&not)));
+					%let _positionNot_ = %index(%nrbquote(%upcase(&searchname)), %nrbquote(%upcase(&not)));
 				%end;
 				%if &_positionNot_ ~= &_notPos_ %then
 					%let notPosBool = 0;	%* State that the NOT keyword was not found since it
@@ -247,7 +260,7 @@ unificar el proceso en una macro y que ambas macros (%FindMatch y %SelectVar) la
 		%put (Empty);
 	%else
 		%do i = 1 %to &nvar;
-			%let vari = %scan(&matchlist, &i, ' ');
+			%let vari = %scan(%nrbquote(&matchlist), &i, ' ');
 			%put &i: %upcase(&vari);
 		%end;
 %end;

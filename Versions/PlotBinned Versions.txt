@@ -69,3 +69,6 @@ V.2.00: 2018/07/26 (DM)
 	- Character variables are now accepted!
 	- Fixed a bug when computing the statistics for continuous variables.
 	- Missing values are now plotted for categorical variables.
+
+V.2.01: 2018/07/27 (DM)
+	- Parameter ALLTOGETHER=0 implemented, which means that when values are excluded via the CONDITION= parameter they are let alone in their own separate bin.

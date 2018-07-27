@@ -15,3 +15,6 @@ V.1.02: 2018/01/10 (DM)
 V.1.03: 2018/07/16 (DM)
 	- New parameter SUFFIX=, so that the user can specify the suffix to use for the grouped rank variables (without having to explicitly list the names for the VARCAT= variables). It defaults to empty, which means that these variables are NOT created in the output dataset by default.
 	- STAT= parameter: it now allows for several statistics to be computed, NOT only one. This is useful when we want to store e.g. the MIN, MEAN, and MAX values of each variable.
+
+V.2.00: 2018/07/27 (DM)
+	- Implemented the ALLTOGETHER=0 parameter which requests excluded values from categorization to be regarded as their original values (separately from each other, instead of alltogether in the same bin).

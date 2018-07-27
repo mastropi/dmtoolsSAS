@@ -1,5 +1,5 @@
 /* MACRO %PlotBinned
-Version: 		2.0
+Version: 		2.01
 Author: 		Daniel Mastropietro
 Created: 		13-Aug-2015
 Modified: 		26-Jul-2018 (previous: 25-Jul-2018, 16-Jul-2018, 15-Feb-2016, 12-Nov-2015)
@@ -22,7 +22,7 @@ USAGE:
 	by=,						*** BY variables.
 	datavartype=,				*** Dataset containing the type or level of the variables listed in VAR.
 	valuesLetAlone=,			*** List of values taken by the input continuous variable to treat as separate bins.
-	alltogether=1,				*** Whether the let-alone values should be put into the same bin (ONLY 1 is accepted)
+	alltogether=0,				*** Whether the let-alone values should be put into the same bin (ONLY 1 is accepted)
 	groupsize=,					*** Nro. of cases each group should contain when categorizing continuous variables.
 	groups=20,					*** Nro. of groups to use in the categorization of continuous variables.
 	stat=mean,					*** Names of the statistics to compute on the input variables for each bin.
@@ -77,14 +77,12 @@ OPTIONAL PARAMETERS:
 
 - alltogether		Whether the let-alone values listed in VALUESLETALONE= should be put into the same bin.
 					Possible values: 
-					(--- NO LONGER VALID ---)
 					0 => No (put each value into a separate bin)
-					(--- NO LONGER VALID ---)
-					 1 => Yes (put all let-alone values into the same bin. In this case
-						  the representative value of the bin will be based on the
-						  statistic specified in VALUE= weighted by the number of
-						  cases in each value to let alone
-					default: 1
+					1 => Yes (put all let-alone values into the same bin. In this case
+						 the representative value of the bin will be based on the
+						 first statistic specified in STAT= weighted by the number of
+						 cases in each value to bet let alone)
+					default: 0
 
 - groupsize:		Number of cases each group or bin should contain.
 					This option overrides the GROUPS parameter.
@@ -226,6 +224,15 @@ Y-axis limits are ALL set to the specified YLIM= limits.
 %PlotBinned(test, target=y, class=grp1 grp2, var=x z,
 	stat=mean, value=median, groups=16,
 	plot=1, smooth=0, xaxisorig=0, ylim=0 0.7,
+	out=test_pb);
+
+3.- Exclude a set of values from the binning of continuous variables
+The binning of the continuous variables x and z exclude the values 0 and 1
+which are listed as parameter VALUESLETALONE=. These values, if they occur
+in the analyzed variables, are assigned to separate bins.
+Use ALLTOGETHER=1 if the excluded values should be assigned to the same bin.
+%PlotBinned(test, target=y, class=grp1 grp2, var=grp1 grp2 x z,
+	stat=mean min max skew, valuesLetAlone=%quote(0,1), alltogether=0,
 	out=test_pb);
 */
 %MACRO PlotBinned(
@@ -463,6 +470,7 @@ quit;
 						varcat=&var2categorize,		/* This variable (i.e. the index of the category) is used to aggregate the values of the target variable by bin */
 						stat=&stat,
 						varstat=&varstat,
+						alltogether=&alltogether,
 						out=_PB_data_, log=&log);
 	%if &log %then
 		%put;

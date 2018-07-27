@@ -35,6 +35,7 @@ libname test "&testpath";
 %let testmacro = Categorize;
 %let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
 libname test "&testpath";
+libname expected "&testpath/expected";
 
 * Read the Test Harness dataset;
 %import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");

@@ -8,17 +8,20 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %FindMatch</h1>
-<pre>Version: 1.02                                                                                                           </pre>
-<pre>Author: Daniel Mastropietro                                                                                             </pre>
-<pre>Created: 20-Oct-04                                                                                                      </pre>
-<pre>Modified: 3-Oct-05                                                                                                      </pre>
+<pre>Version:                      2.0                                                                                       </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      20-Oct-04                                                                                 </pre>
+<pre>Modified:                     27-Jul-2018 (previous: 03-Oct-2005)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Finds a keyword in a blank-separated list of names and returns the names containing it.                                                                                          </pre>
 <pre>The macro function %INDEX is used to search for the keyword in each name in the list.                                                                                          </pre>
 <pre>The search for the keyword is NOT case sensitive.                                                                                          </pre>
 <pre>                                                                                                                        </pre>
-<pre>A comma is not allowed as part of the LIST= nor KEY= values as %INDEX interprets it as                                                                                          </pre>
+<pre>Parentheses in the list of names to search on (LIST=), in the key values (KEY=)                                                                                          </pre>
+<pre>or in the NOT= are allowed (they are masked by calling the macro %MaskParentheses).                                                                                           </pre>
+<pre>                                                                                                                        </pre>
+<pre>On the contrary, a comma is not allowed as part of the LIST= nor KEY= values as %INDEX interprets it as                                                                                          </pre>
 <pre>separator of input parameters...                                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <h3>USAGE:</h3>
@@ -65,6 +68,7 @@ pre {display: block}
 <h3>SEE ALSO:</h3>
 <pre>- %FindInList                                                                                                           </pre>
 <pre>- %InsertInList                                                                                                         </pre>
+<pre>- %MaskParentheses                                                                                                      </pre>
 <pre>- %RemoveFromList                                                                                                       </pre>
 <pre>- %RemoveRepeated                                                                                                       </pre>
 <pre>- %SelectName                                                                                                           </pre>

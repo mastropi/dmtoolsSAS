@@ -1,8 +1,8 @@
 /* MACRO %RunTestHarness
-Version:	1.05
+Version:	1.06
 Author:		Daniel Mastropietro
 Created:	12-Feb-2016
-Modified:	18-Jul-2018 (previous: 09-Jan-2018, 21-Jun-2017, 20-Mar-2016, 17-Mar-2016)
+Modified:	27-Jul-2018 (previous: 18-Jul-2018, 09-Jan-2018, 21-Jun-2017, 20-Mar-2016, 17-Mar-2016)
 
 DESCRIPTION:
 Runs a set of tests on a given macro. The macro parameter values for each test are read
@@ -360,10 +360,10 @@ run;
 				%do i = 1 %to &nro_output;
 					%let outdata = %scan(&checkoutput, &i, ' ');
 					%* Look for the &OUTDATA keyword in the macro signature;
-					%* First remove the commas from the SIGNATURE because o.w. the %INDEX function used inside %FindMatch
-					%* gives error!;
-					%let signature = %sysfunc(transtrn(%quote(&signature), %quote(,), ));
-					%let outnamevalue = %FindMatch(%quote(&signature), key=&outdata=, log=0);
+					%let outnamevalue = %FindMatch(%nrbquote(&signature), key=&outdata=, log=0);
+					%* Now Remove commas from the OUTNAMEVALUE (e.g. TEST.OUT_DATA,) so that the
+					%* extracted output dataset name is not contaminated with the comma;
+					%let outnamevalue = %sysfunc(transtrn(%nrbquote(&outnamevalue), %quote(,), ));
 					%if %quote(&outnamevalue) ~= %then %do;
 						%let outdata = %scan(&outnamevalue, 2, '=');
 						%if %quote(&outdata) ~= %then %do;

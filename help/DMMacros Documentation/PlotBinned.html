@@ -8,7 +8,7 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %PlotBinned</h1>
-<pre>Version:                      2.0                                                                                       </pre>
+<pre>Version:                      2.01                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      13-Aug-2015                                                                               </pre>
 <pre>Modified:                     26-Jul-2018 (previous: 25-Jul-2018, 16-Jul-2018, 15-Feb-2016, 12-Nov-2015)                                                            </pre>
@@ -31,7 +31,7 @@ pre {display: block}
 <pre>          by=,                          /* BY variables. */                                         </pre>
 <pre>          datavartype=,                 /* Dataset containing the type or level of the variables listed in VAR. */                              </pre>
 <pre>          valuesLetAlone=,              /* List of values taken by the input continuous variable to treat as separate bins. */                              </pre>
-<pre>          alltogether=1,                /* Whether the let-alone values should be put into the same bin (ONLY 1 is accepted) */                              </pre>
+<pre>          alltogether=0,                /* Whether the let-alone values should be put into the same bin (ONLY 1 is accepted) */                              </pre>
 <pre>          groupsize=,                   /* Nro. of cases each group should contain when categorizing continuous variables. */                              </pre>
 <pre>          groups=20,                    /* Nro. of groups to use in the categorization of continuous variables. */                              </pre>
 <pre>          stat=mean,                    /* Names of the statistics to compute on the input variables for each bin. */                              </pre>
@@ -86,17 +86,12 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <pre>- alltogether                 Whether the let-alone values listed in VALUESLETALONE= should be put into the same bin.                                                            </pre>
 <pre>                              Possible values:                                                                          </pre>
-<pre>                              (--- NO LONGER VALID ---)                                                                 </pre>
 <pre>                              0 => No (put each value into a separate bin)                                                            </pre>
-<pre>                              (--- NO LONGER VALID ---)                                                                 </pre>
-<pre>                               1 => Yes (put all let-alone values into the same bin. In this case                                                            </pre>
-							the representative value of the bin will be based on the
-<pre>                              the representative value of the bin will be based on the                                                            </pre>
-							statistic specified in VALUE= weighted by the number of
-<pre>                              statistic specified in VALUE= weighted by the number of                                                            </pre>
-							cases in each value to let alone
-<pre>                              cases in each value to let alone                                                            </pre>
-<pre>                              default: 1                                                                                </pre>
+<pre>                              1 => Yes (put all let-alone values into the same bin. In this case                                                            </pre>
+<pre>                               the representative value of the bin will be based on the                                                            </pre>
+<pre>                               first statistic specified in STAT= weighted by the number of                                                            </pre>
+<pre>                               cases in each value to bet let alone)                                                            </pre>
+<pre>                              default: 0                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- groupsize:                  Number of cases each group or bin should contain.                                                            </pre>
 <pre>                              This option overrides the GROUPS parameter.                                                            </pre>
@@ -238,6 +233,15 @@ pre {display: block}
 <pre>%PlotBinned(test, target=y, class=grp1 grp2, var=x z,                                                                                          </pre>
 <pre>                              stat=mean, value=median, groups=16,                                                            </pre>
 <pre>                              plot=1, smooth=0, xaxisorig=0, ylim=0 0.7,                                                            </pre>
+<pre>                              out=test_pb);                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>3.- Exclude a set of values from the binning of continuous variables                                                                                          </pre>
+<pre>The binning of the continuous variables x and z exclude the values 0 and 1                                                                                          </pre>
+<pre>which are listed as parameter VALUESLETALONE=. These values, if they occur                                                                                          </pre>
+<pre>in the analyzed variables, are assigned to separate bins.                                                                                          </pre>
+<pre>Use ALLTOGETHER=1 if the excluded values should be assigned to the same bin.                                                                                          </pre>
+<pre>%PlotBinned(test, target=y, class=grp1 grp2, var=grp1 grp2 x z,                                                                                          </pre>
+<pre>                              stat=mean min max skew, valuesLetAlone=%quote(0,1), alltogether=0,                                                            </pre>
 <pre>                              out=test_pb);                                                                             </pre>
 <body>
 </html>

@@ -1,8 +1,8 @@
 /* MACRO %GetNroElements
-Version: 	2.04
+Version: 	2.05
 Author: 	Daniel Mastropietro
 Created: 	03-Mar-201
-Modified: 	17-Jul-2018 (previous: 05-Feb-2016, 19-Sep-2003)
+Modified: 	27-Jul-2018 (previous: 17-Jul-2018, 05-Feb-2016, 19-Sep-2003)
 
 DESCRIPTION:
 Returns the number of elements in a list separated by a given separator.
@@ -108,7 +108,7 @@ A , , B , C	(sep=,)	4 --> because a blank space between separators is counted.
 	%* - the separator is NON-BLANK and the list has length larger than 0 and is not equal to the separator.
 	%* - the separator is BLANK and the list has length larger than 0 ***after eliminating all white spaces*** (with COMPRESS());
 	%if ~&isblanksep and %length(%nrbquote(&list)) > 0 and %nrbquote(&list) ~= %quote(&sep) or
-		 &isblanksep and %length(%sysfunc(compress(%nrbquote(&list)))) > 0 %then
+		 &isblanksep and %length(%nrbquote(%sysfunc(compress(%nrbquote(&list))))) > 0 %then
 		%let nro_elements = %eval(&i + 1);
 	%else
 		%let nro_elements = &i;

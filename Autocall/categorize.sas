@@ -1,8 +1,8 @@
 /* MACRO %Categorize
-Version:	1.03
+Version:	2.00
 Author:		Daniel Mastropietro
 Created:	12-Feb-2016
-Modified:	16-Jul-2018 (previous: 09-Jan-2018, 18-Jun-2017, 12-Feb-2016)
+Modified:	27-Jul-2018 (previous: 16-Jul-2018, 09-Jan-2018, 18-Jun-2017, 12-Feb-2016)
 
 DESCRIPTION:
 Categorizes a set of numeric variables based on ranks (i.e. equal size binning) and optionally
@@ -12,23 +12,24 @@ Missing values in the analyzed variables are categorized as missing values.
 
 USAGE:
 %Categorize(
-	data, 			*** Input dataset. Dataset options are allowed
-	var=_NUMERIC_,	*** Blank-separated list of variables to categorize
-	by=,			*** Blank-separated list of BY variables
-	format=,		*** Content of the format statement to use in PROC RANK
-	id=,			*** Blank-separated list of ID variables to keep in the output dataset
+	data, 			*** Input dataset. Dataset options are allowed.
+	var=_NUMERIC_,	*** Blank-separated list of variables to categorize.
+	by=,			*** Blank-separated list of BY variables.
+	format=,		*** Content of the format statement to use in PROC RANK.
+	id=,			*** Blank-separated list of ID variables to keep in the output dataset.
 	condition=,		*** Condition that each analysis variable should satisfy in order for the
-					*** case to be included in the categorization process
+					*** case to be included in the categorization process.
+	alltogether=0,	*** Whether the values excluded by CONDITION= should be put all together into one bin.
 	varcat=,		*** Blank-separated list of names to be used for the rank variables.
 					*** This list should be matched one to one with the variables in VAR.
-	varstat=,		*** Blank-separated list of names to be used for the statistic-valued categorized variables
+	varstat=,		*** Blank-separated list of names to be used for the statistic-valued categorized variables.
 					*** This list should contain as many names as the number of variables in VAR times the number of statistics in STAT.
 	suffix=,  	 	*** Suffix to use for the rank variables.
-	stat=mean,		*** Statistics to compute for each category that generates a set of statistic-valued categorized variables
-	groupsize=,		*** Number of cases wished for each group in the categorized variables
-	groups=10,		*** Number of groups to use in the categorization
+	stat=mean,		*** Statistics to compute for each category that generates a set of statistic-valued categorized variables.
+	groupsize=,		*** Number of cases wished for each group in the categorized variables.
+	groups=10,		*** Number of groups to use in the categorization.
 	descending=0,	*** Compute ranks on the decreasing values of the analyzed variables?
-	out=,			*** Output dataset with the categorized variables
+	out=,			*** Output dataset with the categorized variables.
 	addvars=1,		*** Add categorized variables to the variables present in the input dataset?
 	log=1);			*** Show messages in the log?
 
@@ -55,6 +56,21 @@ OPTIONAL PARAMETERS:
 					It should be given in form of a right-hand side expression of a
 					WHERE condition expression.
 					Ex: ~= 0
+
+- alltogether:		Whether the values excluded from the categorization (because of CONDITION=)
+					should be grouped all together into one bin or left in their own bin
+					identified by their original value.
+					When ALLTOGETHER=1 and statistic-valued categorized variables are
+					requested with the STAT= parameter, the representative value stored for
+					the single group containing ALL the excluded values takes into account
+					the possibly different NUMBER OF CASES where the input variable takes
+					each of the different excluded values.
+					For example, if STAT=mean, then the representative value stored in the
+					statistic-valued categorized variable is the mean of the excluded cases,
+					which is equivalent to computing the WEIGHTED average of each excluded
+					value (i.e. weighted by the number of cases where the input variable takes
+					each of the excluded values).
+					default: 0
 
 - varcat:			List of names to use for the rank variables, i.e. for the variables storing
 					the group rank for each analyzed variable.
@@ -147,6 +163,27 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %Means
 - %ResetSASOptions
 - %SetSASOptions
+
+EXAMPLES:
+1.- %Categorize(test, var=x z);
+Variables x and z are categorized in 10 approximately equal-sized groups/bins and for each
+bin the MEAN value of each variable is computed.
+The new variables are named X_MEAN Z_MEAN and are added to the input dataset.
+
+2.- %Categorize(test, by=mth grp, var=x z, stat=mean min max std, condition=~=0, out=test_cat);
+Variables x and z are categorized in 20 approximately equal-sized groups/bins
+where the categorization is run by BY variables MTH GRP, and on all the cases whose values
+are different from 0.
+For each bin the MEAN, MIN, MAX, and Standard Deviation statistics are computed for each variable.
+The new variables are named by adding the suffix with the requested statistic name to the analyzed
+variable names (e.g. X_MEAN X_MIN, etc.) and are added to the input dataset and stored
+in output dataset TEST_CAT.
+
+3.- %Categorize(test, by=mth grp, var=x z, stat=mean min max std,
+		condition=%quote(not in (0,1)),
+		out=test_cat);
+Same as example (2) but now the excluded values are 0 and 1 and they are left alone on their
+own bin. If it is wished to put these excluded values into the same bin, use ALLTOGETHER=1.
 */
 %MACRO Categorize(	data,
 					var=_NUMERIC_,
@@ -155,14 +192,13 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 					id=,		/* NEW */
 
 					condition=,
-/*					alltogether=1,*/
+					alltogether=0,
 
 					varcat=,
 					varstat=,
 					suffix=,
 					stat=mean,
 					value=,
-/*					both=, */
 					groupsize=,
 					groups=10,
 /*					percentiles=,*/
@@ -185,6 +221,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put id= , %quote(                  *** Blank-separated list of ID variables to keep in the output dataset.);
 	%put condition= , %quote(           *** Condition that each analysis variable should satisfy in order for the);
 	%put %quote(                        *** case to be included in the categorization process.);
+	%put alltogether=0 , %quote(        *** Whether the values excluded by CONDITION= should be put all together into one bin.);
 	%put varcat= , %quote(              *** Blank-separated list of names to be used for the rank variables.);
 	%put %quote(                        *** This list should be matched one to one with the ariables in VAR.);
 	%put varstat= , %quote(             *** Blank-separated list of names to be used for the statistic-valued categorized variables.);
@@ -255,6 +292,7 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 	%put CATEGORIZE: - format = %quote(       &format);
 	%put CATEGORIZE: - id = %quote(           &id);
 	%put CATEGORIZE: - condition = %quote(    &condition);
+	%put CATEGORIZE: - alltogether = %quote(  &alltogether);
 	%put CATEGORIZE: - varcat = %quote(       &varcat);
 	%put CATEGORIZE: - varstat = %quote(      &varstat);
 	%put CATEGORIZE: - suffix = %quote(       &suffix);
@@ -408,6 +446,26 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 			ranks &rankvari;
 		run;
 
+		%if ~&alltogether %then %do;
+			%local nvalues_excluded;
+			%* Compute the values taken by the variable that do NOT satisfy CONDITION= so that we can assign
+			%* each value to a different bin;
+			proc freq data=_cat_dat_ noprint;
+				where not missing(&vari) and ~(&vari &condition);	%* Missing values should NOT be included in the frequency distribution;
+				tables &vari / out=_cat_freq_excluded_;
+			run;
+			data _cat_freq_excluded_(index=(&vari / unique));
+				set _cat_freq_excluded_ end=_lastobs;
+				_rank_excluded = _N_;
+				if _lastobs then
+					call symput('nvalues_excluded', trim(left(_N_)));
+			run;
+			%if &nvalues_excluded > 20 %then %do;
+				%put CATEGORIZE: WARNING - The number of excluded values from categorization;
+				%put for variable %upcase(&VARI) is large (> 20): &nvalues_excluded values.;
+			%end;
+		%end;
+
 		%* Merge back with _cat_dat_ so that we have the rank variable in the original dataset
 		%* which will allow us to merge back with it after we compute the statistic-valued
 		%* grouped variable below;
@@ -423,15 +481,24 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 				%* IMPORTANT: This check needs to be done because excluded values by the condition and missing values in the original
 				%* analyzed numeric variable do not have any match in the aggregated dataset generated by PROC RANK above;
 				%* However, the value read from variable &rankvari in the aggregated dataset may NOT always be missing...
-				%* (as it should) WHY??? I think it is because it retains the value from the previous record... WHY???;
+				%* (as I would have expected) I think it is because SAS retains the value from the previous record... NOT good!;
 				_ERROR_ = 0;
 				%* Distinguish the missing values from the excluded values so that they are not put into the same group;
 				if missing(&vari) then
 					&rankvari = .;
-				else
-					&rankvari = -1;
-					%** We can safely use -1 for the rank variable because the rank values are never negative;
-					%** HOWEVER, this has the drawback that ALL EXCLUDED VALUES ARE MAPPED TO THE SAME GROUP!;
+				else do;
+				 	%* Compute a fictitious rank for the excluded values;
+					%* These ranks are ALL NEGATIVE because the minimum rank value is 0;
+					%if ~&alltogether %then %do;
+						%* Read the rank values from the frequency of excluded values and compute the complement;
+						set _cat_freq_excluded_(keep=&vari _rank_excluded) key=&vari / unique;
+						&rankvari = _rank_excluded - &nvalues_excluded - 1;	%* -1 so that the largest fictitious rank is -1;
+						drop _rank_excluded;
+					%end;
+					%else %do;
+						&rankvari = -1;
+					%end;
+				end;
 			end;
 		run;
 	%end;
@@ -644,7 +711,11 @@ proc datasets nolist;
 	delete 	_cat_dat_
 			_cat_dat_means_
 			_cat_dat_rank_
-			_cat_dat_rest_;
+			_cat_dat_rest_
+			%if ~&alltogether %then %do;
+			_cat_freq_excluded_
+			%end;
+			;
 quit;
 
 %* Delete global variables created by %CreateInteractions;

@@ -2,7 +2,7 @@
 Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	09-Dec-2003
-Modified: 	19-Mar-2018 (note: every time a new macro is added or documentation for a macro becomes available change this date)
+Modified: 	28-Jul-2018 (note: every time a new macro is added or documentation for a macro becomes available change this date)
 			Also remember to change the date shown by the output of %Help (search for "as of").
 
 DESCRIPTION:
@@ -63,7 +63,7 @@ help is available when calling %Help(<macro-name>).
 REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 %if %quote(&macro) = %then %do;
 	%put;
-	%put %quote(                        AVAILABLE MACROS AS OF 19-Mar-2018);
+	%put %quote(                        AVAILABLE MACROS AS OF 27-Jul-2018);
 %*	%put MACROS DISPONIBLES AL 10/6/04:;
 	%if %upcase(%quote(&by)) = TOPIC %then %do;
 		%put %quote(                                  -- BY TOPIC --);
@@ -201,6 +201,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	MakeListFromName %quote(    Make a list from a name used as root.);
 		%put	MakeListFromVar %quote(     Make a list containing the values of a variable in a dataset.);
 		%put	MakeVar	%quote(             Define global macro variables whose values are the elements of a given list.);
+		%put	MaskParentheses	%quote(     Masks open and close parentheses in a name.);
 		%put	PrintNameList %quote(       Print a list of names in one column in the output window.);
 		%put	RemoveFromList %quote(      Remove a set of names from a given list.);
 		%put	RemoveRepeated %quote(      Remove repeated names from a given list.);
@@ -318,6 +319,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	MakeListFromName %quote(    Make a list from a name used as root.);
 		%put	MakeListFromVar %quote(     Make a list containing the values of a variable in a dataset.);
 		%put	MakeVar	%quote(             Define global macro variables whose values are the elements of a given list.);
+		%put	MaskParentheses	%quote(     Masks open and close parentheses in a name.);
 		%put	Means* %quote(              Execute a user friendly PROC MEANS.);
 		%put	Merge* %quote(              Merge 2 datasets without having them sorted by the by variables.);
 		%put	MPlot %quote(               Make multiple plots in the same window.);
