@@ -1,8 +1,8 @@
 /* MACRO %CreateFormatsFromCuts
-Version:	1.0
+Version:	1.01
 Author:		Daniel Mastropietro
 Created:	07-Apr-2016
-Modified:	07-Apr-2016
+Modified:	16-Sep-2018 (Previous: 07-Apr-2016)
 
 DESCRIPTION:
 Creates interval-based numeric formats based on a set of cut values separating the intervals.
@@ -19,6 +19,7 @@ USAGE:
 	prefix=F,			*** Prefix to use in the automatically generated format name when VARFMTNAME is empty.
 	out=,				*** Output dataset containing the format definitions.
 	storeformats=0,		*** Whether to run the formats and store them in a catalog.
+	showformats=1,		*** Whether to show the formats definition in the output window when STOREFORMATS=1.
 	library=WORK,		*** Library where the catalog containing the formats should be stored when STOREFORMATS=1.
 	log=1);				*** Show messages in the log?
 
@@ -60,7 +61,8 @@ OPTIONAL PARAMETERS:
 					formats to create.
 					Format names given in this variable must satisfy the restrictions imposed
 					by SAS, such as:
-					- maximum name length: 8 characters
+					- maximum name length: 8 characters when option VALIDFMTNAME=V7 or
+					32 characters when option VALIDFMTNAME=LONG.
 					- cannot start with a number
 					- cannot end with a number
 
@@ -100,7 +102,8 @@ OPTIONAL PARAMETERS:
 
 					The following variables are included in the OUTFORMAT dataset:
 					- var: analyzed variable name (if VARNAME is not empty).
-					- fmtname: format name.
+					- fmtname: format name. This can be 8-character long or 32-character long
+					depending on the value of the VALIDFMTNAME option (V7 => 8-character; LONG => 32-character).
 					- type: type of format (equal to "N" which means "numeric").
 					- start: left end value of each category (length 20).
 					- end: right end value of each category (length 20).
@@ -120,6 +123,11 @@ OPTIONAL PARAMETERS:
 					in the library specified by parameter LIBRARY.
 					Possible values: 0 => No, 1 => Yes
 					default: 0
+
+- showformats:		Flag indicating whether to show the formats definition when STOREFORMAT=1.
+					Only the formats defined now are shown.
+					Possible values: 0 => No, 1 => Yes
+					default: 1
 
 - library:			Library where the catalog containing the formats should be stored when
 					STOREFORMATS=1.
@@ -159,6 +167,7 @@ SEE ALSO:
 		includeright=1,
 		out=_FORMATS_,
 		storeformats=0,
+		showformats=1,
 		library=WORK,
 		log=1,
 		help=0) / store des="Creates numeric formats from a dataset containing cut values";
@@ -193,6 +202,8 @@ SEE ALSO:
 %ExecTimeStart;
 
 %local cuts_long;		%* Name of the dataset containing the cut values in long format (i.e. all cut values in one column);
+%local fmtnamelen;		%* Length to use for the FMTNAME variable in the output dataset;
+%local formatnames;		%* Names of defined formats;
 
 %* Show input parameters;
 %if &log %then %do;
@@ -232,6 +243,12 @@ run;
 %*** PREFIX=;
 %* Keep just the first 3 characters of the PREFIX (to avoid automatic format names longer than 8 characters);
 %let prefix = %substr(&prefix, 1, %sysfunc( min(%sysfunc(length(&prefix)), 3) ));
+
+%*** Check the value of the VALIDFMTNAME option to decide on the length of the FMTNAME variable in the output dataset;
+%if %upcase(%sysfunc(getoption(validfmtname))) = V7 %then
+	%let fmtnamelen = 8;
+%else
+	%let fmtnamelen = 32;
 
 %*** DATAFORMAT=;
 %if %upcase(%quote(&dataformat)) = WIDE %then
@@ -313,7 +330,7 @@ run;
 	%* NOTE: This assumes that the cut values for each variable are sorted in ascending order!;
 	data _CF_cuts_t;
 		keep &varname fmtname cut;
-		length fmtname $8;
+		length fmtname $&fmtnamelen;
 		%* Rename the variable name containing the format names to FMTNAME if the column with the format names are given in the CUTS dataset;
 		set _CF_cuts_;
 		%if %quote(&varfmtname) = %then %do;
@@ -325,7 +342,10 @@ run;
 		retain suffix "L";
 			%end;
 		%* Create the variable FMTNAME since it was not provided by the user in the CUTS dataset;
-		fmtname = cats("&prefix", put(count, z4.), suffix);	%* The length of the format names must be 8 and cannot end in a number;
+		%* NOTE: The length of the format names must be 8 (unless option VALIDFMTNAME=LONG,
+		%* which is actually the default starting SAS 9.2(?), but I am still assuming that the
+		%* maximum format name length is 8 characters) and cannot end in a number;
+		fmtname = cats("&prefix", put(count, z4.), suffix);
 		count + 1;
 		%end;
 		array acuts(*) &varcuts;
@@ -371,7 +391,7 @@ run;
 
 data _CF_cuts_;
 	keep &varname fmtname &cutname;
-	length fmtname $8;
+	length fmtname $&fmtnamelen;
 	set _CF_cuts_;
 	%* BY variable for the FIRST and LAST variables in case VARNAME or FMTNAME is given;
 	%* Note that both variables can be given and the same variable name may have more than one format names;
@@ -387,7 +407,10 @@ data _CF_cuts_;
 	retain suffix "L";
 		%end;
 	%* Create the variable FMTNAME since it was not provided by the user in the CUTS dataset;
-	fmtname = cats("&prefix", put(count, z4.), suffix);	%* The length of the format names must be 8 and cannot end in a number;
+	%* NOTE: The length of the format names must be 8 (unless option VALIDFMTNAME=LONG,
+	%* which is actually the default starting SAS 9.2(?), but I am still assuming that the
+	%* maximum format name length is 8 characters) and cannot end in a number;
+	fmtname = cats("&prefix", put(count, z4.), suffix);
 		%if %quote(&byst) ~= %then %do;
 	if &lastst then
 		count + 1;
@@ -406,7 +429,7 @@ run;
 data &out;
 	keep &varname fmtname type start end sexcl eexcl label;
 	format &varname fmtname type start end sexcl eexcl label;
-	length %if %quote(&varname) ~= %then %do; &varname $32 %end; fmtname $8 type $1 start $20 end $20 sexcl $1 eexcl $1 label $200;
+	length %if %quote(&varname) ~= %then %do; &varname $32 %end; fmtname $&fmtnamelen type $1 start $20 end $20 sexcl $1 eexcl $1 label $200;
 	set &cuts_long;
 	where &cutname ~= .;	%* Remove missing values of the CUT variable (when data format is WIDE, these values come from variables with number of cuts less than the maximum);
 	by fmtname;
@@ -465,7 +488,15 @@ run;
 %if &storeformats %then %do;
 	%if &log %then
 		%put CREATEFORMATSFROMCUTS: Storing formats defined in output dataset %upcase(&OUT) in library %upcase(&library)...;
-	proc format cntlin=&out fmtlib library=&library;
+	%* Read the names of the formats to create so that we show the format definition (with FMTLIB) just for them;
+	proc sql noprint;
+		select distinct fmtname into :formatnames separated by ' '
+		from &out;
+	quit;
+	proc format cntlin=&out library=&library %if &showformats %then %do; fmtlib %end;;
+		%if &showformats %then %do;
+		select &formatnames;
+		%end;
 	run;
 %end;
 

@@ -1,0 +1,7 @@
+case,database,datacomp,varnum,varclass,groups,out,outpsi,_description,_expect,_result
+1,"test.totest(where=(e_cr_pago_tipo = ""Debito""))","test.totest(where=(e_cr_pago_tipo ~= ""Debito""))",V_CR_SALDO_ACTUAL B_TIME_DQ90,B_TARGET_DQ90_12M E_CR_VINCULACION,10,totest_psi_01,totest_psi_bins_01,"Continuous and categorical variables, both character and numeric",,S
+2,"test.totest(where=(e_cr_pago_tipo = ""Debito""))","test.totest(where=(e_cr_pago_tipo ~= ""Debito""))",V_CR_SALDO_ACTUAL B_TIME_DQ90,,10,totest_psi_02,totest_psi_bins_02,Only continuous variables,,S
+3,"test.totest(where=(e_cr_pago_tipo = ""Debito""))","test.totest(where=(e_cr_pago_tipo ~= ""Debito""))",,B_TARGET_DQ90_12M E_CR_VINCULACION,10,totest_psi_03,totest_psi_bins_03,Only categorical variables,,S
+4,"test.totest(where=(e_cr_pago_tipo ~= ""Debito""))","test.totest(where=(e_cr_pago_tipo = ""Debito""))",V_CR_SALDO_ACTUAL B_TIME_DQ90,B_TARGET_DQ90_12M E_CR_VINCULACION,10,totest_psi_04,totest_psi_bins_04,Invert the BASE and COMPARE datasets,,S
+5,"test.totest(where=(e_cr_pago_tipo = ""Debito""))","test.totest(where=(e_cr_pago_tipo ~= ""Debito""))",V_CR_SALDO_ACTUAL B_TIME_DQ90,B_TARGET_DQ90_12M E_CR_VINCULACION,5,totest_psi_05,totest_psi_bins_05,Different number of groups,,S
+6,"test.totest(where=(e_cr_pago_tipo = ""Debito""))","test.totest(where=(e_cr_pago_tipo ~= ""Debito""))",,,10,,,No analysis variable given,Macro should stop because no analysis variable is given.,F

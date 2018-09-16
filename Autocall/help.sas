@@ -2,7 +2,7 @@
 Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	09-Dec-2003
-Modified: 	28-Jul-2018 (note: every time a new macro is added or documentation for a macro becomes available change this date)
+Modified: 	16-Sep-2018 (note: every time a new macro is added or documentation for a macro becomes available change this date)
 			Also remember to change the date shown by the output of %Help (search for "as of").
 
 DESCRIPTION:
@@ -51,6 +51,7 @@ PIECEWISETRANSF
 PIECEWISETRANSFCUTS
 PLOTBINNED
 PLOTSURVIVAL
+PSI
 SORT
 STANDARDIZE
 TESTLOGISTICFIT
@@ -63,7 +64,7 @@ help is available when calling %Help(<macro-name>).
 REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 %if %quote(&macro) = %then %do;
 	%put;
-	%put %quote(                        AVAILABLE MACROS AS OF 27-Jul-2018);
+	%put %quote(                        AVAILABLE MACROS AS OF 16-Sep-2018);
 %*	%put MACROS DISPONIBLES AL 10/6/04:;
 	%if %upcase(%quote(&by)) = TOPIC %then %do;
 		%put %quote(                                  -- BY TOPIC --);
@@ -160,6 +161,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put 	%quote(                     linear regression.);
 		%put	PiecewiseTransf* %quote(    Perform a linear piecewise transformation on continuous variables.); 
 		%put	PiecewiseTransfCuts* %quote(Find the best cuts for a linear piecewies transformation on continuous variables.); 
+		%put	Psi* %quote(                Compute the Population inStability Index between two populations.);
 		%put	QualifyVars %quote(         Automatically qualify variables into categorical or continuous.);
 		%put	Score %quote(               Compute the score of a regression model on a new dataset.);
 		%put	TestLogisticFit* %quote(    Test the fit of a logistic regression model.);
@@ -340,6 +342,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%*%put	PrintDataDoesNotExist	;
 		%*%put	PrintRequiredParameterMissing	;
 		%*%put	PrintVarDoesNotExist	;
+		%put	Psi* %quote(                Compute the Population inStability Index between two populations.);
 		%put;
 		%put Q;
 		%put	QualifyVars %quote(         Automatically qualify variables into categorical or continuous.);

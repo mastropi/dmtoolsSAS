@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %CreateFormatsFromCuts</h1>
-<pre>Version:                      1.0                                                                                       </pre>
+<pre>Version:                      1.01                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      07-Apr-2016                                                                               </pre>
-<pre>Modified:                     07-Apr-2016                                                                               </pre>
+<pre>Modified:                     16-Sep-2018 (Previous: 07-Apr-2016)                                                            </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
 <pre>Creates interval-based numeric formats based on a set of cut values separating the intervals.                                                                                          </pre>
@@ -28,6 +28,7 @@ pre {display: block}
 <pre>          prefix=F,                     /* Prefix to use in the automatically generated format name when VARFMTNAME is empty. */                              </pre>
 <pre>          out=,                         /* Output dataset containing the format definitions. */                              </pre>
 <pre>          storeformats=0,               /* Whether to run the formats and store them in a catalog. */                              </pre>
+<pre>          showformats=1,                /* Whether to show the formats definition in the output window when STOREFORMATS=1. */                              </pre>
 <pre>          library=WORK,                 /* Library where the catalog containing the formats should be stored when STOREFORMATS=1. */                              </pre>
 <pre>          log=1);                       /* Show messages in the log? */                              </pre>
 <pre>                                                                                                    </pre>
@@ -73,7 +74,8 @@ pre {display: block}
 <pre>                              formats to create.                                                                        </pre>
 <pre>                              Format names given in this variable must satisfy the restrictions imposed                                                            </pre>
 <pre>                              by SAS, such as:                                                                          </pre>
-<pre>                              - maximum name length: 8 characters                                                            </pre>
+<pre>                              - maximum name length: 8 characters when option VALIDFMTNAME=V7 or                                                            </pre>
+<pre>                              32 characters when option VALIDFMTNAME=LONG.                                                            </pre>
 <pre>                              - cannot start with a number                                                              </pre>
 <pre>                              - cannot end with a number                                                                </pre>
 <pre>                                                                                                                        </pre>
@@ -113,7 +115,8 @@ pre {display: block}
 <pre>                                                                                                                        </pre>
 <pre>                              The following variables are included in the OUTFORMAT dataset:                                                            </pre>
 <pre>                              - var: analyzed variable name (if VARNAME is not empty).                                                            </pre>
-<pre>                              - fmtname: format name.                                                                   </pre>
+<pre>                              - fmtname: format name. This can be 8-character long or 32-character long                                                            </pre>
+<pre>                              depending on the value of the VALIDFMTNAME option (V7 => 8-character; LONG => 32-character).                                                            </pre>
 <pre>                              - type: type of format (equal to "N" which means "numeric").                                                            </pre>
 <pre>                              - start: left end value of each category (length 20).                                                            </pre>
 <pre>                              - end: right end value of each category (length 20).                                                            </pre>
@@ -133,6 +136,11 @@ pre {display: block}
 <pre>                              in the library specified by parameter LIBRARY.                                                            </pre>
 <pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
 <pre>                              default: 0                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- showformats:                Flag indicating whether to show the formats definition when STOREFORMAT=1.                                                            </pre>
+<pre>                              Only the formats defined now are shown.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
 <pre>- library:                    Library where the catalog containing the formats should be stored when                                                            </pre>
 <pre>                              STOREFORMATS=1.                                                                           </pre>
