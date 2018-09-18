@@ -1,6 +1,6 @@
 /* Psi-Test.sas
 Created: 		16-Sep-2018
-Modified:		16-Sep-2018
+Modified:		18-Sep-2018
 Author: 		Daniel Mastropietro
 Description: 	Tests run on macro %Psi
 Dependencies:	%RunTestHarness macro
@@ -13,6 +13,7 @@ Notes:			The test code makes use of a test harness defined in the same directory
 %let testmacro = Psi;
 %let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
 libname test "&testpath";
+libname expected "&testpath/expected";
 
 * Read the Test Harness dataset;
 %import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
@@ -22,7 +23,7 @@ libname test "&testpath";
 	&testmacro,
 	TestHarness_&testmacro,
 	library=test,
-	checkoutput=out outpsi,
+	checkoutput=out outpsi outformat,
 	resultsdir=&testpath/expected
 );
 /*---------------------------- Run Test Harness ---------------------------------*/
@@ -43,7 +44,7 @@ libname expected "&testpath/expected";
 	&testmacro,
 	TestHarness_&testmacro,
 	library=test,
-	checkoutput=out outpsi,
+	checkoutput=out outpsi outformat,
 	saveoutput=1,
 	resultsdir=&testpath/expected
 );

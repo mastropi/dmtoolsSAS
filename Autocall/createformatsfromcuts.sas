@@ -1,8 +1,8 @@
 /* MACRO %CreateFormatsFromCuts
-Version:	1.01
+Version:	1.02
 Author:		Daniel Mastropietro
 Created:	07-Apr-2016
-Modified:	16-Sep-2018 (Previous: 07-Apr-2016)
+Modified:	17-Sep-2018 (Previous: 16-Sep-2018, 07-Apr-2016)
 
 DESCRIPTION:
 Creates interval-based numeric formats based on a set of cut values separating the intervals.
@@ -15,7 +15,9 @@ USAGE:
 	cutname=,			*** Name of the variable in input dataset containing the cut values when DATAFORMAT=LONG.
 	varname=,			*** Name of the variable in input dataset containing the variables for which formats are defined.
 	varfmtname=,		*** Name of the variable in input dataset containing the names of the formats to create (max 8 characters!).
-	includeright=1,		*** Whether the intervals defined by the cut values should be closed on the right.
+	includeright=1,		*** Whether the format intervals defined by the cut values should be closed on the right.
+	adjustranges=0, 	*** Whether to adjust the format intervals on the INCLUDE side in order to avoid non-inclusion of values due to precision loss.
+	adjustcoeff=1E-9,	*** Coefficient to use to adjust the format intervals if ADJUSTRANGES=1.
 	prefix=F,			*** Prefix to use in the automatically generated format name when VARFMTNAME is empty.
 	out=,				*** Output dataset containing the format definitions.
 	storeformats=0,		*** Whether to run the formats and store them in a catalog.
@@ -89,6 +91,22 @@ OPTIONAL PARAMETERS:
 					Possible values: 0 => No, 1 => Yes
 					default: 1
 
+- adjustranges:		Flag indicating whether the intervals on the INCLUDE side should be adjusted
+					in order to avoid non incorrect boundary value due to precision loss when
+					converting those values to character (since the values are stored as characters
+					when defining the formats).
+					This is adjustment is particularly useful when dealing with floating point
+					variables having many repeated observations with the same floating point value
+					which will likely make up a boundary value with potential precision loss.
+					The value is adjusted by an absolute amount of -ADJUSTCOEFF for left boundaries
+					and by an absolut amount of +ADJUSTCOEFF for right boundaries.
+					Possible values: 0 => No, 1 => Yes
+					default: 0
+
+- adjustcoeff:		Coefficient to use to adjust the format intervals if ADJUSTRANGES=1.
+					See ADJUSTRANGES above for more details.
+					default: 1E-9
+
 - prefix:			Prefix to use in the automatically generated format name when VARFMTNAME is
 					empty.
 					The prefix is truncated to its first 3 characters in order to abide by the
@@ -115,7 +133,7 @@ OPTIONAL PARAMETERS:
 
 					IMPORTANT: It is assumed that the number of digits including decimal point
 					in the start and end values of each category is not larger than 20 when those
-					numbers are expressed in BEST8. format.
+					numbers are expressed in BEST32. format.
 
 					default: _FORMATS_
 
@@ -164,6 +182,8 @@ SEE ALSO:
 		varfmtname=,
 		prefix=F,
 		includeright=1,
+		adjustranges=0,
+		adjustcoeff=1E-9,
 		out=_FORMATS_,
 		storeformats=0,
 		showformats=1,
@@ -179,9 +199,11 @@ SEE ALSO:
 	%put dataformat=wide , %quote( *** Format in which cut values are given in input dataset: WIDE or LONG.);
 	%put cutname= , %quote(        *** Name of the variable in input dataset containing the cut values when DATAFORMAT=LONG.);
 	%put varname= , %quote(        *** Name of the variable in input dataset containing the variables for which formats are defined.);
-	%put prefix=F , %quote(        *** Prefix to use in the automatically generated format name when VARFMTNAME is empty.);
 	%put varfmtname= , %quote(     *** Name of the variable in input dataset containing the names of the formats to create (max 8 characters!).);
-	%put includeright=1 , %quote(  *** Whether the intervals defined by the cut values should be closed on the right.);
+	%put prefix=F , %quote(        *** Prefix to use in the automatically generated format name when VARFMTNAME is empty.);
+	%put includeright=1 , %quote(  *** Whether the format intervals defined by the cut values should be closed on the right.);
+	%put adjustranges=0 , %quote(  *** Whether to adjust the format intervals on the INCLUDE side in order to avoid non-inclusion of values due to precision loss.);
+	%put adjustcoeff=1E-9 , %quote(*** Coefficient to use to adjust the format intervals if ADJUSTRANGES=1.);
 	%put out=_FORMATS_ , %quote(   *** Output dataset containing the format definitions.);
 	%put storeformats=0 , %quote(  *** Whether to run the formats and store them in a catalog.);
 	%put library=WORK , %quote(    *** Library where the catalog containing the formats should be stored when STOREFORMATS=1.);
@@ -217,6 +239,8 @@ SEE ALSO:
 	%put CREATEFORMATSFROMCUTS: - varfmtname = %quote(   &varfmtname);
 	%put CREATEFORMATSFROMCUTS: - prefix = %quote(       &prefix);
 	%put CREATEFORMATSFROMCUTS: - includeright = %quote( &includeright);
+	%put CREATEFORMATSFROMCUTS: - adjustranges = %quote( &adjustranges);
+	%put CREATEFORMATSFROMCUTS: - adjustcoeff = %quote(  &adjustcoeff);
 	%put CREATEFORMATSFROMCUTS: - out = %quote(          &out);
 	%put CREATEFORMATSFROMCUTS: - storeformats = %quote( &storeformats);
 	%put CREATEFORMATSFROMCUTS: - library = %quote(      &library);
@@ -425,6 +449,12 @@ run;
 
 %FINAL:
 %* Create output dataset with the formats definition;
+%* Create output dataset with the formats definition;
+%* Define adjust coefficients tha are optionally applied for the INCLUDED range border
+%* (which depends on the INCLUDERIGHT= parameter) to avoid not inclusion of cases due to
+%* precision loss...;
+%local adjust_coeff_start;
+%local adjust_coeff_end;
 data &out;
 	keep &varname fmtname type start end sexcl eexcl label;
 	format &varname fmtname type start end sexcl eexcl label;
@@ -435,9 +465,29 @@ data &out;
 	retain type "N";		%* N = Numeric variables;
 	retain start;
 	retain count;
+
 	%* Convert the START and END values to string (they should be string because of the LOW and HIGH values;
-	start = compress(put(lag(&cutname), best8.));
-	end = compress(put(&cutname, best8.));
+	%* Note that optionally (if ADJUSTRANGES=1) and the border value is NOT an integer (i.e. if contains a decimal point),
+	%* the range border value to INCLUDE is adjusted by a VERY small quantity in order to try to avoid misplacement
+	%* of values into the incorrect range due to precision loss
+	%* (SAS is known to have these problems such as vale -0.1 being stored as -0.999999999).
+	%* Note that this adjustment affects BOTH contiguous ranges, so NON-overlapping is GUARANTEED;
+
+	%* First check if we need to adjust the current cut value (range end value);
+	%if &adjustranges %then %do;
+		_cutvalue_char = put(&cutname, best32.);
+		%* Check if the value is NOT integer (i.e. it contains a decimal point);
+		if index(_cutvalue_char, '.') > 0 then
+		%if &includeright %then %do;
+			&cutname = &cutname + &adjustcoeff;	%* Give a little more space to the right of the range;
+		%end;
+		%else %do;
+			&cutname = &cutname - &adjustcoeff;	%* Give a little more space to the left of the range;
+		%end;
+	%end;
+	start = compress( put(lag(&cutname), best32.) );
+	end = compress( put(&cutname, best32.) );
+
 	%* Define open and close parentheses depending on the INCLUDERIGHT= parameter;
 	%if &includeright %then %do;
 	openparen = "(";
@@ -483,6 +533,7 @@ data &out;
 		label = cat(put(count, z3.), " - ", openparen, compress(start), ", ", compress(end), closeparen);
 		output;
 	end;
+	drop _cutvalue_char;
 run;
 %if &storeformats %then %do;
 	%if &log %then

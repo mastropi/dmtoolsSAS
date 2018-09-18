@@ -1,8 +1,8 @@
-/* MACRO %CreateFormatsFromCuts
-Version:	1.0
+/* MACRO %Psi
+Version:	1.01
 Author:		Daniel Mastropietro
 Created:	16-Sep-2018
-Modified:	16-Sep-2018
+Modified:	17-Sep-2018
 
 DESCRIPTION:
 Computes the PSI or Population inStability Index for a set of continuous and categorical variables,
@@ -23,8 +23,12 @@ USAGE:
 	varnum=,				*** List of continuous variables to analyze.
 	varclass=, 				*** List of categorical variables to analyze, either character or numeric.
 	groups=10,				*** Number of groups or bins to use in the PSI calculation for continuous variables.
+	adjustbins=1,			*** Whether to slightly adjust the bin ends in order to avoid allocation problems due to precision loss.
+	adjustcoeff=1E-9,		*** Coefficient to use to adjust the bin ends if ADJUSTBINS=1.
 	out=_psi_,				*** Output dataset containing the PSI for each analyzed variable.
 	outpsi=_psi_bygroup_,	*** Output dataset containing the contribution by each bin to the PSI.
+	outformat=_psi_formats_	*** Output dataset containing the format definition used to compute the PSI on continuous variables.
+	checkparams=1 			*** Whether to check input parameters (datasets and variable existence)
 	log=1);					*** Show messages in the log?
 
 REQUIRED PARAMETERS:
@@ -54,6 +58,41 @@ OPTIONAL PARAMETERS:
 - groups:			Number of groups or bins to use in the PSI calculation of continuous variables.
 					default: 10
 
+- adjustbins:		Flag indicating whether to slightly adjust the bin ends in order to avoid
+					allocation problems due to precision loss.
+					This is adjustment is particularly useful when dealing with floating point
+					variables having many repeated observations with the same floating point value
+					which will likely make up a boundary value with potential precision loss.
+					The value is adjusted by an absolute amount of -ADJUSTCOEFF for left boundaries
+					and by an absolut amount of +ADJUSTCOEFF for right boundaries.
+					Possible values: 0 => No, 1 => Yes
+					default: 1
+
+- adjustcoeff:		Coefficient to use to adjust the bin ends if ADJUSTBINS=1.
+					See ADJUSTBINS above for more details.
+					default: 1E-9
+
+- out:				Output dataset containing the PSI for each analyzed variable.
+					Variables are grouped by "categorical" or "continuous" and sorted by variable name within each group.
+					default: _PSI_
+
+- outpsi:			Output dataset containing the contribution by each bin to the PSI.
+					Variables are grouped by "categorical" or "continuous" and sorted
+					by variable name and bin value within each group.
+					default: _PSI_BYGROUP_
+
+- outformat:		Output dataset containing the format definition used to compute the PSI on continuous variables.
+					These formats are computed on the BASE dataset and define the bins against which the variable values
+					in the COMPARE dataset are matched.
+					default: _PSI_FORMATS_
+
+- checkparams:		Should input parameters be checked for existence? (datasets and variables)
+					Set this parameter to 0 when we e.g. you do some RENAME in any input dataset
+					and you know that variables and datasets exist. In fact, these renames are NOT
+					run before checking for variable existence in datasets.
+					Possible values: 0 => No, 1 => Yes
+					default: 1
+
 - log:				Show messages in the log?
 					Possible values: 0 => No, 1 => Yes
 					default: 1
@@ -77,7 +116,20 @@ in the distribution of some variables.
 This is particularly useful or important when testing on a new population a model fit on
 another population.
 */
-%MACRO psi(database, datacomp, varnum=_NUMERIC_, varclass=, groups=10, out=_psi_, outpsi=_psi_bygroup_, log=1, help=0)
+%MACRO psi(
+		database,
+		datacomp,
+		varnum=_NUMERIC_,
+		varclass=,
+		groups=10,
+		adjustbins=1,
+		adjustcoeff=1E-9,
+		out=_psi_,
+		outpsi=_psi_bygroup_,
+		outformat=_psi_formats_,
+		checkparams=1,
+		log=1,
+		help=0)
 	/ des="Computes the Population inStability Index for a set of continuous and categorical variables between two populations";
 /*----- Macro to display usage -----*/
 %MACRO ShowMacroCall;
@@ -88,8 +140,12 @@ another population.
 	%put varnum= , %quote(                 *** List of continuous input variables to analyze.);
 	%put varclass= , %quote(               *** List of categorical input variables to analyze.);
 	%put groups, %quote(                   *** Number of groups to use for the PSI calculation on continuous variables.);
+	%put adjustbins=1 ,%quote(             *** Whether to slightly adjust the bin ends in order to avoid allocation problems due to precision loss.);
+	%put adjustcoeff=1E-9 , %quote(        *** Coefficient to use to adjust the bin ends if ADJUSTBINS=1.);
 	%put out= ,	%quote(		               *** Output dataset containing the PSI of each analyzed variable.);
-	%put outpsi= ,	%quote(		           *** Output dataset containing the contribution by each bin to the PSI.);
+	%put outpsi= , %quote(		           *** Output dataset containing the contribution by each bin to the PSI.);
+	%put outformat= , %quote(              *** Output dataset containing the format definition used to compute the PSI on continuous variables.);
+	%put checkparams=1 %quote(             *** Whether to check the input parameters for something wrong.);
 	%put log=1) %quote(                    *** Show messages in log?);
 %MEND ShowMacroCall;
 
@@ -101,8 +157,8 @@ another population.
 %if &help %then %do;
 	%ShowMacroCall;
 %end;
-%else %if ~%CheckInputParameters(data=&database_name &datacomp_name, singleData=0,
-								check=varnum varclass, macro=PSI) %then %do;
+%else %if &checkparams and ~%CheckInputParameters(data=&database_name &datacomp_name, singleData=0,
+													check=varnum varclass, macro=PSI) %then %do;
 		%ShowMacroCall;
 %end;
 %else %if %quote(&varnum) = and %quote(&varclass) = %then %do;
@@ -125,8 +181,12 @@ another population.
 	%put PSI: - varnum = %quote(         &varnum);
 	%put PSI: - varclass = %quote(       &varclass);
 	%put PSI: - groups = %quote(         &groups);
+	%put PSI: - adjustbins = %quote(     &adjustbins);
+	%put PSI: - adjustcoeff = %quote(    &adjustcoeff);
 	%put PSI: - out = %quote(            &out);
 	%put PSI: - outpsi = %quote(         &outpsi);
+	%put PSI: - outformat = %quote(      &outformat);
+	%put PSI: - checkparams= %quote(     &checkparams);
 	%put PSI: - log = %quote(            &log);
 	%put;
 %end;
@@ -167,13 +227,15 @@ run;
 
 %*** CONTINUOUS VARIABLES;
 %if %quote(&varnum) ~= %then %do;
-	%local i;
-	%local nvars;
-	%local vari;
+	%local i;						%* Loop variable;
+	%local nvars;					%* Number of continuous variables;
+	%local vari;					%* Currently analyzed variable in the I loop;
+	%local fmtnamei;				%* Name of the format used for variable &vari;
 	%local varnumbers;				%* List of variables whose names are numbered, e.g. var1, var2, etc;
 									%* These are used to avoid exceeding the maximum of 32 characters in the variable names
 									%* when categorizing the continuous variables;
 	%local vargroups;				%* List of variable names containing the groups or bins when categorizing continuous variables;
+	%local zeros;					%* Bunch of zeros used to left pad the numbering of the formats (e.g. v001_base);
 
 	%* Bin the continuous variables (all variables are binned at the same time);
 	%* Note that the variable names used after binning are of the form VAR1, VAR2, ...
@@ -223,12 +285,14 @@ run;
 		%put PSI: Computing group ranges of continuous variables in BASE dataset...;
 	%do i = 1 %to &nvars;
 		%let vari = %scan(&varnum, &i, ' ');
+		%let zeros = %rep(0, 3 - %length(&i));
 		%if &log %then
 			%put PSI: %upcase(&vari) (&i of &nvars)...;
-		proc sql;
+		proc sql noprint;
 			create table _psi_base_dist_i as
 			select
-				"v&i._base" as fmtname length=32
+				cats("v", put(&i, z4.), "_base") as fmtname
+				,"&vari" as var length=32
 				,var&i._group as _group
 				,var&i._min as _min
 				,var&i._max as _max
@@ -237,12 +301,16 @@ run;
 			group by var&i._group, var&i._min, var&i._max
 			order by fmtname, var&i._group
 			;
+
+			%* Store the name of the format in a macro variable so that we can refer to it below in macro language;
+			select distinct fmtname into :fmtnamei
+			from _psi_base_dist_i;
 		quit;
 
 		%* Update the list of formats for each analysis variable so that they can be applied
 		%* when generating the distribution for the COMPARE dataset;
 		%let varlist_with_formats = &varlist_with_formats
-									&vari v&i._base.;
+									&vari &fmtnamei..;
 
 		%* Append the results into the single dataset that contains the information for ALL variables;
 		proc append base=_psi_base_dist data=_psi_base_dist_i;
@@ -256,11 +324,27 @@ run;
 		cutname=_max,
 		varfmtname=fmtname,
 		includeright=1,
+		adjustranges=&adjustbins,
+		adjustcoeff=&adjustcoeff,
 		out=_psi_base_format_def,
 		storeformats=1,
 		showformats=0,
 		log=0
 	);
+
+	%* Create the output formats dataset if requested;
+	%if %quote(&outformat) ~= %then %do;
+		data &outformat;
+			format fmtname var;
+			merge	_psi_base_format_def
+					_psi_base_dist(keep=fmtname var);
+			by fmtname;
+		run;
+		%if &log %then %do;
+			%put PSI: Dataset %upcase(&outformat) created with the format definition for continuous variables;
+			%put PSI: that define the BASE groups used to compute the PSI.;
+		%end;
+	%end;
 %end;
 
 %*** Distributions of ALL variables in BASE and COMPARE datasets;
@@ -307,7 +391,7 @@ proc sql;
 		COUNT to be equal but actually the PERCENT values are NOT (because the base for computing the percentages is not
 		the same in both datasets --because of a differing number of groups/bins.
 		*/
-		(coalesce(c.percent, 0) - b.percent)/100 * log( (coalesce(c.percent, 0) + 1E-9) / (b.percent + 1E-5) ) as psi
+		(coalesce(c.percent, 0) - b.percent)/100 * log( (coalesce(c.percent, 0) + 1E-9) / (b.percent + 1E-9) ) as psi
 	from _psi_base_freq b
 	LEFT JOIN _psi_compare_freq c
 	on b.var = c.var
@@ -394,7 +478,7 @@ run;
 %let varclass = B_TARGET_DQ90_12M E_CR_VINCULACION;
 
 options mprint;
-%psi(base, compare, varnum=&varnum, varclass=&varclass, out=psi_12, outpsi=psi_12_bins);
+%psi(base, compare, varnum=&varnum, varclass=&varclass, out=psi_12, outpsi=psi_12_bins, outformat=psi_12_formats);
 %psi(compare, base, varnum=&varnum, varclass=&varclass, out=psi_21, outpsi=psi_21_bins);
 %psi(test.totest(where=(e_cr_pago_tipo = "Debito")), test.totest(where=(e_cr_pago_tipo ~= "Debito")), varnum=&varnum, varclass=&varclass, out=psi, outpsi=psi_bins);
 options nomprint;
