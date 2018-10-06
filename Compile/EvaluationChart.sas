@@ -1,8 +1,8 @@
 /* MACRO %EvaluationChart
-Version: 		3.03
+Version: 		3.04
 Author: 		Daniel Mastropietro
 Created: 		24-Sep-2004
-Modified: 		19-Mar-2016 (previous: 03-Aug-2015)
+Modified: 		23-Sep-2018 (previous: 19-Mar-2016, 03-Aug-2015)
 SAS Version:	9.3
 
 DESCRIPTION:
@@ -192,6 +192,7 @@ OPTIONAL PARAMETERS:
 				The output dataset contains the following columns:
 				- model: 				Name of the dataset, BY group or model being evaluated.
 				- type:					Type of model (specified in the MODEL parameter).
+				- BY variables (if any)
 				- <target>:				Value of the event of interest specified in the EVENT parameter.
 										(the name of the column is defined by the TARGET parameter)
 				- <score>: 				Average value of the score variable for the corresponding quantile.
@@ -219,6 +220,8 @@ OPTIONAL PARAMETERS:
 
 - outstat:		Output dataset with the KS Statistic and Gini Index. It has the following columns:
 				- model: 				Name of the dataset, BY group or model being evaluated.
+				- type:					Type of model (specified in the MODEL parameter).
+				- BY variables (if any)
 				- TotalN:				Total number of cases used for the computation of the measures.
 				- EventRate:			Event Rate
 				- type:					Type of model (specified in the MODEL parameter).
@@ -707,13 +710,18 @@ used above) */
 				if in2;
 			run;
 			%* Read the values of the by variables to be shown in the legend of the graph;
+			%* NOTE-2018/09/23: This assumes that NONE of the BY variable values have spaces...;
+			%* If they have spaces the call to %CreateInteractions may NOT work because
+			%* the number of variables listed in &BY will most likely NOT be the same as
+			%* the number of &quote-variables-&quote listed in &BYI.
+			%* There is no simple solution to this problem;
 			data _NULL_;
 				set _EC_freq_by_(firstobs=&i obs=&i);
 				call symput('byi', %MakeList(&by, sep=%quote(||' '||)));
 			run;
 			%* Create a list of the form BYVAR1=BYVALUE1 BYVAR2=BYVALUE2 etc., which is what is
 			%* going to be shown in the legend of the graph to identify each curve;
-			%CreateInteractions(&by, with=&byi, join==, allInteractions=0, macrovar=_byvaluesi_, log=0);
+			%CreateInteractions(&by, with=%quote(&byi), join==, allInteractions=0, macrovar=_byvaluesi_, log=0);
 			%let bylist = &bylist,&_byvaluesi_;
 			%** I use a comma as separator between the different by variables combination, in order 
 			%** to be able to distinguish each combination of by variables when creating the graph
@@ -1339,14 +1347,19 @@ quit;
 								   Gini   	GiniLower  	GiniUpper
 								   rank		rankLower	rankUpper
 									_score)
-				_EC_KSGini_i_(keep=model type TotalN EventRate
+				_EC_KSGini_i_(keep=model type &by TotalN EventRate
 								   KS_max 	KSLower_max KSUpper_max
 								   Gini   	GiniLower  	GiniUpper
 								   rank		rankLower	rankUpper
 							  rename=(KS_max=KS 		KSLower_max=KSLower 		KSUpper_max=KSUpper
 									  rank=QuantileAtKS rankLower=QuantileAtKSLower rankUpper=QuantileAtKSUpper));
-			format model type TotalN EventRate;
-			length model $100 type $2;	%* TYPE is type of model (LR or DT);
+			format model type &by TotalN EventRate;
+			length model $300 type $2;	%* TYPE is type of model (LR or DT);
+			%if %quote(&by) ~= %then %do;
+			%* Read the BY variable values from the corresponding dataset created
+			%* for the currently analyzed BY variable combination;
+			if _N_ = 1 then set _EC_data&i(obs=1 keep=&by);
+			%end;
 			merge 	_EC_GainsEvent_(in=in1 
 									keep=&target _TARGET_ &score quantile quantile_id BestGainsEvent GainsEvent GainsEventLower GainsEventUpper hits n CumHits CumN TotalHits TotalN)
 									end=lastobs
@@ -1537,6 +1550,7 @@ quit;
 		keep
 				model
 				type
+				&by
 				&target
 				&score
 				quantile
@@ -1561,7 +1575,8 @@ quit;
 				TotalN
 				;
 		format	model
-				type;
+				type
+				&by;
 		format  &target;		%* Remove the format for the target variable (so that we see the original value for single level events);
 		format	&score
 				quantile
