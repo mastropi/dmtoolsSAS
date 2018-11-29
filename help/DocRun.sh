@@ -110,3 +110,5 @@ echo "</html>" >> "$INDEX"
 echo
 echo "Source directory with SAS macros:" \"$SOURCEDIR\"
 echo "Output directory with help files:" \"$OUTDIR\"
+
+read -p "Press ENTER to close..."

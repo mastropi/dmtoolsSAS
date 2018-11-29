@@ -1,13 +1,13 @@
-* Code to compile macros into the SASMACR catalog located in C:\SAS\Macros;
+* Code to compile macros into the SASMACR catalog located in E:\Daniel\SAS\Macros;
 * Created: 25-Sep-2005;
-* Modified: 19-Jun-2012;
+* Modified: 04-Nov-2018;
 
 
 /*--------------------------------------- Startup settings ----------------------------------*/
 * Location of macros source code;
-%let sourcepath = C:\SAS\Macros\Compile;
+%let sourcepath = E:\Daniel\SAS\Macros\Compile;
 * Location of compiled macros (i.e. where the SASMACR catalog will be stored);
-%let outpath = C:\SAS\Macros;
+%let outpath = E:\Daniel\SAS\Macros;
 /*--------------------------------------- Startup settings ----------------------------------*/
 
 
@@ -131,7 +131,7 @@ options mstored sasmstore=macros;
 %include "&sourcepath/RemovePrefix.sas";                             * 99;
 %include "&sourcepath/RemoveRepeated.sas";                           * 100;
 %include "&sourcepath/RemoveSuffix.sas";                             * 101;
-%include "&sourcepath/RenameVariables.sas";                          * 102;
+%include "&sourcepath/RenameVars.sas";                          	 * 102;
 %include "&sourcepath/Rep.sas";                                      * 103;
 %include "&sourcepath/ReplaceChar.sas";                              * 104;
 %include "&sourcepath/ReplaceMissing.sas";                           * 105;

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%GetZeroPaddedNumber</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %GetZeroPaddedNumber</h1>
+<pre>Version:                      1.00                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      29-Nov-2018                                                                               </pre>
+<pre>Modified:                     29-Nov-2018                                                                               </pre>
+<pre>SAS Version:                  9.4                                                                                       </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Returns a string representing a number (NUM) in zero padded format                                                                                          </pre>
+<pre>based on a given maximum number (MAXNUM).                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%GetZeroPaddedNumber(num, maxnum);                                                                                          </pre>
+<pre>                                                                                                    </pre>
+<h3>EXAMPLES:</h3>
+<pre>%put %GetZeroPaddedNumber(13, 1032);* Shows 0013;                                                                             </pre>
+<pre>                                                                                                    </pre>
+<h3>APPLICATIONS:</h3>
+<pre>Given a set of numbers to generate, e.g. from 1 to a given maximum, this macro                                                                                          </pre>
+<pre>returns each of those numbers zero padded so that their string length is the same,                                                                                          </pre>
+<pre>e.g. 01 02 03 04 05 06 07 08 09 10                                                                                          </pre>
+<pre>if the maximum number to generate is 10.                                                                                          </pre>
+<body>
+</html>

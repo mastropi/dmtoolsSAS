@@ -1,8 +1,8 @@
 /* MACRO %CreateFormatsFromCuts
-Version:	1.02
+Version:	1.03
 Author:		Daniel Mastropietro
 Created:	07-Apr-2016
-Modified:	17-Sep-2018 (Previous: 16-Sep-2018, 07-Apr-2016)
+Modified:	18-Sep-2018 (Previous: 16-Sep-2018, 07-Apr-2016)
 
 DESCRIPTION:
 Creates interval-based numeric formats based on a set of cut values separating the intervals.

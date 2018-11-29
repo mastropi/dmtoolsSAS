@@ -2,7 +2,7 @@
 Version: 	1.02
 Author: 	Daniel Mastropietro
 Created: 	09-Dec-2003
-Modified: 	16-Sep-2018 (note: every time a new macro is added or documentation for a macro becomes available change this date)
+Modified: 	29-Nov-2018 (note: every time a new macro is added or documentation for a macro becomes available change this date)
 			Also remember to change the date shown by the output of %Help (search for "as of").
 
 DESCRIPTION:
@@ -178,7 +178,9 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	ExistData %quote(           Check if a dataset exists.);
 		%put	ExistMacroVar %quote(       Check if a macro variable exists.);
 		%put	ExistVar %quote(            Check if all variables in a given list exist in a dataset.);
+		%put 	GetCurrentDatetime %quote(  Return the current datetime.);
 		%put	Getnobs	%quote(             Get the nro. of observations and variables in a dataset.);
+		%put 	Getwd %quote(         		Return the current working directory.);
 		%put	Help %quote(                Show this help information.);
 		%put 	ODSOutputClose %quote(      Close an open ODS output file.);
 		%put 	ODSOutputOpen %quote(       Open an ODS output file for writing.);
@@ -199,6 +201,7 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	FindMatch %quote(           Find the names in a list that contain a given keyword.);
 		%put	FixVarNames %quote(         Fix variable names by truncating them on the right to a maximum allowed length.);
 		%put	GetNroElements %quote(      Get the nro. of elements in a list.);
+		%put 	GetZeroPaddedNumber %quote( Return a zero-padded number based on a maximum number.);
 		%put 	InsertInList %quote(        Insert a name in a list at a given position.);
 		%put	MakeList %quote(            Make a list by adding a prefix and suffix to each name in a given list.);
 		%put	MakeListFromName %quote(    Make a list from a name used as root.);
@@ -296,6 +299,9 @@ REMEMBER TO CHANGE THE DATE BELOW WHEN THE LIST IS UPDATED. */
 		%put	GetVarNames	%quote(         Get the names of the variables present in a dataset.);
 		%put	GetVarOrder	%quote(         Get the order in which variables are stored in a dataset.);
 		%put 	GetVarType %quote(          Get the type of a variable (C(haracter) or N(umeric)) in a dataset.);
+		%put 	GetCurrentDatetime %quote(  Return the current datetime.);
+		%put 	Getwd %quote(         		Return the current working directory.);
+		%put 	GetZeroPaddedNumber %quote( Return a zero-padded number based on a maximum number.);
 		%*%put	GraphStrata	;
 		%put	GraphXY	%quote(             Make a 2D plot of Y vs. X);
 		%put;

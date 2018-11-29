@@ -17,7 +17,8 @@ Notes:			The test code makes use of a test harness dataset defined in the same d
 * Setup;
 %let testmacro = EvaluationChart;
 %let testpath = E:\Daniel\SAS\Macros\tests\&testmacro;
-libname test "&testpath";
+libname _data "&testpath\data";
+libname _expect "&testpath\expected";
 
 * Read the Test Harness dataset;
 %import(TestHarness_&testmacro, "&testpath\TestHarness-&testmacro..csv");
@@ -54,19 +55,24 @@ datalines;
 1 0.01 1
 ;
 
+* Data with grouping variables to test the use of the BY= parameter;
+* Note that one BY variable should be character and have BLANK SPACES
+* and the other numeric, so that we can test the concatenation of their
+* values when calling %CreateInteractions in the tested macro;
 data _data.totest_01;
-	input y p leaf;
+	input id $ grp y p leaf;
+	infile datalines delimiter=",";
 datalines;
-0 0.01 1
-0 0.23 2
-0 0.01 1
-1 0.01 1
-0 0.15 3
-0 0.15 3
-1 0.23 2
-0 0.26 4
-1 0.28 5
-1 0.65 6
+SAN A,30,0,0.01,1
+SAN A,30,0,0.23,2
+SAN A,30,0,0.01,1
+SAN A,40,1,0.01,1
+SAN A,40,0,0.15,3
+SAN A,40,0,0.15,3
+SAN A,40,1,0.23,2
+B,50,0,0.26,4
+B,50,1,0.28,5
+B,50,1,0.65,6
 ;
 
 * Perfect ordering with just one event;

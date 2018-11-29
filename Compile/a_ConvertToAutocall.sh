@@ -111,3 +111,7 @@ if [ $TEST == 0 ]; then
 	# That the number of lines in the output files is the same as in the input files
 #	find $OUTDIR -name "*.sas" -exec wc {} \;
 fi
+
+echo "DONE!"
+
+read -p "Press ENTER to close..."

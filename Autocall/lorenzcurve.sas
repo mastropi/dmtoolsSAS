@@ -1,8 +1,8 @@
 /* MACRO %LorenzCurve
-Version: 		1.02
+Version: 		1.03
 Author: 		Daniel Mastropietro
 Created:		15-May-2015
-Modified:		04-Sep-2015 (previous: 29-Aug-2015)
+Modified:		29-Nov-2018 (previous: 04-Sep-2015, 29-Aug-2015)
 SAS version:	9.4
 
 DESCRIPTION:
@@ -26,8 +26,8 @@ USAGE:
 	out=, 					*** Output dataset containing the area between the Lorenz Curve and the diagonal
 	sortby=descending area,	*** Sorting criteria of the output dataset.
 	plot=1,					*** Whether to plot the Lorenz curve of each analysis variable
-	odspath=, 				*** Quoted name of the path where all generated files should be saved.
-	odsfile=,				*** Quoted name of the file where the plots are saved.
+	odspath=, 				*** Unquoted name of the path where all generated files should be saved.
+	odsfile=,				*** Unquoted name of the file where the plots are saved.
 	odsfiletype=pdf,		*** Type of the file specified in ODSFILE or output format.
 	log=1)					*** Show messages in log?
 
@@ -67,14 +67,20 @@ OPTIONAL PARAMETERS:
 				Possible values: 0 => No, 1 => Yes.
 				default: 1
 
-- odspath:		Quoted name of the path containing the files where plots should be saved.
+- odspath:		Unquoted name of the path containing the files where plots should be saved.
 				This is only valid for HTML output.
-				default: none
+				default: current working directory
 
-- odsfile:		Quoted name of the file where plots should be saved.
-				default: none
+- odsfile:		Unquoted name of the file where plots should be saved.
+				If the odsfiletype is HTML, each file is saved in separate files
+				with default names defined by SAS and numbers indexing them
+				to avoid override.
+				default: (empty)
 
 - odsfiletype:	Type of the file specified in the ODSFILE= option.
+				Valid values are those given in the documentation of ODS GRAPHICS,
+				in section "Supported File Types for Output Destinations",
+				under the table column "Output Destination".
 				default: pdf
 
 - log:			Show messages in log?
@@ -99,6 +105,8 @@ OTHER MACROS AND MODULES USED IN THIS MACRO:
 - %GetNroElements
 - %GetStat
 - %GetVarLabel
+- %ODSOutputClose
+- %ODSOutputOpen
 - %ResetSASOptions
 - %SetSASOptions
 
@@ -140,8 +148,8 @@ in general a continuous variable, similar to the Gini index for binary targets.
 	%put %quote(                        *** and the diagonal %(in absolute value%) for each variable.);
 	%put sortby=descending area, %quote(*** Sorting criteria of the output dataset.);
 	%put plot=1 , %quote(               *** Whether to plot the Lorenz curve of each analysis variable.);
-	%put odspath= ,	%quote(		        *** Quoted name of the path where all generated files should be saved.);
-	%put odsfile= ,	%quote(		        *** Quoted name of the file where the plots are saved.);
+	%put odspath= ,	%quote(		        *** Unquoted name of the path where all generated files should be saved.);
+	%put odsfile= ,	%quote(		        *** Unquoted name of the file where the plots are saved.);
 	%put odsfiletype=pdf, %quote(	    *** Type of the file specified in ODSFILE or output format.);
 	%put log=1) %quote(                 *** Show messages in log?);
 %MEND ShowMacroCall;
@@ -211,7 +219,7 @@ in general a continuous variable, similar to the Gini index for binary targets.
 %ExecTimeStart;
 
 %if &plot %then %do;
-	%ODSOutputOpen(&odspath, &odsfile, odsfiletype=&odsfiletype, macro=LORENZCURVE, log=&log);
+	%ODSOutputOpen(&odsfile, odspath=&odspath, odsfiletype=&odsfiletype, macro=LORENZCURVE, log=&log);
 %end;
 
 %* Create a copy of the input dataset where any included data options are applied;

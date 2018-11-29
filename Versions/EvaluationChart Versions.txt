@@ -83,3 +83,15 @@ V.3.03: 2016/03/19 (DM)
 	- The format for the QUANTILE variable (percent7.1) was removed before doing the aggregation with PROC MEANS because this generated loss of data when doing ungrouped analysis.
 	- Added a check that the number of valid analysis cases (i.e. with non-missing target and non-missing score) is larger than 0 before proceeding with the calculation of the gains or lift chart for a particular BY group. This is done by checking the number of cases in dataset _EC_n_.
 	- Created a test code EvaluationChart-Test.sas that is used to test the macro.
+
+V.3.04: 2018/09/23 (DM)
+	- Added the BY variables as columns in the output datasets.
+	
+V.3.05: 2018/11/29 (DM)
+	- Fixed the creation of the BY-variable values before calling the %CreateInteractions macro so that we don't get an error message when one of the BY-variable value has blank spaces in it. The solution was to replace the blank spaces with hyphens.
+	- Added new parameters to give more flexibility to the output file that stores the generated graphs.
+		- ODSPATH=
+		- IMAGEROOTNAME=
+	- Now the macro calls %ODSOutputOpen to create the ODS output.
+
+	

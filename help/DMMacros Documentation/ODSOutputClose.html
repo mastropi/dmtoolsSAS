@@ -3,6 +3,7 @@
 <html>
 <pre>%* MACRO %ODSOutputClose;                                                                                               </pre>
 <pre>%* Created: 01-Sep-2015;                                                                                                </pre>
+<pre>%* Modified: 29-Nov-2018;                                                                                               </pre>
 <pre>%* Author: Daniel Mastropietro;                                                                                          </pre>
 <pre>%* Close an open ODS output file;                                                                                          </pre>
 <pre>%* SEE ALSO: %ODSOutputOpen;                                                                                            </pre>
@@ -13,9 +14,9 @@
 <pre>                              %if &log %then %do;                                                                       </pre>
 <pre>                              %put;                                                                                     </pre>
 <pre>                              %if %quote(&macro) ~= %then                                                               </pre>
-<pre>                              %put %upcase(&macro): %upcase(&odsfiletype) file %quote(&odsfile) created by ODS.;                                                            </pre>
+<pre>                              %put %upcase(&macro): %upcase(&odsfiletype) file "&odsfile" created by ODS.;                                                            </pre>
 <pre>                              %else                                                                                     </pre>
-<pre>                              %put %upcase(&odsfiletype) file %quote(&odsfile) created by ODS.;                                                            </pre>
+<pre>                              %put %upcase(&odsfiletype) file "&odsfile" created by ODS.;                                                            </pre>
 <pre>                              %end;                                                                                     </pre>
 <pre>%end;                                                                                                                   </pre>
 <pre>%MEND ODSOutputClose;                                                                                                   </pre>

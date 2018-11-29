@@ -72,3 +72,6 @@ V.2.00: 2018/07/26 (DM)
 
 V.2.01: 2018/07/27 (DM)
 	- Parameter ALLTOGETHER=0 implemented, which means that when values are excluded via the CONDITION= parameter they are let alone in their own separate bin.
+
+V.2.02: 2018/11/29 (DM)
+	- Updated macro to new version of the %ODSOutputOpen macro that now receives UNQUOTED paths and files.

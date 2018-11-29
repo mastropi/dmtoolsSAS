@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>%Psi</title>
+<style>
+pre {display: block}
+</style>
+<body>
+<h1>MACRO %Psi</h1>
+<pre>Version:                      1.01                                                                                      </pre>
+<pre>Author:                       Daniel Mastropietro                                                                       </pre>
+<pre>Created:                      16-Sep-2018                                                                               </pre>
+<pre>Modified:                     18-Sep-2018                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<h3>DESCRIPTION:</h3>
+<pre>Computes the PSI or Population inStability Index for a set of continuous and categorical variables,                                                                                          </pre>
+<pre>which can be either character or numeric.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<pre>The following guidelines are used for the output PSI value, based on a 10-bin comparison:                                                                                          </pre>
+<pre>- PSI <= 0.1:                 The population distribution is stable                                                            </pre>
+<pre>- 0.1 < PSI <= 0.25:          The population distribution is somewhat unstable                                                            </pre>
+<pre>- PSI > 0.25:                 The population distribution is unstable                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>Ref: Scoring_Validation_Guidelines_RRM_Int.doc (document prepared by Experian for Scotia Bank)                                                                                          </pre>
+<pre>received by e-mail on 15-Jul-2013 at Nat Consultores.                                                                                          </pre>
+<pre>                                                                                                                        </pre>
+<h3>USAGE:</h3>
+<pre>%Psi(                                                                                               </pre>
+<pre>          database,                     /* Input dataset containing the analysis variables for the BASE distribution. */                              </pre>
+<pre>          datacomp,                     /* Input dataset containing the analysis variables for the COMPARE distribution. */                              </pre>
+<pre>          varnum=,                      /* List of continuous variables to analyze. */                              </pre>
+<pre>          varclass=,                    /* List of categorical variables to analyze, either character or numeric. */                              </pre>
+<pre>          groups=10,                    /* Number of groups or bins to use in the PSI calculation for continuous variables. */                              </pre>
+<pre>          adjustbins=1,                 /* Whether to slightly adjust the bin ends in order to avoid allocation problems due to precision loss. */                              </pre>
+<pre>          adjustcoeff=1E-9,             /* Coefficient to use to adjust the bin ends if ADJUSTBINS=1. */                              </pre>
+<pre>          out=_psi_,                    /* Output dataset containing the PSI for each analyzed variable. */                              </pre>
+<pre>          outpsi=_psi_bygroup_,         /* Output dataset containing the contribution by each bin to the PSI. */                              </pre>
+<pre>          outformat=_psi_formats_       /* Output dataset containing the format definition used to compute the PSI on continuous variables. */                              </pre>
+<pre>          checkparams=1                 /* Whether to check input parameters (datasets and variable existence) */                              </pre>
+<pre>          log=1);                       /* Show messages in the log? */                              </pre>
+<pre>                                                                                                    </pre>
+<h3>REQUIRED PARAMETERS:</h3>
+<pre>- database:                   Input dataset containing the analysis variables to be used as BASE distribution.                                                            </pre>
+<pre>                              This is the distribution used as reference for the PSI calculation, i.e. the distribution                                                            </pre>
+<pre>                              defining the bins for the analysis.                                                            </pre>
+<pre>                              Dataset options are allowed.                                                              </pre>
+<pre>                                                                                                                        </pre>
+<pre>- datacomp:                   Input dataset containing the analysis variables to be used as COMPARE distribution.                                                            </pre>
+<pre>                              This is the distribution that is compared against the BASE distribution in the PSI calculation.                                                            </pre>
+<pre>                              Dataset options are allowed.                                                              </pre>
+<pre>                                                                                                                        </pre>
+<h3>OPTIONAL PARAMETERS:</h3>
+<pre>- varnum:                     List of continuous variables to analyze.                                                            </pre>
+<pre>                              Continuous variables are first binned into the specified number of GROUPS using the BASE dataset                                                            </pre>
+<pre>                              and the PSI is computed on those groups.                                                            </pre>
+<pre>                              At least one of the VARCLASS= option or the VARNUM= option should be non-empty.                                                            </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- varclass:                   List of categorical variables to analyze, which can be either character or numeric.                                                            </pre>
+<pre>                              Categorical variables are analyzed as is, i.e. no grouping is performed and the variables                                                            </pre>
+<pre>                              in the COMPARE dataset are mapped into the groups or values of the corresponding variables                                                            </pre>
+<pre>                              in the BASE dataset.                                                                      </pre>
+<pre>                              At least one of the VARCLASS= option or the VARNUM= option should be non-empty.                                                            </pre>
+<pre>                              default: empty                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- groups:                     Number of groups or bins to use in the PSI calculation of continuous variables.                                                            </pre>
+<pre>                              default: 10                                                                               </pre>
+<pre>                                                                                                                        </pre>
+<pre>- adjustbins:                 Flag indicating whether to slightly adjust the bin ends in order to avoid                                                            </pre>
+<pre>                              allocation problems due to precision loss.                                                            </pre>
+<pre>                              This adjustment is particularly useful when dealing with floating point                                                            </pre>
+<pre>                              variables having many repeated observations with the same floating point value                                                            </pre>
+<pre>                              which will likely make up a boundary value with potential precision loss,                                                            </pre>
+<pre>                              probably making that repeated value be assigned to the wrong bin, thus messing                                                            </pre>
+<pre>                              up the approximately equal-size property of the constructed bins on the BASE dataset.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              The value is adjusted by an absolute amount of -ADJUSTCOEFF for left boundaries                                                            </pre>
+<pre>                              and by an absolute amount of +ADJUSTCOEFF for right boundaries.                                                            </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- adjustcoeff:                Coefficient to use to adjust the bin ends if ADJUSTBINS=1.                                                            </pre>
+<pre>                              See the description of parameter ADJUSTBINS above for more details.                                                            </pre>
+<pre>                              default: 1E-9                                                                             </pre>
+<pre>                                                                                                                        </pre>
+<pre>- out:                        Output dataset containing the PSI for each analyzed variable.                                                            </pre>
+<pre>                              Variables are grouped by variable type ("categorical" or "continuous")                                                            </pre>
+<pre>                              and sorted by variable name within each group.                                                            </pre>
+<pre>                              default: _PSI_                                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outpsi:                     Output dataset containing the contribution by each bin to the PSI.                                                            </pre>
+<pre>                              Variables are grouped by variable type ("categorical" or "continuous")                                                            </pre>
+<pre>                              and sorted by variable name and bin value within each group.                                                            </pre>
+<pre>                              default: _PSI_BYGROUP_                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>- outformat:                  Output dataset containing the format definition used to compute the PSI                                                            </pre>
+<pre>                              on continuous variables.                                                                  </pre>
+<pre>                              These formats are computed on the BASE dataset and define the bins against                                                            </pre>
+<pre>                              which the variable values in the COMPARE dataset are matched.                                                            </pre>
+<pre>                                                                                                                        </pre>
+<pre>                              Note that for floating point variables, the format intervals may not                                                            </pre>
+<pre>                              always coincide with the actual bins constructed from the BASE dataset                                                            </pre>
+<pre>                              values due to issues generated by precision loss.                                                            </pre>
+<pre>                              See description of parameter ADJUSTBINS above for more information about                                                            </pre>
+<pre>                              how to tackle the problem when such thing manifests.                                                            </pre>
+<pre>                              default: _PSI_FORMATS_                                                                    </pre>
+<pre>                                                                                                                        </pre>
+<pre>- checkparams:                Flag indicating whether input parameters should be checked for existence                                                            </pre>
+<pre>                              (datasets and variables).                                                                 </pre>
+<pre>                              Set this parameter to 0 when e.g. you do some RENAME in any input dataset                                                            </pre>
+<pre>                              and you know that the analysis variables and datasets exist.                                                            </pre>
+<pre>                              The reason for this is that renames are NOT run before checking for variable                                                            </pre>
+<pre>                              existence in input datasets.                                                              </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<pre>- log:                        Show messages in the log?                                                                 </pre>
+<pre>                              Possible values: 0 => No, 1 => Yes                                                            </pre>
+<pre>                              default: 1                                                                                </pre>
+<pre>                                                                                                                        </pre>
+<h3>OTHER MACROS AND MODULES USED IN THIS MACRO:</h3>
+<pre>- %Categorize                                                                                                           </pre>
+<pre>- %CheckInputParameters                                                                                                 </pre>
+<pre>- %CreateFormatsFromCuts                                                                                                </pre>
+<pre>- %CreateInteractions                                                                                                   </pre>
+<pre>- %ExecTimeStart                                                                                                        </pre>
+<pre>- %ExecTimeStop                                                                                                         </pre>
+<pre>- %FreqMult                                                                                                             </pre>
+<pre>- %MakeList                                                                                                             </pre>
+<pre>- %MakeListFromName                                                                                                     </pre>
+<pre>- %ResetSASOptions                                                                                                      </pre>
+<pre>- %SetSASOptions                                                                                                        </pre>
+<pre>                                                                                                                        </pre>
+<h3>APPLICATIONS:</h3>
+<pre>1.- Compare two populations in order to determine whether there has been a significant shift                                                                                          </pre>
+<pre>in the distribution of some variables.                                                                                          </pre>
+<pre>This is particularly useful or important when using a new population to test a model fitted                                                                                          </pre>
+<pre>on another population.                                                                                                  </pre>
+<body>
+</html>

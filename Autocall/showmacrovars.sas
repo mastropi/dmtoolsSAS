@@ -1,8 +1,8 @@
 /* MACRO %ShowMacroVars
-Version:		1.00
+Version:		1.01
 Author:			Daniel Mastropietro
 Created:		28-May-2016
-Modified:		28-May-2016
+Modified:		29-Nov-2018
 
 DESCRIPTION:
 Shows a set of macro variables and their values in the output and in the log windows and
@@ -32,6 +32,9 @@ OPTIONAL PARAMETERS:
 - library:		Library where the output dataset is stored.
 				default: WORK
 
+OTHER MACROS AND MODULES USED IN THIS MACRO:
+- %Rep
+
 APPLICATIONS:
 This macro can be used to show a set of parameters defined to run a process
 in the output window, so that they are clearly seen by the user.
@@ -53,10 +56,11 @@ in the output window, so that they are clearly seen by the user.
 	%put MACRO VARIABLE VALUES:;
 %end;
 
-%let nro_macrovars = %GetNroElements(&macrovars);
-%let datetime = %TRIM(%SYSFUNC(DATETIME(), B8601DT.));	* Formato yyyymmddThhmmss;
+%let nro_macrovars = %sysfunc(countw(&macrovars));
+%let datetime = %GetCurrentDatetime;
+
 data &library..MacroVars_&datetime;
-	length macrovar $20 value $&maxlength nchar order 3;
+	length macrovar $32 value $&maxlength nchar order 3;
 	%do i = 1 %to &nro_macrovars;
 		%let macroName = %scan(&macrovars, &i, ' ');
 		%let macroValue = &&&macroName;

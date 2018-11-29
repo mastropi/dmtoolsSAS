@@ -29,3 +29,6 @@ V.1.01: 2015/09/20 (DM)
 V.1.02: 2015/10/15 (DM)
 	- Renamed macro from %PHTestPlots to %PlotSurvival to make it more clear what it does and comply with plot macros starting with 'Plot'.
 	- Changed the default value of IMAGEROOTNAME from PHTestPlot to PlotSurvival.
+
+V.1.03: 2018/11/29 (DM)
+	- Updated macro to new version of the %ODSOutputOpen macro that now receives UNQUOTED paths and files.

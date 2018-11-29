@@ -8,10 +8,10 @@ pre {display: block}
 </style>
 <body>
 <h1>MACRO %LorenzCurve</h1>
-<pre>Version:                      1.02                                                                                      </pre>
+<pre>Version:                      1.03                                                                                      </pre>
 <pre>Author:                       Daniel Mastropietro                                                                       </pre>
 <pre>Created:                      15-May-2015                                                                               </pre>
-<pre>Modified:                     04-Sep-2015 (previous: 29-Aug-2015)                                                            </pre>
+<pre>Modified:                     29-Nov-2018 (previous: 04-Sep-2015, 29-Aug-2015)                                                            </pre>
 <pre>SAS version:                  9.4                                                                                       </pre>
 <pre>                                                                                                                        </pre>
 <h3>DESCRIPTION:</h3>
@@ -35,8 +35,8 @@ pre {display: block}
 <pre>          out=,                         /* Output dataset containing the area between the Lorenz Curve and the diagonal */                              </pre>
 <pre>          sortby=descending area,       /* Sorting criteria of the output dataset. */                              </pre>
 <pre>          plot=1,                       /* Whether to plot the Lorenz curve of each analysis variable */                              </pre>
-<pre>          odspath=,                     /* Quoted name of the path where all generated files should be saved. */                              </pre>
-<pre>          odsfile=,                     /* Quoted name of the file where the plots are saved. */                              </pre>
+<pre>          odspath=,                     /* Unquoted name of the path where all generated files should be saved. */                              </pre>
+<pre>          odsfile=,                     /* Unquoted name of the file where the plots are saved. */                              </pre>
 <pre>          odsfiletype=pdf,              /* Type of the file specified in ODSFILE or output format. */                              </pre>
 <pre>          log=1)                        /* Show messages in log? */                                 </pre>
 <pre>                                                                                                    </pre>
@@ -76,14 +76,20 @@ pre {display: block}
 <pre>                              Possible values: 0 => No, 1 => Yes.                                                            </pre>
 <pre>                              default: 1                                                                                </pre>
 <pre>                                                                                                                        </pre>
-<pre>- odspath:                    Quoted name of the path containing the files where plots should be saved.                                                            </pre>
+<pre>- odspath:                    Unquoted name of the path containing the files where plots should be saved.                                                            </pre>
 <pre>                              This is only valid for HTML output.                                                            </pre>
-<pre>                              default: none                                                                             </pre>
+<pre>                              default: current working directory                                                            </pre>
 <pre>                                                                                                                        </pre>
-<pre>- odsfile:                    Quoted name of the file where plots should be saved.                                                            </pre>
-<pre>                              default: none                                                                             </pre>
+<pre>- odsfile:                    Unquoted name of the file where plots should be saved.                                                            </pre>
+<pre>                              If the odsfiletype is HTML, each file is saved in separate files                                                            </pre>
+<pre>                              with default names defined by SAS and numbers indexing them                                                            </pre>
+<pre>                              to avoid override.                                                                        </pre>
+<pre>                              default: (empty)                                                                          </pre>
 <pre>                                                                                                                        </pre>
 <pre>- odsfiletype:                Type of the file specified in the ODSFILE= option.                                                            </pre>
+<pre>                              Valid values are those given in the documentation of ODS GRAPHICS,                                                            </pre>
+<pre>                              in section "Supported File Types for Output Destinations",                                                            </pre>
+<pre>                              under the table column "Output Destination".                                                            </pre>
 <pre>                              default: pdf                                                                              </pre>
 <pre>                                                                                                                        </pre>
 <pre>- log:                        Show messages in log?                                                                     </pre>
@@ -108,6 +114,8 @@ pre {display: block}
 <pre>- %GetNroElements                                                                                                       </pre>
 <pre>- %GetStat                                                                                                              </pre>
 <pre>- %GetVarLabel                                                                                                          </pre>
+<pre>- %ODSOutputClose                                                                                                       </pre>
+<pre>- %ODSOutputOpen                                                                                                        </pre>
 <pre>- %ResetSASOptions                                                                                                      </pre>
 <pre>- %SetSASOptions                                                                                                        </pre>
 <pre>                                                                                                                        </pre>
