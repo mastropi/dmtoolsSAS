@@ -1,1 +1,10 @@
-^[aA]rchive$
+archive/
+backup/
+ejemplos/
+external/
+SASEM/
+TimeSeries/
+ToolPoolSubmission/
+*.zip
+*.7z
+
