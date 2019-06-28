@@ -93,5 +93,8 @@ V.3.05: 2018/11/29 (DM)
 		- ODSPATH=
 		- IMAGEROOTNAME=
 	- Now the macro calls %ODSOutputOpen to create the ODS output.
-
 	
+V.3.06: 2018/12/17 (DM)
+	- Removed the possible missing values in the score variable so that there is always one non-missing score value for each quantile.
+	This is important in case we want to retrieve the score value for a given quantile for further computations (e.g. context was Ternium project where we were defining the cut-off for the score that maximizes the F statistic that balances precision and recall.
+	Note that the fix copies the PREVIOUS score value to remove the missing values, although the better thing to do would be to copy the NEXT value (based on the definition of quantile --ref: wiki--, but this is too complicated to do in SAS, and copying the previous value should not cause too many problematic --in terms that the copied value also makes sense).	

@@ -97,11 +97,14 @@ OPTIONAL PARAMETERS:
 				- nvalues: 		Number of distinct values taken by the variable.
 				- nused:		Number of distinct values of the variable that were used in the 
 								computation of the Information Value. This is the same as the number
-								of variable values for which the WOE is missing, which corresponds
-								to values for which the information provided is infinite.
+								of variable values for which the WOE is NOT missing, since the WOE-missing
+								bins contributions to the IV representing an infinite information
+								(because the number of distinct target values in those bins is only one
+								--e.g. all 1's or all 0's-- as opposed to two distinct values).
 				- IV:			Information Value of the analysis variable.
-				- IVAdj:		Adjusted Information Value based on the number of cases in each bin
-								and on the number of groups that contribute to the IV.
+				- IVAdj:		Adjusted Information Value based on the number of groups or bins
+								that contribute to the IV. The adjustment is given by:
+									IVAdj = IV * log(&groups) / log(#bins)
 				- EntropyRel:	Entropy of the analyzed variable relative to the maximum possible entropy
 								(which occurs when all categories of the analyzed variable have the same
 								number of cases).
@@ -438,7 +441,7 @@ run;
 %end;
 
 %** GROUPS=;
-%* Define the number of groups to use for the IV adjustement (it is equal to the specified number of groups if this
+%* Define the number of groups to use for the IV adjustment (it is equal to the specified number of groups if this
 %* is given, if not it is set to 10, because the thresholds normally used to define weak, middle, or strong variables
 %* are supposedly based on an IV computed on 10 groups;
 %let nadj = 10;

@@ -1,5 +1,9 @@
 /* 09-Aug-2016
 Reports the time elapsed since a specified datetime value.
+
+Ex:
+%let time_start = %sysfunc(DATETIME());
+%ExecTimeReport(&time_start);
 */
 &rsubmit;
 %MACRO ExecTimeReport(datetime_start) / store des="Reports the elapsed time in a human format";
@@ -22,7 +26,4 @@ Reports the time elapsed since a specified datetime value.
 
 %MEND ExecTimeReport;
 
-/* Ex:
-%let time_start = %sysfunc(DATETIME());
-%ExecTimeReport(&time_start);
-*/
+

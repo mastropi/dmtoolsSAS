@@ -1,8 +1,8 @@
 /* MACRO %EvaluationChart
-Version: 		3.05
+Version: 		3.06
 Author: 		Daniel Mastropietro
 Created: 		24-Sep-2004
-Modified: 		29-Nov-2018 (previous: 23-Sep-2018, 19-Mar-2016, 03-Aug-2015)
+Modified: 		17-Dec-2018 (previous: 01-Dec-2018, 23-Sep-2018, 19-Mar-2016, 03-Aug-2015)
 SAS Version:	9.3
 
 DESCRIPTION:
@@ -836,6 +836,9 @@ proc datasets nolist;
 			_EC_KSGini_;
 quit;
 
+* We set ODS GRAPHICS ON to avoid a WARNING message stating that ODS GRAPHICS needs to be ON
+* to have all features of graphical output in the PROC LIFETEST below, even when we are using PLOTS=NONE!;
+ods graphics on;
 %do i = 1 %to &nro_data;
 	%* Data name;
 	%let datai = %scan(&_data_, &i, ' ');
@@ -1242,7 +1245,8 @@ quit;
 			select
 				 q._TARGET_
 				,q.quantile format=percent7.1	/* NOTE: We should NOT set the format for QUANTILE before aggregating the values with PROC MEANS, because that may derive in a truncation of the possible quantile values as a format like percent7.1 would make values 1.53% and 1.54% look the same! */
-				,t3.&score						/* NOTE: There may be missing of this variable for a particular _TARGET_ because not all scores may occur for both target groups, especially when no gruoping of the score variable is requested. */
+				,t3.&score						/* NOTE: There may be missing of this variable for a particular _TARGET_ because not all scores may occur for both target groups, especially when no gruoping of the score variable is requested.
+													The missing values that remain in this variable are filled when creating the _EC_Chart_i_ dataset below. */
 				,t0.hits as TotalN
 				,t2.CumHits as TotalHits
 				,(case when missing(t1.hits) then 0 else t1.hits end) as n
@@ -1305,11 +1309,13 @@ quit;
 			if first._TARGET_ then
 				CumN = 0;
 			CumN + n;
+
+			%* Deal with the PREV variables in the array;
 			do i = 1 to dim(prev);
 				if first._TARGET_ then
 					prev(i) = .;
 				if current(i) = . then do;
-					%* Set the current value to 0 if the previouus one is missing. Otherwise set it to the previous value;
+					%* Set the current value to 0 if the previous one is missing. Otherwise set it to the previous value;
 					%* Recall that we are replacing the missing values of CUMULATIVE variables (CumHits and CDF) so such
 					%* replacement makes sense;
 					if prev(i) = . then
@@ -1318,6 +1324,7 @@ quit;
 						current(i) = prev(i);
 				end;
 			end;
+
 			%* Update the value of the PREV variables with the CURRENT values;
 			do i = 1 to dim(prev);
 				prev(i) = current(i);
@@ -1378,7 +1385,7 @@ quit;
 		data 	_EC_Chart_i_ (drop=KS_max 	KSLower_max KSUpper_max
 								   Gini   	GiniLower  	GiniUpper
 								   rank		rankLower	rankUpper
-									_score)
+									_scoreNonEvent)
 				_EC_KSGini_i_(keep=model type &by TotalN EventRate
 								   KS_max 	KSLower_max KSUpper_max
 								   Gini   	GiniLower  	GiniUpper
@@ -1397,7 +1404,7 @@ quit;
 									end=lastobs
 					_EC_GainsNonEvent_(	in=in2
 										keep=&score quantile_id BestGainsNonEvent GainsNonEvent GainsNonEventLower GainsNonEventUpper
-										rename=(&score=_score));
+										rename=(&score=_scoreNonEvent));
 										%** From the Non-Event dataset I only keep the information related to the Non-Event
 										%** as for the other variables, we want the information to come from the Event dataset
 										%** (e.g. target value representing the event, #hits, etc.), except for &SCORE which may
@@ -1405,9 +1412,22 @@ quit;
 										%** occur for each event. This is specially true when there is very few observations;
 			by quantile_id;
 
+			%* DM-2018/12/17: Store the previous value of SCORE in order to replace missing values that may remain after merging;
+			retain _score_prev .;
+
 			%* Set the value of the &SCORE variable so that no missing values remain;
+			%* First check if the SCORE variable coming from the NonEvent dataset is not missing,
+			%* and if so assign it to the final SCORE variable;
 			if &score = . then
-				&score = _score;	%* _SCORE comes from _EC_GainsNonEvent_;
+				&score = _scoreNonEvent;	%* This score variable comes from the NonEvent dataset;
+			%* DM-2018/12/17: Now remove any missing values left over by copying the SCORE value of the previous record;
+			%* Note that this copies the PREVIOUS value of the score although the better thing to do would be to copy
+			%* the NEXT value (based on the definition of quantile --ref: wiki--, but this is too complicated to do in SAS
+			%* and copying the previous value should not cause too many problematic --in terms that the copied value
+			%* also makes sense);
+			if &score = . then
+				&score = _score_prev;
+			_score_prev = &score;
 
 			%*** FORMAT variables;
 			format EventRate Naive percent7.1;

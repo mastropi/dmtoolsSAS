@@ -3,7 +3,7 @@
 <html>
 <pre>%* MACRO %ExectTimeStop;                                                                                                </pre>
 <pre>%* Created: 01-Sep-2015;                                                                                                </pre>
-<pre>%* Modified: 12-Feb-2016;                                                                                               </pre>
+<pre>%* Modified: 28-Jun-2018;                                                                                               </pre>
 <pre>%* Author: Daniel Mastropietro;                                                                                          </pre>
 <pre>%* Stop measuring the execution time and show it in the log;                                                                                          </pre>
 <pre>%* The maximum macro call level at which the execution time is reported is set by the macro %ExecTimeStart();                                                                                          </pre>
@@ -18,7 +18,7 @@
 <pre>%local _diff_time_;                                                                                                     </pre>
 <pre>%* Show the execution time for the outer-most macro being executed;                                                                                          </pre>
 <pre>%* The macro variable _Macro_Call_Level_ is handled by %SetSASOptions and %ResetSASOptions;                                                                                          </pre>
-<pre>%if %ExistMacroVar(_Macro_Call_Level_) %then                                                                                          </pre>
+<pre>%if %ExistMacroVar(_Macro_Call_Level_) %then %do;                                                                                          </pre>
 <pre>                              %if &_Macro_Call_Level_ <= &_Macro_Call_Level_Report_Max_ %then %do;%* This check should go on a separate line because if _Macro_Call_Level_ does not exist, the above IF gives an error;                              </pre>
 <pre>                              %put;                         %* Leave a blank line w.r.t. the previous time report;                              </pre>
 <pre>                              %if %ExistMacroVar(_datetime_start_&_Macro_Call_Level_) %then %do;                                                            </pre>
@@ -44,6 +44,7 @@
 <pre>                              %if &_Macro_Call_Level_ = 1 %then                                                            </pre>
 <pre>                              %* We have reached macro call level = 1 => the outermost macro has ended execution and we need to delete the global macro variable _Macro_Call_Level_Report_Max_;                                                            </pre>
 <pre>                              %symdel _Macro_Call_Level_Report_Max_;                                                            </pre>
+<pre>%end;                                                                                                                   </pre>
 <pre>%MEND ExecTimeStop;                                                                                                     </pre>
 <body>
 </html>

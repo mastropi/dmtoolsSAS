@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 
 <html>
-<pre>%* MACRO %ExectTimeStop;                                                                                                </pre>
+<pre>%* MACRO %ExectTimeStart;                                                                                               </pre>
 <pre>%* Created: 01-Sep-2015;                                                                                                </pre>
+<pre>%* Modified: 28-Jun-2019;                                                                                               </pre>
 <pre>%* Author: Daniel Mastropietro;                                                                                          </pre>
 <pre>%* Start measuring the execution time;                                                                                          </pre>
+<pre>%* If the _MACRO_CALL_LEVEL_MACRO_ does not exist, it returnes the current DATETIME();                                                                                          </pre>
 <pre>%* Ref: http://www.sascommunity.org/wiki/Tips:Program_run_time;                                                                                          </pre>
 <pre>%* SEE ALSO:                                                                                                            </pre>
 <pre>%* - %ExecTimeStop                                                                                                      </pre>
@@ -19,11 +21,14 @@
 <pre>%end;                                                                                                                   </pre>
 <pre>%* Mesure the execution time for the outer-most macro being executed;                                                                                          </pre>
 <pre>%* The macro variable _Macro_Call_Level_ is handled by %SetSASOptions and %ResetSASOptions;                                                                                          </pre>
-<pre>%if %ExistMacroVar(_Macro_Call_Level_) %then                                                                                          </pre>
+<pre>%if %ExistMacroVar(_Macro_Call_Level_) %then %do;                                                                                          </pre>
 <pre>                              %if &_Macro_Call_Level_ <= &_Macro_Call_Level_Report_Max_ %then %do;                                                            </pre>
 <pre>                              %global _datetime_start_&_Macro_Call_Level_;                                                            </pre>
 <pre>                              %let _datetime_start_&_Macro_Call_Level_ = %sysfunc(DATETIME());                                                            </pre>
 <pre>                              %end;                                                                                     </pre>
+<pre>%end;                                                                                                                   </pre>
+<pre>%else                                                                                                                   </pre>
+<pre>                              %sysfunc(DATETIME())                                                                      </pre>
 <pre>%MEND ExecTimeStart;                                                                                                    </pre>
 <body>
 </html>

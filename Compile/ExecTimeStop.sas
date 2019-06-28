@@ -1,6 +1,6 @@
 %* MACRO %ExectTimeStop;
 %* Created: 01-Sep-2015;
-%* Modified: 12-Feb-2016;
+%* Modified: 28-Jun-2018;
 %* Author: Daniel Mastropietro;
 %* Stop measuring the execution time and show it in the log;
 %* The maximum macro call level at which the execution time is reported is set by the macro %ExecTimeStart();
@@ -15,7 +15,7 @@
 %local _diff_time_;
 %* Show the execution time for the outer-most macro being executed;
 %* The macro variable _Macro_Call_Level_ is handled by %SetSASOptions and %ResetSASOptions;
-%if %ExistMacroVar(_Macro_Call_Level_) %then
+%if %ExistMacroVar(_Macro_Call_Level_) %then %do;
 	%if &_Macro_Call_Level_ <= &_Macro_Call_Level_Report_Max_ %then %do;	%* This check should go on a separate line because if _Macro_Call_Level_ does not exist, the above IF gives an error;
 		%put;		%* Leave a blank line w.r.t. the previous time report;
 		%if %ExistMacroVar(_datetime_start_&_Macro_Call_Level_) %then %do;
@@ -39,4 +39,5 @@
 	%if &_Macro_Call_Level_ = 1 %then
 		%* We have reached macro call level = 1 => the outermost macro has ended execution and we need to delete the global macro variable _Macro_Call_Level_Report_Max_;
 		%symdel _Macro_Call_Level_Report_Max_;
+%end;
 %MEND ExecTimeStop;
